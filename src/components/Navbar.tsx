@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Services", href: "#services" },
-  { label: "Work", href: "#work" },
   { label: "Process", href: "#process" },
   { label: "Contact", href: "#contact" },
 ];
@@ -54,6 +54,14 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              href="/studio"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[0.8rem] font-bold px-4 py-2 rounded-full border transition-all hover:border-halftone-purple hover:text-halftone-purple"
+              style={{ borderColor: "rgba(0,0,0,0.1)", color: "#0f0f0f" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-halftone-orange inline-block" />
+              Studio
+            </Link>
             <a href="#contact" className="hidden sm:inline-flex btn-primary !py-2 !px-5 !text-xs">
               Book a Call
             </a>
@@ -83,6 +91,10 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
+              <Link href="/studio" onClick={() => setMenuOpen(false)}
+                className="text-2xl text-halftone-orange" style={{ letterSpacing: "-0.04em" }}>
+                Studio ↗
+              </Link>
               <a href="#contact" onClick={() => setMenuOpen(false)} className="btn-primary text-center mt-4">
                 Book a Call
               </a>
