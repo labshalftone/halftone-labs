@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.halftonelabs.in)",
+      "WebFetch(domain:ozo.framer.ai)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-git)",
+      "Bash(npm install:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(where npx:*)",
+      "Bash(where node:*)",
+      "Bash(node -e \"console.log\\(process.execPath\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 20568 //F)",
+      "Bash(node ./node_modules/next/dist/bin/next dev --port 3000)",
+      "Bash(timeout 10)",
+      "Bash(powershell -Command \"Start-Sleep -Seconds 8; Get-Content ''C:\\\\Users\\\\ronit\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-ronit-fRAMER\\\\tasks\\\\bx9mvlzcp.output'' | Select-Object -First 40\")",
+      "WebFetch(domain:asci.framer.website)"
+    ]
+  }
+}
