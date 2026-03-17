@@ -301,6 +301,7 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
       frontPrintTier:   (side === "front" || side === "both") ? (design.print_tier ?? "") : "",
       backPrintTier:    (side === "back"  || side === "both") ? (design.print_tier ?? "") : "",
       printDims:        "",
+      printTechnique:   design.has_design ? "DTG" : "none",
       blankPrice:       design.blank_price,
     });
     setAdded(true);

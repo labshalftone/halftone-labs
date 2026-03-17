@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
       orderRef, razorpayPaymentId, razorpayOrderId,
       product, color, size, printTier, printDimensions,
       blankPrice, printPrice, shipping, total,
+      couponCode, discountAmount,
       customerName, customerEmail, customerPhone,
       address, city, pin, country, userId,
     } = body;
@@ -26,6 +27,8 @@ export async function POST(req: NextRequest) {
       blank_price: blankPrice,
       print_price: printPrice,
       shipping, total,
+      coupon_code: couponCode ?? null,
+      discount_amount: discountAmount ?? 0,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart, GST_RATE } from "@/lib/cart-context";
+import { supabase } from "@/lib/supabase";
 
 const COUNTRY_LIST = [
   { code: "IN", name: "India" },
@@ -158,6 +159,7 @@ export default function CheckoutPage() {
     if (!form.name || !form.email || !form.address || !form.city || !selectedShipping) return;
     setPaying(true); setPayError("");
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -200,6 +202,7 @@ export default function CheckoutPage() {
                   city: form.city,
                   pin: form.pin,
                   country,
+                  userId: session?.user?.id ?? null,
                 }),
               });
               // Increment coupon uses

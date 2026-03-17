@@ -22,6 +22,7 @@ export interface CartItem {
   frontPrintTier: string;
   backPrintTier: string;
   printDims: string;        // primary print dimensions label
+  printTechnique: "DTG" | "DTF" | "none"; // print method
 
   blankPrice: number;       // per unit blank garment price
 

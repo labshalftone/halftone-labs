@@ -325,6 +325,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [color, setColor] = useState(product.colors[0]);
   const [size,  setSize]  = useState(product.sizes[2] ?? product.sizes[0]);
 
+  const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
+
   // Per-side design state
   const [activeTab,       setActiveTab]       = useState<"front" | "back">("front");
   const [previewSide,     setPreviewSide]     = useState<"front" | "back">("front");
@@ -412,6 +414,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       frontPrintTier,
       backPrintTier,
       printDims:      frontPrintDims,
+      printTechnique: hasAnyDesign ? technique : "none",
       blankPrice:     product.blankPrice,
     });
     setAdded(true);
@@ -556,6 +559,22 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                       <button key={s} onClick={() => setSize(s)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all ${size === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-700 hover:border-zinc-400"}`}>
                         {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Print Technique */}
+                <div className="mb-8">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Print Technique</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(["DTG", "DTF"] as const).map((t) => (
+                      <button key={t} onClick={() => setTechnique(t)}
+                        className={`py-3.5 px-4 rounded-xl border-2 text-left transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                        <span className="block text-sm font-black" style={{ letterSpacing: "-0.02em" }}>{t}</span>
+                        <span className={`block text-[10px] font-normal mt-0.5 ${technique === t ? "text-zinc-300" : "text-zinc-400"}`}>
+                          {t === "DTG" ? "Natural feel · best on light fabrics" : "Vibrant on any color · heat-transfer"}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -867,18 +886,66 @@ export default function StudioPage() {
             ))}
           </div>
 
-          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { icon: "🖨️", title: "DTG Printing", desc: "Direct-to-garment. No minimums, full colour, photographic quality." },
-              { icon: "📦", title: "5–7 Day Shipping", desc: "Domestic delivery via top couriers. International ships in 10–18 days." },
-              { icon: "🎨", title: "Bulk Screen Print", desc: "Got a big run? MOQ 50 with screen print pricing that beats the market." },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-2xl p-6 border border-zinc-100">
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <h3 className="font-bold text-zinc-900 mb-1">{item.title}</h3>
-                <p className="text-sm text-zinc-500">{item.desc}</p>
+          {/* DTG vs DTF info section */}
+          <div className="mt-16">
+            <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-3 text-center">Print Techniques</p>
+            <h2 className="text-2xl font-black text-zinc-900 mb-8 text-center" style={{ letterSpacing: "-0.04em" }}>DTG vs DTF — what&apos;s the difference?</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+              {/* DTG */}
+              <div className="bg-white rounded-2xl p-6 border border-zinc-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-black">DTG</span>
+                  </div>
+                  <div>
+                    <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.02em" }}>Direct-to-Garment</h3>
+                    <p className="text-xs text-zinc-400">Ink printed directly onto fabric</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {["Soft, natural hand-feel — feels like part of the fabric","Photographic quality, unlimited colours","Best on white & light-coloured garments","Slight fade over many washes — wash inside-out","No MOQ — perfect for single pieces"].map((t) => (
+                    <li key={t} className="flex items-start gap-2 text-xs text-zinc-600">
+                      <svg className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
+              {/* DTF */}
+              <div className="bg-white rounded-2xl p-6 border border-zinc-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-black">DTF</span>
+                  </div>
+                  <div>
+                    <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.02em" }}>Direct-to-Film</h3>
+                    <p className="text-xs text-zinc-400">Design printed on film then heat-pressed</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {["Works on ANY colour fabric — even black","Vibrant, pop-out colours with crisp edges","Slightly raised texture on the print","More durable wash fastness than DTG","Great for dark garments & exact Pantone matching"].map((t) => (
+                    <li key={t} className="flex items-start gap-2 text-xs text-zinc-600">
+                      <svg className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Feature cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {[
+                { icon: "📦", title: "5–7 Day Shipping", desc: "Domestic delivery via top couriers. International ships in 10–18 days." },
+                { icon: "🎨", title: "Bulk Screen Print", desc: "Got a big run? MOQ 50 with screen print pricing that beats the market." },
+                { icon: "🇮🇳", title: "Made in India", desc: "Every piece fulfilled from our facility in India with strict quality checks." },
+              ].map((item) => (
+                <div key={item.title} className="bg-white rounded-2xl p-6 border border-zinc-100">
+                  <div className="text-3xl mb-3">{item.icon}</div>
+                  <h3 className="font-bold text-zinc-900 mb-1">{item.title}</h3>
+                  <p className="text-sm text-zinc-500">{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-12 text-center">
