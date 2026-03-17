@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart, GST_RATE } from "@/lib/cart-context";
 import { supabase } from "@/lib/supabase";
+import { useCurrency, toForeignAmount, CURRENCY_META } from "@/lib/currency-context";
 
 const COUNTRY_LIST = [
   { code: "IN", name: "India" },
@@ -72,6 +73,8 @@ function InfoTooltip({ text }: { text: string }) {
 
 export default function CheckoutPage() {
   const { items, itemsSubtotal, printSubtotal, total, clearCart } = useCart();
+  const { currency, fmt } = useCurrency();
+  const isINR = currency === "INR";
 
   const [country, setCountry] = useState("IN");
   const [form, setForm] = useState({
@@ -98,10 +101,13 @@ export default function CheckoutPage() {
   const shippingCost    = selectedShipping?.rate ?? 0;
   const discount        = appliedCoupon?.discount_amount ?? 0;
   const discountedTotal = Math.max(0, total - discount);
-  const gstProduct      = Math.round(discountedTotal * GST_RATE);
-  const gstShipping     = Math.round(shippingCost * GST_RATE);
+  // GST only applies to INR (domestic India) orders
+  const gstProduct      = isINR ? Math.round(discountedTotal * GST_RATE) : 0;
+  const gstShipping     = isINR ? Math.round(shippingCost * GST_RATE) : 0;
   const totalGst        = gstProduct + gstShipping;
-  const grandTotal      = discountedTotal + shippingCost + totalGst;
+  const grandTotalINR   = discountedTotal + shippingCost + totalGst;
+  // Numeric amount in the selected currency (for Razorpay charge)
+  const grandTotalForeign = toForeignAmount(grandTotalINR, currency);
 
   const fetchShipping = useCallback(async (countryCode: string, pin: string) => {
     setLoadingShipping(true);
@@ -163,13 +169,13 @@ export default function CheckoutPage() {
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: grandTotal }),
+        body: JSON.stringify({ amount: grandTotalForeign, currency }),
       });
       const { orderId, key } = await orderRes.json();
 
       await new Promise<void>((resolve, reject) => {
         const options = {
-          key, amount: grandTotal * 100, currency: "INR", order_id: orderId,
+          key, amount: Math.round(grandTotalForeign * 100), currency, order_id: orderId,
           name: "Halftone Labs",
           description: items.map((i) => `${i.productName} (${i.size})`).join(", "),
           prefill: { name: form.name, email: form.email, contact: form.phone },
@@ -192,7 +198,9 @@ export default function CheckoutPage() {
                   blankPrice: items.reduce((s, i) => s + i.blankPrice, 0),
                   printPrice: items.reduce((s, i) => s + i.printPrice, 0),
                   shipping: selectedShipping.rate,
-                  total: grandTotal,
+                  total: grandTotalINR,
+                  currency,
+                  totalForeign: grandTotalForeign,
                   couponCode: appliedCoupon?.code ?? null,
                   discountAmount: discount,
                   customerName: form.name,
@@ -403,7 +411,7 @@ export default function CheckoutPage() {
                         <p className="font-semibold text-zinc-800">{opt.label}</p>
                         <p className="text-xs text-zinc-400">{opt.carrier} · {opt.days}</p>
                       </div>
-                      <p className="font-bold">₹{opt.rate}</p>
+                      <p className="font-bold">{fmt(opt.rate)}</p>
                     </button>
                   ))}
                 </div>
@@ -430,8 +438,8 @@ export default function CheckoutPage() {
                     <p className="text-xs text-green-600 mt-0.5">
                       {appliedCoupon.description ?? (appliedCoupon.discount_type === "percent"
                         ? `${appliedCoupon.discount_value}% off`
-                        : `₹${appliedCoupon.discount_value} off`)}
-                      {" "}— saving ₹{appliedCoupon.discount_amount}
+                        : `${fmt(appliedCoupon.discount_value)} off`)}
+                      {" "}— saving {fmt(appliedCoupon.discount_amount)}
                     </p>
                   </div>
                   <button onClick={() => setAppliedCoupon(null)}
@@ -480,7 +488,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-zinc-400">{item.color} · {item.size} · {item.side === "both" ? "Front + Back" : item.side === "none" ? "No print" : `${item.side} print`}</p>
                       {item.printTier && <p className="text-xs text-orange-500">DTG {item.printTier}</p>}
                     </div>
-                    <p className="font-semibold text-sm">₹{((item.blankPrice + item.printPrice) * item.qty).toLocaleString("en-IN")}</p>
+                    <p className="font-semibold text-sm">{fmt((item.blankPrice + item.printPrice) * item.qty)}</p>
                   </div>
                 ))}
               </div>
@@ -489,18 +497,18 @@ export default function CheckoutPage() {
               <div className="border-t border-zinc-100 pt-4 flex flex-col gap-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-zinc-500">Product</span>
-                  <span>₹{itemsSubtotal.toLocaleString("en-IN")}</span>
+                  <span>{fmt(itemsSubtotal)}</span>
                 </div>
                 {printSubtotal > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-zinc-500">Customization</span>
-                    <span>₹{printSubtotal.toLocaleString("en-IN")}</span>
+                    <span>{fmt(printSubtotal)}</span>
                   </div>
                 )}
                 {appliedCoupon && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Discount ({appliedCoupon.code})</span>
-                    <span>−₹{appliedCoupon.discount_amount.toLocaleString("en-IN")}</span>
+                    <span>−{fmt(appliedCoupon.discount_amount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
@@ -510,15 +518,17 @@ export default function CheckoutPage() {
                       <InfoTooltip text="Shipping fees DO NOT include customs duties and handling charges for international orders." />
                     )}
                   </span>
-                  <span>{selectedShipping ? `₹${shippingCost}` : "—"}</span>
+                  <span>{selectedShipping ? fmt(shippingCost) : "—"}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">GST (5%)</span>
-                  <span>₹{totalGst.toLocaleString("en-IN")}</span>
-                </div>
+                {isINR && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-zinc-500">GST (5%)</span>
+                    <span>{fmt(totalGst)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-black text-lg mt-2 pt-2 border-t border-zinc-100">
                   <span>Total</span>
-                  <span>₹{grandTotal.toLocaleString("en-IN")}</span>
+                  <span>{fmt(grandTotalINR)}</span>
                 </div>
               </div>
 
@@ -532,7 +542,7 @@ export default function CheckoutPage() {
                 className="w-full mt-5 py-4 rounded-2xl bg-orange-500 text-white font-black text-base hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                 {paying ? (
                   <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Processing…</>
-                ) : <>Pay ₹{grandTotal.toLocaleString("en-IN")} →</>}
+                ) : <>Pay {fmt(grandTotalINR)} →</>}
               </button>
 
               <p className="text-xs text-zinc-400 text-center mt-3">

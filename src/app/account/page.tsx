@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import CartDrawer from "@/components/CartDrawer";
+import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -731,6 +732,8 @@ function SettingsTab({
   userId: string | null;
   email: string | null;
 }) {
+  const { currency, setCurrency } = useCurrency();
+  const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
   const [addr, setAddr]       = useState({ name: "", phone: "", address_line1: "", address_line2: "", city: "", state: "", pin: "", country: "IN" });
   const [saving, setSaving]   = useState(false);
   const [saved,  setSaved]    = useState(false);
@@ -815,6 +818,42 @@ function SettingsTab({
             Sign out
           </button>
         </div>
+      </div>
+
+      {/* Currency preference */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+            <svg className="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-black text-zinc-900">Display Currency</h3>
+            <p className="text-xs text-zinc-400">Prices shown site-wide and at checkout</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {CURRENCIES.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCurrency(c)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
+                currency === c
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
+              }`}
+            >
+              <span>{CURRENCY_META[c].flag}</span>
+              <span>{CURRENCY_META[c].label}</span>
+            </button>
+          ))}
+        </div>
+        {currency !== "INR" && (
+          <p className="text-xs text-zinc-400 mt-3">
+            International prices include a 2× margin. GST is not applied at checkout for non-INR orders.
+          </p>
+        )}
       </div>
 
       {/* Default shipping address */}

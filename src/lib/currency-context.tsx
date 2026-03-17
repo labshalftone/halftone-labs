@@ -13,11 +13,17 @@ export const CURRENCY_META: Record<Currency, { symbol: string; label: string; fl
 // INR-per-foreign-unit with 2× international markup baked in
 // Market: 1 USD ≈ 83 INR → at 2× we price as if 1 USD = 41.5 INR
 // Market: 1 EUR ≈ 90 INR → at 2× we price as if 1 EUR = 45 INR
-const RATES: Record<Currency, number> = {
+export const RATES: Record<Currency, number> = {
   INR: 1,
   USD: 41.5,
   EUR: 45,
 };
+
+/** Convert an INR amount to the target currency as a numeric value (2 dp for non-INR). */
+export function toForeignAmount(inr: number, currency: Currency): number {
+  if (currency === "INR") return Math.round(inr);
+  return Math.round((inr / RATES[currency]) * 100) / 100;
+}
 
 export function fmtPrice(inr: number, currency: Currency): string {
   const { symbol } = CURRENCY_META[currency];

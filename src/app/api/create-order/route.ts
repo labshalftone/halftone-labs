@@ -17,11 +17,13 @@ export async function POST(req: NextRequest) {
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
     const body = await req.json();
-    const { amount, notes } = body;
+    const { amount, currency = "INR", notes } = body;
 
+    // amount is in the target currency's primary unit (₹ / $ / €)
+    // Razorpay requires smallest unit: paise for INR, cents for USD/EUR
     const order = await razorpay.orders.create({
-      amount: Math.round(amount * 100), // ₹ to paise
-      currency: "INR",
+      amount: Math.round(amount * 100),
+      currency: currency as string,
       receipt: `hl_${Date.now()}`,
       notes,
     });

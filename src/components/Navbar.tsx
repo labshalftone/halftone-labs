@@ -160,6 +160,39 @@ export default function Navbar() {
               </Link>
             )}
 
+            {/* Mobile currency picker — visible only on mobile */}
+            <div className="sm:hidden">
+              <button
+                onClick={() => setCurrencyOpen((o) => !o)}
+                className="flex items-center gap-1 text-[0.75rem] font-bold px-2 py-1.5 rounded-full border border-black/10 hover:border-black/20 transition-colors text-zinc-600"
+              >
+                <span>{CURRENCY_META[currency].flag}</span>
+                <span className="text-[0.7rem]">{CURRENCY_META[currency].label}</span>
+              </button>
+              <AnimatePresence>
+                {currencyOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setCurrencyOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute right-14 top-12 z-40 bg-white rounded-xl border border-zinc-200 shadow-lg overflow-hidden min-w-[110px]"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <button key={c} onClick={() => { setCurrency(c); setCurrencyOpen(false); }}
+                          className={`w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-semibold transition-colors text-left ${currency === c ? "bg-zinc-900 text-white" : "hover:bg-zinc-50 text-zinc-700"}`}>
+                          <span>{CURRENCY_META[c].flag}</span>
+                          <span>{CURRENCY_META[c].label}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Mobile hamburger */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
