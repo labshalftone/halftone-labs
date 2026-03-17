@@ -15,7 +15,12 @@
       "Bash(node ./node_modules/next/dist/bin/next dev --port 3000)",
       "Bash(timeout 10)",
       "Bash(powershell -Command \"Start-Sleep -Seconds 8; Get-Content ''C:\\\\Users\\\\ronit\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-ronit-fRAMER\\\\tasks\\\\bx9mvlzcp.output'' | Select-Object -First 40\")",
-      "WebFetch(domain:asci.framer.website)"
+      "WebFetch(domain:asci.framer.website)",
+      "WebFetch(domain:studio.rovoassembly.com)",
+      "WebFetch(domain:www.rovoassembly.com)",
+      "Bash(node -e \":*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
