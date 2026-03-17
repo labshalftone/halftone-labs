@@ -6,6 +6,7 @@ import Services from "@/components/Services";
 import Process from "@/components/Process";
 import Manufacturing from "@/components/Manufacturing";
 import Benefits from "@/components/Benefits";
+import Enterprise from "@/components/Enterprise";
 import PriceCalculator from "@/components/PriceCalculator";
 import Testimonial from "@/components/Testimonial";
 import FAQ from "@/components/FAQ";
@@ -23,6 +24,7 @@ export default function Home() {
       <Process />
       <Manufacturing />
       <Benefits />
+      <Enterprise />
       <PriceCalculator />
       <Testimonial />
       <FAQ />
