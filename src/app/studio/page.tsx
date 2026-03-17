@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
+import SizeGuide from "@/components/SizeGuide";
+import { useCurrency } from "@/lib/currency-context";
 
 // ─── THUMBNAIL ────────────────────────────────────────────────────────────────
 
@@ -76,9 +78,9 @@ const PRODUCTS = [
       { name: "Maroon", hex: "#6B2D2D" },
     ],
     bulkTiers: [
-      { qty: "50–99",  price: "₹349" },
-      { qty: "100–249", price: "₹299" },
-      { qty: "250+",   price: "₹249" },
+      { qty: "50–99",   priceInr: 349 },
+      { qty: "100–249", priceInr: 299 },
+      { qty: "250+",    priceInr: 249 },
     ],
     tag: "Bestseller",
   },
@@ -95,9 +97,9 @@ const PRODUCTS = [
       { name: "Black", hex: "#111111" },
     ],
     bulkTiers: [
-      { qty: "50–99",  price: "₹449" },
-      { qty: "100–249", price: "₹399" },
-      { qty: "250+",   price: "₹349" },
+      { qty: "50–99",   priceInr: 449 },
+      { qty: "100–249", priceInr: 399 },
+      { qty: "250+",    priceInr: 349 },
     ],
     tag: "New",
   },
@@ -117,9 +119,9 @@ const PRODUCTS = [
       { name: "Red",        hex: "#C0392B" },
     ],
     bulkTiers: [
-      { qty: "50–99",  price: "₹549" },
-      { qty: "100–249", price: "₹499" },
-      { qty: "250+",   price: "₹449" },
+      { qty: "50–99",   priceInr: 549 },
+      { qty: "100–249", priceInr: 499 },
+      { qty: "250+",    priceInr: 449 },
     ],
     tag: null,
   },
@@ -138,9 +140,9 @@ const PRODUCTS = [
       { name: "Lavender", hex: "#C9B8E8" },
     ],
     bulkTiers: [
-      { qty: "50–99",  price: "₹329" },
-      { qty: "100–249", price: "₹279" },
-      { qty: "250+",   price: "₹239" },
+      { qty: "50–99",   priceInr: 329 },
+      { qty: "100–249", priceInr: 279 },
+      { qty: "250+",    priceInr: 239 },
     ],
     tag: null,
   },
@@ -376,6 +378,7 @@ const STEPS = ["Style", "Design"];
 
 function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0]; onClose: () => void }) {
   const { addItem, count } = useCart();
+  const { fmt } = useCurrency();
   const [step, setStep] = useState(0);
 
   const [color,     setColor]     = useState(product.colors[0]);
@@ -537,7 +540,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
             style={{ background: color.hex }} />
           <span className="text-sm text-zinc-700 font-medium">{color.name} · {size}</span>
           <span className="w-px h-4 bg-zinc-200" />
-          <span className="font-black text-zinc-900 text-sm">₹{itemTotal.toLocaleString("en-IN")}</span>
+          <span className="font-black text-zinc-900 text-sm">{fmt(itemTotal)}</span>
         </div>
       </div>
 
@@ -549,7 +552,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
           <span className="font-black text-sm" style={{ letterSpacing: "-0.03em" }}>{product.name}</span>
-          <span className="font-black text-sm">₹{itemTotal.toLocaleString("en-IN")}</span>
+          <span className="font-black text-sm">{fmt(itemTotal)}</span>
         </div>
 
         {/* Steps */}
@@ -683,7 +686,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             <p className="text-[0.65rem] text-zinc-500 font-medium">Front print</p>
                             <p className="font-bold text-zinc-800">{frontPrintTier} <span className="text-zinc-400 font-normal">({frontPrintDims})</span></p>
                           </div>
-                          <p className="font-black text-orange-600">+₹{frontPrintPrice}</p>
+                          <p className="font-black text-orange-600">+{fmt(frontPrintPrice)}</p>
                         </div>
                         <div className="flex gap-3">
                           <label className="text-xs text-orange-500 font-semibold underline hover:text-orange-600 cursor-pointer">
@@ -724,7 +727,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             <p className="text-[0.65rem] text-zinc-500 font-medium">Back print</p>
                             <p className="font-bold text-zinc-800">{backPrintTier}</p>
                           </div>
-                          <p className="font-black text-orange-600">+₹{backPrintPrice}</p>
+                          <p className="font-black text-orange-600">+{fmt(backPrintPrice)}</p>
                         </div>
                         <div className="flex gap-3">
                           <label className="text-xs text-orange-500 font-semibold underline hover:text-orange-600 cursor-pointer">
@@ -760,23 +763,23 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                 <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100">
                   <div className="flex justify-between mb-1.5">
                     <span className="text-xs text-zinc-400">Blank garment</span>
-                    <span className="text-sm font-bold">₹{product.blankPrice}</span>
+                    <span className="text-sm font-bold">{fmt(product.blankPrice)}</span>
                   </div>
                   {frontPrintPrice > 0 && (
                     <div className="flex justify-between mb-1.5">
                       <span className="text-xs text-zinc-400">Front print ({frontPrintTier})</span>
-                      <span className="text-sm font-bold text-orange-600">+₹{frontPrintPrice}</span>
+                      <span className="text-sm font-bold text-orange-600">+{fmt(frontPrintPrice)}</span>
                     </div>
                   )}
                   {backPrintPrice > 0 && (
                     <div className="flex justify-between mb-1.5">
                       <span className="text-xs text-zinc-400">Back print ({backPrintTier})</span>
-                      <span className="text-sm font-bold text-orange-600">+₹{backPrintPrice}</span>
+                      <span className="text-sm font-bold text-orange-600">+{fmt(backPrintPrice)}</span>
                     </div>
                   )}
                   <div className="flex justify-between pt-2 mt-1 border-t border-zinc-200">
                     <span className="text-xs font-black text-zinc-900 uppercase tracking-tight">Item total</span>
-                    <span className="font-black text-zinc-900">₹{itemTotal.toLocaleString("en-IN")}</span>
+                    <span className="font-black text-zinc-900">{fmt(itemTotal)}</span>
                   </div>
                   <p className="text-[10px] text-zinc-300 mt-1.5">+ shipping &amp; GST at checkout · 🇮🇳 Fulfilled from India</p>
                 </div>
@@ -801,7 +804,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   <button disabled={!canAddToCart} onClick={handleAddToCart}
                     className="flex-1 py-3.5 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                    Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
+                    Add to Cart — {fmt(itemTotal)}
                   </button>
                 </div>
               </motion.div>
@@ -823,6 +826,7 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
 }) {
   const [activeColor, setActiveColor] = useState(product.colors[0]);
   const isOversized = product.id.includes("oversized");
+  const { fmt } = useCurrency();
 
   return (
     <motion.div
@@ -871,7 +875,7 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
             <h3 className="font-black text-zinc-900 text-base leading-tight" style={{ letterSpacing: "-0.03em" }}>
               {product.name}
             </h3>
-            <span className="font-black text-zinc-900 text-base flex-shrink-0">₹{product.blankPrice}</span>
+            <span className="font-black text-zinc-900 text-base flex-shrink-0">{fmt(product.blankPrice)}</span>
           </div>
           <p className="text-[0.7rem] font-mono text-zinc-400">{product.gsm}</p>
           <p className="text-xs text-zinc-500 mt-1">{product.fit}</p>
@@ -881,7 +885,7 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
         <div className="flex gap-1.5 flex-wrap mb-5">
           {product.bulkTiers.map((t) => (
             <span key={t.qty} className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-zinc-50 border border-zinc-100 text-zinc-500">
-              {t.qty} pcs → {t.price}
+              {t.qty} pcs → {fmt(t.priceInr)}
             </span>
           ))}
         </div>
@@ -906,6 +910,7 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
 export default function StudioPage() {
   const [activeProduct, setActiveProduct] = useState<typeof PRODUCTS[0] | null>(null);
   const [bulkProduct,   setBulkProduct]   = useState<typeof PRODUCTS[0] | null>(null);
+  const [sizeGuide,     setSizeGuide]     = useState(false);
   const { count } = useCart();
 
   return (
@@ -964,7 +969,12 @@ export default function StudioPage() {
               <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-1">Blanks catalogue</p>
               <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Choose your blank</h2>
             </div>
-            <p className="text-xs text-zinc-400 hidden sm:block">All prices per unit · GST extra</p>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setSizeGuide(true)} className="text-xs font-semibold text-orange-500 underline underline-offset-2 hover:text-orange-600 transition-colors hidden sm:block">
+                Size Guide
+              </button>
+              <p className="text-xs text-zinc-400 hidden sm:block">All prices per unit · GST extra</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1043,6 +1053,7 @@ export default function StudioPage() {
       <AnimatePresence>
         {bulkProduct && <BulkQuoteModal product={bulkProduct} onClose={() => setBulkProduct(null)} />}
       </AnimatePresence>
+      <SizeGuide open={sizeGuide} onClose={() => setSizeGuide(false)} />
     </>
   );
 }

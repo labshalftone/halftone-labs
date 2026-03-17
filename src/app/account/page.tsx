@@ -19,7 +19,8 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> =
 
 type Order = {
   id: string; ref: string; product_name: string; color: string; size: string;
-  print_tier: string; total: number; status: string; created_at: string;
+  print_tier: string; print_dimensions?: string; blank_price?: number; print_price?: number;
+  total: number; status: string; created_at: string;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -162,6 +163,28 @@ function DashboardTab({ orders, user, onTab }: {
 function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; email: string; user_metadata: { name?: string } } | null }) {
   const [selected, setSelected] = useState<Order | null>(null);
   const [filter, setFilter]     = useState("All");
+  const { addItem } = useCart();
+
+  const handleReorder = (order: Order) => {
+    addItem({
+      productId:       "reorder",
+      productName:     order.product_name,
+      gsm:             "",
+      color:           order.color,
+      colorHex:        "#111111",
+      size:            order.size,
+      qty:             1,
+      frontDesignUrl:  "",
+      backDesignUrl:   "",
+      frontPrintPrice: 0,
+      backPrintPrice:  0,
+      frontPrintTier:  order.print_tier ?? "",
+      backPrintTier:   "",
+      printDims:       order.print_dimensions ?? "",
+      printTechnique:  "none",
+      blankPrice:      order.blank_price ?? 0,
+    });
+  };
 
   const statuses = ["All", "Order Placed", "In Production", "Shipped", "Delivered"];
   const filtered = filter === "All" ? orders : orders.filter((o) => o.status === filter);
@@ -253,6 +276,9 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                             className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
                             Order again
                           </Link>
+                          <button onClick={() => handleReorder(order)} className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">
+                            Reorder ↻
+                          </button>
                         </div>
                       </div>
                     </motion.div>

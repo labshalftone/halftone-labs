@@ -47,6 +47,19 @@ export async function POST(req: NextRequest) {
       description: "Payment confirmed. Your order is in our queue.",
     });
 
+    // Fire order confirmation email (non-blocking)
+    fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/email/order-confirmation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderRef, customerName, customerEmail,
+        product, color, size,
+        printTier: printTier ?? "No print",
+        total, shipping,
+        address, city, pin,
+      }),
+    }).catch(() => {}); // non-blocking
+
     // Send notification email via Formspree
     try {
       await fetch(`https://formspree.io/f/${process.env.FORMSPREE_FORM_ID ?? "xlgplaja"}`, {

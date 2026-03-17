@@ -6,6 +6,9 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { supabase } from "@/lib/supabase";
 import CartDrawer from "./CartDrawer";
+import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
+
+const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -18,8 +21,10 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { count } = useCart();
+  const { currency, setCurrency } = useCurrency();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -73,6 +78,41 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+
+            {/* Currency switcher */}
+            <div className="relative hidden sm:block">
+              <button
+                onClick={() => setCurrencyOpen((o) => !o)}
+                className="flex items-center gap-1.5 text-[0.75rem] font-bold px-2.5 py-1.5 rounded-full border border-black/10 hover:border-black/20 transition-colors text-zinc-600"
+              >
+                <span>{CURRENCY_META[currency].flag}</span>
+                <span>{CURRENCY_META[currency].label}</span>
+                <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <AnimatePresence>
+                {currencyOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setCurrencyOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute right-0 top-full mt-2 z-40 bg-white rounded-xl border border-zinc-200 shadow-lg overflow-hidden min-w-[120px]"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <button key={c} onClick={() => { setCurrency(c); setCurrencyOpen(false); }}
+                          className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors text-left ${currency === c ? "bg-zinc-900 text-white" : "hover:bg-zinc-50 text-zinc-700"}`}>
+                          <span>{CURRENCY_META[c].flag}</span>
+                          <span>{CURRENCY_META[c].label}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Studio link */}
             <Link
               href="/studio"

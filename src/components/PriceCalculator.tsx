@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useCurrency } from "@/lib/currency-context";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ type PrintSizeId = (typeof PRINT_SIZES)[number]["id"];
 
 const GST_RATE = 0.05;
 
+// GST only on INR checkout — for display purposes we show it on all currencies
 function getLeadTime(qty: number): string {
   if (qty <= 10) return "5–7 business days";
   if (qty <= 50) return "7–10 days";
@@ -42,9 +44,7 @@ function getLeadTime(qty: number): string {
   return "15–20 days";
 }
 
-function fmt(n: number) {
-  return "₹" + Math.round(n).toLocaleString("en-IN");
-}
+// fmt is now provided by currency context — see component body
 
 // ── Animated number ───────────────────────────────────────────────────────────
 
@@ -104,13 +104,14 @@ export default function PriceCalculator() {
   const [technique, setTechnique] = useState<TechniqueId>("DTG");
   const [printSize, setPrintSize] = useState<PrintSizeId>("medium");
   const [qty, setQty]             = useState(10);
+  const { fmt, currency }         = useCurrency();
 
   const selectedProduct   = PRODUCTS.find((p) => p.id === product)!;
   const selectedPrintSize = PRINT_SIZES.find((s) => s.id === printSize)!;
   const printCost         = technique === "None" ? 0 : selectedPrintSize.price;
   const unitCost          = selectedProduct.blankPrice + printCost;
   const subtotal          = unitCost * qty;
-  const gst               = subtotal * GST_RATE;
+  const gst               = currency === "INR" ? subtotal * GST_RATE : 0; // GST only for INR
   const grandTotal        = subtotal + gst;
   const leadTime          = getLeadTime(qty);
 
@@ -171,6 +172,7 @@ export default function PriceCalculator() {
                     {p.label}
                   </Pill>
                 ))}
+
               </div>
             </div>
 
@@ -209,6 +211,7 @@ export default function PriceCalculator() {
                     {s.label}
                   </Pill>
                 ))}
+
               </div>
             </div>
 
@@ -250,10 +253,10 @@ export default function PriceCalculator() {
             {/* Price breakdown */}
             <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5 flex flex-col gap-2.5">
               {[
-                { label: `Unit cost (×${qty})`,  value: fmt(unitCost) },
-                { label: "Print",                 value: printCost > 0 ? fmt(printCost) : "included" },
-                { label: "Subtotal",              value: fmt(subtotal) },
-                { label: "Est. GST (5%)",         value: fmt(gst) },
+                { label: `Unit cost (×${qty})`,                        value: fmt(unitCost) },
+                { label: "Print",                                        value: printCost > 0 ? fmt(printCost) : "included" },
+                { label: "Subtotal",                                     value: fmt(subtotal) },
+                { label: currency === "INR" ? "Est. GST (5%)" : "Tax", value: currency === "INR" ? fmt(gst) : "at checkout" },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between text-sm text-zinc-500">
                   <span>{row.label}</span>

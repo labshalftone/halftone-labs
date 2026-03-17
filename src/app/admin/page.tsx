@@ -132,24 +132,12 @@ function LoginScreen({ onAuth }: { onAuth: (secret: string) => void }) {
 
 // ── Orders panel ──────────────────────────────────────────────────────────────
 
-function OrdersPanel({ secret }: { secret: string }) {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; orders: Order[]; loading: boolean; onRefresh: () => Promise<void> }) {
   const [selected, setSelected] = useState<Order | null>(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [milestoneForm, setMilestoneForm] = useState({ title: "", description: "", status: "" });
   const [adding, setAdding] = useState(false);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    const res = await fetch("/api/admin/orders", { headers: { "x-admin-secret": secret } });
-    const data = await res.json();
-    setOrders(Array.isArray(data) ? data : []);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchOrders(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addMilestone = async () => {
     if (!selected || !milestoneForm.title) return;
@@ -160,7 +148,7 @@ function OrdersPanel({ secret }: { secret: string }) {
       body: JSON.stringify({ orderId: selected.id, orderRef: selected.ref, title: milestoneForm.title, description: milestoneForm.description, status: milestoneForm.status || undefined }),
     });
     setMilestoneForm({ title: "", description: "", status: "" });
-    await fetchOrders();
+    await onRefresh();
     setAdding(false);
   };
 
@@ -532,21 +520,175 @@ function CouponsPanel({ secret }: { secret: string }) {
   );
 }
 
+// ── Analytics panel ───────────────────────────────────────────────────────────
+
+function AnalyticsPanel({ orders }: { orders: Order[] }) {
+  const totalRevenue   = orders.reduce((s, o) => s + o.total, 0);
+  const totalOrders    = orders.length;
+  const avgOrderValue  = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  const delivered      = orders.filter((o) => o.status === "Delivered").length;
+
+  // Orders by status
+  const statusCounts: Record<string, number> = {};
+  for (const o of orders) {
+    statusCounts[o.status] = (statusCounts[o.status] ?? 0) + 1;
+  }
+  const maxStatusCount = Math.max(1, ...Object.values(statusCounts));
+
+  // Recent 7 days revenue
+  const now    = new Date();
+  const dayMap: Record<string, number> = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    dayMap[key] = 0;
+  }
+  for (const o of orders) {
+    const d   = new Date(o.created_at);
+    const key = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    if (key in dayMap) dayMap[key] += o.total;
+  }
+  const dayEntries  = Object.entries(dayMap);
+  const maxDayRev   = Math.max(1, ...dayEntries.map(([, v]) => v));
+
+  // Top 5 products
+  const productCounts: Record<string, number> = {};
+  for (const o of orders) {
+    productCounts[o.product_name] = (productCounts[o.product_name] ?? 0) + 1;
+  }
+  const topProducts = Object.entries(productCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const maxProductCount = Math.max(1, ...topProducts.map(([, v]) => v));
+
+  const STAT_CARDS = [
+    { label: "Total Revenue",    value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-orange-600" },
+    { label: "Total Orders",     value: String(totalOrders),                         accent: "text-blue-600" },
+    { label: "Avg Order Value",  value: `₹${avgOrderValue.toLocaleString("en-IN")}`, accent: "text-violet-600" },
+    { label: "Delivered",        value: String(delivered),                            accent: "text-green-600" },
+  ];
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+        <div>
+          <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Analytics</h2>
+          <p className="text-xs text-zinc-400 mt-0.5">All-time overview · {totalOrders} order{totalOrders !== 1 ? "s" : ""}</p>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {STAT_CARDS.map((s) => (
+            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+              <p className={`text-2xl font-black ${s.accent}`}>{s.value}</p>
+              <p className="text-xs text-zinc-400 mt-1 font-medium">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Orders by status */}
+        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Orders by Status</p>
+          <div className="flex flex-col gap-3">
+            {STATUS_OPTIONS.map((status) => {
+              const count = statusCounts[status] ?? 0;
+              const pct   = Math.round((count / maxStatusCount) * 100);
+              const c     = STATUS_COLORS[status] ?? { bg: "#f3f4f6", text: "#374151" };
+              return (
+                <div key={status} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-zinc-600 w-36 flex-shrink-0">{status}</span>
+                  <div className="flex-1 bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, background: c.text }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-700 w-6 text-right flex-shrink-0">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Last 7 days revenue */}
+        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Revenue — Last 7 Days</p>
+          <div className="flex items-end gap-2 h-28">
+            {dayEntries.map(([day, rev]) => {
+              const pct = Math.round((rev / maxDayRev) * 100);
+              return (
+                <div key={day} className="flex-1 flex flex-col items-center gap-1.5">
+                  <span className="text-[0.55rem] font-bold text-zinc-500">{rev > 0 ? `₹${(rev / 1000).toFixed(1)}k` : ""}</span>
+                  <div className="w-full bg-zinc-100 rounded-md overflow-hidden flex-1 flex items-end">
+                    <div
+                      className="w-full bg-orange-400 rounded-md transition-all duration-500"
+                      style={{ height: `${Math.max(pct, 2)}%` }}
+                    />
+                  </div>
+                  <span className="text-[0.55rem] text-zinc-400 font-medium text-center leading-tight">{day}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Top products */}
+        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Top Products</p>
+          {topProducts.length === 0 ? (
+            <p className="text-sm text-zinc-400">No data yet.</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {topProducts.map(([name, count]) => {
+                const pct = Math.round((count / maxProductCount) * 100);
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-600 w-40 flex-shrink-0 truncate">{name}</span>
+                    <div className="flex-1 bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+                      <div className="h-full bg-violet-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-zinc-700 w-6 text-right flex-shrink-0">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons";
+type Tab = "orders" | "coupons" | "analytics";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
   const [authed, setAuthed] = useState(false);
   const [tab, setTab] = useState<Tab>("orders");
+  const [orders, setOrders]   = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  const fetchOrders = async (s?: string) => {
+    const key = s ?? secret;
+    if (!key) return;
+    setOrdersLoading(true);
+    try {
+      const res  = await fetch("/api/admin/orders", { headers: { "x-admin-secret": key } });
+      const data = await res.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch { /* ignore */ }
+    setOrdersLoading(false);
+  };
 
   useEffect(() => {
     const saved = sessionStorage.getItem("hl_admin");
-    if (saved) { setSecret(saved); setAuthed(true); }
-  }, []);
+    if (saved) { setSecret(saved); setAuthed(true); fetchOrders(saved); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!authed) return <LoginScreen onAuth={(s) => { setSecret(s); setAuthed(true); }} />;
+  if (!authed) return <LoginScreen onAuth={(s) => { setSecret(s); setAuthed(true); fetchOrders(s); }} />;
 
   const NAV: { id: Tab; label: string; icon: React.ReactNode }[] = [
     {
@@ -558,6 +700,11 @@ export default function AdminPage() {
       id: "coupons",
       label: "Coupons",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z" /></svg>,
+    },
+    {
+      id: "analytics",
+      label: "Analytics",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
     },
   ];
 
@@ -574,7 +721,7 @@ export default function AdminPage() {
           <span className="text-sm text-zinc-500 font-semibold">Admin</span>
         </div>
         <div className="ml-auto">
-          <button onClick={() => { sessionStorage.removeItem("hl_admin"); setAuthed(false); }}
+          <button onClick={() => { sessionStorage.removeItem("hl_admin"); setAuthed(false); setOrders([]); }}
             className="text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
             Sign out
           </button>
@@ -594,8 +741,9 @@ export default function AdminPage() {
 
         {/* Content */}
         <div className="flex-1 flex overflow-hidden">
-          {tab === "orders"  && <OrdersPanel  secret={secret} />}
-          {tab === "coupons" && <CouponsPanel secret={secret} />}
+          {tab === "orders"    && <OrdersPanel    secret={secret} orders={orders} loading={ordersLoading} onRefresh={() => fetchOrders()} />}
+          {tab === "coupons"   && <CouponsPanel   secret={secret} />}
+          {tab === "analytics" && <AnalyticsPanel orders={orders} />}
         </div>
       </div>
     </div>
