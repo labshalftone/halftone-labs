@@ -1,0 +1,388 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { useCart } from "@/lib/cart-context";
+
+const COUNTRY_LIST = [
+  { code: "IN", name: "India" },
+  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "AU", name: "Australia" },
+  { code: "SG", name: "Singapore" },
+  { code: "TH", name: "Thailand" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "NL", name: "Netherlands" },
+  { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" },
+  { code: "AE", name: "UAE" },
+  { code: "JP", name: "Japan" },
+  { code: "NZ", name: "New Zealand" },
+];
+
+interface ShippingOption {
+  id: string; label: string; carrier: string; rate: number; days: string;
+}
+
+export default function CheckoutPage() {
+  const { items, total: itemsTotal, clearCart } = useCart();
+
+  const [country, setCountry] = useState("IN");
+  const [form, setForm] = useState({
+    name: "", email: "", phone: "",
+    address: "", city: "", pin: "", state: "",
+    sameAsBilling: true,
+    billingName: "", billingAddress: "", billingCity: "", billingPin: "",
+  });
+
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [loadingShipping, setLoadingShipping] = useState(false);
+
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+  const [orderSuccess, setOrderSuccess] = useState<{ ref: string } | null>(null);
+
+  const grandTotal = itemsTotal + (selectedShipping?.rate ?? 0);
+
+  const fetchShipping = useCallback(async () => {
+    setLoadingShipping(true);
+    setShippingOptions([]);
+    setSelectedShipping(null);
+    try {
+      const res = await fetch("/api/shipping-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country, pin: form.pin || "201304" }),
+      });
+      const data = await res.json();
+      if (data.options?.length) {
+        setShippingOptions(data.options);
+        setSelectedShipping(data.options[0]);
+      }
+    } catch {}
+    setLoadingShipping(false);
+  }, [country, form.pin]);
+
+  useEffect(() => { fetchShipping(); }, [country]);
+
+  // Load Razorpay
+  useEffect(() => {
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    document.head.appendChild(s);
+    return () => { try { document.head.removeChild(s); } catch {} };
+  }, []);
+
+  const handlePay = async () => {
+    if (!form.name || !form.email || !form.address || !form.city || !selectedShipping) return;
+    setPaying(true); setPayError("");
+    try {
+      const orderRes = await fetch("/api/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: grandTotal }),
+      });
+      const { orderId, key } = await orderRes.json();
+
+      await new Promise<void>((resolve, reject) => {
+        const options = {
+          key, amount: grandTotal * 100, currency: "INR", order_id: orderId,
+          name: "Halftone Labs",
+          description: items.map((i) => `${i.productName} (${i.size})`).join(", "),
+          prefill: { name: form.name, email: form.email, contact: form.phone },
+          theme: { color: "#f15533" },
+          handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string }) => {
+            const ref = `HL${Date.now().toString(36).toUpperCase()}`;
+            try {
+              await fetch("/api/save-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderRef: ref,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  product: items.map((i) => `${i.productName} ${i.gsm}`).join(" + "),
+                  color: items.map((i) => i.color).join(", "),
+                  size: items.map((i) => i.size).join(", "),
+                  printTier: items.map((i) => i.printTier).filter(Boolean).join(", ") || null,
+                  printDimensions: items.map((i) => i.printDims).filter(Boolean).join(", ") || null,
+                  blankPrice: items.reduce((s, i) => s + i.blankPrice, 0),
+                  printPrice: items.reduce((s, i) => s + i.printPrice, 0),
+                  shipping: selectedShipping.rate,
+                  total: grandTotal,
+                  customerName: form.name,
+                  customerEmail: form.email,
+                  customerPhone: form.phone,
+                  address: form.address + ", " + form.city + (form.pin ? " " + form.pin : "") + (form.state ? ", " + form.state : ""),
+                  city: form.city,
+                  pin: form.pin,
+                  country,
+                }),
+              });
+              clearCart();
+              setOrderSuccess({ ref });
+              resolve();
+            } catch (err) { reject(err); }
+          },
+          modal: { ondismiss: () => reject(new Error("cancelled")) },
+        };
+        // @ts-ignore
+        const rz = new window.Razorpay(options);
+        rz.open();
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Payment failed";
+      if (msg !== "cancelled") setPayError(msg);
+    }
+    setPaying(false);
+  };
+
+  // ── Empty cart ──
+  if (items.length === 0 && !orderSuccess) {
+    return (
+      <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🛒</div>
+          <h1 className="text-2xl font-black mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
+          <p className="text-zinc-500 mb-6">Add some products from the Studio first.</p>
+          <Link href="/studio">
+            <button className="px-6 py-3 rounded-full bg-zinc-900 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors">
+              Go to Studio
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Success ──
+  if (orderSuccess) {
+    return (
+      <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl max-w-md w-full p-10 text-center shadow-sm border border-zinc-100">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Order Placed!</h2>
+          <p className="text-zinc-500 text-sm mb-2">Order reference:</p>
+          <p className="text-2xl font-mono font-bold text-orange-500 mb-4">{orderSuccess.ref}</p>
+          <p className="text-zinc-500 text-sm mb-6">
+            Confirmation sent to <strong>{form.email}</strong>. Track at{" "}
+            <Link href="/track" className="text-orange-500 underline">/track</Link>.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/track">
+              <button className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors">
+                Track Order
+              </button>
+            </Link>
+            <Link href="/studio">
+              <button className="px-5 py-2.5 rounded-full border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
+                Back to Studio
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f8f7f5] pt-20">
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="mb-8">
+          <Link href="/studio" className="text-sm text-zinc-400 hover:text-zinc-700 flex items-center gap-1.5 mb-4">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Back to Studio
+          </Link>
+          <h1 className="text-3xl font-black" style={{ letterSpacing: "-0.04em" }}>Checkout</h1>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Left: Form */}
+          <div className="lg:col-span-3 flex flex-col gap-6">
+
+            {/* Contact */}
+            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
+              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Contact</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Full name</label>
+                  <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Your full name" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Email</label>
+                    <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="you@email.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Phone</label>
+                    <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="+91 98765 43210" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping address */}
+            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
+              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping address</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Country</label>
+                  <select value={country} onChange={(e) => setCountry(e.target.value)}
+                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+                    {COUNTRY_LIST.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+                  </select>
+                </div>
+                <input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  placeholder="Street address, apartment…" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
+                  <input value={form.pin} onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value }))}
+                    onBlur={() => country === "IN" && form.pin && fetchShipping()}
+                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    placeholder={country === "IN" ? "PIN code" : "Postal code"} />
+                </div>
+                {country === "IN" && (
+                  <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="State" />
+                )}
+              </div>
+
+              {/* Billing toggle */}
+              <div className="mt-5 pt-5 border-t border-zinc-100">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <div onClick={() => setForm((f) => ({ ...f, sameAsBilling: !f.sameAsBilling }))}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${form.sameAsBilling ? "bg-zinc-900 border-zinc-900" : "border-zinc-300"}`}>
+                    {form.sameAsBilling && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  <span className="text-sm text-zinc-700">Billing address same as shipping</span>
+                </label>
+                <AnimatePresence>
+                  {!form.sameAsBilling && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden mt-4 flex flex-col gap-3">
+                      <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Billing address</p>
+                      <input value={form.billingName} onChange={(e) => setForm((f) => ({ ...f, billingName: e.target.value }))}
+                        className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Name on billing" />
+                      <input value={form.billingAddress} onChange={(e) => setForm((f) => ({ ...f, billingAddress: e.target.value }))}
+                        className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Billing address" />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input value={form.billingCity} onChange={(e) => setForm((f) => ({ ...f, billingCity: e.target.value }))}
+                          className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
+                        <input value={form.billingPin} onChange={(e) => setForm((f) => ({ ...f, billingPin: e.target.value }))}
+                          className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="PIN / Postal code" />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Shipping method */}
+            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
+              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping method</h2>
+              {loadingShipping ? (
+                <div className="flex items-center gap-2 text-sm text-zinc-400 py-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  Calculating rates…
+                </div>
+              ) : shippingOptions.length === 0 ? (
+                <div className="text-sm text-zinc-400">
+                  Enter your address to see shipping options.{" "}
+                  <button onClick={fetchShipping} className="text-orange-500 underline">Refresh</button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {shippingOptions.map((opt) => (
+                    <button key={opt.id} onClick={() => setSelectedShipping(opt)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all ${selectedShipping?.id === opt.id ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:border-zinc-300"}`}>
+                      <div className="text-left">
+                        <p className="font-semibold text-zinc-800">{opt.label}</p>
+                        <p className="text-xs text-zinc-400">{opt.carrier} · {opt.days}</p>
+                      </div>
+                      <p className="font-bold">₹{opt.rate}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Order summary */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-zinc-100 p-6 sticky top-24">
+              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Order summary</h2>
+
+              {/* Cart items */}
+              <div className="flex flex-col gap-3 mb-4">
+                {items.map((item) => (
+                  <div key={item.cartId} className="flex gap-3">
+                    <div className="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
+                      style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
+                      {item.designDataUrl
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={item.designDataUrl} alt="" className="w-8 h-8 object-contain" />
+                        : <span className="text-[8px] text-zinc-400 leading-tight text-center">blank</span>
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{item.productName}</p>
+                      <p className="text-xs text-zinc-400">{item.color} · {item.size}</p>
+                      {item.printTier && <p className="text-xs text-orange-500">{item.printTier}</p>}
+                    </div>
+                    <p className="font-semibold text-sm">₹{(item.blankPrice + item.printPrice).toLocaleString("en-IN")}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-zinc-100 pt-4 flex flex-col gap-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">Items ({items.length})</span>
+                  <span>₹{itemsTotal.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">Shipping</span>
+                  <span>{selectedShipping ? `₹${selectedShipping.rate}` : "—"}</span>
+                </div>
+                <div className="flex justify-between font-black text-lg mt-2 pt-2 border-t border-zinc-100">
+                  <span>Total</span>
+                  <span>₹{grandTotal.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+
+              {payError && (
+                <div className="mt-4 px-4 py-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200">{payError}</div>
+              )}
+
+              <button
+                onClick={handlePay}
+                disabled={paying || !form.name || !form.email || !form.address || !form.city || !selectedShipping}
+                className="w-full mt-5 py-4 rounded-2xl bg-orange-500 text-white font-black text-base hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                {paying ? (
+                  <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Processing…</>
+                ) : <>Pay ₹{grandTotal.toLocaleString("en-IN")} →</>}
+              </button>
+
+              <p className="text-xs text-zinc-400 text-center mt-3">
+                Secured by Razorpay · <a href="mailto:hello@halftonelabs.in" className="underline">hello@halftonelabs.in</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

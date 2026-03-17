@@ -64,12 +64,18 @@ export default function AdminPage() {
 
   const fetchOrders = async (s?: string) => {
     setLoading(true);
-    const res = await fetch("/api/admin/orders", { headers: { "x-admin-secret": s ?? secret } });
-    if (res.status === 401) { setAuthError("Wrong password"); setLoading(false); return; }
-    const data = await res.json();
-    setOrders(data);
-    setAuthed(true);
-    sessionStorage.setItem("hl_admin", s ?? secret);
+    setAuthError("");
+    try {
+      const res = await fetch("/api/admin/orders", { headers: { "x-admin-secret": s ?? secret } });
+      if (res.status === 401) { setAuthError("Wrong password. Check your ADMIN_SECRET env var."); setLoading(false); return; }
+      const data = await res.json();
+      if (data.error) { setAuthError(`Error: ${data.error}. Have you run the Supabase SQL to create tables?`); setLoading(false); return; }
+      setOrders(Array.isArray(data) ? data : []);
+      setAuthed(true);
+      sessionStorage.setItem("hl_admin", s ?? secret);
+    } catch (err) {
+      setAuthError("Network error — check your connection.");
+    }
     setLoading(false);
   };
 
