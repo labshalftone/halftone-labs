@@ -94,9 +94,13 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           style={{ opacity: opacityFade }}
+          className="flex flex-wrap items-center gap-4"
         >
-          <a href="#contact" className="btn-primary">
-            Book an Intro Call
+          <a href="/studio" className="btn-primary">
+            Start designing →
+          </a>
+          <a href="#contact" className="btn-outline">
+            Book a call
           </a>
         </motion.div>
 

@@ -13,7 +13,9 @@ const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Services", href: "#services" },
-  { label: "Process", href: "#process" },
+  { label: "How it works", href: "/how-it-works" },
+  { label: "Case Studies", href: "/case-studies" },
+  { label: "Journal", href: "/journal" },
   { label: "Contact", href: "#contact" },
 ];
 

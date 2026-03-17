@@ -38,10 +38,16 @@ export default function GetStarted() {
               <br />
               <span className="text-orange-400">today</span>
             </h2>
-            <p className="text-zinc-400 leading-relaxed max-w-md text-[0.95rem] mb-8">
+            <p className="text-zinc-400 leading-relaxed max-w-md text-[0.95rem] mb-4">
               Our garments are classic unisex fits, all made in India. Order a
               sample to try before you buy — then design your full order in the
               Halftone Studio.
+            </p>
+            <p className="text-zinc-500 text-sm mb-8">
+              Blank samples from{" "}
+              <span className="text-orange-400 font-semibold">₹499</span>
+              {" · "}Printed samples from{" "}
+              <span className="text-orange-400 font-semibold">₹799</span>
             </p>
 
             <div className="flex flex-wrap gap-3">

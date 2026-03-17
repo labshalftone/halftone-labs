@@ -738,6 +738,23 @@ function SettingsTab({
   const [saving, setSaving]   = useState(false);
   const [saved,  setSaved]    = useState(false);
   const [loadingAddr, setLoadingAddr] = useState(true);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCopied, setReferralCopied] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/referrals?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.code) setReferralCode(d.code); })
+      .catch(() => {});
+  }, [userId]);
+
+  const copyReferral = () => {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(`https://halftonelabs.in/studio?ref=${referralCode}`);
+    setReferralCopied(true);
+    setTimeout(() => setReferralCopied(false), 2000);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -854,6 +871,40 @@ function SettingsTab({
             International prices include a 2× margin. GST is not applied at checkout for non-INR orders.
           </p>
         )}
+      </div>
+
+      {/* Referral Program */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+            <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-black text-zinc-900">Referral Program</h3>
+            <p className="text-xs text-zinc-400">Share your code — earn 5% store credit on every referral</p>
+          </div>
+        </div>
+        <p className="text-sm text-zinc-500 mb-4 leading-relaxed">
+          Share your link with other artists. They get <strong className="text-zinc-800">5% off</strong> their first order — you earn <strong className="text-zinc-800">5% store credit</strong> automatically.
+        </p>
+        {referralCode ? (
+          <div className="flex gap-2">
+            <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 font-mono text-sm text-zinc-700 truncate">
+              halftonelabs.in/studio?ref={referralCode}
+            </div>
+            <button onClick={copyReferral}
+              className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${referralCopied ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
+              {referralCopied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-zinc-50 rounded-xl px-4 py-3 text-sm text-zinc-400">
+            {userId ? "Generating your code…" : "Log in to get your referral code"}
+          </div>
+        )}
+        <p className="text-xs text-zinc-400 mt-3">Credits are applied automatically after the referred order ships.</p>
       </div>
 
       {/* Default shipping address */}

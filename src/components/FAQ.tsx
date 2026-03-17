@@ -7,28 +7,52 @@ import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
 
 const faqs = [
   {
-    q: "What services do you offer?",
-    a: "We help artists, labels, and creators launch and scale merch brands. Our services cover design, sampling, production, fulfillment, e-commerce, and marketing.",
+    q: "What is your minimum order quantity?",
+    a: "Depends on what you need. For on-demand Studio orders — printed and shipped one at a time — the MOQ is 1. No bulk commitment, no dead stock. For custom bulk drops (cut-and-sew, screen print, woven labels, embroidery), the MOQ is 50 units per style. Two modes, built for different stages of your journey.",
   },
   {
-    q: "What is your Minimum Order Quantity (MOQ)?",
-    a: "We accept orders starting from 50 units per style, with variations depending on fabric type and complexity.",
+    q: "How long does production take?",
+    a: "On-demand Studio orders ship within 5–7 business days domestically. Custom bulk drops — the kind with bespoke construction, specialty printing, or full packaging — take 3–4 weeks depending on complexity and volume. We'll give you a clear timeline upfront, not a vague estimate.",
   },
   {
-    q: "How long does it take to launch merch?",
-    a: "Most drops go live within 3 to 4 weeks, depending on the complexity of designs and product range. Festival and event merch can be produced even faster.",
+    q: "What's the difference between DTG and DTF printing?",
+    a: "DTG (Direct-to-Garment) prints ink directly onto the fabric — great for soft, breathable prints on light and mid-tone garments. DTF (Direct-to-Film) transfers a printed film onto the garment, giving you sharper edges, vivid colour on dark fabrics, and the ability to print on almost any material. We use both, and we'll recommend the right one for your artwork.",
+  },
+  {
+    q: "Can I order a sample before committing to bulk?",
+    a: "Yes, and we actively encourage it. Blank samples start from ₹499. Printed samples (your actual artwork on the garment) start from ₹799. Order through the Studio, check the fit and print quality in your hands, then scale up. No guesswork, no surprises.",
+  },
+  {
+    q: "Do you ship internationally?",
+    a: "Yes. Domestic orders ship via Shiprocket and arrive in 5–7 business days. International orders ship in 10–18 business days depending on the destination. Duties and taxes are the buyer's responsibility for international shipments.",
+  },
+  {
+    q: "What if I'm not happy with the quality?",
+    a: "We stand behind everything that leaves our facility. If there's a print defect, a sizing issue, or anything that doesn't meet the spec you approved, we'll reprint or refund — no runaround. Reach us at hello@halftonelabs.in with photos and your order number.",
+  },
+  {
+    q: "Can you design the artwork for me?",
+    a: "Yes. Our in-house design team has worked on everything from minimalist logos to full tour merch collections. If you have a rough idea, a mood board, or just a vibe — we'll turn it into print-ready artwork. Design services are scoped separately; reach out to discuss.",
+  },
+  {
+    q: "Do you offer custom neck labels or packaging?",
+    a: "Yes, for bulk orders. Custom woven or printed neck labels are available from MOQ 50 units. Branded poly bags, hang tags, tissue paper, and box packaging can be added to any bulk order. White-label fulfillment means your customer sees your brand, not ours.",
+  },
+  {
+    q: "What file format should I use for my artwork?",
+    a: "For the best results, send us a PNG or PDF with a transparent background, at least 300 DPI at print size. Vector files (AI or EPS) are ideal for logos and text-heavy designs. If your file isn't print-ready, our team can clean it up — just flag it when you submit.",
+  },
+  {
+    q: "How does pricing work — is there a price list?",
+    a: "On-demand Studio orders are priced transparently at checkout — you see the total before you confirm. For custom bulk quotes, pricing depends on garment type, print method, quantity, and finishing. Send us your brief and we'll turn around a detailed quote within 24 hours.",
   },
   {
     q: "Do you work with independent artists or only big labels?",
-    a: "Both. We have worked with global labels and indie artists just starting out. If you have a vision, we will help you bring it to life at any scale.",
-  },
-  {
-    q: "Can I customize the packages you offer?",
-    a: "Yes. Whether you need only design support or full-stack merch management, we build packages to fit your needs.",
+    a: "Both, and we treat them the same. We've worked with global labels and bedroom producers, festival headliners and debut acts. The only thing that matters is that you're serious about your merch. Scale doesn't.",
   },
   {
     q: "How do I get started?",
-    a: "Book a discovery call with us or send us an email at hello@halftonelabs.in. We will understand your vision and suggest the right plan.",
+    a: "Two ways. If you want on-demand merch right now, head to the Studio, upload your artwork, and place an order — it takes about five minutes. If you're thinking about a custom bulk drop, a full merch strategy, or something more involved, email us at hello@halftonelabs.in or book a discovery call. We'll take it from there.",
   },
 ];
 

@@ -99,15 +99,13 @@ export default function Footer() {
                 Sitemap
               </p>
               <div className="flex flex-col gap-2">
-                {["About", "Services", "Process", "Contact"].map((l) => (
-                  <a
-                    key={l}
-                    href={`#${l.toLowerCase()}`}
-                    className="text-sm text-white/40 hover:text-white transition-colors"
-                  >
-                    {l}
-                  </a>
-                ))}
+                <a href="#about" className="text-sm text-white/40 hover:text-white transition-colors">About</a>
+                <a href="#services" className="text-sm text-white/40 hover:text-white transition-colors">Services</a>
+                <a href="#process" className="text-sm text-white/40 hover:text-white transition-colors">Process</a>
+                <a href="/studio" className="text-sm text-white/40 hover:text-white transition-colors">Studio</a>
+                <a href="#pricing" className="text-sm text-white/40 hover:text-white transition-colors">Pricing</a>
+                <a href="/track" className="text-sm text-white/40 hover:text-white transition-colors">Track Order</a>
+                <a href="#contact" className="text-sm text-white/40 hover:text-white transition-colors">Contact</a>
               </div>
             </div>
 
@@ -116,20 +114,51 @@ export default function Footer() {
                 Follow Us
               </p>
               <div className="flex flex-col gap-2">
-                {["Instagram", "Twitter", "LinkedIn"].map((s) => (
-                  <span
-                    key={s}
-                    className="text-sm text-white/40 hover:text-white transition-colors cursor-pointer"
-                  >
-                    {s}
-                  </span>
-                ))}
+                <a
+                  href="https://instagram.com/halftonelabs.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/40 hover:text-white transition-colors"
+                >
+                  Instagram
+                </a>
+                <a
+                  href="https://x.com/halftonelabs.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/40 hover:text-white transition-colors"
+                >
+                  X / Twitter
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/101764839"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/40 hover:text-white transition-colors"
+                >
+                  LinkedIn
+                </a>
               </div>
             </div>
           </div>
 
+          {/* Copyright + legal */}
+          <div className="mt-10 pt-6 border-t border-white/[0.04] flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <p className="text-xs text-white/25">
+              &copy; 2021&ndash;2025 Halftone Labs. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <a href="/privacy" className="text-xs text-white/25 hover:text-white/60 transition-colors">
+                Privacy Policy
+              </a>
+              <a href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">
+                Terms
+              </a>
+            </div>
+          </div>
+
           {/* Brand watermark */}
-          <div className="mt-16 -mb-4 overflow-hidden">
+          <div className="mt-10 -mb-4 overflow-hidden">
             <p className="text-[clamp(3rem,12vw,10rem)] leading-none text-white/[0.03]" style={{ letterSpacing: "-0.065em" }}>
               halftone labs
             </p>

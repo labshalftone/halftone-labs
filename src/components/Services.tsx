@@ -26,7 +26,7 @@ const services = [
   },
   {
     icon: Smartphone,
-    title: "App Design & Development",
+    title: "Web & Creative Design",
     desc: "Website maintenance, social media graphics, email design, pitch decks & presentations.",
     tags: ["Web Design", "Social Graphics", "Pitch Decks"],
   },
