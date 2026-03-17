@@ -329,13 +329,15 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [printPrice, setPrintPrice] = useState(0);
   const [printTier, setPrintTier] = useState("");
   const [printDims, setPrintDims] = useState("");
+  const [side, setSide] = useState<"front" | "back" | "both">("front");
   const [noDesign, setNoDesign] = useState(false);
   const [added, setAdded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const isOversized = product.id.includes("oversized");
-  const itemTotal = product.blankPrice + printPrice;
+  const effectivePrintPrice = side === "both" ? printPrice * 2 : printPrice;
+  const itemTotal = product.blankPrice + effectivePrintPrice;
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -384,9 +386,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       color: color.name,
       colorHex: color.hex,
       size,
+      qty: 1,
+      side,
       blankPrice: product.blankPrice,
-      printPrice,
-      printTier,
+      printPrice: effectivePrintPrice,
+      printTier: side === "both" ? `${printTier} × 2 sides` : printTier,
       printDims,
       hasDesign: !!designSrc,
       designDataUrl: designSrc,
@@ -502,7 +506,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   </div>
                 </div>
 
-                <div className="mb-10">
+                <div className="mb-8">
                   <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Size</p>
                   <div className="flex flex-wrap gap-2">
                     {product.sizes.map((s) => (
@@ -570,14 +574,47 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   Blank tee — no print
                 </button>
 
+                {/* Print side selector — visible once a design is uploaded OR noDesign selected */}
+                {(designSrc || noDesign) && !noDesign && (
+                  <div className="mb-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2.5">Print side</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { val: "front",  label: "Front only" },
+                        { val: "back",   label: "Back only" },
+                        { val: "both",   label: "Both sides" },
+                      ] as const).map(({ val, label }) => (
+                        <button key={val} onClick={() => setSide(val)}
+                          className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${
+                            side === val
+                              ? "border-zinc-900 bg-zinc-900 text-white"
+                              : "border-zinc-200 text-zinc-600 hover:border-zinc-400"
+                          }`}>
+                          {label}
+                          {val === "both" && <span className="block text-[9px] font-normal opacity-70 mt-0.5">2× print cost</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Price + actions — pinned together */}
                 <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-zinc-400">Item total</p>
                     <p className="font-black text-lg">₹{itemTotal.toLocaleString("en-IN")}</p>
-                    {printPrice > 0 && <p className="text-xs text-orange-500">{printTier} print included</p>}
+                    {effectivePrintPrice > 0 && (
+                      <p className="text-xs text-orange-500">
+                        {side === "both" ? `${printTier} × 2 sides` : `${printTier} print`} included
+                      </p>
+                    )}
                   </div>
-                  <p className="text-xs text-zinc-400">+ shipping at checkout</p>
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-400">+ shipping at checkout</p>
+                    <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-400">
+                      🇮🇳 <span>Fulfilled from India</span>
+                    </span>
+                  </div>
                 </div>
 
                 {/* Save design — above CTA, always visible */}

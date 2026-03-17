@@ -20,7 +20,9 @@
       "WebFetch(domain:www.rovoassembly.com)",
       "Bash(node -e \":*)",
       "Bash(npm run:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
