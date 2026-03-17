@@ -40,7 +40,7 @@ function Separator() {
 
 export default function TrustedBy() {
   return (
-    <section className="bg-[#f8f7f5] py-16 mt-16 border-t border-zinc-200/60 overflow-hidden">
+    <section className="bg-[#f8f7f5] py-16 border-t border-zinc-200/60 overflow-hidden">
       {/* Header */}
       <div className="text-center mb-10 px-6">
         <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-zinc-400">
