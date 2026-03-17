@@ -48,7 +48,7 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
     </svg>
   )},
-  { id: "stores", label: "Stores", badge: "Soon", icon: (
+  { id: "stores", label: "Stores", icon: (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
@@ -699,26 +699,526 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
 }
 
 // ── Stores Tab ─────────────────────────────────────────────────────────────────
-function StoresTab() {
+
+const STORE_CATALOG = [
+  {
+    id: "regular-tee", name: "Regular Tee", gsm: "180 GSM",
+    costPrice: 400,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    colors: [
+      { name: "White",  hex: "#FFFFFF" },
+      { name: "Black",  hex: "#111111" },
+      { name: "Navy",   hex: "#1B2A4A" },
+      { name: "Maroon", hex: "#6B2D2D" },
+    ],
+  },
+  {
+    id: "oversized-tee-sj", name: "Oversized Tee (SJ)", gsm: "220 GSM",
+    costPrice: 500,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    colors: [
+      { name: "White", hex: "#FFFFFF" },
+      { name: "Black", hex: "#111111" },
+    ],
+  },
+  {
+    id: "oversized-tee-ft", name: "Oversized Tee (FT)", gsm: "240 GSM",
+    costPrice: 600,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    colors: [
+      { name: "Black",      hex: "#111111" },
+      { name: "White",      hex: "#FFFFFF" },
+      { name: "Royal Blue", hex: "#2355C0" },
+      { name: "Baby Pink",  hex: "#F5C2C7" },
+      { name: "Red",        hex: "#C0392B" },
+    ],
+  },
+  {
+    id: "baby-tee", name: "Baby Tee", gsm: "180 GSM",
+    costPrice: 380,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    colors: [
+      { name: "White",     hex: "#FFFFFF" },
+      { name: "Black",     hex: "#111111" },
+      { name: "Baby Pink", hex: "#F5C2C7" },
+      { name: "Lavender",  hex: "#C9B8E8" },
+    ],
+  },
+];
+
+type ArtistStore = {
+  id: string; handle: string; artist_name: string;
+  description: string | null; instagram: string | null; active: boolean;
+};
+type StoreProductRow = {
+  id: string; product_id: string; product_name: string;
+  color_hex: string; color_name: string; sizes: string[];
+  retail_price_inr: number; cost_price_inr: number;
+  design_front_url: string | null; design_back_url: string | null;
+  print_technique: string;
+};
+
+function AddProductModal({
+  store, onClose, onAdded,
+}: { store: ArtistStore; onClose: () => void; onAdded: (p: StoreProductRow) => void }) {
+  const [step, setStep] = useState<"pick" | "config">("pick");
+  const [catalog, setCatalog] = useState<typeof STORE_CATALOG[0] | null>(null);
+  const [color, setColor] = useState<{ name: string; hex: string } | null>(null);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [frontUrl, setFrontUrl] = useState("");
+  const [backUrl, setBackUrl] = useState("");
+  const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
+  const [price, setPrice] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+
+  const minPrice = catalog ? catalog.costPrice + 50 : 0;
+
+  function pickProduct(p: typeof STORE_CATALOG[0]) {
+    setCatalog(p);
+    setColor(p.colors[0]);
+    setSizes([...p.sizes]);
+    setPrice(String(p.costPrice + 200));
+    setStep("config");
+  }
+
+  function toggleSize(s: string) {
+    setSizes((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+  }
+
+  async function handleSubmit() {
+    if (!catalog || !color) return;
+    const priceNum = parseInt(price, 10);
+    if (isNaN(priceNum) || priceNum < minPrice) {
+      setErr(`Minimum price is ₹${minPrice} (cost + ₹50 fulfillment)`);
+      return;
+    }
+    if (sizes.length === 0) { setErr("Select at least one size"); return; }
+    setSaving(true); setErr("");
+    const res = await fetch(`/api/stores/${store.handle}/products`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product_id: catalog.id,
+        product_name: catalog.name,
+        color_hex: color.hex,
+        color_name: color.name,
+        sizes,
+        retail_price_inr: priceNum,
+        cost_price_inr: catalog.costPrice,
+        design_front_url: frontUrl || null,
+        design_back_url: backUrl || null,
+        print_technique: technique,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setErr(data.error ?? "Failed"); setSaving(false); return; }
+    onAdded(data);
+    onClose();
+  }
+
   return (
-    <div>
-      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>Stores</h2>
-      <div className="bg-white border-2 border-dashed border-zinc-200 rounded-2xl p-14 text-center">
-        <div className="text-5xl mb-4">🛍️</div>
-        <h3 className="font-black text-zinc-900 mb-2">Shopify integration coming soon</h3>
-        <p className="text-zinc-500 text-sm mb-4 max-w-sm mx-auto">
-          Connect your Shopify store and we&apos;ll automatically fulfil orders placed there — print, pack, and ship directly to your customers.
-        </p>
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-xs font-bold">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          In development · Get notified
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
+      >
+        <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+          <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>
+            {step === "pick" ? "Choose a product" : `Configure · ${catalog?.name}`}
+          </h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors text-sm">✕</button>
         </div>
-        <div className="mt-4">
-          <a href="mailto:hello@halftonelabs.in?subject=Shopify Integration Waitlist" className="text-sm font-bold text-orange-500 hover:underline">
-            Join the waitlist →
-          </a>
+
+        {step === "pick" ? (
+          <div className="p-6 grid grid-cols-2 gap-3">
+            {STORE_CATALOG.map((p) => (
+              <button key={p.id} onClick={() => pickProduct(p)}
+                className="text-left p-4 rounded-2xl border-2 border-zinc-100 hover:border-orange-300 hover:bg-orange-50 transition-all group">
+                <div className="flex gap-1 mb-3">
+                  {p.colors.slice(0, 4).map((c) => (
+                    <div key={c.hex} className="w-4 h-4 rounded-full border border-zinc-200" style={{ background: c.hex }} />
+                  ))}
+                </div>
+                <p className="font-bold text-zinc-900 text-sm group-hover:text-orange-600 transition-colors">{p.name}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{p.gsm} · from ₹{p.costPrice}</p>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="p-6 space-y-5">
+            {/* Color */}
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Color</p>
+              <div className="flex gap-2 flex-wrap">
+                {catalog!.colors.map((c) => (
+                  <button key={c.hex} onClick={() => setColor(c)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-xs font-bold transition-all ${color?.hex === c.hex ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                    <span className="w-3 h-3 rounded-full border border-white/30" style={{ background: c.hex }} />
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sizes offered</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {catalog!.sizes.map((s) => (
+                  <button key={s} onClick={() => toggleSize(s)}
+                    className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Print technique */}
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Print technique</p>
+              <div className="flex gap-2">
+                {(["DTG", "DTF"] as const).map((t) => (
+                  <button key={t} onClick={() => setTechnique(t)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Designs */}
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Design URLs <span className="text-zinc-400 font-normal normal-case">(optional)</span></p>
+              <div className="space-y-2">
+                <input value={frontUrl} onChange={(e) => setFrontUrl(e.target.value)} placeholder="Front design URL (imgur, Cloudinary, etc.)"
+                  className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-400" />
+                <input value={backUrl} onChange={(e) => setBackUrl(e.target.value)} placeholder="Back design URL (optional)"
+                  className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-400" />
+              </div>
+            </div>
+
+            {/* Price */}
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Retail price (₹)</p>
+              <p className="text-xs text-zinc-400 mb-2">Min ₹{minPrice} — you keep ₹{Math.max(0, parseInt(price || "0") - minPrice)} margin</p>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm">₹</span>
+                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={minPrice}
+                  className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
+              </div>
+            </div>
+
+            {err && <p className="text-red-500 text-xs font-bold">{err}</p>}
+
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => setStep("pick")} className="px-4 py-3 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">← Back</button>
+              <button onClick={handleSubmit} disabled={saving}
+                className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+                {saving ? "Adding…" : "Add to store →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+function StoresTab({ userId }: { userId: string | null }) {
+  const [store, setStore] = useState<ArtistStore | null>(null);
+  const [products, setProducts] = useState<StoreProductRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editingStore, setEditingStore] = useState(false);
+
+  // Create form state
+  const [handle, setHandle] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [description, setDescription] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState("");
+
+  // Edit store state
+  const [editArtistName, setEditArtistName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editInstagram, setEditInstagram] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    fetch(`/api/stores?userId=${userId}`)
+      .then((r) => r.json())
+      .then((data: ArtistStore[]) => {
+        if (data && data.length > 0) {
+          setStore(data[0]);
+          return fetch(`/api/stores/${data[0].handle}/products`);
+        }
+        return null;
+      })
+      .then((r) => r ? r.json() : [])
+      .then((prods) => { if (Array.isArray(prods)) setProducts(prods); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!userId) return;
+    setCreating(true); setCreateErr("");
+    const res = await fetch("/api/stores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ handle: handle.toLowerCase(), artist_name: artistName, description: description || null, instagram: instagram || null, user_id: userId }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setCreateErr(data.error ?? "Failed"); setCreating(false); return; }
+    setStore(data);
+    setShowCreate(false);
+    setCreating(false);
+  }
+
+  async function handleSaveStore(e: React.FormEvent) {
+    e.preventDefault();
+    if (!store || !userId) return;
+    setSaving(true);
+    const res = await fetch(`/api/stores/${store.handle}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, artist_name: editArtistName, description: editDescription || null, instagram: editInstagram || null }),
+    });
+    const data = await res.json();
+    if (res.ok) { setStore((s) => s ? { ...s, ...data } : s); setEditingStore(false); }
+    setSaving(false);
+  }
+
+  async function removeProduct(id: string) {
+    if (!store) return;
+    await fetch(`/api/stores/${store.handle}/products?id=${id}`, { method: "DELETE" });
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  function startEdit() {
+    if (!store) return;
+    setEditArtistName(store.artist_name);
+    setEditDescription(store.description ?? "");
+    setEditInstagram(store.instagram ?? "");
+    setEditingStore(true);
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="w-6 h-6 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+    </div>
+  );
+
+  // No store yet — launch CTA
+  if (!store && !showCreate) return (
+    <div>
+      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>My Store</h2>
+      <div className="bg-zinc-900 rounded-3xl p-10 text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.05]"
+          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+        <div className="relative z-10">
+          <div className="text-5xl mb-4">🛍️</div>
+          <h3 className="font-black text-white text-xl mb-2" style={{ letterSpacing: "-0.04em" }}>Launch your merch store</h3>
+          <p className="text-zinc-400 text-sm max-w-sm mx-auto mb-6">
+            Create a public storefront, add your products with custom pricing, and share the link with your fans. We handle print, pack, and ship.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+            {["No inventory", "On-demand fulfillment", "You keep the margin"].map((f) => (
+              <div key={f} className="flex items-center gap-1.5 text-zinc-400 text-xs font-semibold">
+                <span className="text-green-400">✓</span>{f}
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setShowCreate(true)}
+            className="px-8 py-3 rounded-full bg-orange-500 text-white font-black text-sm hover:bg-orange-400 transition-colors">
+            Create your store →
+          </button>
         </div>
       </div>
+    </div>
+  );
+
+  // Create store form
+  if (showCreate) return (
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => setShowCreate(false)} className="text-zinc-400 hover:text-zinc-700 text-sm">← Back</button>
+        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Create Store</h2>
+      </div>
+      <div className="max-w-md">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Store handle *</label>
+            <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+              <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50 font-mono">halftone.in/store/</span>
+              <input value={handle} onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                placeholder="your-name" required pattern="[a-z0-9-]+"
+                className="flex-1 px-3 py-2.5 text-sm font-mono outline-none" />
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">Lowercase letters, numbers, hyphens only</p>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Display name *</label>
+            <input value={artistName} onChange={(e) => setArtistName(e.target.value)} placeholder="Kevin Abstract" required
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Bio / description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell your fans what this store is about…" rows={3}
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Instagram handle</label>
+            <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+              <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50">@</span>
+              <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace("@", ""))} placeholder="yourhandle"
+                className="flex-1 px-3 py-2.5 text-sm outline-none" />
+            </div>
+          </div>
+          {createErr && <p className="text-red-500 text-xs font-bold">{createErr}</p>}
+          <button type="submit" disabled={creating}
+            className="w-full py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+            {creating ? "Creating…" : "Launch store →"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
+  // Store dashboard
+  const storeUrl = `${typeof window !== "undefined" ? window.location.origin : "https://halftonelabs.in"}/store/${store!.handle}`;
+
+  return (
+    <div>
+      {showAddProduct && store && (
+        <AddProductModal store={store} onClose={() => setShowAddProduct(false)}
+          onAdded={(p) => setProducts((prev) => [...prev, p])} />
+      )}
+
+      {/* Store header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>{store!.artist_name}</h2>
+          <div className="flex items-center gap-2 mt-1">
+            <a href={storeUrl} target="_blank" rel="noopener noreferrer"
+              className="text-xs text-orange-500 font-bold hover:underline font-mono">
+              /store/{store!.handle} ↗
+            </a>
+            <button onClick={() => { navigator.clipboard.writeText(storeUrl); }}
+              className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">Copy link</button>
+          </div>
+        </div>
+        <button onClick={startEdit}
+          className="px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">
+          Edit store
+        </button>
+      </div>
+
+      {/* Edit store inline form */}
+      {editingStore && (
+        <form onSubmit={handleSaveStore} className="bg-zinc-50 rounded-2xl p-5 mb-6 space-y-3">
+          <h3 className="font-bold text-zinc-900 text-sm">Edit store info</h3>
+          <input value={editArtistName} onChange={(e) => setEditArtistName(e.target.value)} placeholder="Display name" required
+            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors" />
+          <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Bio / description" rows={2}
+            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+          <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors bg-white">
+            <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50">@</span>
+            <input value={editInstagram} onChange={(e) => setEditInstagram(e.target.value.replace("@", ""))} placeholder="Instagram handle"
+              className="flex-1 px-3 py-2.5 text-sm outline-none" />
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setEditingStore(false)} className="px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Products section */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.03em" }}>
+          Products <span className="text-zinc-400 font-normal text-sm ml-1">{products.length}</span>
+        </h3>
+        <button onClick={() => setShowAddProduct(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+          <span className="text-base leading-none">+</span> Add product
+        </button>
+      </div>
+
+      {products.length === 0 ? (
+        <div className="border-2 border-dashed border-zinc-200 rounded-2xl p-12 text-center">
+          <div className="text-4xl mb-3">👕</div>
+          <p className="text-zinc-500 text-sm font-semibold mb-1">No products yet</p>
+          <p className="text-zinc-400 text-xs mb-4">Add your first product to start selling</p>
+          <button onClick={() => setShowAddProduct(true)}
+            className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+            Add first product →
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {products.map((p) => {
+            const margin = p.retail_price_inr - p.cost_price_inr - 50;
+            return (
+              <div key={p.id} className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 transition-all group">
+                <div className="aspect-square flex items-center justify-center relative" style={{ background: p.color_hex + "22" }}>
+                  <div className="absolute inset-0 opacity-[0.04]"
+                    style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+                  {p.design_front_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.design_front_url} alt={p.product_name} className="w-24 h-24 object-contain relative z-10 drop-shadow" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl flex items-center justify-center text-3xl relative z-10" style={{ background: p.color_hex, opacity: 0.8 }}>👕</div>
+                  )}
+                  <button onClick={() => removeProduct(p.id)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 text-zinc-400 hover:text-red-500 hover:bg-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center shadow-sm">
+                    ✕
+                  </button>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-1">
+                    <div>
+                      <p className="font-bold text-zinc-900 text-sm">{p.product_name}</p>
+                      <p className="text-xs text-zinc-400">{p.color_name} · {p.print_technique}</p>
+                    </div>
+                    <p className="font-black text-zinc-900 text-sm">₹{p.retail_price_inr}</p>
+                  </div>
+                  <div className="flex gap-1 flex-wrap mt-2">
+                    {p.sizes.map((s) => (
+                      <span key={s} className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-zinc-100 flex items-center justify-between">
+                    <span className="text-xs text-zinc-400">Your margin</span>
+                    <span className={`text-xs font-black ${margin > 0 ? "text-green-600" : "text-red-500"}`}>₹{margin} / unit</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Store link card */}
+      {products.length > 0 && (
+        <div className="mt-8 bg-zinc-900 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-white font-bold text-sm">Your store is live 🎉</p>
+            <p className="text-zinc-400 text-xs mt-0.5 font-mono">{storeUrl}</p>
+          </div>
+          <a href={storeUrl} target="_blank" rel="noopener noreferrer"
+            className="px-5 py-2.5 rounded-full bg-orange-500 text-white text-sm font-bold hover:bg-orange-400 transition-colors whitespace-nowrap">
+            View store ↗
+          </a>
+        </div>
+      )}
     </div>
   );
 }
@@ -1128,7 +1628,7 @@ export default function AccountPage() {
               {activeTab === "orders"    && <OrdersTab orders={orders} user={user} />}
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
-              {activeTab === "stores"    && <StoresTab />}
+              {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>
           </AnimatePresence>

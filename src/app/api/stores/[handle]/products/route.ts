@@ -63,3 +63,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ handle: string }> }) {
+  await params; // consume params
+  const supabase = createAdminClient();
+  const productId = req.nextUrl.searchParams.get("id");
+  if (!productId) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  const { error } = await supabase
+    .from("store_products")
+    .delete()
+    .eq("id", productId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}

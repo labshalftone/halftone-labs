@@ -45,14 +45,22 @@ import { createAdminClient } from "@/lib/supabase-server";
   );
 */
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const userId = req.nextUrl.searchParams.get("userId");
+
+  let query = supabase
     .from("artist_stores")
-    .select("id, handle, artist_name, description, instagram, created_at")
-    .eq("active", true)
+    .select("id, handle, artist_name, description, instagram, active, created_at")
     .order("created_at", { ascending: false });
 
+  if (userId) {
+    query = query.eq("user_id", userId);
+  } else {
+    query = query.eq("active", true);
+  }
+
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
