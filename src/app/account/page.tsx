@@ -53,7 +53,7 @@ const NAV = [
 ] as const;
 
 // ── Dashboard Overview ────────────────────────────────────────────────────────
-function DashboardTab({ orders, user, onTab }: { orders: Order[]; user: { email: string; user_metadata: { name?: string } } | null; onTab: (t: ActiveTab) => void }) {
+function DashboardTab({ orders, user, onTab }: { orders: Order[]; user: { id: string; email: string; user_metadata: { name?: string } } | null; onTab: (t: ActiveTab) => void }) {
   const active = orders.filter((o) => !["Delivered"].includes(o.status));
   const delivered = orders.filter((o) => o.status === "Delivered");
 
@@ -164,7 +164,7 @@ function DashboardTab({ orders, user, onTab }: { orders: Order[]; user: { email:
 }
 
 // ── Orders Tab ────────────────────────────────────────────────────────────────
-function OrdersTab({ orders, user }: { orders: Order[]; user: { email: string } | null }) {
+function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; email: string; user_metadata: { name?: string } } | null }) {
   const [selected, setSelected] = useState<Order | null>(null);
   const [filter, setFilter] = useState("All");
 
@@ -279,21 +279,127 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { email: string } 
   );
 }
 
+type Design = {
+  id: string;
+  name: string;
+  product_name: string;
+  gsm: string;
+  color_name: string;
+  color_hex: string;
+  size: string;
+  print_tier: string | null;
+  blank_price: number;
+  print_price: number;
+  has_design: boolean;
+  thumbnail: string | null;
+  created_at: string;
+};
+
 // ── Designs Tab ────────────────────────────────────────────────────────────────
-function DesignsTab() {
+function DesignsTab({ userId, email }: { userId: string | null; email: string | null }) {
+  const [designs, setDesigns] = useState<Design[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (userId) params.set("userId", userId);
+    else if (email) params.set("email", email);
+    fetch(`/api/designs?${params}`)
+      .then((r) => r.json())
+      .then((d) => setDesigns(Array.isArray(d) ? d : []))
+      .finally(() => setLoading(false));
+  }, [userId, email]);
+
+  const handleDelete = async (id: string) => {
+    setDeleting(id);
+    await fetch(`/api/designs?id=${id}`, { method: "DELETE" });
+    setDesigns((prev) => prev.filter((d) => d.id !== id));
+    setDeleting(null);
+  };
+
   return (
     <div>
-      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>Designs</h2>
-      <div className="bg-white border-2 border-dashed border-zinc-200 rounded-2xl p-14 text-center">
-        <div className="text-5xl mb-4">🎨</div>
-        <h3 className="font-black text-zinc-900 mb-2">Design library coming soon</h3>
-        <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">
-          Save and manage your uploaded artwork, create design templates, and reorder fast.
-        </p>
-        <Link href="/studio" className="px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
-          Go to Studio →
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Designs</h2>
+        <Link href="/studio" className="px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition-colors">
+          + New Design
         </Link>
       </div>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+          <div className="w-4 h-4 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
+          Loading designs…
+        </div>
+      ) : designs.length === 0 ? (
+        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-2xl p-14 text-center">
+          <div className="text-5xl mb-4">🎨</div>
+          <h3 className="font-black text-zinc-900 mb-2">No saved designs yet</h3>
+          <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">
+            When you configure a product in Studio, hit <strong>"Save design to account"</strong> — it'll appear here.
+          </p>
+          <Link href="/studio" className="px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+            Open Studio →
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {designs.map((d) => (
+            <motion.div key={d.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 hover:shadow-sm transition-all">
+              {/* Thumbnail */}
+              <div className="h-36 flex items-center justify-center relative"
+                style={{ background: d.color_hex || "#f4f4f5" }}>
+                {d.thumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={d.thumbnail} alt={d.name} className="w-24 h-24 object-contain drop-shadow-md" />
+                ) : (
+                  <div className="text-4xl opacity-40">👕</div>
+                )}
+                {d.has_design && (
+                  <span className="absolute top-2 right-2 text-[9px] font-black px-2 py-0.5 rounded-full bg-white/80 text-zinc-600 backdrop-blur-sm">
+                    Custom print
+                  </span>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="px-4 py-4">
+                <p className="font-black text-sm text-zinc-900 truncate">{d.name}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{d.product_name} · {d.color_name} · {d.size}</p>
+                {d.print_tier && <p className="text-xs text-orange-500 mt-0.5">{d.print_tier}</p>}
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  ₹{(d.blank_price + d.print_price).toLocaleString("en-IN")} base
+                </p>
+                <p className="text-[10px] text-zinc-300 mt-1">
+                  Saved {new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+
+                {/* Actions */}
+                <div className="flex gap-2 mt-3">
+                  <Link href="/studio"
+                    className="flex-1 text-center px-3 py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+                    Order again
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(d.id)}
+                    disabled={deleting === d.id}
+                    className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-red-200 hover:text-red-500 transition-colors disabled:opacity-40"
+                    title="Delete design"
+                  >
+                    {deleting === d.id ? (
+                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -325,7 +431,7 @@ function StoresTab() {
 }
 
 // ── Settings Tab ───────────────────────────────────────────────────────────────
-function SettingsTab({ user, onSignOut }: { user: { email: string; user_metadata: { name?: string } } | null; onSignOut: () => void }) {
+function SettingsTab({ user, onSignOut }: { user: { id: string; email: string; user_metadata: { name?: string } } | null; onSignOut: () => void }) {
   return (
     <div>
       <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>Account Settings</h2>
@@ -360,7 +466,7 @@ function SettingsTab({ user, onSignOut }: { user: { email: string; user_metadata
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function AccountPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; user_metadata: { name?: string } } | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string; user_metadata: { name?: string } } | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
@@ -486,7 +592,7 @@ export default function AccountPage() {
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
               {activeTab === "dashboard" && <DashboardTab orders={orders} user={user} onTab={setActiveTab} />}
               {activeTab === "orders"    && <OrdersTab orders={orders} user={user} />}
-              {activeTab === "designs"   && <DesignsTab />}
+              {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} />}
             </motion.div>

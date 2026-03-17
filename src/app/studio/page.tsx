@@ -5,6 +5,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
+
+// Compress image to small JPEG thumbnail for DB storage
+async function makeThumbnail(src: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 120; canvas.height = 120;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(""); return; }
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width - side) / 2;
+      const sy = (img.height - side) / 2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, 120, 120);
+      resolve(canvas.toDataURL("image/jpeg", 0.6));
+    };
+    img.onerror = () => resolve("");
+    img.src = src;
+  });
+}
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -310,6 +331,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [printDims, setPrintDims] = useState("");
   const [noDesign, setNoDesign] = useState(false);
   const [added, setAdded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const isOversized = product.id.includes("oversized");
   const itemTotal = product.blankPrice + printPrice;
@@ -320,6 +343,37 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     const url = URL.createObjectURL(file);
     setDesignSrc(url);
     setNoDesign(false);
+  };
+
+  const handleSaveDesign = async () => {
+    setSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const thumbnail = designSrc ? await makeThumbnail(designSrc) : "";
+      await fetch("/api/designs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session?.user?.id ?? null,
+          customerEmail: session?.user?.email ?? null,
+          productId: product.id,
+          productName: product.name,
+          gsm: product.gsm,
+          colorName: color.name,
+          colorHex: color.hex,
+          size,
+          printTier: printTier || null,
+          printDims: printDims || null,
+          blankPrice: product.blankPrice,
+          printPrice,
+          hasDesign: !!designSrc,
+          thumbnail,
+        }),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {}
+    setSaving(false);
   };
 
   const handleAddToCart = () => {
@@ -545,6 +599,23 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     className="flex-1 py-4 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
+                  </button>
+                </div>
+
+                {/* Save design */}
+                <div className="flex items-center justify-center mt-3">
+                  <button
+                    disabled={(!designSrc && !noDesign) || saving}
+                    onClick={handleSaveDesign}
+                    className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-zinc-700 disabled:opacity-40 transition-colors"
+                  >
+                    {saved ? (
+                      <><svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg><span className="text-green-600">Design saved!</span></>
+                    ) : saving ? (
+                      <><svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg><span>Saving…</span></>
+                    ) : (
+                      <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg><span>Save design to account</span></>
+                    )}
                   </button>
                 </div>
               </motion.div>
