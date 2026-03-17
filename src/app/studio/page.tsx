@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
+import Navbar from "@/components/Navbar";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -601,6 +602,7 @@ export default function StudioPage() {
 
   return (
     <>
+      <Navbar />
       <div className="min-h-screen bg-[#f8f7f5]">
         {/* Hero */}
         <div className="pt-28 pb-16 px-6 text-center">
