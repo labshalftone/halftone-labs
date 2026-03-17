@@ -30,7 +30,8 @@
       "WebFetch(domain:studio.tapstitch.com)",
       "WebSearch",
       "Bash(grep -rn \"blanks\\\\|catalog\\\\|products\" \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\api\"\" --include=\"*.ts \" -l)",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(awk 'NR>=1 && NR<=20')"
     ]
   }
 }

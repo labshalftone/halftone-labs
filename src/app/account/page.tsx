@@ -815,92 +815,109 @@ async function uploadFileToStorage(file: File): Promise<string> {
   });
 }
 
-// ── Full-screen product configurator ─────────────────────────────────────────
-function StoreProductConfigurator({
-  store, onClose, onAdded,
-}: { store: ArtistStore; onClose: () => void; onAdded: (p: StoreProductRow) => void }) {
-  const [phase, setPhase] = useState<"pick" | "configure">("pick");
-  const [catalog, setCatalog] = useState<typeof STORE_CATALOG[0] | null>(null);
+// Type for designs fetched from the API
+type DesignRow = {
+  id: string;
+  product_id: string;
+  product_name: string;
+  gsm: string;
+  color_name: string;
+  color_hex: string;
+  blank_price: number;
+  print_price: number;
+  has_design: boolean;
+  thumbnail: string | null;
+  created_at: string;
+};
 
-  // Configure state
-  const [color, setColor] = useState<{ name: string; hex: string }>({ name: "White", hex: "#FFFFFF" });
+// ── Push design to store modal ─────────────────────────────────────────────────
+function PushDesignModal({
+  store, userId, onClose, onAdded,
+}: { store: ArtistStore; userId: string | null; onClose: () => void; onAdded: (p: StoreProductRow) => void }) {
+  const [designs, setDesigns] = useState<DesignRow[]>([]);
+  const [loadingDesigns, setLoadingDesigns] = useState(true);
+  const [selected, setSelected] = useState<DesignRow | null>(null);
   const [sizes, setSizes] = useState<string[]>([]);
-  const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
-  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [view, setView] = useState<"front" | "back">("front");
-
-  // File state
-  const [frontFile, setFrontFile] = useState<File | null>(null);
-  const [frontPreview, setFrontPreview] = useState("");
-  const [backFile, setBackFile] = useState<File | null>(null);
-  const [backPreview, setBackPreview] = useState("");
+  const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
-
-  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  const minPrice = catalog ? catalog.costPrice + 50 : 0;
-  const priceNum = parseInt(price || "0", 10);
-  const margin = isNaN(priceNum) ? 0 : priceNum - minPrice;
-  const isOversized = catalog?.id.includes("oversized") ?? false;
+  useEffect(() => {
+    if (!userId) { setLoadingDesigns(false); return; }
+    fetch(`/api/designs?userId=${userId}`)
+      .then((r) => r.json())
+      .then((data: DesignRow[]) => {
+        setDesigns(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setDesigns([]))
+      .finally(() => setLoadingDesigns(false));
+  }, [userId]);
 
-  function pickProduct(p: typeof STORE_CATALOG[0]) {
-    setCatalog(p);
-    setColor(p.colors[0]);
-    setSizes([...p.sizes]);
-    setPrice(String(p.costPrice + 200));
-    setPhase("configure");
+  function pickDesign(d: DesignRow) {
+    setSelected(d);
+    const catalog = STORE_CATALOG.find((c) => c.id === d.product_id);
+    setSizes(catalog ? [...catalog.sizes] : []);
+    const totalCost = d.blank_price + (d.print_price ?? 0);
+    setPrice(String(totalCost + 200));
+    setDescription("");
+    setImageFile(null);
+    setImagePreview("");
   }
 
   function toggleSize(s: string) {
     setSizes((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
-  function onFileSelect(e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" | "image") {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    if (side === "front") { setFrontFile(file); setFrontPreview(url); setView("front"); }
-    else if (side === "back") { setBackFile(file); setBackPreview(url); setView("back"); }
-    else { setImageFile(file); setImagePreview(url); }
-    e.target.value = "";
-  }
-
   async function handleSubmit() {
-    if (!catalog || !color) return;
+    if (!selected) return;
+    const priceNum = parseInt(price, 10);
+    const totalCost = selected.blank_price + (selected.print_price ?? 0);
+    const minPrice = totalCost + 50;
     if (isNaN(priceNum) || priceNum < minPrice) { setErr(`Minimum price is ₹${minPrice}`); return; }
     if (sizes.length === 0) { setErr("Select at least one size"); return; }
-    setErr(""); setSaving(true); setUploading(true);
+    setSaving(true); setErr("");
 
-    let finalFrontUrl: string | null = null;
-    let finalBackUrl: string | null = null;
     let finalImageUrl: string | null = null;
 
-    try {
-      if (frontFile) finalFrontUrl = await uploadFileToStorage(frontFile);
-      if (backFile)  finalBackUrl  = await uploadFileToStorage(backFile);
-      if (imageFile) finalImageUrl = await uploadFileToStorage(imageFile);
-    } catch (e) {
-      setErr((e as Error).message ?? "Upload failed");
-      setSaving(false); setUploading(false); return;
+    // If user uploaded a custom product photo, upload it
+    if (imageFile) {
+      try { finalImageUrl = await uploadFileToStorage(imageFile); }
+      catch (e) { setErr((e as Error).message ?? "Upload failed"); setSaving(false); return; }
+    } else if (selected.thumbnail && selected.thumbnail.startsWith("data:")) {
+      // Upload the design thumbnail to storage so it's a permanent URL
+      try {
+        const res = await fetch("/api/store-upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: `thumb-${selected.id}.jpg`,
+            base64: selected.thumbnail,
+            contentType: "image/jpeg",
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) finalImageUrl = data.url;
+      } catch { /* use null */ }
     }
-    setUploading(false);
 
     const res = await fetch(`/api/stores/${store.handle}/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_id: catalog.id, product_name: catalog.name,
-        color_hex: color.hex, color_name: color.name,
-        sizes, retail_price_inr: priceNum, cost_price_inr: catalog.costPrice,
+        product_id: selected.product_id,
+        product_name: selected.product_name,
+        color_hex: selected.color_hex,
+        color_name: selected.color_name,
+        sizes,
+        retail_price_inr: priceNum,
+        cost_price_inr: selected.blank_price + (selected.print_price ?? 0),
         description: description || null,
-        design_front_url: finalFrontUrl,
-        design_back_url: finalBackUrl,
-        image_url: finalImageUrl ?? finalFrontUrl,
-        print_technique: technique,
+        design_front_url: finalImageUrl,
+        image_url: finalImageUrl,
+        print_technique: "DTG",
       }),
     });
     const data = await res.json();
@@ -909,173 +926,132 @@ function StoreProductConfigurator({
     onClose();
   }
 
+  const catalog = selected ? STORE_CATALOG.find((c) => c.id === selected.product_id) : null;
+  const totalCost = selected ? selected.blank_price + (selected.print_price ?? 0) : 0;
+  const priceNum = parseInt(price || "0", 10);
+  const margin = isNaN(priceNum) ? 0 : priceNum - totalCost - 50;
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end md:items-center justify-center p-0 md:p-6">
       <motion.div
         initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white w-full md:rounded-3xl md:max-w-4xl max-h-[96vh] overflow-y-auto shadow-2xl flex flex-col"
+        className="bg-white w-full md:rounded-3xl md:max-w-3xl max-h-[96vh] overflow-y-auto shadow-2xl flex flex-col"
       >
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {phase === "configure" && (
-              <button onClick={() => setPhase("pick")} className="text-zinc-400 hover:text-zinc-700 text-sm transition-colors">← Back</button>
+            {selected && (
+              <button onClick={() => setSelected(null)} className="text-zinc-400 hover:text-zinc-700 text-sm transition-colors">← Back</button>
             )}
             <h3 className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.03em" }}>
-              {phase === "pick" ? "Choose product" : `${catalog?.name} · ${catalog?.gsm}`}
+              {selected ? `Push to store · ${selected.product_name}` : "Choose a design"}
             </h3>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors">✕</button>
         </div>
 
-        {/* Pick phase */}
-        {phase === "pick" && (
-          <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {STORE_CATALOG.map((p) => (
-              <button key={p.id} onClick={() => pickProduct(p)}
-                className="text-left p-4 rounded-2xl border-2 border-zinc-100 hover:border-orange-300 hover:bg-orange-50 transition-all group">
-                <div className="flex gap-1 mb-3">
-                  {p.colors.slice(0, 4).map((c) => (
-                    <div key={c.hex} className="w-4 h-4 rounded-full border border-zinc-200" style={{ background: c.hex }} />
-                  ))}
-                </div>
-                <p className="font-bold text-zinc-900 text-sm group-hover:text-orange-600 transition-colors leading-snug">{p.name}</p>
-                <p className="text-xs text-zinc-400 mt-1">{p.gsm}</p>
-                <p className="text-xs font-bold text-zinc-500 mt-0.5">from ₹{p.costPrice}</p>
-              </button>
-            ))}
+        {/* Design picker */}
+        {!selected && (
+          <div className="p-6">
+            {loadingDesigns ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="w-6 h-6 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+              </div>
+            ) : designs.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-4xl mb-3">🎨</div>
+                <p className="font-bold text-zinc-900 mb-1">No designs saved yet</p>
+                <p className="text-zinc-500 text-sm mb-4">Go to Studio, configure a product and save your design — it&apos;ll appear here.</p>
+                <a href="/studio" className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors inline-block">
+                  Open Studio →
+                </a>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {designs.map((d) => (
+                  <button key={d.id} onClick={() => pickDesign(d)}
+                    className="text-left rounded-2xl border-2 border-zinc-100 hover:border-orange-300 hover:bg-orange-50 transition-all overflow-hidden group">
+                    <div className="aspect-square flex items-center justify-center relative overflow-hidden"
+                      style={{ background: d.color_hex + "22" }}>
+                      {d.thumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={d.thumbnail} alt={d.product_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl" style={{ background: d.color_hex }} />
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-bold text-zinc-900 text-xs group-hover:text-orange-600 transition-colors truncate">{d.product_name}</p>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">{d.color_name} · {d.gsm}</p>
+                      <p className="text-[10px] text-zinc-500 font-bold mt-0.5">Cost ₹{d.blank_price + (d.print_price ?? 0)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Configure phase */}
-        {phase === "configure" && catalog && (
+        {selected && (
           <div className="flex flex-col md:flex-row flex-1">
-
-            {/* Left: tee preview */}
-            <div className="md:w-80 flex-shrink-0 bg-zinc-50 flex flex-col items-center justify-center p-8 gap-4">
-              <div className="w-full max-w-xs">
-                <StoreTeePreview
-                  color={color.hex}
-                  isOversized={isOversized}
-                  frontSrc={frontPreview}
-                  backSrc={backPreview}
-                  view={view}
-                />
+            {/* Left: preview */}
+            <div className="md:w-64 flex-shrink-0 bg-zinc-50 flex flex-col items-center justify-center p-6 gap-4">
+              <div className="w-full max-w-[200px]">
+                {imagePreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={imagePreview} alt="Product" className="w-full rounded-2xl aspect-square object-cover" />
+                ) : selected.thumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={selected.thumbnail} alt={selected.product_name} className="w-full rounded-2xl aspect-square object-cover" />
+                ) : (
+                  <div className="w-full aspect-square rounded-2xl" style={{ background: selected.color_hex + "44" }} />
+                )}
               </div>
-              {/* Front / Back toggle */}
-              <div className="flex gap-2">
-                {(["front", "back"] as const).map((v) => (
-                  <button key={v} onClick={() => setView(v)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all capitalize ${view === v ? "bg-zinc-900 text-white" : "bg-zinc-200 text-zinc-500 hover:bg-zinc-300"}`}>
-                    {v}
-                  </button>
-                ))}
+              <div className="text-center">
+                <p className="font-bold text-zinc-900 text-sm">{selected.product_name}</p>
+                <p className="text-xs text-zinc-400">{selected.color_name}</p>
               </div>
-              {imagePreview && (
-                <div className="w-full mt-2">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 text-center">Product photo</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imagePreview} alt="Product" className="w-full rounded-xl object-cover aspect-square" />
-                </div>
-              )}
             </div>
 
             {/* Right: controls */}
-            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-
-              {/* Color */}
-              <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Color</p>
-                <div className="flex gap-2 flex-wrap">
-                  {catalog.colors.map((c) => (
-                    <button key={c.hex} onClick={() => setColor(c)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-xs font-bold transition-all ${color.hex === c.hex ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                      <span className="w-3 h-3 rounded-full border border-white/30 flex-shrink-0" style={{ background: c.hex }} />
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+            <div className="flex-1 p-6 space-y-5">
               {/* Sizes */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Sizes to offer</p>
-                <div className="flex gap-1.5 flex-wrap">
-                  {catalog.sizes.map((s) => (
-                    <button key={s} onClick={() => toggleSize(s)}
-                      className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Technique */}
-              <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Print technique</p>
-                <div className="flex gap-2">
-                  {(["DTG", "DTF"] as const).map((t) => (
-                    <button key={t} onClick={() => setTechnique(t)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Design files */}
-              <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Designs</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {(["front", "back"] as const).map((side) => {
-                    const preview = side === "front" ? frontPreview : backPreview;
-                    const label = side === "front" ? "Front" : "Back";
-                    return (
-                      <label key={side} className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed cursor-pointer transition-all h-24 ${preview ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
-                        <input type="file" accept="image/*" className="sr-only" onChange={(e) => onFileSelect(e, side)} />
-                        {preview ? (
-                          <>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={preview} alt={label} className="h-14 w-14 object-contain" />
-                            <span className="text-[10px] text-zinc-400 mt-1">{label} · tap to change</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-5 h-5 text-zinc-300 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                            <span className="text-[10px] font-bold text-zinc-400">{label} design{side === "back" ? " (opt.)" : ""}</span>
-                          </>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sizes to offer</p>
+                {catalog ? (
+                  <div className="flex gap-1.5 flex-wrap">
+                    {catalog.sizes.map((s) => (
+                      <button key={s} onClick={() => toggleSize(s)}
+                        className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400">Product type not found in catalog</p>
+                )}
               </div>
 
               {/* Product photo */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Product photo <span className="text-zinc-400 font-normal normal-case">(shown on store card)</span></p>
-                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imagePreview ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
-                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => onFileSelect(e, "image")} />
-                  {imagePreview ? (
-                    <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imagePreview} alt="Product" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-                      <span className="text-xs text-zinc-500">Product photo uploaded · tap to change</span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                      </div>
-                      <span className="text-xs text-zinc-400">Upload a photo of the finished product (optional)</span>
-                    </>
-                  )}
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Product photo <span className="text-zinc-400 font-normal normal-case">(optional — overrides design thumbnail)</span></p>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imageFile ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
+                    e.target.value = "";
+                  }} />
+                  <svg className="w-5 h-5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                  <span className="text-xs text-zinc-500">
+                    {imageFile ? imageFile.name : "Upload a lifestyle or product photo"}
+                  </span>
                 </label>
               </div>
 
               {/* Description */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Description <span className="text-zinc-400 font-normal normal-case">(optional)</span></p>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Description</p>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)}
                   placeholder="Tell fans about this piece — the story, the collab, the vibe…"
                   rows={3} className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
@@ -1084,31 +1060,27 @@ function StoreProductConfigurator({
               {/* Price */}
               <div>
                 <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Retail price (₹)</p>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-zinc-400">Min ₹{minPrice}</span>
+                <div className="flex items-center gap-2 mb-2 text-xs text-zinc-400">
+                  <span>Cost ₹{totalCost} + ₹50 fulfillment</span>
                   <span className="text-zinc-200">·</span>
-                  <span className={`text-xs font-black ${margin >= 0 ? "text-green-600" : "text-red-500"}`}>
-                    {margin >= 0 ? `You keep ₹${margin}/unit` : `Below minimum`}
+                  <span className={`font-black ${margin >= 0 ? "text-green-600" : "text-red-500"}`}>
+                    {margin >= 0 ? `You keep ₹${margin}/unit` : "Below minimum"}
                   </span>
                 </div>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm">₹</span>
-                  <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={minPrice}
+                  <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={totalCost + 50}
                     className="w-full pl-7 pr-4 py-3 rounded-xl border border-zinc-200 text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
                 </div>
               </div>
 
               {err && <p className="text-red-500 text-xs font-bold">{err}</p>}
 
-              <button onClick={handleSubmit} disabled={saving || uploading}
+              <button onClick={handleSubmit} disabled={saving}
                 className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-black text-sm hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
-                {uploading ? (
-                  <><div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" /> Uploading files…</>
-                ) : saving ? (
-                  "Adding to store…"
-                ) : (
-                  "Add to store →"
-                )}
+                {saving ? (
+                  <><div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" /> Publishing…</>
+                ) : "Publish to store →"}
               </button>
             </div>
           </div>
@@ -1117,6 +1089,7 @@ function StoreProductConfigurator({
     </div>
   );
 }
+
 
 function StoresTab({ userId }: { userId: string | null }) {
   const [store, setStore] = useState<ArtistStore | null>(null);
@@ -1343,7 +1316,7 @@ function StoresTab({ userId }: { userId: string | null }) {
   return (
     <div>
       {showAddProduct && store && (
-        <StoreProductConfigurator store={store} onClose={() => setShowAddProduct(false)}
+        <PushDesignModal store={store} userId={userId} onClose={() => setShowAddProduct(false)}
           onAdded={(p) => setProducts((prev) => [...prev, p])} />
       )}
 
@@ -1395,7 +1368,7 @@ function StoresTab({ userId }: { userId: string | null }) {
         </h3>
         <button onClick={() => setShowAddProduct(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
-          <span className="text-base leading-none">+</span> Add product
+          <span className="text-base leading-none">+</span> Push to store
         </button>
       </div>
 
@@ -1406,7 +1379,7 @@ function StoresTab({ userId }: { userId: string | null }) {
           <p className="text-zinc-400 text-xs mb-4">Add your first product to start selling</p>
           <button onClick={() => setShowAddProduct(true)}
             className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
-            Add first product →
+            Push your first design →
           </button>
         </div>
       ) : (

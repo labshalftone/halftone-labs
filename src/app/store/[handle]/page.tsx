@@ -3,11 +3,10 @@
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
-import Navbar from "@/components/Navbar";
+import StoreNavbar from "@/components/StoreNavbar";
 
-interface StoreProduct {
+export interface StoreProduct {
   id: string;
   product_id: string;
   product_name: string;
@@ -22,7 +21,7 @@ interface StoreProduct {
   print_technique: string;
 }
 
-interface Store {
+export interface Store {
   id: string;
   handle: string;
   artist_name: string;
@@ -31,125 +30,92 @@ interface Store {
   store_products: StoreProduct[];
 }
 
-function ProductCard({ product }: { product: StoreProduct }) {
-  const { addItem } = useCart();
+function ProductCard({
+  product,
+  storeHandle,
+}: {
+  product: StoreProduct;
+  storeHandle: string;
+}) {
   const { fmt } = useCurrency();
-  const [selectedSize, setSelectedSize] = useState(
-    product.sizes[Math.floor(product.sizes.length / 2)] ?? product.sizes[0]
-  );
-  const [added, setAdded] = useState(false);
-
-  // Show image_url first, fall back to design_front_url
   const displayImage = product.image_url || product.design_front_url;
 
-  const handleAdd = () => {
-    addItem({
-      productId: product.product_id,
-      productName: product.product_name,
-      color: product.color_name,
-      colorHex: product.color_hex,
-      size: selectedSize,
-      blankPrice: product.retail_price_inr,
-      frontPrintPrice: 0,
-      backPrintPrice: 0,
-      frontPrintTier: "",
-      backPrintTier: "",
-      printTechnique: (product.print_technique as "DTG" | "DTF") ?? "DTG",
-      printDims: "",
-      frontDesignUrl: product.design_front_url ?? "",
-      backDesignUrl: product.design_back_url ?? "",
-      qty: 1,
-      gsm: "",
-    });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
-
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="bg-white rounded-3xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-lg transition-all flex flex-col"
-    >
-      {/* Product visual */}
-      <div
-        className="relative aspect-square flex items-center justify-center overflow-hidden"
-        style={{ background: product.color_hex + "22" }}
+    <Link href={`/store/${storeHandle}/${product.id}`}>
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="bg-white rounded-3xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-lg transition-all cursor-pointer flex flex-col"
       >
+        {/* Visual */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-            backgroundSize: "14px 14px",
-          }}
-        />
-        {displayImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={displayImage}
-            alt={product.product_name}
-            className="w-full h-full object-cover relative z-10"
-          />
-        ) : (
-          <div
-            className="w-28 h-28 rounded-2xl relative z-10 flex items-center justify-center"
-            style={{ background: product.color_hex }}
-          >
-            <span className="text-4xl">👕</span>
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-1">
-          <div className="flex-1 min-w-0 pr-2">
-            <h3
-              className="font-black text-zinc-900 text-sm truncate"
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              {product.product_name}
-            </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">{product.color_name}</p>
-          </div>
-          <span className="font-black text-zinc-900 text-sm whitespace-nowrap">
-            {fmt(product.retail_price_inr)}
-          </span>
-        </div>
-
-        {product.description && (
-          <p className="text-xs text-zinc-500 leading-relaxed mt-2 mb-3 line-clamp-2">
-            {product.description}
-          </p>
-        )}
-
-        {/* Size selector */}
-        <div className="flex gap-1.5 flex-wrap mt-auto mb-4">
-          {product.sizes.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSelectedSize(s)}
-              className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                selectedSize === s
-                  ? "bg-zinc-900 text-white"
-                  : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={handleAdd}
-          className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${
-            added ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"
-          }`}
+          className="relative aspect-square flex items-center justify-center overflow-hidden"
+          style={{ background: product.color_hex + "22" }}
         >
-          {added ? "✓ Added to cart" : "Add to Cart"}
-        </button>
-      </div>
-    </motion.div>
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, #000 1px, transparent 1px)",
+              backgroundSize: "14px 14px",
+            }}
+          />
+          {displayImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={displayImage}
+              alt={product.product_name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="w-28 h-28 rounded-2xl flex items-center justify-center text-4xl relative z-10"
+              style={{ background: product.color_hex }}
+            >
+              👕
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="p-4 flex flex-col flex-1">
+          <div className="flex items-start justify-between mb-1">
+            <div className="flex-1 min-w-0 pr-2">
+              <h3
+                className="font-black text-zinc-900 text-sm truncate"
+                style={{ letterSpacing: "-0.02em" }}
+              >
+                {product.product_name}
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">{product.color_name}</p>
+            </div>
+            <span className="font-black text-zinc-900 text-sm whitespace-nowrap">
+              {fmt(product.retail_price_inr)}
+            </span>
+          </div>
+
+          {product.description && (
+            <p className="text-xs text-zinc-500 mt-1 line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+          )}
+
+          <div className="flex gap-1 flex-wrap mt-auto pt-3">
+            {product.sizes.slice(0, 5).map((s) => (
+              <span
+                key={s}
+                className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded"
+              >
+                {s}
+              </span>
+            ))}
+            {product.sizes.length > 5 && (
+              <span className="text-[10px] text-zinc-400">+{product.sizes.length - 5}</span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -188,7 +154,7 @@ export default function StorePage({
   if (notFound || !store) {
     return (
       <>
-        <Navbar />
+        <StoreNavbar storeName="Store" storeHandle={handle} variant="solid" />
         <div
           className="min-h-screen flex items-center justify-center p-6 pt-24"
           style={{ background: "#f8f7f5" }}
@@ -204,12 +170,6 @@ export default function StorePage({
             <p className="text-zinc-500 text-sm mb-6">
               This store doesn&apos;t exist or hasn&apos;t launched yet.
             </p>
-            <Link
-              href="/studio"
-              className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors"
-            >
-              Create your own store →
-            </Link>
           </div>
         </div>
       </>
@@ -220,11 +180,10 @@ export default function StorePage({
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f7f5" }}>
-      {/* Navbar — has cart button + drawer built in */}
-      <Navbar />
+      <StoreNavbar storeName={store.artist_name} storeHandle={handle} variant="overlay" />
 
-      {/* Store hero — pt-16 accounts for fixed navbar */}
-      <div className="bg-zinc-900 relative overflow-hidden pt-16">
+      {/* Hero — pt-14 offsets fixed navbar */}
+      <div className="bg-zinc-900 relative overflow-hidden pt-14">
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
@@ -235,7 +194,7 @@ export default function StorePage({
         />
         <div className="max-w-5xl mx-auto px-6 py-16 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-500 mb-4">
+            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-500 mb-3">
               Official Merch Store
             </p>
             <h1
@@ -266,7 +225,7 @@ export default function StorePage({
         </div>
       </div>
 
-      {/* Products */}
+      {/* Products grid */}
       <div className="max-w-5xl mx-auto px-6 py-16">
         {products.length === 0 ? (
           <div className="text-center py-20">
@@ -291,7 +250,7 @@ export default function StorePage({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06 }}
                 >
-                  <ProductCard product={p} />
+                  <ProductCard product={p} storeHandle={handle} />
                 </motion.div>
               ))}
             </div>
@@ -299,23 +258,14 @@ export default function StorePage({
         )}
       </div>
 
-      {/* Halftone branding */}
+      {/* Footer */}
       <div className="border-t border-zinc-200 py-6 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-zinc-400 text-xs">
-          <span>Fulfilled by</span>
-          <Link
-            href="/"
-            className="font-black text-zinc-500 hover:text-zinc-900 transition-colors"
-          >
-            Halftone Labs
+          <Link href="/track" className="hover:text-zinc-600 transition-colors">
+            Track your order
           </Link>
           <span>·</span>
-          <Link
-            href="/studio"
-            className="hover:text-zinc-600 transition-colors"
-          >
-            Create your own store →
-          </Link>
+          <span>Shipped in 5–7 days</span>
         </div>
       </div>
     </div>
