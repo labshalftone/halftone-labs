@@ -11,14 +11,22 @@ export async function GET(req: NextRequest) {
   }
 
   const db = createAdminClient();
-  let query = db
+  const base = db
     .from("orders")
     .select("*, milestones(id, title, description, created_at)")
     .order("created_at", { ascending: false })
     .order("created_at", { referencedTable: "milestones", ascending: true });
 
-  if (userId) query = query.eq("user_id", userId);
-  else if (email) query = query.eq("customer_email", email);
+  // Match by EITHER user_id OR customer_email so orders placed before
+  // the userId fix (which only have customer_email) still appear.
+  let query;
+  if (userId && email) {
+    query = base.or(`user_id.eq.${userId},customer_email.eq.${email}`);
+  } else if (userId) {
+    query = base.eq("user_id", userId);
+  } else {
+    query = base.eq("customer_email", email!);
+  }
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
