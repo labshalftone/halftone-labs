@@ -570,43 +570,21 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   Blank tee — no print
                 </button>
 
-                {/* Pricing summary */}
-                <div className="bg-zinc-50 rounded-2xl p-4 mb-6 border border-zinc-100">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-zinc-600">Blank tee</span>
-                    <span className="font-semibold">₹{product.blankPrice}</span>
+                {/* Price + actions — pinned together */}
+                <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-zinc-400">Item total</p>
+                    <p className="font-black text-lg">₹{itemTotal.toLocaleString("en-IN")}</p>
+                    {printPrice > 0 && <p className="text-xs text-orange-500">{printTier} print included</p>}
                   </div>
-                  {printPrice > 0 && (
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-zinc-600">Print ({printTier})</span>
-                      <span className="font-semibold text-orange-600">+₹{printPrice}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold mt-2 pt-2 border-t border-zinc-200">
-                    <span>Item total</span>
-                    <span>₹{itemTotal.toLocaleString("en-IN")}</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 mt-1">+ shipping at checkout</p>
+                  <p className="text-xs text-zinc-400">+ shipping at checkout</p>
                 </div>
 
-                <div className="flex gap-3">
-                  <button onClick={() => setStep(0)} className="px-5 py-3 rounded-2xl border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
-                    Back
-                  </button>
-                  <button
-                    disabled={!designSrc && !noDesign}
-                    onClick={handleAddToCart}
-                    className="flex-1 py-4 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                    Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
-                  </button>
-                </div>
-
-                {/* Save design — always visible, prominent */}
+                {/* Save design — above CTA, always visible */}
                 <button
                   disabled={saving}
                   onClick={handleSaveDesign}
-                  className={`w-full mt-3 py-3 rounded-2xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                  className={`w-full mb-3 py-3 rounded-2xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                     saved
                       ? "border-green-400 bg-green-50 text-green-700"
                       : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
@@ -620,6 +598,19 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>Save design to account</>
                   )}
                 </button>
+
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(0)} className="px-5 py-3 rounded-2xl border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
+                    Back
+                  </button>
+                  <button
+                    disabled={!designSrc && !noDesign}
+                    onClick={handleAddToCart}
+                    className="flex-1 py-4 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
