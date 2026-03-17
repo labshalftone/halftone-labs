@@ -19,6 +19,8 @@ const BRANDS = [
   "Illusion Hills",
   "Felicia Lu",
   "DJ ADHD",
+  "QUADECA",
+  "RAUN",
 ];
 
 // Duplicate for seamless loop
@@ -26,7 +28,7 @@ const TRACK = [...BRANDS, ...BRANDS];
 
 export default function TrustedBy() {
   return (
-    <section className="relative bg-white border-t border-b border-zinc-200 py-5 overflow-hidden">
+    <section className="relative bg-white border-t border-b border-zinc-200 py-5 mt-16 overflow-hidden">
       {/* Label */}
       <div className="absolute left-0 top-0 bottom-0 z-10 flex items-center pl-6 pr-8 bg-white border-r border-zinc-200">
         <span className="text-[0.65rem] font-mono text-zinc-400 uppercase tracking-widest whitespace-nowrap">
