@@ -32,6 +32,21 @@ const ZONE_PCT = { x: 0.28, y: 0.22, w: 0.44, h: 0.44 };
 const MAX_PRINT_W_IN = 19;
 const MAX_PRINT_H_IN = 15.5;
 
+// Zone bounds in SVG coordinate space (viewBox 200×230)
+const ZX1 = 200 * ZONE_PCT.x;               // 56
+const ZY1 = 230 * ZONE_PCT.y;               // 50.6
+const ZX2 = ZX1 + 200 * ZONE_PCT.w;         // 144
+const ZY2 = ZY1 + 230 * ZONE_PCT.h;         // 151.8
+const MAX_DESIGN_SIZE = Math.floor(Math.min(200 * ZONE_PCT.w, 230 * ZONE_PCT.h)); // 88
+
+function clampInZone(x: number, y: number, size: number) {
+  const half = size / 2;
+  return {
+    x: Math.max(ZX1 + half, Math.min(ZX2 - half, x)),
+    y: Math.max(ZY1 + half, Math.min(ZY2 - half, y)),
+  };
+}
+
 const PRINT_TIERS = [
   { label: '5×5"',     sqin: 25,    price: 120 },
   { label: '6×10"',    sqin: 60,    price: 180 },
@@ -163,9 +178,14 @@ function DesignPlacer({
   onPriceChange: (price: number, tier: string, dims: string) => void;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [pos, setPos] = useState({ x: 100, y: 115, size: 60 });
-  const dragging = useRef(false);
-  const dragOffset = useRef({ dx: 0, dy: 0 });
+  // Keep latest onPriceChange in a ref so we never need it as an effect dep
+  const onPriceChangeRef = useRef(onPriceChange);
+  useEffect(() => { onPriceChangeRef.current = onPriceChange; });
+
+  const initSize = 60;
+  const [pos, setPos] = useState({ ...clampInZone(100, 115, initSize), size: initSize });
+  const dragging    = useRef(false);
+  const dragOffset  = useRef({ dx: 0, dy: 0 });
 
   const toSVG = useCallback((cx: number, cy: number) => {
     const svg = svgRef.current;
@@ -174,29 +194,41 @@ function DesignPlacer({
     return { x: (cx - r.left) / r.width * 200, y: (cy - r.top) / r.height * 230 };
   }, []);
 
-  const updatePrice = useCallback((size: number) => {
-    const fracW = size / (200 * ZONE_PCT.w);
-    const fracH = size / (230 * ZONE_PCT.h);
+  // Recalculate price whenever size changes — uses ref so no stale closure
+  useEffect(() => {
+    const fracW = pos.size / (200 * ZONE_PCT.w);
+    const fracH = pos.size / (230 * ZONE_PCT.h);
     const sqin  = fracW * MAX_PRINT_W_IN * fracH * MAX_PRINT_H_IN;
     const tier  = getTier(sqin);
-    onPriceChange(tier.price, tier.label, `${(fracW * MAX_PRINT_W_IN).toFixed(1)}"×${(fracH * MAX_PRINT_H_IN).toFixed(1)}"`);
-  }, [onPriceChange]);
+    onPriceChangeRef.current(
+      tier.price,
+      tier.label,
+      `${(fracW * MAX_PRINT_W_IN).toFixed(1)}"×${(fracH * MAX_PRINT_H_IN).toFixed(1)}"`,
+    );
+  }, [pos.size]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { updatePrice(pos.size); }, [pos.size, updatePrice]);
-
-  const isDark   = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
-  const body     = isOversized
+  const isDark  = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
+  const body    = isOversized
     ? "M30 52 L8 95 L50 100 L50 215 L150 215 L150 100 L192 95 L170 52 L130 32 Q100 20 70 32 Z"
     : "M40 56 L15 92 L55 100 L55 215 L145 215 L145 100 L185 92 L160 56 L125 38 Q100 28 75 38 Z";
-  const collar   = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
+  const collar  = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
+
+  const pct = Math.round((pos.size / MAX_DESIGN_SIZE) * 100);
 
   return (
     <div className="flex flex-col gap-4">
-      <svg ref={svgRef} viewBox="0 0 200 230" className="w-full cursor-move select-none" style={{ maxHeight: 400 }}
+      <svg
+        ref={svgRef}
+        viewBox="0 0 200 230"
+        className="w-full cursor-move select-none"
+        style={{ maxHeight: 400 }}
         onPointerMove={(e) => {
           if (!dragging.current) return;
           const s = toSVG(e.clientX, e.clientY);
-          setPos((p) => ({ ...p, x: Math.max(30, Math.min(170, s.x - dragOffset.current.dx)), y: Math.max(30, Math.min(200, s.y - dragOffset.current.dy)) }));
+          setPos((p) => ({
+            ...clampInZone(s.x - dragOffset.current.dx, s.y - dragOffset.current.dy, p.size),
+            size: p.size,
+          }));
         }}
         onPointerUp={() => { dragging.current = false; }}
         onPointerLeave={() => { dragging.current = false; }}
@@ -204,9 +236,15 @@ function DesignPlacer({
         <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.07)" />
         <path d={body} fill={color} stroke={isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.10)"} strokeWidth="1.5" />
         <path d={collar} fill="none" stroke={isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.16)"} strokeWidth="1.5" />
-        <rect x={200*ZONE_PCT.x} y={230*ZONE_PCT.y} width={200*ZONE_PCT.w} height={230*ZONE_PCT.h}
-          fill="none" stroke={isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.13)"} strokeWidth="0.7" strokeDasharray="3 3" rx="2" />
-        <image href={designSrc} x={pos.x - pos.size/2} y={pos.y - pos.size/2} width={pos.size} height={pos.size}
+        {/* Print zone — design is constrained within this box */}
+        <rect x={ZX1} y={ZY1} width={ZX2 - ZX1} height={ZY2 - ZY1}
+          fill="none"
+          stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)"}
+          strokeWidth="0.8" strokeDasharray="3 3" rx="2" />
+        <image
+          href={designSrc}
+          x={pos.x - pos.size / 2} y={pos.y - pos.size / 2}
+          width={pos.size} height={pos.size}
           style={{ cursor: "grab" }}
           onPointerDown={(e) => {
             e.preventDefault();
@@ -214,25 +252,44 @@ function DesignPlacer({
             dragging.current = true;
             const s = toSVG(e.clientX, e.clientY);
             dragOffset.current = { dx: s.x - pos.x, dy: s.y - pos.y };
-          }} />
+          }}
+        />
         <text x="100" y="228" textAnchor="middle" fontSize="5"
-          fill={isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)"}>drag to reposition</text>
+          fill={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)"}>
+          drag to reposition within print area
+        </text>
       </svg>
 
       <div>
-        <div className="flex justify-between text-xs text-zinc-400 mb-2">
+        <div className="flex justify-between text-xs mb-2">
           <span className="font-medium text-zinc-600">Design size</span>
-          <span className="font-bold text-orange-500">{Math.round((pos.size / 120) * 100)}%</span>
+          <span className="font-bold text-orange-500">{pct}% of print area</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setPos((p) => ({ ...p, size: Math.max(20, p.size - 8) }))}
-            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0">−</button>
-          <input type="range" min={20} max={120} value={pos.size}
-            onChange={(e) => setPos((p) => ({ ...p, size: Number(e.target.value) }))}
-            className="flex-1 accent-orange-500 h-1.5" />
-          <button onClick={() => setPos((p) => ({ ...p, size: Math.min(120, p.size + 8) }))}
-            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0">+</button>
+          <button
+            onClick={() => setPos((p) => {
+              const s = Math.max(20, p.size - 8);
+              return { size: s, ...clampInZone(p.x, p.y, s) };
+            })}
+            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+          >−</button>
+          <input
+            type="range" min={20} max={MAX_DESIGN_SIZE} value={pos.size}
+            onChange={(e) => {
+              const s = Number(e.target.value);
+              setPos((p) => ({ size: s, ...clampInZone(p.x, p.y, s) }));
+            }}
+            className="flex-1 accent-orange-500 h-1.5"
+          />
+          <button
+            onClick={() => setPos((p) => {
+              const s = Math.min(MAX_DESIGN_SIZE, p.size + 8);
+              return { size: s, ...clampInZone(p.x, p.y, s) };
+            })}
+            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+          >+</button>
         </div>
+        <p className="text-[10px] text-zinc-300 text-center mt-1.5">Design stays within the dashed print zone</p>
       </div>
     </div>
   );

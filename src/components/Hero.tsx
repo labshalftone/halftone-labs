@@ -43,7 +43,7 @@ export default function Hero() {
           style={{ opacity: opacityFade }}
           className="mono-tag mb-8"
         >
-          [ est. 2023 ]
+          [ est. 2021 ]
         </motion.div>
 
         <motion.div
