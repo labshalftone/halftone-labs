@@ -29,9 +29,17 @@ import { createAdminClient } from "@/lib/supabase-server";
     design_front_url text,
     design_back_url text,
     print_technique text default 'DTG',
+    description text,
+    image_url text,
     active boolean default true,
     created_at timestamptz default now()
   );
+
+  -- Run these if store_products already exists:
+  -- alter table store_products add column if not exists description text;
+  -- alter table store_products add column if not exists image_url text;
+
+  -- Storage: create a public bucket named "store-assets" in Supabase dashboard
 
   create table referrals (
     id uuid primary key default gen_random_uuid(),

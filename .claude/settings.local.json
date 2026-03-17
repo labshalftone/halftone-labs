@@ -23,7 +23,14 @@
       "Bash(npx tsc:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx next:*)",
+      "WebFetch(domain:www.tapstitch.com)",
+      "WebFetch(domain:rovoassembly.com)",
+      "WebFetch(domain:studio.tapstitch.com)",
+      "WebSearch",
+      "Bash(grep -rn \"blanks\\\\|catalog\\\\|products\" \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\api\"\" --include=\"*.ts \" -l)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

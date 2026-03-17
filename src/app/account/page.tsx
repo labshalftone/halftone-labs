@@ -754,60 +754,152 @@ type StoreProductRow = {
   id: string; product_id: string; product_name: string;
   color_hex: string; color_name: string; sizes: string[];
   retail_price_inr: number; cost_price_inr: number;
+  description: string | null; image_url: string | null;
   design_front_url: string | null; design_back_url: string | null;
   print_technique: string;
 };
 
-function AddProductModal({
+// ── Tee preview for store configurator ────────────────────────────────────────
+function StoreTeePreview({
+  color, isOversized, frontSrc, backSrc, view,
+}: { color: string; isOversized?: boolean; frontSrc?: string; backSrc?: string; view: "front" | "back" }) {
+  const isDark = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
+  const body = isOversized
+    ? "M30 52 L8 95 L50 100 L50 215 L150 215 L150 100 L192 95 L170 52 L130 32 Q100 20 70 32 Z"
+    : "M40 56 L15 92 L55 100 L55 215 L145 215 L145 100 L185 92 L160 56 L125 38 Q100 28 75 38 Z";
+  const collar = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
+  const src = view === "front" ? frontSrc : backSrc;
+  return (
+    <svg viewBox="0 0 200 230" className="w-full drop-shadow-xl" style={{ maxHeight: 340 }}>
+      <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.08)" />
+      <path d={body} fill={color}
+        stroke={isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.10)"} strokeWidth="1.5" />
+      <path d={collar} fill="none"
+        stroke={isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.16)"} strokeWidth="1.5" />
+      {src ? (
+        <image href={src} x="62" y="57" width="76" height="88"
+          preserveAspectRatio="xMidYMid meet" style={{ mixBlendMode: "multiply" }} />
+      ) : (
+        <rect x="56" y="51" width="88" height="101" fill="none"
+          stroke={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.12)"}
+          strokeWidth="0.8" strokeDasharray="3 3" rx="2" />
+      )}
+      {!src && (
+        <text x="100" y="105" textAnchor="middle" fontSize="7" fontFamily="monospace"
+          fill={isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)"}>
+          upload design
+        </text>
+      )}
+    </svg>
+  );
+}
+
+// ── Upload helper (reads file → calls /api/store-upload) ──────────────────────
+async function uploadFileToStorage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const res = await fetch("/api/store-upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName: file.name, base64: reader.result as string, contentType: file.type }),
+        });
+        const data = await res.json();
+        if (!res.ok) reject(new Error(data.error ?? "Upload failed"));
+        else resolve(data.url as string);
+      } catch (e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error("File read failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Full-screen product configurator ─────────────────────────────────────────
+function StoreProductConfigurator({
   store, onClose, onAdded,
 }: { store: ArtistStore; onClose: () => void; onAdded: (p: StoreProductRow) => void }) {
-  const [step, setStep] = useState<"pick" | "config">("pick");
+  const [phase, setPhase] = useState<"pick" | "configure">("pick");
   const [catalog, setCatalog] = useState<typeof STORE_CATALOG[0] | null>(null);
-  const [color, setColor] = useState<{ name: string; hex: string } | null>(null);
+
+  // Configure state
+  const [color, setColor] = useState<{ name: string; hex: string }>({ name: "White", hex: "#FFFFFF" });
   const [sizes, setSizes] = useState<string[]>([]);
-  const [frontUrl, setFrontUrl] = useState("");
-  const [backUrl, setBackUrl] = useState("");
   const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [view, setView] = useState<"front" | "back">("front");
+
+  // File state
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [frontPreview, setFrontPreview] = useState("");
+  const [backFile, setBackFile] = useState<File | null>(null);
+  const [backPreview, setBackPreview] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
+
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
   const minPrice = catalog ? catalog.costPrice + 50 : 0;
+  const priceNum = parseInt(price || "0", 10);
+  const margin = isNaN(priceNum) ? 0 : priceNum - minPrice;
+  const isOversized = catalog?.id.includes("oversized") ?? false;
 
   function pickProduct(p: typeof STORE_CATALOG[0]) {
     setCatalog(p);
     setColor(p.colors[0]);
     setSizes([...p.sizes]);
     setPrice(String(p.costPrice + 200));
-    setStep("config");
+    setPhase("configure");
   }
 
   function toggleSize(s: string) {
     setSizes((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
+  function onFileSelect(e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" | "image") {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    if (side === "front") { setFrontFile(file); setFrontPreview(url); setView("front"); }
+    else if (side === "back") { setBackFile(file); setBackPreview(url); setView("back"); }
+    else { setImageFile(file); setImagePreview(url); }
+    e.target.value = "";
+  }
+
   async function handleSubmit() {
     if (!catalog || !color) return;
-    const priceNum = parseInt(price, 10);
-    if (isNaN(priceNum) || priceNum < minPrice) {
-      setErr(`Minimum price is ₹${minPrice} (cost + ₹50 fulfillment)`);
-      return;
-    }
+    if (isNaN(priceNum) || priceNum < minPrice) { setErr(`Minimum price is ₹${minPrice}`); return; }
     if (sizes.length === 0) { setErr("Select at least one size"); return; }
-    setSaving(true); setErr("");
+    setErr(""); setSaving(true); setUploading(true);
+
+    let finalFrontUrl: string | null = null;
+    let finalBackUrl: string | null = null;
+    let finalImageUrl: string | null = null;
+
+    try {
+      if (frontFile) finalFrontUrl = await uploadFileToStorage(frontFile);
+      if (backFile)  finalBackUrl  = await uploadFileToStorage(backFile);
+      if (imageFile) finalImageUrl = await uploadFileToStorage(imageFile);
+    } catch (e) {
+      setErr((e as Error).message ?? "Upload failed");
+      setSaving(false); setUploading(false); return;
+    }
+    setUploading(false);
+
     const res = await fetch(`/api/stores/${store.handle}/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_id: catalog.id,
-        product_name: catalog.name,
-        color_hex: color.hex,
-        color_name: color.name,
-        sizes,
-        retail_price_inr: priceNum,
-        cost_price_inr: catalog.costPrice,
-        design_front_url: frontUrl || null,
-        design_back_url: backUrl || null,
+        product_id: catalog.id, product_name: catalog.name,
+        color_hex: color.hex, color_name: color.name,
+        sizes, retail_price_inr: priceNum, cost_price_inr: catalog.costPrice,
+        description: description || null,
+        design_front_url: finalFrontUrl,
+        design_back_url: finalBackUrl,
+        image_url: finalImageUrl ?? finalFrontUrl,
         print_technique: technique,
       }),
     });
@@ -818,20 +910,27 @@ function AddProductModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50">
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end md:items-center justify-center p-0 md:p-6">
       <motion.div
-        initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
+        initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }}
+        className="bg-white w-full md:rounded-3xl md:max-w-4xl max-h-[96vh] overflow-y-auto shadow-2xl flex flex-col"
       >
-        <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-          <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>
-            {step === "pick" ? "Choose a product" : `Configure · ${catalog?.name}`}
-          </h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors text-sm">✕</button>
+        {/* Header */}
+        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {phase === "configure" && (
+              <button onClick={() => setPhase("pick")} className="text-zinc-400 hover:text-zinc-700 text-sm transition-colors">← Back</button>
+            )}
+            <h3 className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.03em" }}>
+              {phase === "pick" ? "Choose product" : `${catalog?.name} · ${catalog?.gsm}`}
+            </h3>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors">✕</button>
         </div>
 
-        {step === "pick" ? (
-          <div className="p-6 grid grid-cols-2 gap-3">
+        {/* Pick phase */}
+        {phase === "pick" && (
+          <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {STORE_CATALOG.map((p) => (
               <button key={p.id} onClick={() => pickProduct(p)}
                 className="text-left p-4 rounded-2xl border-2 border-zinc-100 hover:border-orange-300 hover:bg-orange-50 transition-all group">
@@ -840,82 +939,176 @@ function AddProductModal({
                     <div key={c.hex} className="w-4 h-4 rounded-full border border-zinc-200" style={{ background: c.hex }} />
                   ))}
                 </div>
-                <p className="font-bold text-zinc-900 text-sm group-hover:text-orange-600 transition-colors">{p.name}</p>
-                <p className="text-xs text-zinc-400 mt-0.5">{p.gsm} · from ₹{p.costPrice}</p>
+                <p className="font-bold text-zinc-900 text-sm group-hover:text-orange-600 transition-colors leading-snug">{p.name}</p>
+                <p className="text-xs text-zinc-400 mt-1">{p.gsm}</p>
+                <p className="text-xs font-bold text-zinc-500 mt-0.5">from ₹{p.costPrice}</p>
               </button>
             ))}
           </div>
-        ) : (
-          <div className="p-6 space-y-5">
-            {/* Color */}
-            <div>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Color</p>
-              <div className="flex gap-2 flex-wrap">
-                {catalog!.colors.map((c) => (
-                  <button key={c.hex} onClick={() => setColor(c)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-xs font-bold transition-all ${color?.hex === c.hex ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                    <span className="w-3 h-3 rounded-full border border-white/30" style={{ background: c.hex }} />
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+        )}
 
-            {/* Sizes */}
-            <div>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sizes offered</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {catalog!.sizes.map((s) => (
-                  <button key={s} onClick={() => toggleSize(s)}
-                    className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+        {/* Configure phase */}
+        {phase === "configure" && catalog && (
+          <div className="flex flex-col md:flex-row flex-1">
 
-            {/* Print technique */}
-            <div>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Print technique</p>
+            {/* Left: tee preview */}
+            <div className="md:w-80 flex-shrink-0 bg-zinc-50 flex flex-col items-center justify-center p-8 gap-4">
+              <div className="w-full max-w-xs">
+                <StoreTeePreview
+                  color={color.hex}
+                  isOversized={isOversized}
+                  frontSrc={frontPreview}
+                  backSrc={backPreview}
+                  view={view}
+                />
+              </div>
+              {/* Front / Back toggle */}
               <div className="flex gap-2">
-                {(["DTG", "DTF"] as const).map((t) => (
-                  <button key={t} onClick={() => setTechnique(t)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                    {t}
+                {(["front", "back"] as const).map((v) => (
+                  <button key={v} onClick={() => setView(v)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all capitalize ${view === v ? "bg-zinc-900 text-white" : "bg-zinc-200 text-zinc-500 hover:bg-zinc-300"}`}>
+                    {v}
                   </button>
                 ))}
               </div>
+              {imagePreview && (
+                <div className="w-full mt-2">
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 text-center">Product photo</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imagePreview} alt="Product" className="w-full rounded-xl object-cover aspect-square" />
+                </div>
+              )}
             </div>
 
-            {/* Designs */}
-            <div>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Design URLs <span className="text-zinc-400 font-normal normal-case">(optional)</span></p>
-              <div className="space-y-2">
-                <input value={frontUrl} onChange={(e) => setFrontUrl(e.target.value)} placeholder="Front design URL (imgur, Cloudinary, etc.)"
-                  className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-400" />
-                <input value={backUrl} onChange={(e) => setBackUrl(e.target.value)} placeholder="Back design URL (optional)"
-                  className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-400" />
+            {/* Right: controls */}
+            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+
+              {/* Color */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Color</p>
+                <div className="flex gap-2 flex-wrap">
+                  {catalog.colors.map((c) => (
+                    <button key={c.hex} onClick={() => setColor(c)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 text-xs font-bold transition-all ${color.hex === c.hex ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                      <span className="w-3 h-3 rounded-full border border-white/30 flex-shrink-0" style={{ background: c.hex }} />
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Price */}
-            <div>
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Retail price (₹)</p>
-              <p className="text-xs text-zinc-400 mb-2">Min ₹{minPrice} — you keep ₹{Math.max(0, parseInt(price || "0") - minPrice)} margin</p>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm">₹</span>
-                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={minPrice}
-                  className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
+              {/* Sizes */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Sizes to offer</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {catalog.sizes.map((s) => (
+                    <button key={s} onClick={() => toggleSize(s)}
+                      className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {err && <p className="text-red-500 text-xs font-bold">{err}</p>}
+              {/* Technique */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Print technique</p>
+                <div className="flex gap-2">
+                  {(["DTG", "DTF"] as const).map((t) => (
+                    <button key={t} onClick={() => setTechnique(t)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"}`}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            <div className="flex gap-3 pt-1">
-              <button onClick={() => setStep("pick")} className="px-4 py-3 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">← Back</button>
-              <button onClick={handleSubmit} disabled={saving}
-                className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
-                {saving ? "Adding…" : "Add to store →"}
+              {/* Design files */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2.5">Designs</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["front", "back"] as const).map((side) => {
+                    const preview = side === "front" ? frontPreview : backPreview;
+                    const label = side === "front" ? "Front" : "Back";
+                    return (
+                      <label key={side} className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed cursor-pointer transition-all h-24 ${preview ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
+                        <input type="file" accept="image/*" className="sr-only" onChange={(e) => onFileSelect(e, side)} />
+                        {preview ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={preview} alt={label} className="h-14 w-14 object-contain" />
+                            <span className="text-[10px] text-zinc-400 mt-1">{label} · tap to change</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-5 h-5 text-zinc-300 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                            <span className="text-[10px] font-bold text-zinc-400">{label} design{side === "back" ? " (opt.)" : ""}</span>
+                          </>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Product photo */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Product photo <span className="text-zinc-400 font-normal normal-case">(shown on store card)</span></p>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imagePreview ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => onFileSelect(e, "image")} />
+                  {imagePreview ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imagePreview} alt="Product" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                      <span className="text-xs text-zinc-500">Product photo uploaded · tap to change</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                      </div>
+                      <span className="text-xs text-zinc-400">Upload a photo of the finished product (optional)</span>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              {/* Description */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Description <span className="text-zinc-400 font-normal normal-case">(optional)</span></p>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Tell fans about this piece — the story, the collab, the vibe…"
+                  rows={3} className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+              </div>
+
+              {/* Price */}
+              <div>
+                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Retail price (₹)</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-zinc-400">Min ₹{minPrice}</span>
+                  <span className="text-zinc-200">·</span>
+                  <span className={`text-xs font-black ${margin >= 0 ? "text-green-600" : "text-red-500"}`}>
+                    {margin >= 0 ? `You keep ₹${margin}/unit` : `Below minimum`}
+                  </span>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm">₹</span>
+                  <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={minPrice}
+                    className="w-full pl-7 pr-4 py-3 rounded-xl border border-zinc-200 text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
+                </div>
+              </div>
+
+              {err && <p className="text-red-500 text-xs font-bold">{err}</p>}
+
+              <button onClick={handleSubmit} disabled={saving || uploading}
+                className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-black text-sm hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                {uploading ? (
+                  <><div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" /> Uploading files…</>
+                ) : saving ? (
+                  "Adding to store…"
+                ) : (
+                  "Add to store →"
+                )}
               </button>
             </div>
           </div>
@@ -932,6 +1125,13 @@ function StoresTab({ userId }: { userId: string | null }) {
   const [showCreate, setShowCreate] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingStore, setEditingStore] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editPrice, setEditPrice] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editSizes, setEditSizes] = useState<string[]>([]);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   // Create form state
   const [handle, setHandle] = useState("");
@@ -998,6 +1198,53 @@ function StoresTab({ userId }: { userId: string | null }) {
     if (!store) return;
     await fetch(`/api/stores/${store.handle}/products?id=${id}`, { method: "DELETE" });
     setProducts((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  function startEditProduct(p: StoreProductRow) {
+    setEditingProductId(p.id);
+    setEditPrice(String(p.retail_price_inr));
+    setEditDesc(p.description ?? "");
+    setEditSizes([...p.sizes]);
+    setEditImagePreview(p.image_url ?? p.design_front_url ?? "");
+    setEditImageFile(null);
+  }
+
+  function toggleEditSize(s: string) {
+    setEditSizes((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
+  }
+
+  async function saveEditProduct(productId: string, costPrice: number, allSizes: string[]) {
+    if (!store) return;
+    setEditSaving(true);
+    const priceNum = parseInt(editPrice, 10);
+    const minPrice = costPrice + 50;
+    if (isNaN(priceNum) || priceNum < minPrice) { setEditSaving(false); return; }
+
+    let finalImageUrl: string | undefined;
+    if (editImageFile) {
+      try { finalImageUrl = await uploadFileToStorage(editImageFile); }
+      catch { setEditSaving(false); return; }
+    }
+
+    const body: Record<string, unknown> = {
+      retail_price_inr: priceNum,
+      description: editDesc || null,
+      sizes: editSizes,
+    };
+    if (finalImageUrl) body.image_url = finalImageUrl;
+
+    const res = await fetch(`/api/stores/${store.handle}/products?id=${productId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setProducts((prev) => prev.map((p) => p.id === productId ? { ...p, ...data } : p));
+      setEditingProductId(null);
+    }
+    setEditSaving(false);
+    void allSizes;
   }
 
   function startEdit() {
@@ -1096,7 +1343,7 @@ function StoresTab({ userId }: { userId: string | null }) {
   return (
     <div>
       {showAddProduct && store && (
-        <AddProductModal store={store} onClose={() => setShowAddProduct(false)}
+        <StoreProductConfigurator store={store} onClose={() => setShowAddProduct(false)}
           onAdded={(p) => setProducts((prev) => [...prev, p])} />
       )}
 
@@ -1166,40 +1413,117 @@ function StoresTab({ userId }: { userId: string | null }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((p) => {
             const margin = p.retail_price_inr - p.cost_price_inr - 50;
+            const displayImage = p.image_url || p.design_front_url;
+            const isEditing = editingProductId === p.id;
+            const catalogEntry = STORE_CATALOG.find((c) => c.id === p.product_id);
+
             return (
-              <div key={p.id} className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 transition-all group">
-                <div className="aspect-square flex items-center justify-center relative" style={{ background: p.color_hex + "22" }}>
+              <div key={p.id} className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 transition-all group flex flex-col">
+                {/* Image */}
+                <div className="aspect-square flex items-center justify-center relative overflow-hidden" style={{ background: p.color_hex + "22" }}>
                   <div className="absolute inset-0 opacity-[0.04]"
                     style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-                  {p.design_front_url ? (
+                  {displayImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.design_front_url} alt={p.product_name} className="w-24 h-24 object-contain relative z-10 drop-shadow" />
+                    <img src={isEditing && editImagePreview ? editImagePreview : displayImage}
+                      alt={p.product_name} className="w-full h-full object-cover relative z-10" />
                   ) : (
                     <div className="w-20 h-20 rounded-xl flex items-center justify-center text-3xl relative z-10" style={{ background: p.color_hex, opacity: 0.8 }}>👕</div>
                   )}
-                  <button onClick={() => removeProduct(p.id)}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 text-zinc-400 hover:text-red-500 hover:bg-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center shadow-sm">
-                    ✕
-                  </button>
+                  {/* Actions overlay */}
+                  <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => isEditing ? setEditingProductId(null) : startEditProduct(p)}
+                      className="w-7 h-7 rounded-full bg-white/90 text-zinc-500 hover:text-zinc-900 text-xs flex items-center justify-center shadow-sm transition-colors">
+                      {isEditing ? "✕" : "✏️"}
+                    </button>
+                    <button onClick={() => removeProduct(p.id)}
+                      className="w-7 h-7 rounded-full bg-white/90 text-zinc-400 hover:text-red-500 hover:bg-white text-xs flex items-center justify-center shadow-sm transition-colors">
+                      🗑
+                    </button>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-1">
+
+                {/* Card body */}
+                {isEditing ? (
+                  <div className="p-4 space-y-3 flex-1">
+                    <p className="text-xs font-bold text-zinc-900">{p.product_name} · {p.color_name}</p>
+
+                    {/* Price */}
                     <div>
-                      <p className="font-bold text-zinc-900 text-sm">{p.product_name}</p>
-                      <p className="text-xs text-zinc-400">{p.color_name} · {p.print_technique}</p>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Price (₹)</label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs">₹</span>
+                        <input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)}
+                          min={p.cost_price_inr + 50}
+                          className="w-full pl-6 pr-3 py-2 rounded-lg border border-zinc-200 text-xs font-bold outline-none focus:border-zinc-900 transition-colors" />
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">Min ₹{p.cost_price_inr + 50}</p>
                     </div>
-                    <p className="font-black text-zinc-900 text-sm">₹{p.retail_price_inr}</p>
+
+                    {/* Sizes */}
+                    {catalogEntry && (
+                      <div>
+                        <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Sizes</label>
+                        <div className="flex gap-1 flex-wrap">
+                          {catalogEntry.sizes.map((s) => (
+                            <button key={s} onClick={() => toggleEditSize(s)}
+                              className={`w-8 h-8 rounded-lg text-[10px] font-bold transition-all ${editSizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Description</label>
+                      <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={2}
+                        placeholder="Short product description…"
+                        className="w-full px-2.5 py-2 rounded-lg border border-zinc-200 text-xs outline-none focus:border-zinc-900 transition-colors resize-none" />
+                    </div>
+
+                    {/* Image upload */}
+                    <label className="flex items-center gap-2 p-2 rounded-lg border border-dashed border-zinc-200 hover:border-orange-300 cursor-pointer transition-colors">
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) { setEditImageFile(f); setEditImagePreview(URL.createObjectURL(f)); }
+                        e.target.value = "";
+                      }} />
+                      <svg className="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                      <span className="text-[10px] text-zinc-400">
+                        {editImageFile ? `${editImageFile.name}` : "Change product photo"}
+                      </span>
+                    </label>
+
+                    <button onClick={() => saveEditProduct(p.id, p.cost_price_inr, catalogEntry?.sizes ?? p.sizes)} disabled={editSaving}
+                      className="w-full py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+                      {editSaving ? "Saving…" : "Save changes"}
+                    </button>
                   </div>
-                  <div className="flex gap-1 flex-wrap mt-2">
-                    {p.sizes.map((s) => (
-                      <span key={s} className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>
-                    ))}
+                ) : (
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <p className="font-bold text-zinc-900 text-sm truncate">{p.product_name}</p>
+                        <p className="text-xs text-zinc-400">{p.color_name} · {p.print_technique}</p>
+                      </div>
+                      <p className="font-black text-zinc-900 text-sm whitespace-nowrap">₹{p.retail_price_inr}</p>
+                    </div>
+                    {p.description && (
+                      <p className="text-xs text-zinc-500 mt-1 line-clamp-2 leading-relaxed">{p.description}</p>
+                    )}
+                    <div className="flex gap-1 flex-wrap mt-2">
+                      {p.sizes.map((s) => (
+                        <span key={s} className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>
+                      ))}
+                    </div>
+                    <div className="mt-auto pt-3 border-t border-zinc-100 flex items-center justify-between mt-3">
+                      <span className="text-xs text-zinc-400">Your margin</span>
+                      <span className={`text-xs font-black ${margin > 0 ? "text-green-600" : "text-red-500"}`}>₹{margin} / unit</span>
+                    </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-zinc-100 flex items-center justify-between">
-                    <span className="text-xs text-zinc-400">Your margin</span>
-                    <span className={`text-xs font-black ${margin > 0 ? "text-green-600" : "text-red-500"}`}>₹{margin} / unit</span>
-                  </div>
-                </div>
+                )}
               </div>
             );
           })}
