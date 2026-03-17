@@ -16,12 +16,22 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    });
-    if (error) setError(error.message);
-    else router.push("/account");
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    if (!url || url.includes("placeholder")) {
+      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel → Settings → Environment Variables, then redeploy.");
+      setLoading(false);
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
+      if (error) setError(error.message);
+      else router.push("/account");
+    } catch {
+      setError("Network error — check your Supabase URL is correct and the project is active.");
+    }
     setLoading(false);
   };
 

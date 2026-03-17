@@ -201,10 +201,24 @@ function DesignPlacer({
         <text x="100" y="228" textAnchor="middle" fontSize="5" fill={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)"}>drag to reposition</text>
       </svg>
       <div>
-        <div className="flex justify-between text-xs text-zinc-400 mb-1"><span>Design size</span><span>drag to resize</span></div>
-        <input type="range" min={20} max={120} value={pos.size}
-          onChange={(e) => setPos((p) => ({ ...p, size: Number(e.target.value) }))}
-          className="w-full accent-orange-500" />
+        <div className="flex justify-between text-xs text-zinc-400 mb-2">
+          <span className="font-medium text-zinc-600">Design size</span>
+          <span className="text-orange-500 font-semibold">{Math.round((pos.size / 120) * 100)}%</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setPos((p) => ({ ...p, size: Math.max(20, p.size - 8) }))}
+            className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+          >−</button>
+          <input type="range" min={20} max={120} value={pos.size}
+            onChange={(e) => setPos((p) => ({ ...p, size: Number(e.target.value) }))}
+            className="flex-1 accent-orange-500 h-1.5" />
+          <button
+            onClick={() => setPos((p) => ({ ...p, size: Math.min(120, p.size + 8) }))}
+            className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+          >+</button>
+        </div>
+        <p className="text-xs text-zinc-400 mt-2 text-center">Drag design on tee to reposition</p>
       </div>
     </div>
   );
