@@ -7,9 +7,15 @@ import { useCart, GST_RATE } from "@/lib/cart-context";
 export default function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, removeItem, updateQty, clearCart, itemsSubtotal, printSubtotal, total } = useCart();
 
-  // Shipping is calculated at checkout — show 0 in drawer
   const gst = Math.round(total * GST_RATE);
   const grandTotal = total + gst;
+
+  const sideLabel = (side: string) => {
+    if (side === "both") return "Front + Back print";
+    if (side === "back")  return "Back print";
+    if (side === "front") return "Front print";
+    return "No print";
+  };
 
   return (
     <AnimatePresence>
@@ -50,14 +56,25 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                 items.map((item) => (
                   <div key={item.cartId} className="p-3 rounded-2xl bg-zinc-50 border border-zinc-100">
                     <div className="flex gap-3">
-                      {/* Thumbnail */}
-                      <div className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden"
-                        style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
-                        {item.designDataUrl
-                          // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={item.designDataUrl} alt="design" className="w-9 h-9 object-contain" />
-                          : <span className="text-[9px] text-white/60 text-center leading-tight px-1">blank</span>
-                        }
+                      {/* Thumbnails — show front + back if both exist */}
+                      <div className="flex gap-1 flex-shrink-0">
+                        {item.frontDesignUrl || (!item.backDesignUrl) ? (
+                          <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                            style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
+                            {item.frontDesignUrl
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={item.frontDesignUrl} alt="front" className="w-9 h-9 object-contain" />
+                              : <span className="text-[9px] text-white/50 leading-tight text-center px-1">blank</span>
+                            }
+                          </div>
+                        ) : null}
+                        {item.backDesignUrl && (
+                          <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                            style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.backDesignUrl} alt="back" className="w-9 h-9 object-contain" />
+                          </div>
+                        )}
                       </div>
 
                       {/* Details */}
@@ -68,10 +85,10 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                           <span className="text-[10px] text-zinc-300">·</span>
                           <span className="text-[10px] text-zinc-500">Size {item.size}</span>
                           <span className="text-[10px] text-zinc-300">·</span>
-                          <span className="text-[10px] text-zinc-500">{item.side === "both" ? "Front + Back print" : item.side === "back" ? "Back print" : "Front print"}</span>
+                          <span className="text-[10px] text-zinc-500">{sideLabel(item.side)}</span>
                         </div>
                         {item.printTier && (
-                          <span className="text-[10px] text-orange-500 font-semibold">DTG {item.printTier}</span>
+                          <span className="text-[10px] text-orange-500 font-semibold">{item.printTier}</span>
                         )}
                         {!item.hasDesign && (
                           <span className="text-[10px] text-zinc-400">Blank — no print</span>

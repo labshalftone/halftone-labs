@@ -285,28 +285,30 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
   const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
+    const thumb = design.thumbnail ?? "";
     addItem({
-      productId:    design.product_id || "custom",
-      productName:  design.product_name,
-      gsm:          design.gsm,
-      color:        design.color_name,
-      colorHex:     design.color_hex,
+      productId:        design.product_id || "custom",
+      productName:      design.product_name,
+      gsm:              design.gsm,
+      color:            design.color_name,
+      colorHex:         design.color_hex,
       size,
       qty,
-      side,
-      blankPrice:   design.blank_price,
-      printPrice:   effectivePrint,
-      printTier:    design.print_tier ?? "",
-      printDims:    "",
-      hasDesign:    design.has_design,
-      designDataUrl: design.thumbnail ?? "",
+      frontDesignUrl:   (side === "front" || side === "both") ? thumb : "",
+      backDesignUrl:    (side === "back"  || side === "both") ? thumb : "",
+      frontPrintPrice:  (side === "front" || side === "both") ? design.print_price : 0,
+      backPrintPrice:   (side === "back"  || side === "both") ? design.print_price : 0,
+      frontPrintTier:   (side === "front" || side === "both") ? (design.print_tier ?? "") : "",
+      backPrintTier:    (side === "back"  || side === "both") ? (design.print_tier ?? "") : "",
+      printDims:        "",
+      blankPrice:       design.blank_price,
     });
     setAdded(true);
     setTimeout(() => { setAdded(false); onClose(); }, 900);
   };
 
-  const effectivePrint = side === "both" ? design.print_price * 2 : design.print_price;
-  const unitPrice = design.blank_price + effectivePrint;
+  const sidePrint = side === "both" ? design.print_price * 2 : design.print_price;
+  const unitPrice = design.blank_price + sidePrint;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">

@@ -466,15 +466,15 @@ export default function CheckoutPage() {
                   <div key={item.cartId} className="flex gap-3">
                     <div className="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"
                       style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
-                      {item.designDataUrl
+                      {item.frontDesignUrl || item.backDesignUrl
                         // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={item.designDataUrl} alt="" className="w-8 h-8 object-contain" />
+                        ? <img src={item.frontDesignUrl || item.backDesignUrl} alt="" className="w-8 h-8 object-contain" />
                         : <span className="text-[8px] text-white/60 leading-tight text-center">blank</span>
                       }
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{item.productName} {item.qty > 1 ? `×${item.qty}` : ""}</p>
-                      <p className="text-xs text-zinc-400">{item.color} · {item.size} · {item.side === "both" ? "Front + Back print" : `${item.side} print`}</p>
+                      <p className="text-xs text-zinc-400">{item.color} · {item.size} · {item.side === "both" ? "Front + Back" : item.side === "none" ? "No print" : `${item.side} print`}</p>
                       {item.printTier && <p className="text-xs text-orange-500">DTG {item.printTier}</p>}
                     </div>
                     <p className="font-semibold text-sm">₹{((item.blankPrice + item.printPrice) * item.qty).toLocaleString("en-IN")}</p>

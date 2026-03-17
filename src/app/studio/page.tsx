@@ -323,35 +323,53 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [step, setStep] = useState(0);
 
   const [color, setColor] = useState(product.colors[0]);
-  const [size, setSize] = useState(product.sizes[2] ?? product.sizes[0]);
+  const [size,  setSize]  = useState(product.sizes[2] ?? product.sizes[0]);
 
-  const [designSrc, setDesignSrc] = useState("");
-  const [printPrice, setPrintPrice] = useState(0);
-  const [printTier, setPrintTier] = useState("");
-  const [printDims, setPrintDims] = useState("");
-  const [side, setSide] = useState<"front" | "back" | "both">("front");
-  const [noDesign, setNoDesign] = useState(false);
-  const [added, setAdded] = useState(false);
+  // Per-side design state
+  const [activeTab,       setActiveTab]       = useState<"front" | "back">("front");
+  const [previewSide,     setPreviewSide]     = useState<"front" | "back">("front");
+  const [frontDesignSrc,  setFrontDesignSrc]  = useState("");
+  const [backDesignSrc,   setBackDesignSrc]   = useState("");
+  const [frontPrintPrice, setFrontPrintPrice] = useState(0);
+  const [backPrintPrice,  setBackPrintPrice]  = useState(0);
+  const [frontPrintTier,  setFrontPrintTier]  = useState("");
+  const [backPrintTier,   setBackPrintTier]   = useState("");
+  const [frontPrintDims,  setFrontPrintDims]  = useState("");
+  const [noDesign,        setNoDesign]        = useState(false);
+
+  const [added,  setAdded]  = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved,  setSaved]  = useState(false);
 
-  const isOversized = product.id.includes("oversized");
-  const effectivePrintPrice = side === "both" ? printPrice * 2 : printPrice;
-  const itemTotal = product.blankPrice + effectivePrintPrice;
+  const isOversized  = product.id.includes("oversized");
+  const totalPrint   = frontPrintPrice + backPrintPrice;
+  const itemTotal    = product.blankPrice + totalPrint;
+  const hasAnyDesign = !!frontDesignSrc || !!backDesignSrc;
+  const canAddToCart = hasAnyDesign || noDesign;
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Switch preview side when switching tabs
+  const handleTabSwitch = (tab: "front" | "back") => {
+    setActiveTab(tab);
+    setPreviewSide(tab);
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
-    setDesignSrc(url);
-    setNoDesign(false);
+    if (side === "front") { setFrontDesignSrc(url); setNoDesign(false); }
+    else                  { setBackDesignSrc(url);  setNoDesign(false); }
+    // Switch to that side's DesignPlacer
+    setPreviewSide(side);
+    e.target.value = "";
   };
 
   const handleSaveDesign = async () => {
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const thumbnail = designSrc ? await makeThumbnail(designSrc) : "";
+      const primarySrc = frontDesignSrc || backDesignSrc;
+      const thumbnail = primarySrc ? await makeThumbnail(primarySrc) : "";
       await fetch("/api/designs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -364,11 +382,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           colorName: color.name,
           colorHex: color.hex,
           size,
-          printTier: printTier || null,
-          printDims: printDims || null,
+          printTier: [frontPrintTier, backPrintTier].filter(Boolean).join(" + ") || null,
+          printDims: frontPrintDims || null,
           blankPrice: product.blankPrice,
-          printPrice,
-          hasDesign: !!designSrc,
+          printPrice: totalPrint,
+          hasDesign: hasAnyDesign,
           thumbnail,
         }),
       });
@@ -380,20 +398,21 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
   const handleAddToCart = () => {
     addItem({
-      productId: product.id,
-      productName: product.name,
-      gsm: product.gsm,
-      color: color.name,
-      colorHex: color.hex,
+      productId:      product.id,
+      productName:    product.name,
+      gsm:            product.gsm,
+      color:          color.name,
+      colorHex:       color.hex,
       size,
-      qty: 1,
-      side,
-      blankPrice: product.blankPrice,
-      printPrice: effectivePrintPrice,
-      printTier: side === "both" ? `${printTier} × 2 sides` : printTier,
-      printDims,
-      hasDesign: !!designSrc,
-      designDataUrl: designSrc,
+      qty:            1,
+      frontDesignUrl: frontDesignSrc,
+      backDesignUrl:  backDesignSrc,
+      frontPrintPrice,
+      backPrintPrice,
+      frontPrintTier,
+      backPrintTier,
+      printDims:      frontPrintDims,
+      blankPrice:     product.blankPrice,
     });
     setAdded(true);
   };
@@ -425,6 +444,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     );
   }
 
+  const activeDesignSrc = previewSide === "front" ? frontDesignSrc : backDesignSrc;
+
   return (
     <div className="fixed inset-0 z-50 flex overflow-hidden" style={{ background: "#f8f7f5" }}>
       {/* Left panel — always-visible mockup */}
@@ -440,15 +461,37 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
         </div>
 
         <div className="w-full max-w-xs">
-          {step === 1 && designSrc ? (
-            <DesignPlacer designSrc={designSrc} color={color.hex} isOversized={isOversized}
-              onPriceChange={(p, t, d) => { setPrintPrice(p); setPrintTier(t); setPrintDims(d); }} />
+          {step === 1 && activeDesignSrc ? (
+            previewSide === "front" ? (
+              <DesignPlacer key="front-placer" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+                onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
+            ) : (
+              <DesignPlacer key="back-placer" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+                onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
+            )
           ) : (
             <TeeMockup color={color.hex} isOversized={isOversized} />
           )}
         </div>
 
-        <div className="mt-6 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-medium flex items-center gap-3">
+        {/* Front / Back flip toggle (only in Step 1) */}
+        {step === 1 && (
+          <div className="mt-5 flex gap-2">
+            {(["front", "back"] as const).map((s) => (
+              <button key={s} onClick={() => setPreviewSide(s)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                  previewSide === s ? "bg-zinc-900 text-white border-zinc-900" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                }`}>
+                {s === "front" ? "👕" : "🔄"} {s.charAt(0).toUpperCase() + s.slice(1)}
+                {((s === "front" && frontDesignSrc) || (s === "back" && backDesignSrc)) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 ml-0.5" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-medium flex items-center gap-3">
           <span>{color.name} · {size}</span>
           <span className="w-px h-4 bg-white/20" />
           <span className="font-bold">₹{itemTotal.toLocaleString("en-IN")}</span>
@@ -529,104 +572,171 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
               </motion.div>
             )}
 
-            {/* Step 1 — Design */}
+            {/* Step 1 — Design (Front + Back tabs) */}
             {step === 1 && (
               <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Your design</h2>
-                <p className="text-zinc-500 text-sm mb-8">Upload a PNG — drag & resize it on the tee</p>
+                <p className="text-zinc-500 text-sm mb-5">Upload different designs for front and back. At least one side needs a design.</p>
 
-                {!designSrc ? (
-                  <label className="block w-full border-2 border-dashed border-zinc-300 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/30 transition-colors mb-6">
-                    <div className="text-4xl mb-3">🎨</div>
-                    <p className="font-semibold text-zinc-700 mb-1">Upload PNG file</p>
-                    <p className="text-xs text-zinc-400">PNG with transparent background works best</p>
-                    <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onFileChange} />
-                  </label>
-                ) : (
-                  <div className="mb-6">
-                    <div className="lg:hidden mb-4">
-                      <DesignPlacer designSrc={designSrc} color={color.hex} isOversized={isOversized}
-                        onPriceChange={(p, t, d) => { setPrintPrice(p); setPrintTier(t); setPrintDims(d); }} />
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl">
-                      <div>
-                        <p className="text-xs text-zinc-500">Print size</p>
-                        <p className="font-semibold text-zinc-800">{printTier} ({printDims})</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-zinc-500">Print cost</p>
-                        <p className="font-bold text-orange-600">+₹{printPrice}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => { setDesignSrc(""); setPrintPrice(0); setPrintTier(""); setPrintDims(""); }}
-                      className="mt-3 text-xs text-zinc-400 underline hover:text-zinc-600">
-                      Remove design
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 my-4">
-                  <hr className="flex-1 border-zinc-200" /><span className="text-xs text-zinc-400">or</span><hr className="flex-1 border-zinc-200" />
+                {/* Front / Back tabs */}
+                <div className="flex gap-1 bg-zinc-100 rounded-xl p-1 mb-6">
+                  {(["front", "back"] as const).map((tab) => {
+                    const hasDesign = tab === "front" ? !!frontDesignSrc : !!backDesignSrc;
+                    return (
+                      <button key={tab} onClick={() => handleTabSwitch(tab)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
+                          activeTab === tab ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+                        }`}>
+                        {tab} print
+                        {hasDesign && <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <button onClick={() => { setNoDesign(true); setPrintPrice(0); setPrintTier(""); setPrintDims(""); setDesignSrc(""); }}
-                  className={`w-full py-3 rounded-xl border-2 text-sm font-medium transition-all mb-8 ${noDesign && !designSrc ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                  Blank tee — no print
-                </button>
-
-                {/* Print side selector — visible once a design is uploaded OR noDesign selected */}
-                {(designSrc || noDesign) && !noDesign && (
-                  <div className="mb-6">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2.5">Print side</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {([
-                        { val: "front",  label: "Front only" },
-                        { val: "back",   label: "Back only" },
-                        { val: "both",   label: "Both sides" },
-                      ] as const).map(({ val, label }) => (
-                        <button key={val} onClick={() => setSide(val)}
-                          className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${
-                            side === val
-                              ? "border-zinc-900 bg-zinc-900 text-white"
-                              : "border-zinc-200 text-zinc-600 hover:border-zinc-400"
-                          }`}>
-                          {label}
-                          {val === "both" && <span className="block text-[9px] font-normal opacity-70 mt-0.5">2× print cost</span>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Price + actions — pinned together */}
-                <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100 flex items-center justify-between">
+                {/* Tab content — Front */}
+                {activeTab === "front" && (
                   <div>
-                    <p className="text-xs text-zinc-400">Item total</p>
-                    <p className="font-black text-lg">₹{itemTotal.toLocaleString("en-IN")}</p>
-                    {effectivePrintPrice > 0 && (
-                      <p className="text-xs text-orange-500">
-                        {side === "both" ? `${printTier} × 2 sides` : `${printTier} print`} included
-                      </p>
+                    {!frontDesignSrc ? (
+                      <label className="block w-full border-2 border-dashed border-zinc-300 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/30 transition-colors mb-4">
+                        <div className="text-4xl mb-3">🎨</div>
+                        <p className="font-semibold text-zinc-700 mb-1">Upload front design</p>
+                        <p className="text-xs text-zinc-400">PNG with transparent background works best</p>
+                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                          onChange={(e) => onFileChange(e, "front")} />
+                      </label>
+                    ) : (
+                      <div className="mb-4">
+                        <div className="lg:hidden mb-4">
+                          <DesignPlacer key="front-placer-mobile" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+                            onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl mb-2">
+                          <div>
+                            <p className="text-xs text-zinc-500">Front print size</p>
+                            <p className="font-semibold text-zinc-800">{frontPrintTier} ({frontPrintDims})</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-zinc-500">Print cost</p>
+                            <p className="font-bold text-orange-600">+₹{frontPrintPrice}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <label className="text-xs text-orange-500 underline hover:text-orange-600 cursor-pointer">
+                            Change design
+                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                              onChange={(e) => onFileChange(e, "front")} />
+                          </label>
+                          <span className="text-zinc-200">·</span>
+                          <button onClick={() => { setFrontDesignSrc(""); setFrontPrintPrice(0); setFrontPrintTier(""); setFrontPrintDims(""); }}
+                            className="text-xs text-zinc-400 underline hover:text-red-500 transition-colors">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {!frontDesignSrc && (
+                      <p className="text-xs text-zinc-400 text-center">Leave blank to skip front print</p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-zinc-400">+ shipping at checkout</p>
-                    <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-400">
-                      🇮🇳 <span>Fulfilled from India</span>
-                    </span>
+                )}
+
+                {/* Tab content — Back */}
+                {activeTab === "back" && (
+                  <div>
+                    {!backDesignSrc ? (
+                      <label className="block w-full border-2 border-dashed border-zinc-300 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/30 transition-colors mb-4">
+                        <div className="text-4xl mb-3">🎨</div>
+                        <p className="font-semibold text-zinc-700 mb-1">Upload back design</p>
+                        <p className="text-xs text-zinc-400">PNG with transparent background works best</p>
+                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                          onChange={(e) => onFileChange(e, "back")} />
+                      </label>
+                    ) : (
+                      <div className="mb-4">
+                        <div className="lg:hidden mb-4">
+                          <DesignPlacer key="back-placer-mobile" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+                            onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl mb-2">
+                          <div>
+                            <p className="text-xs text-zinc-500">Back print size</p>
+                            <p className="font-semibold text-zinc-800">{backPrintTier}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-zinc-500">Print cost</p>
+                            <p className="font-bold text-orange-600">+₹{backPrintPrice}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <label className="text-xs text-orange-500 underline hover:text-orange-600 cursor-pointer">
+                            Change design
+                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                              onChange={(e) => onFileChange(e, "back")} />
+                          </label>
+                          <span className="text-zinc-200">·</span>
+                          <button onClick={() => { setBackDesignSrc(""); setBackPrintPrice(0); setBackPrintTier(""); }}
+                            className="text-xs text-zinc-400 underline hover:text-red-500 transition-colors">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {!backDesignSrc && (
+                      <p className="text-xs text-zinc-400 text-center">Leave blank to skip back print</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Blank tee option */}
+                <div className="flex items-center gap-3 my-5">
+                  <hr className="flex-1 border-zinc-200" /><span className="text-xs text-zinc-400">or</span><hr className="flex-1 border-zinc-200" />
+                </div>
+                <button onClick={() => { setNoDesign(true); setFrontDesignSrc(""); setBackDesignSrc(""); setFrontPrintPrice(0); setBackPrintPrice(0); setFrontPrintTier(""); setBackPrintTier(""); setFrontPrintDims(""); }}
+                  className={`w-full py-3 rounded-xl border-2 text-sm font-medium transition-all mb-6 ${noDesign ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                  Blank tee — no print on either side
+                </button>
+
+                {/* Validation note */}
+                {!canAddToCart && (
+                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-4">
+                    ⚠️ Upload at least one design (front or back) to continue, or choose blank tee.
+                  </p>
+                )}
+
+                {/* Price summary */}
+                <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-zinc-400">Blank garment</p>
+                    <p className="text-sm font-semibold">₹{product.blankPrice}</p>
+                  </div>
+                  {frontPrintPrice > 0 && (
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-zinc-400">Front print ({frontPrintTier})</p>
+                      <p className="text-sm font-semibold text-orange-600">+₹{frontPrintPrice}</p>
+                    </div>
+                  )}
+                  {backPrintPrice > 0 && (
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-zinc-400">Back print ({backPrintTier})</p>
+                      <p className="text-sm font-semibold text-orange-600">+₹{backPrintPrice}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-200">
+                    <p className="text-xs font-bold text-zinc-900">Item total</p>
+                    <p className="font-black text-zinc-900">₹{itemTotal.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[10px] text-zinc-400">+ shipping at checkout</p>
+                    <span className="text-[10px] text-zinc-400">🇮🇳 Fulfilled from India</span>
                   </div>
                 </div>
 
-                {/* Save design — above CTA, always visible */}
-                <button
-                  disabled={saving}
-                  onClick={handleSaveDesign}
+                {/* Save design */}
+                <button disabled={saving} onClick={handleSaveDesign}
                   className={`w-full mb-3 py-3 rounded-2xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                    saved
-                      ? "border-green-400 bg-green-50 text-green-700"
-                      : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
-                  } disabled:opacity-50`}
-                >
+                    saved ? "border-green-400 bg-green-50 text-green-700" : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                  } disabled:opacity-50`}>
                   {saved ? (
                     <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Design saved to account!</>
                   ) : saving ? (
@@ -640,9 +750,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   <button onClick={() => setStep(0)} className="px-5 py-3 rounded-2xl border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
                     Back
                   </button>
-                  <button
-                    disabled={!designSrc && !noDesign}
-                    onClick={handleAddToCart}
+                  <button disabled={!canAddToCart} onClick={handleAddToCart}
                     className="flex-1 py-4 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
