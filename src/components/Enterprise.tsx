@@ -179,12 +179,14 @@ export default function Enterprise() {
               Already trusted by
             </p>
             <p className="text-white font-black text-xl md:text-2xl leading-tight" style={{ letterSpacing: "-0.04em" }}>
-              Sunburn Festival · Tidal Rave
+              Sunburn Festival · Teletech
               <br />
-              Katarsis · Galactica · WearADHD
+              Time Music · Galactica
+              <br />
+              Kevin Abstract
             </p>
             <p className="text-zinc-400 text-sm mt-2">
-              ...and 60+ independent artists across India
+              ...and 60+ independent artists across the globe
             </p>
           </div>
           <div className="flex-shrink-0">
