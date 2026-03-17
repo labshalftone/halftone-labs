@@ -504,7 +504,7 @@ export default function CheckoutPage() {
                   <span className="text-zinc-500 flex items-center">
                     Shipping
                     {country !== "IN" && (
-                      <InfoTooltip text="Shipping fees include customs duties and handling charges for international orders." />
+                      <InfoTooltip text="Shipping fees DO NOT include customs duties and handling charges for international orders." />
                     )}
                   </span>
                   <span>{selectedShipping ? `₹${shippingCost}` : "—"}</span>
