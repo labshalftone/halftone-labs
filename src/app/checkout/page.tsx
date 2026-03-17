@@ -48,15 +48,13 @@ export default function CheckoutPage() {
 
   const grandTotal = itemsTotal + (selectedShipping?.rate ?? 0);
 
-  const fetchShipping = useCallback(async () => {
+  const fetchShipping = useCallback(async (countryCode: string, pin: string) => {
     setLoadingShipping(true);
-    setShippingOptions([]);
-    setSelectedShipping(null);
     try {
       const res = await fetch("/api/shipping-rates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country, pin: form.pin || "201304" }),
+        body: JSON.stringify({ country: countryCode, pin: pin || "201304" }),
       });
       const data = await res.json();
       if (data.options?.length) {
@@ -65,9 +63,9 @@ export default function CheckoutPage() {
       }
     } catch {}
     setLoadingShipping(false);
-  }, [country, form.pin]);
+  }, []);
 
-  useEffect(() => { fetchShipping(); }, [country]);
+  useEffect(() => { fetchShipping(country, form.pin); }, [country]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load Razorpay
   useEffect(() => {
@@ -251,7 +249,7 @@ export default function CheckoutPage() {
                   <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
                   <input value={form.pin} onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value }))}
-                    onBlur={() => country === "IN" && form.pin && fetchShipping()}
+                    onBlur={(e) => country === "IN" && e.target.value && fetchShipping(country, e.target.value)}
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                     placeholder={country === "IN" ? "PIN code" : "Postal code"} />
                 </div>
@@ -302,7 +300,7 @@ export default function CheckoutPage() {
               ) : shippingOptions.length === 0 ? (
                 <div className="text-sm text-zinc-400">
                   Enter your address to see shipping options.{" "}
-                  <button onClick={fetchShipping} className="text-orange-500 underline">Refresh</button>
+                  <button onClick={() => fetchShipping(country, form.pin)} className="text-orange-500 underline">Refresh</button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">

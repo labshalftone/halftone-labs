@@ -33,6 +33,7 @@ async function getShiprocketToken(): Promise<string | null> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password: pass }),
+      signal: AbortSignal.timeout(5000),
     });
     const data = await res.json();
     _token = data.token ?? null;
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
               delivery_postcode: pin,
               cod: 0, weight: 0.5, length: 30, breadth: 25, height: 2,
             }),
+            signal: AbortSignal.timeout(6000),
           }
         );
         const data = await res.json();
