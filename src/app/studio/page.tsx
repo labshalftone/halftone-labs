@@ -7,7 +7,8 @@ import { useCart } from "@/lib/cart-context";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
 
-// Compress image to small JPEG thumbnail for DB storage
+// ─── THUMBNAIL ────────────────────────────────────────────────────────────────
+
 async function makeThumbnail(src: string): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -17,9 +18,7 @@ async function makeThumbnail(src: string): Promise<string> {
       const ctx = canvas.getContext("2d");
       if (!ctx) { resolve(""); return; }
       const side = Math.min(img.width, img.height);
-      const sx = (img.width - side) / 2;
-      const sy = (img.height - side) / 2;
-      ctx.drawImage(img, sx, sy, side, side, 0, 0, 120, 120);
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 120, 120);
       resolve(canvas.toDataURL("image/jpeg", 0.6));
     };
     img.onerror = () => resolve("");
@@ -51,21 +50,20 @@ const PRODUCTS = [
     id: "regular-tee",
     name: "Regular Tee",
     gsm: "180 GSM",
-    fabric: "100% combed ring-spun cotton",
-    fit: "Regular unisex fit, slightly tapered body",
+    spec: "100% combed ring-spun cotton",
+    fit: "Regular unisex fit, slightly tapered",
     blankPrice: 400,
     sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
-    moqBulk: 50,
     colors: [
-      { name: "White", hex: "#FFFFFF", border: true },
-      { name: "Black", hex: "#111111" },
-      { name: "Navy", hex: "#1B2A4A" },
+      { name: "White",  hex: "#FFFFFF", border: true },
+      { name: "Black",  hex: "#111111" },
+      { name: "Navy",   hex: "#1B2A4A" },
       { name: "Maroon", hex: "#6B2D2D" },
     ],
     bulkTiers: [
-      { qty: "50–99 pcs", price: "₹349" },
-      { qty: "100–249 pcs", price: "₹299" },
-      { qty: "250+ pcs", price: "₹249" },
+      { qty: "50–99",  price: "₹349" },
+      { qty: "100–249", price: "₹299" },
+      { qty: "250+",   price: "₹249" },
     ],
     tag: "Bestseller",
   },
@@ -73,19 +71,18 @@ const PRODUCTS = [
     id: "oversized-tee-sj",
     name: "Oversized Tee",
     gsm: "220 GSM · Single Jersey",
-    fabric: "100% combed cotton, single jersey knit",
-    fit: "Drop-shoulder oversized fit",
+    spec: "100% combed cotton, single jersey knit",
+    fit: "Drop-shoulder oversized, loopback",
     blankPrice: 500,
     sizes: ["S", "M", "L", "XL", "2XL"],
-    moqBulk: 50,
     colors: [
       { name: "White", hex: "#FFFFFF", border: true },
       { name: "Black", hex: "#111111" },
     ],
     bulkTiers: [
-      { qty: "50–99 pcs", price: "₹449" },
-      { qty: "100–249 pcs", price: "₹399" },
-      { qty: "250+ pcs", price: "₹349" },
+      { qty: "50–99",  price: "₹449" },
+      { qty: "100–249", price: "₹399" },
+      { qty: "250+",   price: "₹349" },
     ],
     tag: "New",
   },
@@ -93,22 +90,21 @@ const PRODUCTS = [
     id: "oversized-tee-ft",
     name: "Oversized Tee",
     gsm: "240 GSM · French Terry",
-    fabric: "100% combed cotton, french terry",
-    fit: "Drop-shoulder oversized fit, looped back",
+    spec: "100% combed cotton, french terry",
+    fit: "Drop-shoulder oversized, looped back",
     blankPrice: 600,
     sizes: ["S", "M", "L", "XL", "2XL"],
-    moqBulk: 50,
     colors: [
-      { name: "Black", hex: "#111111" },
-      { name: "White", hex: "#FFFFFF", border: true },
+      { name: "Black",      hex: "#111111" },
+      { name: "White",      hex: "#FFFFFF", border: true },
       { name: "Royal Blue", hex: "#2355C0" },
-      { name: "Baby Pink", hex: "#F5C2C7" },
-      { name: "Red", hex: "#C0392B" },
+      { name: "Baby Pink",  hex: "#F5C2C7" },
+      { name: "Red",        hex: "#C0392B" },
     ],
     bulkTiers: [
-      { qty: "50–99 pcs", price: "₹549" },
-      { qty: "100–249 pcs", price: "₹499" },
-      { qty: "250+ pcs", price: "₹449" },
+      { qty: "50–99",  price: "₹549" },
+      { qty: "100–249", price: "₹499" },
+      { qty: "250+",   price: "₹449" },
     ],
     tag: null,
   },
@@ -116,21 +112,20 @@ const PRODUCTS = [
     id: "baby-tee",
     name: "Baby Tee",
     gsm: "180 GSM",
-    fabric: "100% combed ring-spun cotton",
+    spec: "100% combed ring-spun cotton",
     fit: "Cropped fitted cut, women's silhouette",
     blankPrice: 380,
     sizes: ["XS", "S", "M", "L", "XL"],
-    moqBulk: 50,
     colors: [
-      { name: "White", hex: "#FFFFFF", border: true },
-      { name: "Black", hex: "#111111" },
+      { name: "White",    hex: "#FFFFFF", border: true },
+      { name: "Black",    hex: "#111111" },
       { name: "Baby Pink", hex: "#F5C2C7" },
       { name: "Lavender", hex: "#C9B8E8" },
     ],
     bulkTiers: [
-      { qty: "50–99 pcs", price: "₹329" },
-      { qty: "100–249 pcs", price: "₹279" },
-      { qty: "250+ pcs", price: "₹239" },
+      { qty: "50–99",  price: "₹329" },
+      { qty: "100–249", price: "₹279" },
+      { qty: "250+",   price: "₹239" },
     ],
     tag: null,
   },
@@ -140,17 +135,21 @@ const PRODUCTS = [
 
 function TeeMockup({ color, isOversized }: { color: string; isOversized?: boolean }) {
   const isDark = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
-  const body = isOversized
+  const body   = isOversized
     ? "M30 52 L8 95 L50 100 L50 215 L150 215 L150 100 L192 95 L170 52 L130 32 Q100 20 70 32 Z"
     : "M40 56 L15 92 L55 100 L55 215 L145 215 L145 100 L185 92 L160 56 L125 38 Q100 28 75 38 Z";
   const collar = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
   return (
     <svg viewBox="0 0 200 230" className="w-full h-full" style={{ maxHeight: 480 }}>
-      <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.08)" />
-      <path d={body} fill={color} stroke={isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)"} strokeWidth="1.5" />
-      <path d={collar} fill="none" stroke={isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.18)"} strokeWidth="1.5" />
+      <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.07)" />
+      <path d={body} fill={color}
+        stroke={isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.10)"} strokeWidth="1.5" />
+      <path d={collar} fill="none"
+        stroke={isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.16)"} strokeWidth="1.5" />
       <rect x={200*ZONE_PCT.x} y={230*ZONE_PCT.y} width={200*ZONE_PCT.w} height={230*ZONE_PCT.h}
-        fill="none" stroke={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"} strokeWidth="0.8" strokeDasharray="3 3" rx="2" />
+        fill="none"
+        stroke={isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.13)"}
+        strokeWidth="0.7" strokeDasharray="3 3" rx="2" />
     </svg>
   );
 }
@@ -178,18 +177,18 @@ function DesignPlacer({
   const updatePrice = useCallback((size: number) => {
     const fracW = size / (200 * ZONE_PCT.w);
     const fracH = size / (230 * ZONE_PCT.h);
-    const sqin = fracW * MAX_PRINT_W_IN * fracH * MAX_PRINT_H_IN;
-    const tier = getTier(sqin);
+    const sqin  = fracW * MAX_PRINT_W_IN * fracH * MAX_PRINT_H_IN;
+    const tier  = getTier(sqin);
     onPriceChange(tier.price, tier.label, `${(fracW * MAX_PRINT_W_IN).toFixed(1)}"×${(fracH * MAX_PRINT_H_IN).toFixed(1)}"`);
   }, [onPriceChange]);
 
   useEffect(() => { updatePrice(pos.size); }, [pos.size, updatePrice]);
 
-  const isDark = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
-  const body = isOversized
+  const isDark   = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
+  const body     = isOversized
     ? "M30 52 L8 95 L50 100 L50 215 L150 215 L150 100 L192 95 L170 52 L130 32 Q100 20 70 32 Z"
     : "M40 56 L15 92 L55 100 L55 215 L145 215 L145 100 L185 92 L160 56 L125 38 Q100 28 75 38 Z";
-  const collar = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
+  const collar   = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
 
   return (
     <div className="flex flex-col gap-4">
@@ -202,14 +201,12 @@ function DesignPlacer({
         onPointerUp={() => { dragging.current = false; }}
         onPointerLeave={() => { dragging.current = false; }}
       >
-        <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.08)" />
-        <path d={body} fill={color} stroke={isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)"} strokeWidth="1.5" />
-        <path d={collar} fill="none" stroke={isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.18)"} strokeWidth="1.5" />
+        <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.07)" />
+        <path d={body} fill={color} stroke={isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.10)"} strokeWidth="1.5" />
+        <path d={collar} fill="none" stroke={isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.16)"} strokeWidth="1.5" />
         <rect x={200*ZONE_PCT.x} y={230*ZONE_PCT.y} width={200*ZONE_PCT.w} height={230*ZONE_PCT.h}
-          fill="none" stroke={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"} strokeWidth="0.8" strokeDasharray="3 3" rx="2" />
-        <image
-          href={designSrc}
-          x={pos.x - pos.size/2} y={pos.y - pos.size/2} width={pos.size} height={pos.size}
+          fill="none" stroke={isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.13)"} strokeWidth="0.7" strokeDasharray="3 3" rx="2" />
+        <image href={designSrc} x={pos.x - pos.size/2} y={pos.y - pos.size/2} width={pos.size} height={pos.size}
           style={{ cursor: "grab" }}
           onPointerDown={(e) => {
             e.preventDefault();
@@ -217,29 +214,25 @@ function DesignPlacer({
             dragging.current = true;
             const s = toSVG(e.clientX, e.clientY);
             dragOffset.current = { dx: s.x - pos.x, dy: s.y - pos.y };
-          }}
-        />
-        <text x="100" y="228" textAnchor="middle" fontSize="5" fill={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)"}>drag to reposition</text>
+          }} />
+        <text x="100" y="228" textAnchor="middle" fontSize="5"
+          fill={isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)"}>drag to reposition</text>
       </svg>
+
       <div>
         <div className="flex justify-between text-xs text-zinc-400 mb-2">
           <span className="font-medium text-zinc-600">Design size</span>
-          <span className="text-orange-500 font-semibold">{Math.round((pos.size / 120) * 100)}%</span>
+          <span className="font-bold text-orange-500">{Math.round((pos.size / 120) * 100)}%</span>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setPos((p) => ({ ...p, size: Math.max(20, p.size - 8) }))}
-            className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
-          >−</button>
+          <button onClick={() => setPos((p) => ({ ...p, size: Math.max(20, p.size - 8) }))}
+            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0">−</button>
           <input type="range" min={20} max={120} value={pos.size}
             onChange={(e) => setPos((p) => ({ ...p, size: Number(e.target.value) }))}
             className="flex-1 accent-orange-500 h-1.5" />
-          <button
-            onClick={() => setPos((p) => ({ ...p, size: Math.min(120, p.size + 8) }))}
-            className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
-          >+</button>
+          <button onClick={() => setPos((p) => ({ ...p, size: Math.min(120, p.size + 8) }))}
+            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0">+</button>
         </div>
-        <p className="text-xs text-zinc-400 mt-2 text-center">Drag design on tee to reposition</p>
       </div>
     </div>
   );
@@ -248,8 +241,8 @@ function DesignPlacer({
 // ─── BULK QUOTE MODAL ─────────────────────────────────────────────────────────
 
 function BulkQuoteModal({ product, onClose }: { product: typeof PRODUCTS[0]; onClose: () => void }) {
-  const [form, setForm] = useState({ name: "", email: "", qty: "50", message: "" });
-  const [sent, setSent] = useState(false);
+  const [form, setForm]     = useState({ name: "", email: "", qty: "50", message: "" });
+  const [sent, setSent]     = useState(false);
   const [sending, setSending] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -262,49 +255,55 @@ function BulkQuoteModal({ product, onClose }: { product: typeof PRODUCTS[0]; onC
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)" }}>
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }}
         className="bg-white rounded-2xl w-full max-w-md p-8 relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 text-2xl leading-none">&times;</button>
         {sent ? (
           <div className="text-center py-8">
-            <div className="text-4xl mb-3">✓</div>
-            <h3 className="text-xl font-semibold mb-2">Quote Requested</h3>
+            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-black mb-2" style={{ letterSpacing: "-0.04em" }}>Quote requested</h3>
             <p className="text-zinc-500 text-sm">We'll email you within 24 hours.</p>
-            <button onClick={onClose} className="mt-6 px-6 py-2 bg-zinc-900 text-white rounded-full text-sm">Done</button>
+            <button onClick={onClose} className="mt-6 px-6 py-2.5 bg-zinc-900 text-white rounded-full text-sm font-semibold">Done</button>
           </div>
         ) : (
           <>
-            <h3 className="text-xl font-semibold mb-1">Bulk Quote</h3>
-            <p className="text-zinc-500 text-sm mb-6">{product.name} · Screen print · MOQ 50</p>
+            <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-1">Bulk Order</p>
+            <h3 className="text-xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>{product.name}</h3>
+            <p className="text-zinc-400 text-sm mb-6">MOQ 50 · Screen print / DTF pricing</p>
             <form onSubmit={submit} className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Name</label>
+                  <label className="block text-[0.7rem] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Name</label>
                   <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Your name" />
+                    className="w-full border border-zinc-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" placeholder="Your name" />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Email</label>
+                  <label className="block text-[0.7rem] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Email</label>
                   <input required type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="you@email.com" />
+                    className="w-full border border-zinc-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" placeholder="you@email.com" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Quantity</label>
+                <label className="block text-[0.7rem] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Quantity</label>
                 <select value={form.qty} onChange={(e) => setForm((f) => ({ ...f, qty: e.target.value }))}
-                  className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                  className="w-full border border-zinc-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900">
                   <option>50</option><option>100</option><option>250</option><option>500</option><option>1000+</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Notes</label>
+                <label className="block text-[0.7rem] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Notes</label>
                 <textarea value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                  rows={3} className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" placeholder="Colors, design specs…" />
+                  rows={3} className="w-full border border-zinc-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+                  placeholder="Colors, design specs, deadline…" />
               </div>
               <button type="submit" disabled={sending}
-                className="w-full py-3 rounded-xl bg-zinc-900 text-white font-medium text-sm hover:bg-zinc-700 transition-colors">
-                {sending ? "Sending…" : "Request Quote"}
+                className="w-full py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 transition-colors">
+                {sending ? "Sending…" : "Request Quote →"}
               </button>
             </form>
           </>
@@ -314,7 +313,7 @@ function BulkQuoteModal({ product, onClose }: { product: typeof PRODUCTS[0]; onC
   );
 }
 
-// ─── CONFIGURATOR (2 steps: Style + Design → Add to Cart) ────────────────────
+// ─── CONFIGURATOR ─────────────────────────────────────────────────────────────
 
 const STEPS = ["Style", "Design"];
 
@@ -322,12 +321,10 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const { addItem, count } = useCart();
   const [step, setStep] = useState(0);
 
-  const [color, setColor] = useState(product.colors[0]);
-  const [size,  setSize]  = useState(product.sizes[2] ?? product.sizes[0]);
-
+  const [color,     setColor]     = useState(product.colors[0]);
+  const [size,      setSize]      = useState(product.sizes[2] ?? product.sizes[0]);
   const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
 
-  // Per-side design state
   const [activeTab,       setActiveTab]       = useState<"front" | "back">("front");
   const [previewSide,     setPreviewSide]     = useState<"front" | "back">("front");
   const [frontDesignSrc,  setFrontDesignSrc]  = useState("");
@@ -349,11 +346,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const hasAnyDesign = !!frontDesignSrc || !!backDesignSrc;
   const canAddToCart = hasAnyDesign || noDesign;
 
-  // Switch preview side when switching tabs
-  const handleTabSwitch = (tab: "front" | "back") => {
-    setActiveTab(tab);
-    setPreviewSide(tab);
-  };
+  const handleTabSwitch = (tab: "front" | "back") => { setActiveTab(tab); setPreviewSide(tab); };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0];
@@ -361,7 +354,6 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     const url = URL.createObjectURL(file);
     if (side === "front") { setFrontDesignSrc(url); setNoDesign(false); }
     else                  { setBackDesignSrc(url);  setNoDesign(false); }
-    // Switch to that side's DesignPlacer
     setPreviewSide(side);
     e.target.value = "";
   };
@@ -371,25 +363,19 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const primarySrc = frontDesignSrc || backDesignSrc;
-      const thumbnail = primarySrc ? await makeThumbnail(primarySrc) : "";
+      const thumbnail  = primarySrc ? await makeThumbnail(primarySrc) : "";
       await fetch("/api/designs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: session?.user?.id ?? null,
           customerEmail: session?.user?.email ?? null,
-          productId: product.id,
-          productName: product.name,
-          gsm: product.gsm,
-          colorName: color.name,
-          colorHex: color.hex,
-          size,
+          productId: product.id, productName: product.name, gsm: product.gsm,
+          colorName: color.name, colorHex: color.hex, size,
           printTier: [frontPrintTier, backPrintTier].filter(Boolean).join(" + ") || null,
           printDims: frontPrintDims || null,
-          blankPrice: product.blankPrice,
-          printPrice: totalPrint,
-          hasDesign: hasAnyDesign,
-          thumbnail,
+          blankPrice: product.blankPrice, printPrice: totalPrint,
+          hasDesign: hasAnyDesign, thumbnail,
         }),
       });
       setSaved(true);
@@ -400,29 +386,21 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
   const handleAddToCart = () => {
     addItem({
-      productId:      product.id,
-      productName:    product.name,
-      gsm:            product.gsm,
-      color:          color.name,
-      colorHex:       color.hex,
-      size,
-      qty:            1,
-      frontDesignUrl: frontDesignSrc,
-      backDesignUrl:  backDesignSrc,
-      frontPrintPrice,
-      backPrintPrice,
-      frontPrintTier,
-      backPrintTier,
-      printDims:      frontPrintDims,
+      productId: product.id, productName: product.name, gsm: product.gsm,
+      color: color.name, colorHex: color.hex, size, qty: 1,
+      frontDesignUrl: frontDesignSrc, backDesignUrl: backDesignSrc,
+      frontPrintPrice, backPrintPrice,
+      frontPrintTier, backPrintTier,
+      printDims: frontPrintDims,
       printTechnique: hasAnyDesign ? technique : "none",
-      blankPrice:     product.blankPrice,
+      blankPrice: product.blankPrice,
     });
     setAdded(true);
   };
 
   if (added) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)" }}>
         <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-2xl max-w-sm w-full mx-4 p-8 text-center">
           <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
@@ -437,7 +415,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
               + Add more
             </button>
             <Link href="/checkout" onClick={onClose}>
-              <button className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors flex items-center gap-1.5">
+              <button className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors">
                 Checkout ({count}) →
               </button>
             </Link>
@@ -450,26 +428,30 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const activeDesignSrc = previewSide === "front" ? frontDesignSrc : backDesignSrc;
 
   return (
-    <div className="fixed inset-0 z-50 flex overflow-hidden" style={{ background: "#f8f7f5" }}>
-      {/* Left panel — always-visible mockup */}
-      <div className="hidden lg:flex flex-col items-center justify-center w-[45%] bg-white border-r border-zinc-100 relative p-10">
+    <div className="fixed inset-0 z-50 flex overflow-hidden bg-white">
+      {/* ── Left: live mockup panel ── */}
+      <div className="hidden lg:flex flex-col items-center justify-center w-[44%] bg-[#f8f7f5] relative p-10 border-r border-zinc-100">
         <button onClick={onClose}
-          className="absolute top-6 left-6 flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-700 transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          className="absolute top-6 left-6 flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Back
         </button>
         <div className="absolute top-6 right-6 text-right">
-          <p className="text-xs text-zinc-400">{product.gsm}</p>
-          <p className="text-sm font-semibold">{product.name}</p>
+          <p className="text-[0.65rem] font-mono text-zinc-400">{product.gsm}</p>
+          <p className="text-sm font-black" style={{ letterSpacing: "-0.03em" }}>{product.name}</p>
         </div>
 
-        <div className="w-full max-w-xs">
+        {/* Halftone dot bg */}
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+
+        <div className="w-full max-w-xs relative z-10">
           {step === 1 && activeDesignSrc ? (
             previewSide === "front" ? (
-              <DesignPlacer key="front-placer" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+              <DesignPlacer key="fp" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
                 onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
             ) : (
-              <DesignPlacer key="back-placer" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+              <DesignPlacer key="bp" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
                 onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
             )
           ) : (
@@ -477,68 +459,72 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           )}
         </div>
 
-        {/* Front / Back flip toggle (only in Step 1) */}
         {step === 1 && (
-          <div className="mt-5 flex gap-2">
+          <div className="mt-5 flex gap-2 relative z-10">
             {(["front", "back"] as const).map((s) => (
               <button key={s} onClick={() => setPreviewSide(s)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
                   previewSide === s ? "bg-zinc-900 text-white border-zinc-900" : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
                 }`}>
-                {s === "front" ? "👕" : "🔄"} {s.charAt(0).toUpperCase() + s.slice(1)}
+                {s.charAt(0).toUpperCase() + s.slice(1)}
                 {((s === "front" && frontDesignSrc) || (s === "back" && backDesignSrc)) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 ml-0.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
                 )}
               </button>
             ))}
           </div>
         )}
 
-        <div className="mt-4 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-medium flex items-center gap-3">
-          <span>{color.name} · {size}</span>
-          <span className="w-px h-4 bg-white/20" />
-          <span className="font-bold">₹{itemTotal.toLocaleString("en-IN")}</span>
+        <div className="mt-5 flex items-center gap-3 bg-white rounded-full px-5 py-2.5 shadow-sm border border-zinc-100 relative z-10">
+          <div className="w-4 h-4 rounded-full border border-zinc-200 flex-shrink-0"
+            style={{ background: color.hex }} />
+          <span className="text-sm text-zinc-700 font-medium">{color.name} · {size}</span>
+          <span className="w-px h-4 bg-zinc-200" />
+          <span className="font-black text-zinc-900 text-sm">₹{itemTotal.toLocaleString("en-IN")}</span>
         </div>
       </div>
 
-      {/* Right panel — steps */}
+      {/* ── Right: step content ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile header */}
-        <div className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-zinc-200 bg-white">
+        <div className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-zinc-100">
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
-          <span className="font-semibold text-sm">{product.name}</span>
-          <span className="font-bold text-sm">₹{itemTotal.toLocaleString("en-IN")}</span>
+          <span className="font-black text-sm" style={{ letterSpacing: "-0.03em" }}>{product.name}</span>
+          <span className="font-black text-sm">₹{itemTotal.toLocaleString("en-IN")}</span>
         </div>
 
-        {/* Step pills */}
-        <div className="flex items-center gap-0 px-6 lg:px-10 pt-6 pb-4">
+        {/* Steps */}
+        <div className="flex items-center gap-0 px-6 lg:px-10 pt-6 pb-4 border-b border-zinc-50">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center">
               <button onClick={() => i < step && setStep(i)}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors ${i === step ? "text-zinc-900" : i < step ? "text-orange-500 cursor-pointer" : "text-zinc-400 cursor-default"}`}>
-                <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-semibold ${i === step ? "bg-zinc-900 text-white" : i < step ? "bg-orange-500 text-white" : "bg-zinc-200 text-zinc-500"}`}>
+                className={`flex items-center gap-2 text-sm font-bold transition-colors ${i === step ? "text-zinc-900" : i < step ? "text-orange-500 cursor-pointer" : "text-zinc-300 cursor-default"}`}>
+                <span className={`w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold ${i === step ? "bg-zinc-900 text-white" : i < step ? "bg-orange-500 text-white" : "bg-zinc-100 text-zinc-400"}`}>
                   {i < step ? "✓" : i + 1}
                 </span>
                 <span className="hidden sm:inline">{s}</span>
               </button>
-              {i < STEPS.length - 1 && <div className={`mx-2 h-px w-10 ${i < step ? "bg-orange-400" : "bg-zinc-200"}`} />}
+              {i < STEPS.length - 1 && <div className={`mx-3 h-px w-10 ${i < step ? "bg-orange-300" : "bg-zinc-100"}`} />}
             </div>
           ))}
         </div>
 
         {/* Step content */}
-        <div className="flex-1 overflow-y-auto px-6 lg:px-10 py-6">
+        <div className="flex-1 overflow-y-auto px-6 lg:px-10 py-8">
           <AnimatePresence mode="wait">
-            {/* Step 0 — Style */}
-            {step === 0 && (
-              <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Pick your style</h2>
-                <p className="text-zinc-500 text-sm mb-8">{product.fabric}</p>
 
+            {/* ── STEP 0: Style ── */}
+            {step === 0 && (
+              <motion.div key="s0" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }}>
+                <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-1">Step 1</p>
+                <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Pick your style</h2>
+                <p className="text-zinc-400 text-sm mb-8">{product.spec}</p>
+
+                {/* Colour */}
                 <div className="mb-8">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Colour — {color.name}</p>
+                  <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Colour — <span className="text-zinc-700">{color.name}</span></p>
                   <div className="flex flex-wrap gap-3">
                     {product.colors.map((c) => (
                       <button key={c.name} title={c.name} onClick={() => setColor(c)}
@@ -552,231 +538,218 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   </div>
                 </div>
 
+                {/* Size */}
                 <div className="mb-8">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Size</p>
+                  <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Size</p>
                   <div className="flex flex-wrap gap-2">
                     {product.sizes.map((s) => (
                       <button key={s} onClick={() => setSize(s)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all ${size === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-700 hover:border-zinc-400"}`}>
+                        className={`w-12 h-12 rounded-xl text-sm font-bold border-2 transition-all ${size === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-700 hover:border-zinc-400"}`}>
                         {s}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Print Technique */}
+                {/* Technique */}
                 <div className="mb-8">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Print Technique</p>
+                  <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Print Technique</p>
                   <div className="grid grid-cols-2 gap-3">
                     {(["DTG", "DTF"] as const).map((t) => (
                       <button key={t} onClick={() => setTechnique(t)}
                         className={`py-3.5 px-4 rounded-xl border-2 text-left transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
                         <span className="block text-sm font-black" style={{ letterSpacing: "-0.02em" }}>{t}</span>
                         <span className={`block text-[10px] font-normal mt-0.5 ${technique === t ? "text-zinc-300" : "text-zinc-400"}`}>
-                          {t === "DTG" ? "Natural feel · best on light fabrics" : "Vibrant on any color · heat-transfer"}
+                          {t === "DTG" ? "Natural feel · light fabrics" : "Vibrant on any colour"}
                         </span>
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Mobile mockup */}
                 <div className="lg:hidden w-44 mx-auto mb-8">
                   <TeeMockup color={color.hex} isOversized={isOversized} />
                 </div>
 
                 <button onClick={() => setStep(1)}
-                  className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors">
-                  Next — Add Your Design
+                  className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 transition-colors">
+                  Next — Upload your design →
                 </button>
               </motion.div>
             )}
 
-            {/* Step 1 — Design (Front + Back tabs) */}
+            {/* ── STEP 1: Design ── */}
             {step === 1 && (
-              <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Your design</h2>
-                <p className="text-zinc-500 text-sm mb-5">Upload different designs for front and back. At least one side needs a design.</p>
+              <motion.div key="s1" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }}>
+                <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-1">Step 2</p>
+                <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Add your design</h2>
+                <p className="text-zinc-400 text-sm mb-6">Upload front and/or back. Leave a side blank to skip it.</p>
 
                 {/* Front / Back tabs */}
                 <div className="flex gap-1 bg-zinc-100 rounded-xl p-1 mb-6">
                   {(["front", "back"] as const).map((tab) => {
-                    const hasDesign = tab === "front" ? !!frontDesignSrc : !!backDesignSrc;
+                    const has = tab === "front" ? !!frontDesignSrc : !!backDesignSrc;
                     return (
                       <button key={tab} onClick={() => handleTabSwitch(tab)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
-                          activeTab === tab ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all capitalize ${
+                          activeTab === tab ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-700"
                         }`}>
                         {tab} print
-                        {hasDesign && <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />}
+                        {has && <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />}
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Tab content — Front */}
+                {/* Front tab */}
                 {activeTab === "front" && (
                   <div>
                     {!frontDesignSrc ? (
-                      <label className="block w-full border-2 border-dashed border-zinc-300 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/30 transition-colors mb-4">
-                        <div className="text-4xl mb-3">🎨</div>
-                        <p className="font-semibold text-zinc-700 mb-1">Upload front design</p>
-                        <p className="text-xs text-zinc-400">PNG with transparent background works best</p>
+                      <label className="block w-full border-2 border-dashed border-zinc-200 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all mb-4 group">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
+                          <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                        </div>
+                        <p className="font-bold text-zinc-700 mb-1 text-sm">Upload front design</p>
+                        <p className="text-xs text-zinc-400">PNG with transparent bg · JPG · WebP</p>
                         <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
                           onChange={(e) => onFileChange(e, "front")} />
                       </label>
                     ) : (
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
-                          <DesignPlacer key="front-placer-mobile" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+                          <DesignPlacer key="fpm" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
                             onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
                         </div>
-                        <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl mb-2">
+                        <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">
                           <div>
-                            <p className="text-xs text-zinc-500">Front print size</p>
-                            <p className="font-semibold text-zinc-800">{frontPrintTier} ({frontPrintDims})</p>
+                            <p className="text-[0.65rem] text-zinc-500 font-medium">Front print</p>
+                            <p className="font-bold text-zinc-800">{frontPrintTier} <span className="text-zinc-400 font-normal">({frontPrintDims})</span></p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-zinc-500">Print cost</p>
-                            <p className="font-bold text-orange-600">+₹{frontPrintPrice}</p>
-                          </div>
+                          <p className="font-black text-orange-600">+₹{frontPrintPrice}</p>
                         </div>
                         <div className="flex gap-3">
-                          <label className="text-xs text-orange-500 underline hover:text-orange-600 cursor-pointer">
-                            Change design
-                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
-                              onChange={(e) => onFileChange(e, "front")} />
+                          <label className="text-xs text-orange-500 font-semibold underline hover:text-orange-600 cursor-pointer">
+                            Change
+                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onFileChange(e, "front")} />
                           </label>
                           <span className="text-zinc-200">·</span>
                           <button onClick={() => { setFrontDesignSrc(""); setFrontPrintPrice(0); setFrontPrintTier(""); setFrontPrintDims(""); }}
-                            className="text-xs text-zinc-400 underline hover:text-red-500 transition-colors">
-                            Remove
-                          </button>
+                            className="text-xs text-zinc-400 font-semibold underline hover:text-red-500 transition-colors">Remove</button>
                         </div>
                       </div>
                     )}
-                    {!frontDesignSrc && (
-                      <p className="text-xs text-zinc-400 text-center">Leave blank to skip front print</p>
-                    )}
+                    {!frontDesignSrc && <p className="text-xs text-zinc-300 text-center">Leave blank to skip front</p>}
                   </div>
                 )}
 
-                {/* Tab content — Back */}
+                {/* Back tab */}
                 {activeTab === "back" && (
                   <div>
                     {!backDesignSrc ? (
-                      <label className="block w-full border-2 border-dashed border-zinc-300 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/30 transition-colors mb-4">
-                        <div className="text-4xl mb-3">🎨</div>
-                        <p className="font-semibold text-zinc-700 mb-1">Upload back design</p>
-                        <p className="text-xs text-zinc-400">PNG with transparent background works best</p>
+                      <label className="block w-full border-2 border-dashed border-zinc-200 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all mb-4 group">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
+                          <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                        </div>
+                        <p className="font-bold text-zinc-700 mb-1 text-sm">Upload back design</p>
+                        <p className="text-xs text-zinc-400">PNG with transparent bg · JPG · WebP</p>
                         <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
                           onChange={(e) => onFileChange(e, "back")} />
                       </label>
                     ) : (
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
-                          <DesignPlacer key="back-placer-mobile" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+                          <DesignPlacer key="bpm" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
                             onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
                         </div>
-                        <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl mb-2">
+                        <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">
                           <div>
-                            <p className="text-xs text-zinc-500">Back print size</p>
-                            <p className="font-semibold text-zinc-800">{backPrintTier}</p>
+                            <p className="text-[0.65rem] text-zinc-500 font-medium">Back print</p>
+                            <p className="font-bold text-zinc-800">{backPrintTier}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-zinc-500">Print cost</p>
-                            <p className="font-bold text-orange-600">+₹{backPrintPrice}</p>
-                          </div>
+                          <p className="font-black text-orange-600">+₹{backPrintPrice}</p>
                         </div>
                         <div className="flex gap-3">
-                          <label className="text-xs text-orange-500 underline hover:text-orange-600 cursor-pointer">
-                            Change design
-                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
-                              onChange={(e) => onFileChange(e, "back")} />
+                          <label className="text-xs text-orange-500 font-semibold underline hover:text-orange-600 cursor-pointer">
+                            Change
+                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onFileChange(e, "back")} />
                           </label>
                           <span className="text-zinc-200">·</span>
                           <button onClick={() => { setBackDesignSrc(""); setBackPrintPrice(0); setBackPrintTier(""); }}
-                            className="text-xs text-zinc-400 underline hover:text-red-500 transition-colors">
-                            Remove
-                          </button>
+                            className="text-xs text-zinc-400 font-semibold underline hover:text-red-500 transition-colors">Remove</button>
                         </div>
                       </div>
                     )}
-                    {!backDesignSrc && (
-                      <p className="text-xs text-zinc-400 text-center">Leave blank to skip back print</p>
-                    )}
+                    {!backDesignSrc && <p className="text-xs text-zinc-300 text-center">Leave blank to skip back</p>}
                   </div>
                 )}
 
-                {/* Blank tee option */}
+                {/* Blank option */}
                 <div className="flex items-center gap-3 my-5">
-                  <hr className="flex-1 border-zinc-200" /><span className="text-xs text-zinc-400">or</span><hr className="flex-1 border-zinc-200" />
+                  <hr className="flex-1 border-zinc-100" /><span className="text-xs text-zinc-300 font-medium">or</span><hr className="flex-1 border-zinc-100" />
                 </div>
                 <button onClick={() => { setNoDesign(true); setFrontDesignSrc(""); setBackDesignSrc(""); setFrontPrintPrice(0); setBackPrintPrice(0); setFrontPrintTier(""); setBackPrintTier(""); setFrontPrintDims(""); }}
-                  className={`w-full py-3 rounded-xl border-2 text-sm font-medium transition-all mb-6 ${noDesign ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                  Blank tee — no print on either side
+                  className={`w-full py-3 rounded-xl border-2 text-sm font-bold transition-all mb-6 ${noDesign ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}>
+                  Blank tee — no print
                 </button>
 
-                {/* Validation note */}
                 {!canAddToCart && (
                   <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-4">
-                    ⚠️ Upload at least one design (front or back) to continue, or choose blank tee.
+                    ⚠️ Upload at least one design, or choose blank.
                   </p>
                 )}
 
-                {/* Price summary */}
+                {/* Price breakdown */}
                 <div className="bg-zinc-50 rounded-2xl p-4 mb-4 border border-zinc-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-zinc-400">Blank garment</p>
-                    <p className="text-sm font-semibold">₹{product.blankPrice}</p>
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-xs text-zinc-400">Blank garment</span>
+                    <span className="text-sm font-bold">₹{product.blankPrice}</span>
                   </div>
                   {frontPrintPrice > 0 && (
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs text-zinc-400">Front print ({frontPrintTier})</p>
-                      <p className="text-sm font-semibold text-orange-600">+₹{frontPrintPrice}</p>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-xs text-zinc-400">Front print ({frontPrintTier})</span>
+                      <span className="text-sm font-bold text-orange-600">+₹{frontPrintPrice}</span>
                     </div>
                   )}
                   {backPrintPrice > 0 && (
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs text-zinc-400">Back print ({backPrintTier})</p>
-                      <p className="text-sm font-semibold text-orange-600">+₹{backPrintPrice}</p>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-xs text-zinc-400">Back print ({backPrintTier})</span>
+                      <span className="text-sm font-bold text-orange-600">+₹{backPrintPrice}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-200">
-                    <p className="text-xs font-bold text-zinc-900">Item total</p>
-                    <p className="font-black text-zinc-900">₹{itemTotal.toLocaleString("en-IN")}</p>
+                  <div className="flex justify-between pt-2 mt-1 border-t border-zinc-200">
+                    <span className="text-xs font-black text-zinc-900 uppercase tracking-tight">Item total</span>
+                    <span className="font-black text-zinc-900">₹{itemTotal.toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-[10px] text-zinc-400">+ shipping at checkout</p>
-                    <span className="text-[10px] text-zinc-400">🇮🇳 Fulfilled from India</span>
-                  </div>
+                  <p className="text-[10px] text-zinc-300 mt-1.5">+ shipping &amp; GST at checkout · 🇮🇳 Fulfilled from India</p>
                 </div>
 
                 {/* Save design */}
                 <button disabled={saving} onClick={handleSaveDesign}
                   className={`w-full mb-3 py-3 rounded-2xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                    saved ? "border-green-400 bg-green-50 text-green-700" : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                    saved ? "border-green-400 bg-green-50 text-green-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:text-zinc-700"
                   } disabled:opacity-50`}>
                   {saved ? (
-                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Design saved to account!</>
-                  ) : saving ? (
-                    <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Saving…</>
-                  ) : (
+                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Saved!</>
+                  ) : saving ? "Saving…" : (
                     <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>Save design to account</>
                   )}
                 </button>
 
                 <div className="flex gap-3">
-                  <button onClick={() => setStep(0)} className="px-5 py-3 rounded-2xl border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
-                    Back
+                  <button onClick={() => setStep(0)}
+                    className="px-5 py-3.5 rounded-2xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">
+                    ← Back
                   </button>
                   <button disabled={!canAddToCart} onClick={handleAddToCart}
-                    className="flex-1 py-4 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                    className="flex-1 py-3.5 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     Add to Cart — ₹{itemTotal.toLocaleString("en-IN")}
                   </button>
                 </div>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
       </div>
@@ -787,46 +760,82 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 // ─── PRODUCT CARD ─────────────────────────────────────────────────────────────
 
 function ProductCard({ product, onOrder, onBulkQuote }: {
-  product: typeof PRODUCTS[0]; onOrder: () => void; onBulkQuote: () => void;
+  product: typeof PRODUCTS[0];
+  onOrder: () => void;
+  onBulkQuote: () => void;
 }) {
-  const [hoverColor, setHoverColor] = useState(product.colors[0]);
+  const [activeColor, setActiveColor] = useState(product.colors[0]);
   const isOversized = product.id.includes("oversized");
+
   return (
-    <motion.div whileHover={{ y: -4 }} className="bg-white rounded-3xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all shadow-sm hover:shadow-md">
-      <div className="relative bg-zinc-50 px-10 pt-8 pb-2" style={{ minHeight: 260 }}>
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className="group bg-white rounded-3xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-lg transition-all duration-300 flex flex-col"
+    >
+      {/* Mockup area */}
+      <div className="relative overflow-hidden" style={{ background: "#f4f3f0" }}>
+        {/* Halftone dot background */}
+        <div className="absolute inset-0 opacity-[0.045] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+
         {product.tag && (
-          <span className="absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full bg-zinc-900 text-white">{product.tag}</span>
+          <span className="absolute top-4 left-4 z-10 text-[0.65rem] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-zinc-900 text-white">
+            {product.tag}
+          </span>
         )}
-        <div className="w-full max-w-[180px] mx-auto">
-          <TeeMockup color={hoverColor.hex} isOversized={isOversized} />
-        </div>
-      </div>
-      <div className="px-6 pb-6 pt-4">
-        <div className="flex items-start justify-between mb-1">
-          <div>
-            <h3 className="font-black text-zinc-900 text-lg leading-tight" style={{ letterSpacing: "-0.03em" }}>{product.name}</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">{product.gsm}</p>
-          </div>
-          <p className="text-lg font-black text-zinc-900 shrink-0">from ₹{product.blankPrice}</p>
-        </div>
-        <p className="text-xs text-zinc-500 mb-4">{product.fit}</p>
-        <div className="flex gap-2 mb-5">
+
+        {/* Color strip */}
+        <div className="absolute top-4 right-4 z-10 flex gap-1.5">
           {product.colors.map((c) => (
-            <button key={c.name} title={c.name} onMouseEnter={() => setHoverColor(c)} onClick={() => setHoverColor(c)}
-              className="w-5 h-5 rounded-full transition-transform hover:scale-125 focus:outline-none"
+            <button key={c.name} title={c.name}
+              onMouseEnter={() => setActiveColor(c)}
+              onClick={() => setActiveColor(c)}
+              className="w-4 h-4 rounded-full transition-transform hover:scale-125 focus:outline-none"
               style={{
                 background: c.hex,
-                border: hoverColor.name === c.name ? "2px solid #f15533" : c.border ? "1.5px solid #d1d5db" : "none",
-                boxShadow: hoverColor.name === c.name ? "0 0 0 1px white, 0 0 0 3px #f15533" : "none",
+                border: activeColor.name === c.name ? "2px solid #f15533" : c.border ? "1.5px solid #cbd5e1" : "1.5px solid transparent",
+                boxShadow: activeColor.name === c.name ? "0 0 0 1px white, 0 0 0 3px #f15533" : "none",
               }} />
           ))}
         </div>
-        <div className="flex gap-2">
-          <button onClick={onOrder} className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+
+        <div className="px-10 pt-10 pb-4">
+          <div className="w-full max-w-[180px] mx-auto drop-shadow-sm">
+            <TeeMockup color={activeColor.hex} isOversized={isOversized} />
+          </div>
+        </div>
+      </div>
+
+      {/* Info area */}
+      <div className="p-5 flex flex-col flex-1">
+        <div className="mb-4">
+          <div className="flex items-start justify-between gap-2 mb-0.5">
+            <h3 className="font-black text-zinc-900 text-base leading-tight" style={{ letterSpacing: "-0.03em" }}>
+              {product.name}
+            </h3>
+            <span className="font-black text-zinc-900 text-base flex-shrink-0">₹{product.blankPrice}</span>
+          </div>
+          <p className="text-[0.7rem] font-mono text-zinc-400">{product.gsm}</p>
+          <p className="text-xs text-zinc-500 mt-1">{product.fit}</p>
+        </div>
+
+        {/* Bulk tiers */}
+        <div className="flex gap-1.5 flex-wrap mb-5">
+          {product.bulkTiers.map((t) => (
+            <span key={t.qty} className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-zinc-50 border border-zinc-100 text-zinc-500">
+              {t.qty} pcs → {t.price}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex gap-2 mt-auto">
+          <button onClick={onOrder}
+            className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
             Customise →
           </button>
-          <button onClick={onBulkQuote} title="Bulk quote (MOQ 50)"
-            className="px-4 py-3 rounded-xl border-2 border-zinc-200 text-zinc-600 text-sm font-medium hover:border-zinc-400 transition-colors">
+          <button onClick={onBulkQuote} title="Request bulk quote (MOQ 50)"
+            className="px-4 py-3 rounded-xl border-2 border-zinc-100 text-zinc-500 text-sm font-bold hover:border-zinc-300 hover:text-zinc-700 transition-colors">
             Bulk
           </button>
         </div>
@@ -839,121 +848,136 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
 
 export default function StudioPage() {
   const [activeProduct, setActiveProduct] = useState<typeof PRODUCTS[0] | null>(null);
-  const [bulkProduct, setBulkProduct] = useState<typeof PRODUCTS[0] | null>(null);
+  const [bulkProduct,   setBulkProduct]   = useState<typeof PRODUCTS[0] | null>(null);
   const { count } = useCart();
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f8f7f5]">
-        {/* Hero */}
-        <div className="pt-28 pb-16 px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-orange-500 mb-4">
-              Halftone Labs Studio
-            </span>
-            <h1 className="text-5xl sm:text-6xl font-black text-zinc-900 leading-tight mb-4" style={{ letterSpacing: "-0.04em" }}>
-              Design. Print. Ship.
-            </h1>
-            <p className="text-zinc-500 text-lg max-w-md mx-auto mb-8">
-              Custom printed tees, MOQ 1. DTG print on premium blanks — shipped in 5–7 days.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-500">
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />MOQ 1</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-orange-400 inline-block" />DTG / DTF</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />Ships worldwide</span>
-            </div>
 
-            {count > 0 && (
-              <Link href="/checkout">
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-full bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors cursor-pointer">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                  Checkout {count} item{count !== 1 ? "s" : ""} →
-                </motion.div>
-              </Link>
-            )}
-          </motion.div>
+      <div className="min-h-screen" style={{ background: "#f8f7f5" }}>
+
+        {/* ── Hero ── */}
+        <div className="relative overflow-hidden border-b border-zinc-200/60">
+          {/* Halftone dot bg */}
+          <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+
+          <div className="relative z-10 max-w-6xl mx-auto px-6 pt-28 pb-20">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-5">[ Halftone Labs Studio ]</p>
+              <h1 className="text-[clamp(2.8rem,8vw,6.5rem)] font-black text-zinc-900 leading-[0.88] mb-6"
+                style={{ letterSpacing: "-0.055em" }}>
+                Design it.
+                <br />
+                <span style={{ WebkitTextStroke: "2px #111", color: "transparent" }}>We&nbsp;print it.</span>
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-zinc-500 mb-8">
+                {[
+                  { dot: "#22c55e", text: "MOQ 1 — no bulk required" },
+                  { dot: "#f97316", text: "DTG & DTF printing" },
+                  { dot: "#3b82f6", text: "Ships in 5–7 days" },
+                  { dot: "#a855f7", text: "Fulfilled from India" },
+                ].map(({ dot, text }) => (
+                  <span key={text} className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />
+                    {text}
+                  </span>
+                ))}
+              </div>
+
+              {count > 0 && (
+                <Link href="/checkout">
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors cursor-pointer">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    Checkout {count} item{count !== 1 ? "s" : ""} →
+                  </motion.div>
+                </Link>
+              )}
+            </motion.div>
+          </div>
         </div>
 
-        {/* Products grid */}
-        <div className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* ── Products ── */}
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-1">Blanks catalogue</p>
+              <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Choose your blank</h2>
+            </div>
+            <p className="text-xs text-zinc-400 hidden sm:block">All prices per unit · GST extra</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PRODUCTS.map((p, i) => (
-              <motion.div key={p.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                <ProductCard product={p} onOrder={() => setActiveProduct(p)} onBulkQuote={() => setBulkProduct(p)} />
+              <motion.div key={p.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07, duration: 0.45 }}>
+                <ProductCard product={p}
+                  onOrder={() => setActiveProduct(p)}
+                  onBulkQuote={() => setBulkProduct(p)} />
               </motion.div>
             ))}
           </div>
+        </div>
 
-          {/* DTG vs DTF info section */}
-          <div className="mt-16">
-            <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-3 text-center">Print Techniques</p>
-            <h2 className="text-2xl font-black text-zinc-900 mb-8 text-center" style={{ letterSpacing: "-0.04em" }}>DTG vs DTF — what&apos;s the difference?</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-              {/* DTG */}
-              <div className="bg-white rounded-2xl p-6 border border-zinc-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-black">DTG</span>
-                  </div>
-                  <div>
-                    <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.02em" }}>Direct-to-Garment</h3>
-                    <p className="text-xs text-zinc-400">Ink printed directly onto fabric</p>
-                  </div>
-                </div>
-                <ul className="space-y-2">
-                  {["Soft, natural hand-feel — feels like part of the fabric","Photographic quality, unlimited colours","Best on white & light-coloured garments","Slight fade over many washes — wash inside-out","No MOQ — perfect for single pieces"].map((t) => (
-                    <li key={t} className="flex items-start gap-2 text-xs text-zinc-600">
-                      <svg className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* DTF */}
-              <div className="bg-white rounded-2xl p-6 border border-zinc-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-black">DTF</span>
-                  </div>
-                  <div>
-                    <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.02em" }}>Direct-to-Film</h3>
-                    <p className="text-xs text-zinc-400">Design printed on film then heat-pressed</p>
-                  </div>
-                </div>
-                <ul className="space-y-2">
-                  {["Works on ANY colour fabric — even black","Vibrant, pop-out colours with crisp edges","Slightly raised texture on the print","More durable wash fastness than DTG","Great for dark garments & exact Pantone matching"].map((t) => (
-                    <li key={t} className="flex items-start gap-2 text-xs text-zinc-600">
-                      <svg className="w-3.5 h-3.5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        {/* ── DTG vs DTF ── */}
+        <div className="max-w-6xl mx-auto px-6 pb-24">
+          <div className="border-t border-zinc-200/60 pt-16">
+            <div className="text-center mb-10">
+              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">Print Techniques</p>
+              <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
+                DTG vs DTF — what&apos;s the difference?
+              </h2>
             </div>
-            {/* Feature cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
               {[
-                { icon: "📦", title: "5–7 Day Shipping", desc: "Domestic delivery via top couriers. International ships in 10–18 days." },
-                { icon: "🎨", title: "Bulk Screen Print", desc: "Got a big run? MOQ 50 with screen print pricing that beats the market." },
-                { icon: "🇮🇳", title: "Made in India", desc: "Every piece fulfilled from our facility in India with strict quality checks." },
-              ].map((item) => (
-                <div key={item.title} className="bg-white rounded-2xl p-6 border border-zinc-100">
-                  <div className="text-3xl mb-3">{item.icon}</div>
-                  <h3 className="font-bold text-zinc-900 mb-1">{item.title}</h3>
-                  <p className="text-sm text-zinc-500">{item.desc}</p>
+                {
+                  id: "DTG", color: "#111", label: "Direct-to-Garment", sub: "Ink printed directly onto fabric",
+                  pros: ["Soft hand-feel — part of the fabric","Full colour & photographic gradients","Best on white & light fabrics","No MOQ — perfect for singles"],
+                  accent: "text-zinc-600",
+                },
+                {
+                  id: "DTF", color: "#f97316", label: "Direct-to-Film", sub: "Design printed on film, heat-pressed",
+                  pros: ["Works on ANY colour — even black","Vibrant pop-out colours, crisp edges","Slightly raised texture","Better wash fastness than DTG"],
+                  accent: "text-orange-500",
+                },
+              ].map((t) => (
+                <div key={t.id} className="bg-white rounded-2xl p-6 border border-zinc-100">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: t.color }}>
+                      <span className="text-white text-xs font-black">{t.id}</span>
+                    </div>
+                    <div>
+                      <p className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.02em" }}>{t.label}</p>
+                      <p className="text-[0.7rem] text-zinc-400">{t.sub}</p>
+                    </div>
+                  </div>
+                  <ul className="space-y-2">
+                    {t.pros.map((pro) => (
+                      <li key={pro} className="flex items-start gap-2 text-xs text-zinc-600">
+                        <svg className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${t.accent}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        {pro}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-zinc-500 text-sm">
-              Questions? <a href="mailto:hello@halftonelabs.in" className="text-orange-500 font-medium hover:underline">hello@halftonelabs.in</a>
-            </p>
+            <div className="text-center">
+              <p className="text-sm text-zinc-400">
+                Questions? <a href="mailto:hello@halftonelabs.in" className="text-orange-500 font-semibold hover:underline">hello@halftonelabs.in</a>
+              </p>
+            </div>
           </div>
         </div>
+
       </div>
 
       <AnimatePresence>

@@ -7,9 +7,10 @@ import Link from "next/link";
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const PRODUCTS = [
-  { id: "regular-tee",   label: "Regular Tee",   blankPrice: 400 },
-  { id: "oversized-tee", label: "Oversized Tee",  blankPrice: 500 },
-  { id: "hoodie",        label: "Hoodie",          blankPrice: 900 },
+  { id: "regular-tee",      label: "Regular Tee",         sub: "180 GSM · Combed cotton", blankPrice: 400 },
+  { id: "oversized-tee-sj", label: "Oversized Tee (SJ)",  sub: "220 GSM · Single jersey", blankPrice: 500 },
+  { id: "oversized-tee-ft", label: "Oversized Tee (FT)",  sub: "240 GSM · French terry",  blankPrice: 600 },
+  { id: "baby-tee",         label: "Baby Tee",            sub: "180 GSM · Cropped fit",   blankPrice: 380 },
 ] as const;
 
 type ProductId = (typeof PRODUCTS)[number]["id"];
@@ -165,7 +166,7 @@ export default function PriceCalculator() {
                     key={p.id}
                     active={product === p.id}
                     onClick={() => setProduct(p.id)}
-                    sub={`blank ${fmt(p.blankPrice)}`}
+                    sub={`${p.sub} · ${fmt(p.blankPrice)}`}
                   >
                     {p.label}
                   </Pill>
