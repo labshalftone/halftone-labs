@@ -602,22 +602,24 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                   </button>
                 </div>
 
-                {/* Save design */}
-                <div className="flex items-center justify-center mt-3">
-                  <button
-                    disabled={(!designSrc && !noDesign) || saving}
-                    onClick={handleSaveDesign}
-                    className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-zinc-700 disabled:opacity-40 transition-colors"
-                  >
-                    {saved ? (
-                      <><svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg><span className="text-green-600">Design saved!</span></>
-                    ) : saving ? (
-                      <><svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg><span>Saving…</span></>
-                    ) : (
-                      <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg><span>Save design to account</span></>
-                    )}
-                  </button>
-                </div>
+                {/* Save design — always visible, prominent */}
+                <button
+                  disabled={saving}
+                  onClick={handleSaveDesign}
+                  className={`w-full mt-3 py-3 rounded-2xl border-2 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                    saved
+                      ? "border-green-400 bg-green-50 text-green-700"
+                      : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50"
+                  } disabled:opacity-50`}
+                >
+                  {saved ? (
+                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Design saved to account!</>
+                  ) : saving ? (
+                    <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Saving…</>
+                  ) : (
+                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>Save design to account</>
+                  )}
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
