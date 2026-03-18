@@ -143,6 +143,8 @@ export const PRODUCTS = [
       },
       {
         name: "Black", hex: "#111111",
+        mockupFront: "/mockups/baby-tee/Mannequin_Image5.png",
+        mockupBack:  "/mockups/baby-tee/Mannequin_Image6.png",
       },
       {
         name: "Baby Pink", hex: "#F5C2C7",
