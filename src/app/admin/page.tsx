@@ -44,6 +44,8 @@ type Order = {
   pin: string;
   status: string;
   created_at: string;
+  front_design_url: string | null;
+  back_design_url: string | null;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -262,6 +264,31 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                   ))}
                 </div>
               </div>
+
+              {/* Print Files */}
+              {(selected.front_design_url || selected.back_design_url) && (
+                <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Print Files</p>
+                  <div className="flex gap-3">
+                    {selected.front_design_url && (
+                      <a href={selected.front_design_url} target="_blank" rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-zinc-200 hover:border-zinc-400 transition-colors">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={selected.front_design_url} alt="Front design" className="w-24 h-24 object-contain rounded-lg bg-zinc-50" />
+                        <span className="text-xs font-semibold text-zinc-600">Front ↗</span>
+                      </a>
+                    )}
+                    {selected.back_design_url && (
+                      <a href={selected.back_design_url} target="_blank" rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-zinc-200 hover:border-zinc-400 transition-colors">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={selected.back_design_url} alt="Back design" className="w-24 h-24 object-contain rounded-lg bg-zinc-50" />
+                        <span className="text-xs font-semibold text-zinc-600">Back ↗</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Timeline */}
               <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">

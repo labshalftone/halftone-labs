@@ -56,24 +56,31 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                 items.map((item) => (
                   <div key={item.cartId} className="p-3 rounded-2xl bg-zinc-50 border border-zinc-100">
                     <div className="flex gap-3">
-                      {/* Thumbnails — show front + back if both exist */}
+                      {/* Thumbnails — show composite mockup if available, else fall back to design-on-colour */}
                       <div className="flex gap-1 flex-shrink-0">
-                        {item.frontDesignUrl || (!item.backDesignUrl) ? (
-                          <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
-                            style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
-                            {item.frontDesignUrl
-                              // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={item.frontDesignUrl} alt="front" className="w-9 h-9 object-contain" />
-                              : <span className="text-[9px] text-white/50 leading-tight text-center px-1">blank</span>
-                            }
-                          </div>
-                        ) : null}
-                        {item.backDesignUrl && (
-                          <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
-                            style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.backDesignUrl} alt="back" className="w-9 h-9 object-contain" />
-                          </div>
+                        {item.thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={item.thumbnail} className="w-14 h-14 object-cover rounded-xl" alt="product" />
+                        ) : (
+                          <>
+                            {item.frontDesignUrl || (!item.backDesignUrl) ? (
+                              <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                                style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
+                                {item.frontDesignUrl
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  ? <img src={item.frontDesignUrl} alt="front" className="w-9 h-9 object-contain" />
+                                  : <span className="text-[9px] text-white/50 leading-tight text-center px-1">blank</span>
+                                }
+                              </div>
+                            ) : null}
+                            {item.backDesignUrl && (
+                              <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                                style={{ background: item.colorHex, border: "1px solid rgba(0,0,0,0.08)" }}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={item.backDesignUrl} alt="back" className="w-9 h-9 object-contain" />
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
 

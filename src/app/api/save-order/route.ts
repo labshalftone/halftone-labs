@@ -1,5 +1,22 @@
+// ALTER TABLE orders ADD COLUMN IF NOT EXISTS front_design_url text;
+// ALTER TABLE orders ADD COLUMN IF NOT EXISTS back_design_url text;
+
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+
+async function uploadDesign(db: ReturnType<typeof createAdminClient>, dataUrl: string, path: string): Promise<string | null> {
+  try {
+    const base64 = dataUrl.split(",")[1];
+    if (!base64) return null;
+    const buffer = Buffer.from(base64, "base64");
+    const { error } = await db.storage.from("store-assets").upload(path, buffer, {
+      contentType: "image/png", upsert: true,
+    });
+    if (error) return null;
+    const { data } = db.storage.from("store-assets").getPublicUrl(path);
+    return data.publicUrl;
+  } catch { return null; }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,11 +26,20 @@ export async function POST(req: NextRequest) {
       product, color, size, printTier, printDimensions,
       blankPrice, printPrice, shipping, total,
       couponCode, discountAmount,
+      frontDesignUrl, backDesignUrl,
       customerName, customerEmail, customerPhone,
       address, city, pin, country, userId,
     } = body;
 
     const db = createAdminClient();
+
+    // Upload design files if present
+    const frontDesignStorageUrl = frontDesignUrl
+      ? await uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)
+      : null;
+    const backDesignStorageUrl = backDesignUrl
+      ? await uploadDesign(db, backDesignUrl, `designs/${orderRef}/back.png`)
+      : null;
 
     // Save order
     const { data: order, error } = await db.from("orders").insert({
@@ -29,6 +55,8 @@ export async function POST(req: NextRequest) {
       shipping, total,
       coupon_code: couponCode ?? null,
       discount_amount: discountAmount ?? 0,
+      front_design_url: frontDesignStorageUrl,
+      back_design_url: backDesignStorageUrl,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,
@@ -74,6 +102,8 @@ export async function POST(req: NextRequest) {
           email: customerEmail,
           phone: customerPhone,
           address: `${address}, ${city} – ${pin}`,
+          front_design: frontDesignStorageUrl ?? "none",
+          back_design: backDesignStorageUrl ?? "none",
         }),
       });
     } catch {}

@@ -29,6 +29,43 @@ async function makeThumbnail(src: string): Promise<string> {
   });
 }
 
+async function makeCompositeThumbnail(
+  mockupSrc: string,
+  designSrc: string,
+  zone: { left: number; top: number; width: number; height: number }
+): Promise<string> {
+  return new Promise((resolve) => {
+    const SIZE = 300;
+    const canvas = document.createElement("canvas");
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { resolve(""); return; }
+
+    const mockup = new Image();
+    mockup.crossOrigin = "anonymous";
+    mockup.onload = () => {
+      ctx.drawImage(mockup, 0, 0, SIZE, SIZE);
+      const design = new Image();
+      design.onload = () => {
+        const zLeft   = (zone.left   / 100) * SIZE;
+        const zTop    = (zone.top    / 100) * SIZE;
+        const zWidth  = (zone.width  / 100) * SIZE;
+        const zHeight = (zone.height / 100) * SIZE;
+        const aspect = design.width / design.height;
+        let dw = zWidth * 0.75;
+        let dh = dw / aspect;
+        if (dh > zHeight * 0.75) { dh = zHeight * 0.75; dw = dh * aspect; }
+        ctx.drawImage(design, zLeft + (zWidth - dw) / 2, zTop + (zHeight - dh) / 2, dw, dh);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.85));
+      design.src = designSrc;
+    };
+    mockup.onerror = () => resolve("");
+    mockup.src = mockupSrc;
+  });
+}
+
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const ZONE_PCT = { x: 0.28, y: 0.22, w: 0.44, h: 0.44 };
@@ -116,10 +153,11 @@ function DesignPlacer({
 
   // Clamp design centre within the photo print zone
   const clamp = useCallback((x: number, y: number, size: number) => {
-    const half = size / 2;
+    const hx = size / 2;          // horizontal: keep design inside zone left/right
+    const hy = Math.min(size / 2, zone.height * 0.08); // vertical: tiny margin so full zone is usable
     return {
-      x: Math.max(zone.left + half, Math.min(zone.left + zone.width - half, x)),
-      y: Math.max(zone.top + half, Math.min(zone.top + zone.height - half, y)),
+      x: Math.max(zone.left + hx, Math.min(zone.left + zone.width  - hx, x)),
+      y: Math.max(zone.top  + hy, Math.min(zone.top  + zone.height - hy, y)),
     };
   }, [zone]);
 
@@ -519,7 +557,13 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     setSaving(false);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const zone = photoZone[zoneKey];
+    const thumbnail = color.mockupFront && frontDesignSrc
+      ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, zone)
+      : color.mockupFront && backDesignSrc
+      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, zone)
+      : "";
     addItem({
       productId: product.id, productName: product.name, gsm: product.gsm,
       color: color.name, colorHex: color.hex, size, qty: 1,
@@ -529,6 +573,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       printDims: frontPrintDims,
       printTechnique: hasAnyDesign ? technique : "none",
       blankPrice: product.blankPrice,
+      thumbnail,
+      mockupFront: color.mockupFront ?? "",
     });
     // Record that checkout was initiated from Studio
     sessionStorage.setItem("checkout_origin", JSON.stringify({ type: "studio" }));
@@ -584,7 +630,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
             style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
         )}
 
-        <div className="w-full max-w-xs relative z-10">
+        <div className="w-full relative z-10">
           {step === 1 && activeDesignSrc ? (
             previewSide === "front" ? (
               <DesignPlacer key="fp" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
@@ -1025,7 +1071,38 @@ export default function StudioPage() {
   const [activeProduct, setActiveProduct] = useState<typeof PRODUCTS[0] | null>(null);
   const [bulkProduct,   setBulkProduct]   = useState<typeof PRODUCTS[0] | null>(null);
   const [sizeGuide,     setSizeGuide]     = useState(false);
+  const [allProducts,   setAllProducts]   = useState<typeof PRODUCTS>(PRODUCTS);
   const { count } = useCart();
+
+  // Merge static products with any active DB products from admin
+  useEffect(() => {
+    fetch("/api/studio-products")
+      .then((r) => r.json())
+      .then((dbProducts) => {
+        if (!Array.isArray(dbProducts) || dbProducts.length === 0) return;
+        // Map DB product shape → same shape as PRODUCTS
+        const mapped = dbProducts.map((p: {
+          id: string; name: string; gsm?: string; description?: string;
+          blank_price: number; type: string; size_guide_key: string;
+          colors: typeof PRODUCTS[0]["colors"]; active: boolean;
+        }) => ({
+          id: p.id,
+          name: p.name,
+          gsm: p.gsm ?? "",
+          spec: "",
+          fit: "",
+          description: p.description ?? "",
+          blankPrice: p.blank_price,
+          sizes: p.type === "baby" ? ["XS","S","M","L","XL","2XL"] : ["XS","S","M","L","XL","2XL","3XL"],
+          sizeGuideKey: p.size_guide_key as typeof PRODUCTS[0]["sizeGuideKey"],
+          colors: p.colors ?? [],
+          bulkTiers: [] as typeof PRODUCTS[0]["bulkTiers"],
+          tag: null as string | null,
+        }));
+        setAllProducts([...PRODUCTS, ...mapped]);
+      })
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -1092,7 +1169,7 @@ export default function StudioPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PRODUCTS.map((p, i) => (
+            {allProducts.map((p, i) => (
               <motion.div key={p.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -213,6 +213,8 @@ export default function CheckoutPage() {
                   totalForeign: grandTotalForeign,
                   couponCode: appliedCoupon?.code ?? null,
                   discountAmount: discount,
+                  frontDesignUrl: items.map(i => i.frontDesignUrl || "").find(Boolean) ?? null,
+                  backDesignUrl:  items.map(i => i.backDesignUrl  || "").find(Boolean) ?? null,
                   customerName: form.name,
                   customerEmail: form.email,
                   customerPhone: form.phone,

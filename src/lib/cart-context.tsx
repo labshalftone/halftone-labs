@@ -26,6 +26,10 @@ export interface CartItem {
 
   blankPrice: number;       // per unit blank garment price
 
+  // Composite thumbnail — mockup with design overlaid (optional)
+  thumbnail?: string;
+  mockupFront?: string;
+
   // Derived — computed by addItem, do not set manually
   printPrice: number;       // frontPrintPrice + backPrintPrice (per unit)
   side: "front" | "back" | "both" | "none";
@@ -73,7 +77,7 @@ function deriveFields(item: AddItemPayload): Omit<CartItem, "cartId"> {
   const designDataUrl = item.frontDesignUrl || item.backDesignUrl;
   const tiers = [item.frontPrintTier, item.backPrintTier].filter(Boolean);
   const printTier   = tiers.length > 1 ? tiers.join(" + ") : tiers[0] ?? "";
-  return { ...item, printPrice, side, hasDesign, designDataUrl, printTier };
+  return { ...item, printPrice, side, hasDesign, designDataUrl, printTier, thumbnail: item.thumbnail ?? "", mockupFront: item.mockupFront ?? "" };
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
