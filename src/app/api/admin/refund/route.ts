@@ -12,11 +12,12 @@ async function sendCancellationEmail(p: {
   amount: number;
   refundId: string | null;
   isFree: boolean;
+  isWalletPayment?: boolean;
 }) {
   const key = process.env.RESEND_API_KEY;
   if (!key) { console.warn("[refund] RESEND_API_KEY not set"); return; }
 
-  const { orderRef, customerName, customerEmail, amount, refundId, isFree } = p;
+  const { orderRef, customerName, customerEmail, amount, refundId, isFree, isWalletPayment } = p;
 
   const refundSection = isFree
     ? `<tr><td style="padding:0 32px 24px;">
@@ -26,12 +27,30 @@ async function sendCancellationEmail(p: {
           </p>
         </div>
       </td></tr>`
-    : `<tr><td style="padding:0 32px 24px;">
+    : isWalletPayment
+      ? `<tr><td style="padding:0 32px 24px;">
+          <div style="background:#f0fdf4;border-radius:8px;padding:20px 24px;border:1px solid #bbf7d0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-collapse:collapse;">
+              <tr>
+                <td style="color:#666666;padding:6px 0;border-bottom:1px solid #d1fae5;">Refund amount</td>
+                <td style="color:#111111;font-weight:700;padding:6px 0;border-bottom:1px solid #d1fae5;text-align:right;">₹${Number(amount).toLocaleString("en-IN")}</td>
+              </tr>
+              <tr>
+                <td style="color:#666666;padding:6px 0 0;">Refunded to</td>
+                <td style="color:#16a34a;font-weight:700;padding:6px 0 0;text-align:right;">Halftone Wallet</td>
+              </tr>
+            </table>
+            <p style="margin:14px 0 0;font-size:13px;color:#15803d;line-height:1.5;">
+              Your refund has been credited instantly to your Halftone Wallet. You can use it for your next order.
+            </p>
+          </div>
+        </td></tr>`
+      : `<tr><td style="padding:0 32px 24px;">
         <div style="background:#f9f9f9;border-radius:8px;padding:20px 24px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-collapse:collapse;">
             <tr>
               <td style="color:#666666;padding:6px 0;border-bottom:1px solid #eeeeee;">Refund amount</td>
-              <td style="color:#111111;font-weight:700;padding:6px 0;border-bottom:1px solid #eeeeee;text-align:right;">₹${amount.toLocaleString("en-IN")}</td>
+              <td style="color:#111111;font-weight:700;padding:6px 0;border-bottom:1px solid #eeeeee;text-align:right;">₹${Number(amount).toLocaleString("en-IN")}</td>
             </tr>
             ${refundId ? `<tr>
               <td style="color:#666666;padding:6px 0;border-bottom:1px solid #eeeeee;">Refund ID</td>
@@ -98,11 +117,59 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createAdminClient();
-  const isFree = !razorpayPaymentId || razorpayPaymentId === "FREE";
+
+  // Fetch order to get user_id (needed for wallet refund)
+  const { data: orderRow } = await db
+    .from("orders")
+    .select("user_id")
+    .eq("id", orderId)
+    .maybeSingle();
+  const userId = orderRow?.user_id ?? null;
+
+  // ── Detect payment type ───────────────────────────────────────────────────
+  const isWalletPayment =
+    razorpayPaymentId?.startsWith("WALLET") ||
+    // Fallback: check wallet_transactions for a debit matching this orderRef
+    (!razorpayPaymentId && userId && (await db
+      .from("wallet_transactions")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("reference_id", orderRef)
+      .eq("type", "debit")
+      .limit(1)
+      .then(({ data }) => (data?.length ?? 0) > 0)));
+
+  const isFree = !razorpayPaymentId && !isWalletPayment;
   let refundId: string | null = null;
 
+  // ── Wallet refund ─────────────────────────────────────────────────────────
+  if (isWalletPayment && userId) {
+    // Credit back to wallet
+    const { data: wallet } = await db
+      .from("wallets")
+      .select("balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const newBalance = Number(wallet?.balance ?? 0) + Number(amount);
+    await db.from("wallets").update({
+      balance: newBalance,
+      updated_at: new Date().toISOString(),
+    }).eq("user_id", userId);
+
+    await db.from("wallet_transactions").insert({
+      user_id:      userId,
+      amount:       Number(amount),
+      type:         "credit",
+      description:  `Refund for cancelled order ${orderRef}`,
+      reference_id: `REFUND-${orderRef}`,
+    });
+
+    refundId = `WALLET-REFUND-${orderRef}`;
+  }
+
   // ── Razorpay refund (only for paid orders) ────────────────────────────────
-  if (!isFree) {
+  if (!isFree && !isWalletPayment) {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
     if (!keyId || !keySecret) {
@@ -155,7 +222,9 @@ export async function POST(req: NextRequest) {
   // ── Insert milestone ──────────────────────────────────────────────────────
   const milestoneDesc = isFree
     ? "Order cancelled (free order — no refund needed)."
-    : `Refund of ₹${amount.toLocaleString("en-IN")} initiated via Razorpay. Refund ID: ${refundId}`;
+    : isWalletPayment
+      ? `₹${Number(amount).toLocaleString("en-IN")} refunded to Halftone Wallet.`
+      : `Refund of ₹${Number(amount).toLocaleString("en-IN")} initiated via Razorpay. Refund ID: ${refundId}`;
 
   await db.from("milestones").insert({
     order_id: orderId,
@@ -179,6 +248,7 @@ export async function POST(req: NextRequest) {
         amount,
         refundId,
         isFree,
+        isWalletPayment: !!isWalletPayment,
       });
     }
   } catch (e) {

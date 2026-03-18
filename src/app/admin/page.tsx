@@ -449,13 +449,23 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      {selected.razorpay_payment_id && selected.razorpay_payment_id !== "FREE" ? (
-                        <div className="text-xs text-zinc-500 font-medium">
-                          Payment ID: <span className="font-mono text-zinc-700">{selected.razorpay_payment_id}</span>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-zinc-500 italic">This was a free order. No refund needed.</div>
-                      )}
+                      {(() => {
+                        const pid = selected.razorpay_payment_id;
+                        const isWallet = pid?.startsWith("WALLET");
+                        const isRazorpay = pid && pid !== "FREE" && !isWallet;
+                        return isWallet ? (
+                          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                            Paid via Halftone Wallet — refund will go back instantly
+                          </div>
+                        ) : isRazorpay ? (
+                          <div className="text-xs text-zinc-500 font-medium">
+                            Payment ID: <span className="font-mono text-zinc-700">{pid}</span>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-zinc-500 italic">This was a free order. No refund needed.</div>
+                        );
+                      })()}
                       <div className="text-xs text-zinc-600 font-medium">
                         Refund amount: <span className="font-bold text-zinc-900">₹{selected.total.toLocaleString("en-IN")}</span>
                       </div>
@@ -479,10 +489,12 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                         >
                           {cancelling ? (
                             <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Processing…</>
+                          ) : selected.razorpay_payment_id?.startsWith("WALLET") ? (
+                            "Cancel order + Refund to Wallet →"
+                          ) : selected.razorpay_payment_id && selected.razorpay_payment_id !== "FREE" ? (
+                            "Cancel order + Issue refund →"
                           ) : (
-                            selected.razorpay_payment_id && selected.razorpay_payment_id !== "FREE"
-                              ? "Cancel order + Issue refund →"
-                              : "Cancel order →"
+                            "Cancel order →"
                           )}
                         </button>
                       )}

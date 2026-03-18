@@ -41,6 +41,7 @@ export default function WalletTab({ userId }: { userId: string }) {
   const [processing, setProcessing]       = useState(false);
   const [error, setError]                 = useState<string | null>(null);
   const [activeFlowTab, setActiveFlowTab] = useState<"inflow" | "outflow">("inflow");
+  const [showLearnMore, setShowLearnMore]         = useState(false);
   const [changingCurrency, setChangingCurrency]   = useState(false);
   const [selectedCurrency, setSelectedCurrency]   = useState<string>("");
   const [currencySaving, setCurrencySaving]       = useState(false);
@@ -229,7 +230,7 @@ export default function WalletTab({ userId }: { userId: string }) {
         <div className="mt-4 flex flex-col gap-1.5">
           <p className="text-xs text-zinc-500">
             • What is Credit and how does it work?{" "}
-            <span className="text-orange-500 cursor-pointer hover:underline">Learn more</span>
+            <button onClick={() => setShowLearnMore(true)} className="text-orange-500 hover:underline font-semibold">Learn more</button>
           </p>
           <p className="text-xs text-zinc-500">
             • Credit are not eligible for withdrawal.
@@ -427,6 +428,40 @@ export default function WalletTab({ userId }: { userId: string }) {
           </div>
         )}
       </div>
+      {/* Learn More modal */}
+      {showLearnMore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowLearnMore(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowLearnMore(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+              </div>
+              <h3 className="text-lg font-black text-zinc-900" style={{ letterSpacing: "-0.03em" }}>How Wallet Credit Works</h3>
+            </div>
+            <div className="flex flex-col gap-4 text-sm text-zinc-600">
+              {[
+                { icon: "💳", title: "Add Credit", body: "Top up your wallet using Razorpay (UPI, cards, net banking). Minimum ₹100." },
+                { icon: "🛍️", title: "Pay for Orders", body: "Use your wallet balance to confirm Shopify orders and pay production costs (blank + print + shipping) instantly." },
+                { icon: "💰", title: "Pay at Checkout", body: "You can also use your wallet balance at the normal checkout for custom orders." },
+                { icon: "↩️", title: "Instant Refunds", body: "If an order is cancelled, the production cost is refunded back to your wallet immediately — no waiting 5–7 days." },
+                { icon: "🚫", title: "No Withdrawal", body: "Wallet credits cannot be withdrawn as cash. They can only be used for orders on Halftone Labs." },
+              ].map(({ icon, title, body }) => (
+                <div key={title} className="flex gap-3">
+                  <span className="text-lg flex-shrink-0 mt-0.5">{icon}</span>
+                  <div>
+                    <p className="font-bold text-zinc-800 text-sm">{title}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowLearnMore(false)} className="mt-6 w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">Got it</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

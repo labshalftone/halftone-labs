@@ -90,18 +90,22 @@ export async function POST(req: NextRequest) {
   // Generate HL order reference for this Shopify order
   const hlOrderRef = `HLSFY-${shopifyOrderNumber?.replace("#", "") ?? Date.now()}`;
 
-  // Look up design print files if a designId was provided
+  // Look up design print files + mockups if a designId was provided
   let frontDesignUrl: string | null = null;
   let backDesignUrl: string | null = null;
+  let mockupUrl: string | null = null;
+  let backMockupUrl: string | null = null;
   if (designId) {
     const { data: design } = await db
       .from("designs")
-      .select("front_design_url, back_design_url")
+      .select("front_design_url, back_design_url, thumbnail, back_thumbnail")
       .eq("id", designId)
       .eq("user_id", userId)
       .maybeSingle();
     frontDesignUrl = design?.front_design_url ?? null;
     backDesignUrl  = design?.back_design_url  ?? null;
+    mockupUrl      = design?.thumbnail        ?? null;
+    backMockupUrl  = design?.back_thumbnail   ?? null;
   }
 
   // ── Wallet payment path ────────────────────────────────────────────────────
@@ -179,7 +183,10 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id: null,
       razorpay_order_id: null,
       front_design_url: frontDesignUrl,
-      back_design_url: backDesignUrl,
+      back_design_url:  backDesignUrl,
+      mockup_url:       mockupUrl,
+      back_mockup_url:  backMockupUrl,
+      razorpay_payment_id: "WALLET",
     }).select("id").single();
 
     if (orderError) {
