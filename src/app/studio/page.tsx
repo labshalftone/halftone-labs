@@ -539,20 +539,46 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
   const handleTabSwitch = (tab: "front" | "back") => { setActiveTab(tab); setPreviewSide(tab); };
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
+  const [uploadingFront, setUploadingFront] = useState(false);
+  const [uploadingBack,  setUploadingBack]  = useState(false);
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Use FileReader to get a data URL — blob URLs can't be sent to the server
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      if (!dataUrl) return;
-      if (side === "front") { setFrontDesignSrc(dataUrl); setNoDesign(false); }
-      else                  { setBackDesignSrc(dataUrl);  setNoDesign(false); }
-    };
-    reader.readAsDataURL(file);
-    setPreviewSide(side);
     e.target.value = "";
+
+    if (side === "front") setUploadingFront(true);
+    else                  setUploadingBack(true);
+
+    try {
+      // First, read as data URL for instant local preview
+      const previewUrl = await new Promise<string>((res) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => res(ev.target?.result as string ?? "");
+        reader.readAsDataURL(file);
+      });
+
+      // Show preview immediately
+      if (side === "front") { setFrontDesignSrc(previewUrl); setNoDesign(false); }
+      else                  { setBackDesignSrc(previewUrl);  setNoDesign(false); }
+      setPreviewSide(side);
+
+      // Upload to Supabase Storage and replace preview URL with a tiny public URL
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload-design", { method: "POST", body: fd });
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) {
+          if (side === "front") setFrontDesignSrc(url);
+          else                  setBackDesignSrc(url);
+        }
+      }
+      // If upload fails, we already have the data URL as fallback — it'll still work
+    } catch {}
+
+    if (side === "front") setUploadingFront(false);
+    else                  setUploadingBack(false);
   };
 
   const handleSaveDesign = async () => {
@@ -844,11 +870,14 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     {!frontDesignSrc ? (
                       <label className="block w-full border-2 border-dashed border-zinc-200 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all mb-4 group">
                         <div className="w-12 h-12 rounded-2xl bg-zinc-100 group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
-                          <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                          {uploadingFront
+                            ? <svg className="w-5 h-5 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            : <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                          }
                         </div>
-                        <p className="font-bold text-zinc-700 mb-1 text-sm">Upload front design</p>
+                        <p className="font-bold text-zinc-700 mb-1 text-sm">{uploadingFront ? "Uploading…" : "Upload front design"}</p>
                         <p className="text-xs text-zinc-400">PNG with transparent bg · JPG · WebP</p>
-                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={uploadingFront}
                           onChange={(e) => onFileChange(e, "front")} />
                       </label>
                     ) : (
@@ -887,11 +916,14 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     {!backDesignSrc ? (
                       <label className="block w-full border-2 border-dashed border-zinc-200 rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/20 transition-all mb-4 group">
                         <div className="w-12 h-12 rounded-2xl bg-zinc-100 group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
-                          <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                          {uploadingBack
+                            ? <svg className="w-5 h-5 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            : <svg className="w-6 h-6 text-zinc-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                          }
                         </div>
-                        <p className="font-bold text-zinc-700 mb-1 text-sm">Upload back design</p>
+                        <p className="font-bold text-zinc-700 mb-1 text-sm">{uploadingBack ? "Uploading…" : "Upload back design"}</p>
                         <p className="text-xs text-zinc-400">PNG with transparent bg · JPG · WebP</p>
-                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                        <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={uploadingBack}
                           onChange={(e) => onFileChange(e, "back")} />
                       </label>
                     ) : (
