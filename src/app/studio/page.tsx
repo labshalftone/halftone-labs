@@ -84,16 +84,17 @@ const PHOTO_ZONE = {
 };
 
 function DesignPlacer({
-  designSrc, mockupSrc, zoneKey, onPriceChange,
+  designSrc, mockupSrc, zoneKey, onPriceChange, photoZone,
 }: {
   designSrc: string; mockupSrc: string; zoneKey: keyof typeof PHOTO_ZONE;
   onPriceChange: (price: number, tier: string, dims: string) => void;
+  photoZone: typeof PHOTO_ZONE;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onPriceChangeRef = useRef(onPriceChange);
   useEffect(() => { onPriceChangeRef.current = onPriceChange; });
 
-  const defaultZone = PHOTO_ZONE[zoneKey];
+  const defaultZone = photoZone[zoneKey];
   const [zone, setZone] = useState(defaultZone);
 
   // Calibration mode — lets user drag the zone box itself
@@ -490,6 +491,14 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const { fmt } = useCurrency();
   const [step, setStep] = useState(0);
 
+  const [photoZone, setPhotoZone] = useState(PHOTO_ZONE);
+  useEffect(() => {
+    fetch("/api/studio-settings")
+      .then((r) => r.json())
+      .then((data) => { if (data.print_zones) setPhotoZone(data.print_zones); })
+      .catch(() => {});
+  }, []);
+
   const [color,     setColor]     = useState(product.colors[0]);
   const [size,      setSize]      = useState(product.sizes[2] ?? product.sizes[0]);
   const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
@@ -625,9 +634,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           {step === 1 && activeDesignSrc ? (
             previewSide === "front" ? (
               <DesignPlacer key="fp" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
+                photoZone={photoZone}
                 onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
             ) : (
               <DesignPlacer key="bp" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
+                photoZone={photoZone}
                 onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
             )
           ) : (
@@ -810,6 +821,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
                           <DesignPlacer key="fpm" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
+                            photoZone={photoZone}
                             onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">
@@ -851,6 +863,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
                           <DesignPlacer key="bpm" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
+                            photoZone={photoZone}
                             onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">

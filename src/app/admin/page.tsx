@@ -520,6 +520,452 @@ function CouponsPanel({ secret }: { secret: string }) {
   );
 }
 
+// ── Studio panel ──────────────────────────────────────────────────────────────
+
+type StudioProduct = {
+  id: string;
+  name: string;
+  gsm: string | null;
+  description: string | null;
+  blank_price: number;
+  type: "regular" | "oversized" | "baby";
+  size_guide_key: string;
+  colors: { name: string; hex: string; border: boolean; mockupFront: string; mockupBack: string }[];
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
+type PrintZone = { left: number; top: number; width: number; height: number };
+type PrintZones = { regular: PrintZone; oversized: PrintZone; baby: PrintZone };
+
+const DEFAULT_ZONES: PrintZones = {
+  regular:   { left: 30,   top: 29.8, width: 36, height: 44 },
+  oversized: { left: 28.3, top: 29.8, width: 40, height: 48 },
+  baby:      { left: 28.3, top: 29.8, width: 40, height: 26 },
+};
+
+const EMPTY_PRODUCT_FORM = {
+  name: "",
+  gsm: "",
+  description: "",
+  blank_price: "",
+  type: "regular" as "regular" | "oversized" | "baby",
+  size_guide_key: "regular",
+  active: true,
+  colors: [] as { name: string; hex: string; border: boolean; mockupFront: string; mockupBack: string }[],
+};
+
+function ZoneEditor({
+  label,
+  zone,
+  onChange,
+}: {
+  label: string;
+  zone: PrintZone;
+  onChange: (z: PrintZone) => void;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+      <p className="font-bold text-zinc-900 mb-4 text-sm">{label}</p>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {(["left", "top", "width", "height"] as (keyof PrintZone)[]).map((field) => (
+          <div key={field}>
+            <label className="text-xs font-semibold text-zinc-500 block mb-1 capitalize">{field} %</label>
+            <input
+              type="number"
+              step={0.1}
+              value={zone[field]}
+              onChange={(e) => onChange({ ...zone, [field]: Number(e.target.value) })}
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            />
+          </div>
+        ))}
+      </div>
+      {/* Visual preview */}
+      <div className="relative bg-white border border-zinc-200 rounded-xl overflow-hidden" style={{ paddingBottom: "75%" }}>
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-50">
+          <div className="relative w-3/4 h-3/4 bg-white border border-zinc-200 rounded">
+            <div
+              className="absolute"
+              style={{
+                left: `${zone.left}%`,
+                top: `${zone.top}%`,
+                width: `${zone.width}%`,
+                height: `${zone.height}%`,
+                border: "2px dashed #f97316",
+                background: "rgba(249,115,22,0.07)",
+                borderRadius: 2,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StudioPanel({ secret }: { secret: string }) {
+  const [subTab, setSubTab] = useState<"products" | "zones">("products");
+
+  // ── Products state ──
+  const [products, setProducts] = useState<StudioProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(EMPTY_PRODUCT_FORM);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  // ── Zones state ──
+  const [zones, setZones] = useState<PrintZones>(DEFAULT_ZONES);
+  const [zonesLoading, setZonesLoading] = useState(true);
+  const [zonesSaving, setZonesSaving] = useState(false);
+  const [zonesSaved, setZonesSaved] = useState(false);
+
+  const fetchProducts = async () => {
+    setProductsLoading(true);
+    const res = await fetch("/api/admin/studio-products", { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+    setProducts(Array.isArray(data) ? data : []);
+    setProductsLoading(false);
+  };
+
+  const fetchZones = async () => {
+    setZonesLoading(true);
+    const res = await fetch("/api/admin/studio-settings", { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+    if (data.print_zones) setZones(data.print_zones as PrintZones);
+    setZonesLoading(false);
+  };
+
+  useEffect(() => { fetchProducts(); fetchZones(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(EMPTY_PRODUCT_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (p: StudioProduct) => {
+    setEditingId(p.id);
+    setForm({
+      name: p.name,
+      gsm: p.gsm ?? "",
+      description: p.description ?? "",
+      blank_price: String(p.blank_price),
+      type: p.type,
+      size_guide_key: p.size_guide_key,
+      active: p.active,
+      colors: p.colors ?? [],
+    });
+    setShowForm(true);
+  };
+
+  const closeForm = () => { setShowForm(false); setEditingId(null); setForm(EMPTY_PRODUCT_FORM); };
+
+  const saveProduct = async () => {
+    if (!form.name || !form.blank_price) return;
+    setSaving(true);
+    const body = {
+      name: form.name,
+      gsm: form.gsm || null,
+      description: form.description || null,
+      blank_price: Number(form.blank_price),
+      type: form.type,
+      size_guide_key: form.size_guide_key,
+      active: form.active,
+      colors: form.colors,
+    };
+    if (editingId) {
+      await fetch("/api/admin/studio-products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+        body: JSON.stringify({ id: editingId, ...body }),
+      });
+    } else {
+      await fetch("/api/admin/studio-products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+        body: JSON.stringify(body),
+      });
+    }
+    closeForm();
+    await fetchProducts();
+    setSaving(false);
+  };
+
+  const toggleActive = async (id: string, active: boolean) => {
+    await fetch("/api/admin/studio-products", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ id, active }),
+    });
+    await fetchProducts();
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (!confirm("Delete this product?")) return;
+    setDeleting(id);
+    await fetch(`/api/admin/studio-products?id=${id}`, { method: "DELETE", headers: { "x-admin-secret": secret } });
+    await fetchProducts();
+    setDeleting(null);
+  };
+
+  const saveZones = async () => {
+    setZonesSaving(true);
+    await fetch("/api/admin/studio-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ key: "print_zones", value: zones }),
+    });
+    setZonesSaving(false);
+    setZonesSaved(true);
+    setTimeout(() => setZonesSaved(false), 2500);
+  };
+
+  const addColor = () =>
+    setForm((f) => ({ ...f, colors: [...f.colors, { name: "", hex: "#ffffff", border: false, mockupFront: "", mockupBack: "" }] }));
+
+  const removeColor = (i: number) =>
+    setForm((f) => ({ ...f, colors: f.colors.filter((_, idx) => idx !== i) }));
+
+  const updateColor = (i: number, field: string, value: string | boolean) =>
+    setForm((f) => ({ ...f, colors: f.colors.map((c, idx) => idx === i ? { ...c, [field]: value } : c) }));
+
+  const INPUT = "w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900";
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Sub-tab nav */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setSubTab("products")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "products" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+          >
+            Products
+          </button>
+          <button
+            onClick={() => setSubTab("zones")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "zones" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+          >
+            Print Zones
+          </button>
+        </div>
+
+        {/* ── Products sub-section ── */}
+        {subTab === "products" && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Studio Products</h2>
+                <p className="text-xs text-zinc-400 mt-0.5">{products.length} product{products.length !== 1 ? "s" : ""}</p>
+              </div>
+              <button
+                onClick={openCreate}
+                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                New Product
+              </button>
+            </div>
+
+            {/* Form slide-in */}
+            <AnimatePresence>
+              {showForm && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="bg-white rounded-2xl border border-zinc-200 p-6 mb-6 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="font-bold text-zinc-900">{editingId ? "Edit Product" : "New Product"}</h3>
+                    <button onClick={closeForm} className="text-zinc-400 hover:text-zinc-700 text-xl leading-none">&times;</button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Name *</label>
+                      <input type="text" placeholder="Classic Tee" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={INPUT} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">GSM</label>
+                      <input type="text" placeholder="220 GSM" value={form.gsm} onChange={(e) => setForm({ ...form, gsm: e.target.value })} className={INPUT} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Description</label>
+                      <textarea rows={2} placeholder="Product description…" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={INPUT + " resize-none"} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Blank Price (₹) *</label>
+                      <input type="number" placeholder="599" value={form.blank_price} onChange={(e) => setForm({ ...form, blank_price: e.target.value })} className={INPUT} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Type</label>
+                      <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "regular" | "oversized" | "baby" })} className={INPUT}>
+                        <option value="regular">Regular</option>
+                        <option value="oversized">Oversized</option>
+                        <option value="baby">Baby</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Size Guide Key</label>
+                      <select value={form.size_guide_key} onChange={(e) => setForm({ ...form, size_guide_key: e.target.value })} className={INPUT}>
+                        <option value="regular">regular</option>
+                        <option value="oversized-ft">oversized-ft</option>
+                        <option value="oversized-sj">oversized-sj</option>
+                        <option value="baby">baby</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-3 pt-5">
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, active: !form.active })}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${form.active ? "bg-zinc-900" : "bg-zinc-300"}`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${form.active ? "translate-x-5" : "translate-x-0.5"}`} />
+                      </button>
+                      <label className="text-xs font-semibold text-zinc-500">Active</label>
+                    </div>
+                  </div>
+
+                  {/* Colors */}
+                  <div className="mb-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-xs font-semibold text-zinc-500">Colors</label>
+                      <button
+                        type="button"
+                        onClick={addColor}
+                        className="text-xs font-bold text-zinc-900 hover:text-zinc-600 flex items-center gap-1"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        Add color
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {form.colors.map((c, i) => (
+                        <div key={i} className="bg-zinc-50 rounded-xl p-3 border border-zinc-100">
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            <input type="text" placeholder="Name (e.g. White)" value={c.name} onChange={(e) => updateColor(i, "name", e.target.value)} className={INPUT} />
+                            <div className="flex items-center gap-2">
+                              <input type="color" value={c.hex} onChange={(e) => updateColor(i, "hex", e.target.value)} className="w-10 h-10 rounded-lg border border-zinc-200 p-0.5 cursor-pointer" />
+                              <input type="text" placeholder="#ffffff" value={c.hex} onChange={(e) => updateColor(i, "hex", e.target.value)} className={INPUT} />
+                            </div>
+                            <input type="text" placeholder="Mockup Front URL" value={c.mockupFront} onChange={(e) => updateColor(i, "mockupFront", e.target.value)} className={INPUT} />
+                            <input type="text" placeholder="Mockup Back URL" value={c.mockupBack} onChange={(e) => updateColor(i, "mockupBack", e.target.value)} className={INPUT} />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-xs text-zinc-500 font-medium cursor-pointer">
+                              <input type="checkbox" checked={c.border} onChange={(e) => updateColor(i, "border", e.target.checked)} className="rounded" />
+                              Show border
+                            </label>
+                            <button type="button" onClick={() => removeColor(i)} className="text-xs text-red-400 hover:text-red-600 font-semibold">Remove</button>
+                          </div>
+                        </div>
+                      ))}
+                      {form.colors.length === 0 && (
+                        <p className="text-xs text-zinc-300 text-center py-3">No colors added yet</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={closeForm} className="flex-1 py-3 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+                      Cancel
+                    </button>
+                    <button onClick={saveProduct} disabled={saving || !form.name || !form.blank_price} className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40">
+                      {saving ? "Saving…" : editingId ? "Update Product →" : "Create Product →"}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Product list */}
+            {productsLoading && <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>}
+            {!productsLoading && products.length === 0 && (
+              <div className="text-center py-16 text-zinc-400">
+                <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                <p className="font-semibold text-sm">No studio products yet</p>
+                <p className="text-xs mt-1">Create your first product above</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-3">
+              {products.map((p) => (
+                <div key={p.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${p.active ? "border-zinc-200" : "border-zinc-100 opacity-60"}`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
+                        <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
+                          {p.active ? "ACTIVE" : "INACTIVE"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+                        {p.gsm && <span className="font-mono">{p.gsm}</span>}
+                        <span className="font-semibold text-zinc-800">₹{p.blank_price.toLocaleString("en-IN")}</span>
+                        <span className="capitalize">{p.type}</span>
+                        {p.colors?.length > 0 && <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Active toggle */}
+                      <button
+                        onClick={() => toggleActive(p.id, !p.active)}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.active ? "bg-zinc-900" : "bg-zinc-300"}`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${p.active ? "translate-x-5" : "translate-x-0.5"}`} />
+                      </button>
+                      {/* Edit */}
+                      <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+                      {/* Delete */}
+                      <button onClick={() => deleteProduct(p.id)} disabled={deleting === p.id} className="p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Print Zones sub-section ── */}
+        {subTab === "zones" && (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Print Zone Calibration</h2>
+                <p className="text-xs text-zinc-400 mt-0.5">Adjust the print zone position and size for each garment type</p>
+              </div>
+              <button
+                onClick={saveZones}
+                disabled={zonesSaving}
+                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40"
+              >
+                {zonesSaving ? "Saving…" : zonesSaved ? "Saved ✓" : "Save Zones"}
+              </button>
+            </div>
+            {zonesLoading ? (
+              <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>
+            ) : (
+              <div className="flex flex-col gap-5">
+                <ZoneEditor label="Regular Tee" zone={zones.regular} onChange={(z) => setZones({ ...zones, regular: z })} />
+                <ZoneEditor label="Oversized Tee" zone={zones.oversized} onChange={(z) => setZones({ ...zones, oversized: z })} />
+                <ZoneEditor label="Baby Tee" zone={zones.baby} onChange={(z) => setZones({ ...zones, baby: z })} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Analytics panel ───────────────────────────────────────────────────────────
 
 function AnalyticsPanel({ orders }: { orders: Order[] }) {
@@ -662,7 +1108,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics";
+type Tab = "orders" | "coupons" | "analytics" | "studio";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -706,6 +1152,11 @@ export default function AdminPage() {
       label: "Analytics",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
     },
+    {
+      id: "studio",
+      label: "Studio",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+    },
   ];
 
   return (
@@ -744,6 +1195,7 @@ export default function AdminPage() {
           {tab === "orders"    && <OrdersPanel    secret={secret} orders={orders} loading={ordersLoading} onRefresh={() => fetchOrders()} />}
           {tab === "coupons"   && <CouponsPanel   secret={secret} />}
           {tab === "analytics" && <AnalyticsPanel orders={orders} />}
+          {tab === "studio"    && <StudioPanel    secret={secret} />}
         </div>
       </div>
     </div>
