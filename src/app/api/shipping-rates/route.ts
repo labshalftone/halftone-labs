@@ -24,46 +24,78 @@ let _token: string | null = null;
 let _tokenExpiry = 0;
 
 async function getShiprocketToken(): Promise<string | null> {
-  if (_token && Date.now() < _tokenExpiry) return _token;
+  if (_token && Date.now() < _tokenExpiry) {
+    console.log("[shiprocket] using cached token");
+    return _token;
+  }
   const email = process.env.SHIPROCKET_EMAIL;
   const pass  = process.env.SHIPROCKET_PASSWORD;
-  if (!email || !pass) return null;
+  if (!email || !pass) {
+    console.error("[shiprocket] SHIPROCKET_EMAIL or SHIPROCKET_PASSWORD env var not set");
+    return null;
+  }
+  console.log(`[shiprocket] logging in as ${email}`);
   try {
     const res = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password: pass }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(8000),
     });
     const data = await res.json();
-    _token = data.token ?? null;
+    if (!res.ok) {
+      console.error(`[shiprocket] login failed (${res.status}):`, JSON.stringify(data));
+      return null;
+    }
+    if (!data.token) {
+      console.error("[shiprocket] login OK but no token in response:", JSON.stringify(data));
+      return null;
+    }
+    _token = data.token;
     _tokenExpiry = Date.now() + 23 * 3_600_000;
+    console.log("[shiprocket] login successful, token cached for 23h");
     return _token;
-  } catch { return null; }
+  } catch (e) {
+    console.error("[shiprocket] login fetch exception:", e);
+    return null;
+  }
 }
 
 export async function POST(req: NextRequest) {
   const { country, pin } = await req.json();
+  console.log(`[shiprocket] rate request — country=${country} pin=${pin}`);
 
   // ── Domestic India ────────────────────────────────────────────────────────
   if (country === "IN") {
     const token = await getShiprocketToken();
-    if (token && pin) {
+    if (!token) {
+      console.warn("[shiprocket] no token — using fallback rates");
+    } else if (!pin) {
+      console.warn("[shiprocket] no PIN provided — using fallback rates");
+    } else {
       try {
+        const payload = {
+          pickup_postcode:   PICKUP_PIN,
+          delivery_postcode: pin,
+          cod: 0, weight: 0.5, length: 30, breadth: 25, height: 2,
+        };
+        console.log("[shiprocket] serviceability request:", JSON.stringify(payload));
         const res = await fetch(
           "https://apiv2.shiprocket.in/v1/external/courier/serviceability/",
           {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({
-              pickup_postcode: PICKUP_PIN,
-              delivery_postcode: pin,
-              cod: 0, weight: 0.5, length: 30, breadth: 25, height: 2,
-            }),
-            signal: AbortSignal.timeout(6000),
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(8000),
           }
         );
         const data = await res.json();
+        if (!res.ok) {
+          console.error(`[shiprocket] serviceability failed (${res.status}):`, JSON.stringify(data));
+        } else {
+          console.log(`[shiprocket] serviceability status=${res.status}, message="${data?.message}", couriers=${data?.data?.available_courier_companies?.length ?? 0}`);
+        }
+
         const couriers: Array<{ courier_name: string; rate: number; etd: number }> =
           data?.data?.available_courier_companies ?? [];
 
@@ -71,6 +103,7 @@ export async function POST(req: NextRequest) {
           const sorted = [...couriers].sort((a, b) => a.rate - b.rate);
           const std  = sorted[0];
           const fast = sorted.find((c) => Number(c.etd) <= 3) ?? null;
+          console.log(`[shiprocket] cheapest=${std.courier_name} ₹${std.rate} ${std.etd}d`);
           const opts = [
             {
               id: "domestic-standard",
@@ -91,7 +124,10 @@ export async function POST(req: NextRequest) {
           }
           return NextResponse.json({ options: opts });
         }
-      } catch {}
+        console.warn("[shiprocket] 0 couriers returned — using fallback rates");
+      } catch (e) {
+        console.error("[shiprocket] serviceability exception:", e);
+      }
     }
     // Fallback fixed domestic
     return NextResponse.json({
