@@ -133,6 +133,32 @@ function LoginScreen({ onAuth }: { onAuth: (secret: string) => void }) {
   );
 }
 
+// ── Download helper (fetch → blob so cross-origin Supabase URLs download properly)
+function DownloadButton({ url, filename }: { url: string; filename: string }) {
+  const [loading, setLoading] = useState(false);
+  const handleDownload = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl; a.download = filename; a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch { alert("Download failed — try the View link instead."); }
+    setLoading(false);
+  };
+  return (
+    <button onClick={handleDownload} disabled={loading}
+      className="flex-1 flex items-center justify-center gap-1 text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg bg-zinc-900 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50">
+      {loading
+        ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>}
+      {loading ? "…" : "DL"}
+    </button>
+  );
+}
+
 // ── Orders panel ──────────────────────────────────────────────────────────────
 
 function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; orders: Order[]; loading: boolean; onRefresh: () => Promise<void> }) {
@@ -265,30 +291,46 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                 </div>
               </div>
 
-              {/* Print Files */}
-              {(selected.front_design_url || selected.back_design_url) && (
-                <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Print Files</p>
-                  <div className="flex gap-3">
-                    {selected.front_design_url && (
-                      <a href={selected.front_design_url} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-zinc-200 hover:border-zinc-400 transition-colors">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={selected.front_design_url} alt="Front design" className="w-24 h-24 object-contain rounded-lg bg-zinc-50" />
-                        <span className="text-xs font-semibold text-zinc-600">Front ↗</span>
-                      </a>
-                    )}
-                    {selected.back_design_url && (
-                      <a href={selected.back_design_url} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl border border-zinc-200 hover:border-zinc-400 transition-colors">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={selected.back_design_url} alt="Back design" className="w-24 h-24 object-contain rounded-lg bg-zinc-50" />
-                        <span className="text-xs font-semibold text-zinc-600">Back ↗</span>
-                      </a>
-                    )}
-                  </div>
+              {/* Print Files — always shown */}
+              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400">Print Files</p>
+                  {(selected.front_design_url || selected.back_design_url) && (
+                    <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
+                      {[selected.front_design_url && "Front", selected.back_design_url && "Back"].filter(Boolean).join(" + ")} received
+                    </span>
+                  )}
                 </div>
-              )}
+                {!(selected.front_design_url || selected.back_design_url) ? (
+                  <div className="flex items-center gap-2 text-zinc-400 text-xs py-2">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    No design files received for this order.
+                  </div>
+                ) : (
+                  <div className="flex gap-3 flex-wrap">
+                    {([
+                      { url: selected.front_design_url, label: "Front" },
+                      { url: selected.back_design_url,  label: "Back"  },
+                    ] as const).map(({ url, label }) => url && (
+                      <div key={label} className="flex flex-col gap-2 p-3 rounded-xl border border-zinc-100 bg-zinc-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt={`${label} design`}
+                          className="w-28 h-28 object-contain rounded-lg bg-white border border-zinc-100" />
+                        <p className="text-[0.65rem] font-bold text-zinc-500 text-center">{label} print</p>
+                        <div className="flex gap-1.5">
+                          <a href={url} target="_blank" rel="noopener noreferrer"
+                            className="flex-1 text-center text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
+                            View ↗
+                          </a>
+                          <DownloadButton url={url} filename={`${selected.ref}-${label.toLowerCase()}-design.png`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Timeline */}
               <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
