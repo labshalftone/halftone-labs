@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     userId, shopifyOrderId, shopifyOrderNumber,
     lineItems, shippingAddress, customerEmail, customerName,
     useWallet, totalInr, productName, colorName, sizeName,
-    shippingAmount, customerPhone,
+    shippingAmount, customerPhone, designId,
   } = await req.json();
 
   if (!userId || !shopifyOrderId) {
@@ -89,6 +89,20 @@ export async function POST(req: NextRequest) {
 
   // Generate HL order reference for this Shopify order
   const hlOrderRef = `HLSFY-${shopifyOrderNumber?.replace("#", "") ?? Date.now()}`;
+
+  // Look up design print files if a designId was provided
+  let frontDesignUrl: string | null = null;
+  let backDesignUrl: string | null = null;
+  if (designId) {
+    const { data: design } = await db
+      .from("designs")
+      .select("front_design_url, back_design_url")
+      .eq("id", designId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    frontDesignUrl = design?.front_design_url ?? null;
+    backDesignUrl  = design?.back_design_url  ?? null;
+  }
 
   // ── Wallet payment path ────────────────────────────────────────────────────
   if (useWallet) {
@@ -164,6 +178,8 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       razorpay_payment_id: null,
       razorpay_order_id: null,
+      front_design_url: frontDesignUrl,
+      back_design_url: backDesignUrl,
     }).select("id").single();
 
     if (orderError) {

@@ -442,6 +442,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
         sizeName:           firstMatched?.hlProduct?.size ?? null,
         shippingAmount:     shippingCost,
         customerPhone:      order.shipping_address?.phone ?? null,
+        designId:           firstMatched?.hlProduct?.productId ?? null,
       }),
     });
     const data = await res.json();
