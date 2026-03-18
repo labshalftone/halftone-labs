@@ -8,14 +8,14 @@ import { createAdminClient } from "@/lib/supabase-server";
 async function uploadDesign(db: ReturnType<typeof createAdminClient>, dataUrl: string, path: string): Promise<string | null> {
   try {
     const [header, base64] = dataUrl.split(",");
-    if (!base64) return null;
+    if (!base64) { console.error(`[save-order] uploadDesign: no base64 data for ${path}`); return null; }
     const buffer = Buffer.from(base64, "base64");
     const contentType = header.includes("jpeg") ? "image/jpeg" : "image/png";
     const { error } = await db.storage.from("store-assets").upload(path, buffer, { contentType, upsert: true });
-    if (error) return null;
+    if (error) { console.error(`[save-order] storage upload failed for ${path}:`, error.message); return null; }
     const { data } = db.storage.from("store-assets").getPublicUrl(path);
     return data.publicUrl;
-  } catch { return null; }
+  } catch (e) { console.error(`[save-order] uploadDesign exception for ${path}:`, e); return null; }
 }
 
 export async function POST(req: NextRequest) {

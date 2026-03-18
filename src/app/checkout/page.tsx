@@ -193,7 +193,7 @@ export default function CheckoutPage() {
           handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string }) => {
             const ref = `HL${Date.now().toString(36).toUpperCase()}`;
             try {
-              await fetch("/api/save-order", {
+              const saveRes = await fetch("/api/save-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -226,6 +226,10 @@ export default function CheckoutPage() {
                   userId: session?.user?.id ?? null,
                 }),
               });
+              if (!saveRes.ok) {
+                const errData = await saveRes.json().catch(() => ({}));
+                throw new Error(errData.error ?? `Order save failed (${saveRes.status})`);
+              }
               // Increment coupon uses
               if (appliedCoupon?.code) {
                 await fetch("/api/coupon", {
