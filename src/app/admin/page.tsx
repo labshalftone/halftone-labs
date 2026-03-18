@@ -560,10 +560,12 @@ function ZoneEditor({
   label,
   zone,
   onChange,
+  mockupSrc,
 }: {
   label: string;
   zone: PrintZone;
   onChange: (z: PrintZone) => void;
+  mockupSrc: string;
 }) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
@@ -582,24 +584,22 @@ function ZoneEditor({
           </div>
         ))}
       </div>
-      {/* Visual preview */}
-      <div className="relative bg-white border border-zinc-200 rounded-xl overflow-hidden" style={{ paddingBottom: "75%" }}>
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-50">
-          <div className="relative w-3/4 h-3/4 bg-white border border-zinc-200 rounded">
-            <div
-              className="absolute"
-              style={{
-                left: `${zone.left}%`,
-                top: `${zone.top}%`,
-                width: `${zone.width}%`,
-                height: `${zone.height}%`,
-                border: "2px dashed #f97316",
-                background: "rgba(249,115,22,0.07)",
-                borderRadius: 2,
-              }}
-            />
-          </div>
-        </div>
+      {/* Visual preview — real product photo */}
+      <div className="relative w-full overflow-hidden rounded-xl border border-zinc-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={mockupSrc} alt={label} className="w-full block" draggable={false} />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${zone.left}%`,
+            top: `${zone.top}%`,
+            width: `${zone.width}%`,
+            height: `${zone.height}%`,
+            border: "2px dashed rgba(241,85,51,0.85)",
+            background: "rgba(241,85,51,0.06)",
+            borderRadius: 3,
+          }}
+        />
       </div>
     </div>
   );
@@ -954,9 +954,9 @@ function StudioPanel({ secret }: { secret: string }) {
               <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>
             ) : (
               <div className="flex flex-col gap-5">
-                <ZoneEditor label="Regular Tee" zone={zones.regular} onChange={(z) => setZones({ ...zones, regular: z })} />
-                <ZoneEditor label="Oversized Tee" zone={zones.oversized} onChange={(z) => setZones({ ...zones, oversized: z })} />
-                <ZoneEditor label="Baby Tee" zone={zones.baby} onChange={(z) => setZones({ ...zones, baby: z })} />
+                <ZoneEditor label="Regular Tee" zone={zones.regular} onChange={(z) => setZones({ ...zones, regular: z })} mockupSrc="/mockups/regular-tee/Mannequin_Image4.png" />
+                <ZoneEditor label="Oversized Tee" zone={zones.oversized} onChange={(z) => setZones({ ...zones, oversized: z })} mockupSrc="/mockups/oversized-sj/Mannequin_Image1.png" />
+                <ZoneEditor label="Baby Tee" zone={zones.baby} onChange={(z) => setZones({ ...zones, baby: z })} mockupSrc="/mockups/baby-tee/Mannequin_Image1.png" />
               </div>
             )}
           </>
