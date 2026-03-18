@@ -76,96 +76,134 @@ function TeeMockup({ color, isOversized }: { color: string; isOversized?: boolea
 }
 
 // ─── DESIGN PLACER ────────────────────────────────────────────────────────────
+// Print zone as % of the photo container — calibrated per garment (inside seams, chest only)
+const PHOTO_ZONE = {
+  // Regular tee: narrower set-in sleeves; seams at ~22–78%; collar bottom ~15%
+  regular:  { left: 26, top: 16, width: 48, height: 36 },
+  // Oversized/FT: drop-shoulder body seams at ~20–80%; collar bottom ~15%
+  oversized: { left: 22, top: 15, width: 56, height: 38 },
+  // Baby tee: wide but short crop; body ~20–80%; keep height small (crop)
+  baby:     { left: 22, top: 17, width: 56, height: 22 },
+};
 
 function DesignPlacer({
-  designSrc, color, isOversized, onPriceChange,
+  designSrc, mockupSrc, zoneKey, onPriceChange,
 }: {
-  designSrc: string; color: string; isOversized: boolean;
+  designSrc: string; mockupSrc: string; zoneKey: keyof typeof PHOTO_ZONE;
   onPriceChange: (price: number, tier: string, dims: string) => void;
 }) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  // Keep latest onPriceChange in a ref so we never need it as an effect dep
+  const containerRef = useRef<HTMLDivElement>(null);
   const onPriceChangeRef = useRef(onPriceChange);
   useEffect(() => { onPriceChangeRef.current = onPriceChange; });
 
-  const initSize = 60;
-  const [pos, setPos] = useState({ ...clampInZone(100, 115, initSize), size: initSize });
-  const dragging    = useRef(false);
-  const dragOffset  = useRef({ dx: 0, dy: 0 });
+  const zone = PHOTO_ZONE[zoneKey];
+  const minSize = zone.width * 0.12;
+  const maxSize = zone.width * 0.90;
+  const initSize = zone.width * 0.38;
+  const initX = zone.left + zone.width / 2;
+  const initY = zone.top + zone.height / 2;
 
-  const toSVG = useCallback((cx: number, cy: number) => {
-    const svg = svgRef.current;
-    if (!svg) return { x: 0, y: 0 };
-    const r = svg.getBoundingClientRect();
-    return { x: (cx - r.left) / r.width * 200, y: (cy - r.top) / r.height * 230 };
+  const [pos, setPos] = useState({ x: initX, y: initY, size: initSize });
+  const dragging   = useRef(false);
+  const dragOffset = useRef({ dx: 0, dy: 0 });
+
+  // Convert client pixel → % of container
+  const toPct = useCallback((cx: number, cy: number) => {
+    const el = containerRef.current;
+    if (!el) return { x: 0, y: 0 };
+    const r = el.getBoundingClientRect();
+    return { x: (cx - r.left) / r.width * 100, y: (cy - r.top) / r.height * 100 };
   }, []);
 
-  // Recalculate price whenever size changes — uses ref so no stale closure
+  // Clamp design centre within the photo print zone
+  const clamp = useCallback((x: number, y: number, size: number) => {
+    const half = size / 2;
+    return {
+      x: Math.max(zone.left + half, Math.min(zone.left + zone.width - half, x)),
+      y: Math.max(zone.top + half, Math.min(zone.top + zone.height - half, y)),
+    };
+  }, [zone]);
+
+  // Price calculation — size relative to zone → square inches
   useEffect(() => {
-    const fracW = pos.size / (200 * ZONE_PCT.w);
-    const fracH = pos.size / (230 * ZONE_PCT.h);
+    const fracW = pos.size / zone.width;
+    const fracH = pos.size / zone.height;
     const sqin  = fracW * MAX_PRINT_W_IN * fracH * MAX_PRINT_H_IN;
     const tier  = getTier(sqin);
     onPriceChangeRef.current(
-      tier.price,
-      tier.label,
+      tier.price, tier.label,
       `${(fracW * MAX_PRINT_W_IN).toFixed(1)}"×${(fracH * MAX_PRINT_H_IN).toFixed(1)}"`,
     );
-  }, [pos.size]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pos.size, zone.width, zone.height]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isDark  = ["#111111","#1B2A4A","#2355C0","#C0392B","#6B2D2D"].includes(color);
-  const body    = isOversized
-    ? "M30 52 L8 95 L50 100 L50 215 L150 215 L150 100 L192 95 L170 52 L130 32 Q100 20 70 32 Z"
-    : "M40 56 L15 92 L55 100 L55 215 L145 215 L145 100 L185 92 L160 56 L125 38 Q100 28 75 38 Z";
-  const collar  = isOversized ? "M70 32 Q100 52 130 32" : "M75 38 Q100 56 125 38";
-
-  const pct = Math.round((pos.size / MAX_DESIGN_SIZE) * 100);
+  const pct = Math.round(((pos.size - minSize) / (maxSize - minSize)) * 100);
+  const step = (maxSize - minSize) / 10;
 
   return (
     <div className="flex flex-col gap-4">
-      <svg
-        ref={svgRef}
-        viewBox="0 0 200 230"
-        className="w-full cursor-move select-none"
-        style={{ maxHeight: 400 }}
+      {/* Photo canvas with draggable design overlay */}
+      <div
+        ref={containerRef}
+        className="relative w-full select-none overflow-hidden rounded-xl"
+        style={{ background: "#f0ede8", touchAction: "none" }}
         onPointerMove={(e) => {
           if (!dragging.current) return;
-          const s = toSVG(e.clientX, e.clientY);
-          setPos((p) => ({
-            ...clampInZone(s.x - dragOffset.current.dx, s.y - dragOffset.current.dy, p.size),
-            size: p.size,
+          const p = toPct(e.clientX, e.clientY);
+          setPos((prev) => ({
+            ...clamp(p.x - dragOffset.current.dx, p.y - dragOffset.current.dy, prev.size),
+            size: prev.size,
           }));
         }}
         onPointerUp={() => { dragging.current = false; }}
         onPointerLeave={() => { dragging.current = false; }}
       >
-        <ellipse cx="100" cy="222" rx="52" ry="5" fill="rgba(0,0,0,0.07)" />
-        <path d={body} fill={color} stroke={isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.10)"} strokeWidth="1.5" />
-        <path d={collar} fill="none" stroke={isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.16)"} strokeWidth="1.5" />
-        {/* Print zone — design is constrained within this box */}
-        <rect x={ZX1} y={ZY1} width={ZX2 - ZX1} height={ZY2 - ZY1}
-          fill="none"
-          stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)"}
-          strokeWidth="0.8" strokeDasharray="3 3" rx="2" />
-        <image
-          href={designSrc}
-          x={pos.x - pos.size / 2} y={pos.y - pos.size / 2}
-          width={pos.size} height={pos.size}
-          style={{ cursor: "grab" }}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            (e.target as SVGImageElement).setPointerCapture(e.pointerId);
-            dragging.current = true;
-            const s = toSVG(e.clientX, e.clientY);
-            dragOffset.current = { dx: s.x - pos.x, dy: s.y - pos.y };
+        {/* Real product photo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={mockupSrc} alt="product" className="w-full block pointer-events-none" draggable={false} />
+
+        {/* Print-zone outline */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: `${zone.left}%`, top: `${zone.top}%`,
+            width: `${zone.width}%`, height: `${zone.height}%`,
+            border: "2px dashed rgba(241,85,51,0.75)",
+            borderRadius: "4px",
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04)",
+            background: "rgba(241,85,51,0.04)",
           }}
         />
-        <text x="100" y="228" textAnchor="middle" fontSize="5"
-          fill={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)"}>
-          drag to reposition within print area
-        </text>
-      </svg>
 
+        {/* Draggable design */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={designSrc}
+          alt="your design"
+          draggable={false}
+          className="absolute cursor-grab active:cursor-grabbing"
+          style={{
+            left: `${pos.x}%`, top: `${pos.y}%`,
+            width: `${pos.size}%`,
+            transform: "translate(-50%, -50%)",
+            touchAction: "none",
+            userSelect: "none",
+          }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            (e.target as HTMLImageElement).setPointerCapture(e.pointerId);
+            dragging.current = true;
+            const p = toPct(e.clientX, e.clientY);
+            dragOffset.current = { dx: p.x - pos.x, dy: p.y - pos.y };
+          }}
+        />
+
+        {/* Hint */}
+        <p className="absolute bottom-2 inset-x-0 text-center text-[9px] text-white/60 pointer-events-none drop-shadow">
+          drag to reposition · stays within print zone
+        </p>
+      </div>
+
+      {/* Size slider */}
       <div>
         <div className="flex justify-between text-xs mb-2">
           <span className="font-medium text-zinc-600">Design size</span>
@@ -173,25 +211,16 @@ function DesignPlacer({
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setPos((p) => {
-              const s = Math.max(20, p.size - 8);
-              return { size: s, ...clampInZone(p.x, p.y, s) };
-            })}
+            onClick={() => setPos((p) => { const s = Math.max(minSize, p.size - step); return { size: s, ...clamp(p.x, p.y, s) }; })}
             className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
           >−</button>
           <input
-            type="range" min={20} max={MAX_DESIGN_SIZE} value={pos.size}
-            onChange={(e) => {
-              const s = Number(e.target.value);
-              setPos((p) => ({ size: s, ...clampInZone(p.x, p.y, s) }));
-            }}
+            type="range" min={minSize} max={maxSize} step={0.5} value={pos.size}
+            onChange={(e) => { const s = Number(e.target.value); setPos((p) => ({ size: s, ...clamp(p.x, p.y, s) })); }}
             className="flex-1 accent-orange-500 h-1.5"
           />
           <button
-            onClick={() => setPos((p) => {
-              const s = Math.min(MAX_DESIGN_SIZE, p.size + 8);
-              return { size: s, ...clampInZone(p.x, p.y, s) };
-            })}
+            onClick={() => setPos((p) => { const s = Math.min(maxSize, p.size + step); return { size: s, ...clamp(p.x, p.y, s) }; })}
             className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
           >+</button>
         </div>
@@ -439,6 +468,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [saved,  setSaved]  = useState(false);
 
   const isOversized  = product.id.includes("oversized");
+  const zoneKey: keyof typeof PHOTO_ZONE =
+    product.id === "baby-tee" ? "baby" : isOversized ? "oversized" : "regular";
   const totalPrint   = frontPrintPrice + backPrintPrice;
   const itemTotal    = product.blankPrice + totalPrint;
   const hasAnyDesign = !!frontDesignSrc || !!backDesignSrc;
@@ -548,14 +579,16 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
         <div className="w-full max-w-xs relative z-10">
           {step === 1 && activeDesignSrc ? (
             previewSide === "front" ? (
-              <DesignPlacer key="fp" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+              <DesignPlacer key="fp" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
                 onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
             ) : (
-              <DesignPlacer key="bp" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+              <DesignPlacer key="bp" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
                 onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
             )
           ) : (
-            <TeeMockup color={color.hex} isOversized={isOversized} />
+            color.mockupFront
+              ? <img src={color.mockupFront} alt={color.name} className="w-full h-full object-contain" />
+              : <TeeMockup color={color.hex} isOversized={isOversized} />
           )}
         </div>
 
@@ -680,7 +713,9 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
                 {/* Mobile mockup */}
                 <div className="lg:hidden w-44 mx-auto mb-8">
-                  <TeeMockup color={color.hex} isOversized={isOversized} />
+                  {color.mockupFront
+                    ? <img src={color.mockupFront} alt={color.name} className="w-full object-contain" />
+                    : <TeeMockup color={color.hex} isOversized={isOversized} />}
                 </div>
 
                 <button onClick={() => setStep(1)}
@@ -729,7 +764,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     ) : (
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
-                          <DesignPlacer key="fpm" designSrc={frontDesignSrc} color={color.hex} isOversized={isOversized}
+                          <DesignPlacer key="fpm" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
                             onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">
@@ -770,7 +805,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     ) : (
                       <div className="mb-4">
                         <div className="lg:hidden mb-4">
-                          <DesignPlacer key="bpm" designSrc={backDesignSrc} color={color.hex} isOversized={isOversized}
+                          <DesignPlacer key="bpm" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
                             onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">

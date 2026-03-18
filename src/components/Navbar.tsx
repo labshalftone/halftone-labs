@@ -16,7 +16,6 @@ const navLinks = [
   { label: "How it works", href: "/how-it-works" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Journal", href: "/journal" },
-  { label: "Contact", href: "#contact" },
 ];
 
 export default function Navbar() {
@@ -67,14 +66,25 @@ export default function Navbar() {
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-[0.8rem] text-halftone-dark/50 hover:text-halftone-purple transition-colors"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                {link.label}
-              </a>
+              link.href.startsWith("/") ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-[0.8rem] text-halftone-dark/50 hover:text-halftone-purple transition-colors"
+                  style={{ letterSpacing: "-0.02em" }}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-[0.8rem] text-halftone-dark/50 hover:text-halftone-purple transition-colors"
+                  style={{ letterSpacing: "-0.02em" }}
+                >
+                  {link.label}
+                </a>
+              )
             ))}
           </div>
 
@@ -114,6 +124,15 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Get in touch link */}
+            <Link
+              href="/contact"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[0.8rem] font-bold px-4 py-2 rounded-full border transition-all hover:border-halftone-purple hover:text-halftone-purple"
+              style={{ borderColor: "rgba(0,0,0,0.1)", color: "#0f0f0f" }}
+            >
+              Get in touch
+            </Link>
 
             {/* Studio link */}
             <Link
@@ -219,11 +238,22 @@ export default function Navbar() {
           >
             <div className="flex flex-col gap-6">
               {navLinks.map((link) => (
-                <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-                  className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
-                  {link.label}
-                </a>
+                link.href.startsWith("/") ? (
+                  <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+                    className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+                    className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
+                    {link.label}
+                  </a>
+                )
               ))}
+              <Link href="/contact" onClick={() => setMenuOpen(false)}
+                className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
+                Get in touch
+              </Link>
               <Link href="/studio" onClick={() => setMenuOpen(false)}
                 className="text-2xl text-halftone-orange" style={{ letterSpacing: "-0.04em" }}>
                 Studio ↗
@@ -239,9 +269,6 @@ export default function Navbar() {
                   Login
                 </Link>
               )}
-              <a href="#contact" onClick={() => setMenuOpen(false)} className="btn-primary text-center mt-4">
-                Book a Call
-              </a>
             </div>
           </motion.div>
         )}
