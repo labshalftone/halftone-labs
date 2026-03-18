@@ -501,7 +501,12 @@ function PushToShopifyModal({
           setReauthShop(json.shopDomain);
           return;
         }
-        throw new Error(typeof json.error === "string" ? json.error : "Push failed");
+        const errMsg = typeof json.error === "string"
+          ? json.error
+          : typeof json.error === "object" && json.error !== null
+            ? Object.entries(json.error as Record<string, unknown>).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`).join(" | ")
+            : "Push failed";
+        throw new Error(errMsg);
       }
       setDone(json.shopifyUrl);
       onDone(json.shopifyProductId);
