@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PICKUP_PIN = "201304";
+const PICKUP_PIN = "144004";
 
 // Fallback international rates (Shiprocket DHL/Aramex + 28% margin, from Noida)
 const INTL_FALLBACK: Record<string, { label: string; carrier: string; rate: number; days: string }> = {
@@ -217,86 +217,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── International ─────────────────────────────────────────────────────────
-  const token = await getShiprocketToken();
-  if (token) {
-    try {
-      // Shiprocket international API needs integer weight (rounds up to nearest 0.5 kg slab, min 1)
-      const intlWeight = Math.max(1, Math.ceil(weight));
-      const qs = new URLSearchParams({
-        pickup_postcode:  PICKUP_PIN,
-        delivery_country: country,
-        weight:           String(intlWeight),
-        length:           "30",
-        breadth:          "25",
-        height:           "2",
-        declared_value:   "1000",
-        cod:              "0",
-      });
-      const url = `https://apiv2.shiprocket.in/v1/external/courier/international/serviceability?${qs}`;
-      console.log("[shiprocket] international serviceability GET:", url);
-      const res = await fetch(url, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(8000),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.error(`[shiprocket] intl serviceability failed (${res.status}):`, JSON.stringify(data));
-      } else {
-        console.log(`[shiprocket] intl serviceability status=${res.status}, couriers=${data?.data?.available_courier_companies?.length ?? 0}`);
-      }
-
-      const intlCouriers: Array<{
-        courier_name: string;
-        freight_charge?: number;
-        rate?: number;
-        etd?: string | number;
-        estimated_delivery_days?: number;
-        [k: string]: unknown;
-      }> = data?.data?.available_courier_companies ?? [];
-
-      if (intlCouriers.length > 0) {
-        console.log("[shiprocket] intl sample courier:", JSON.stringify(intlCouriers[0]));
-        console.log(`[shiprocket] intl all: ${intlCouriers.map(c => `${c.courier_name}|₹${c.freight_charge ?? c.rate}`).join(" / ")}`);
-
-        // Sort by freight_charge (international uses freight_charge not rate)
-        const sorted = [...intlCouriers].sort((a, b) => {
-          const ra = a.freight_charge ?? a.rate ?? 9999;
-          const rb = b.freight_charge ?? b.rate ?? 9999;
-          return ra - rb;
-        });
-        const best = sorted[0];
-        const rawRate = best.freight_charge ?? best.rate ?? 0;
-        const rate = Math.ceil(rawRate / 10) * 10;
-
-        let days = "7–14 business days";
-        if (best.etd) {
-          const d = etdToDays(best.etd);
-          days = `${d}–${d + 2} business days`;
-        } else if (best.estimated_delivery_days) {
-          const d = Number(best.estimated_delivery_days);
-          days = `${d}–${d + 2} business days`;
-        }
-
-        if (rate > 0) {
-          return NextResponse.json({
-            options: [{
-              id:      `intl-${country}`,
-              label:   "International Express",
-              carrier: "DHL Express",
-              rate,
-              days,
-            }],
-          });
-        }
-      }
-      console.warn("[shiprocket] intl: 0 couriers or zero rate — using fallback");
-    } catch (e) {
-      console.error("[shiprocket] intl serviceability exception:", e);
-    }
-  }
-
-  // Fallback to hardcoded international rates
+  // Use hardcoded rates (Shiprocket intl API not enabled on this account)
   const r = INTL_FALLBACK[country];
   if (r) {
     return NextResponse.json({
