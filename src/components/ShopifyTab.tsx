@@ -70,74 +70,74 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 // ── Connect form ──────────────────────────────────────────────────────────────
-function ConnectForm({ userId, onConnected }: { userId: string; onConnected: (c: Connection) => void }) {
-  const [domain, setDomain]   = useState("");
-  const [token, setToken]     = useState("");
+function ConnectForm({ userId }: { userId: string; onConnected: (c: Connection) => void }) {
+  const [domain,  setDomain]  = useState("");
+  const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
 
-  const handleConnect = async () => {
-    if (!domain.trim() || !token.trim()) return;
-    setLoading(true); setError("");
-    const res = await fetch("/api/shopify/connect", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, shopDomain: domain.trim(), accessToken: token.trim() }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) { setError(data.error ?? "Connection failed"); return; }
-    // Re-fetch connection
-    const r2 = await fetch(`/api/shopify/connect?userId=${userId}`);
-    const d2 = await r2.json();
-    if (d2.connection) onConnected(d2.connection);
+  const handleConnect = () => {
+    const raw = domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+    if (!raw) return;
+    // Auto-append .myshopify.com if user just typed the subdomain
+    const shop = raw.includes(".") ? raw : `${raw}.myshopify.com`;
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/.test(shop)) {
+      setError("Enter a valid Shopify domain, e.g. your-store.myshopify.com");
+      return;
+    }
+    setLoading(true);
+    // Redirect to OAuth — Shopify handles the rest
+    window.location.href = `/api/shopify/auth?shop=${encodeURIComponent(shop)}&userId=${encodeURIComponent(userId)}`;
   };
 
   return (
-    <div className="max-w-lg">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-[#96bf48]/10 rounded-xl flex items-center justify-center">
-          <svg className="w-5 h-5 text-[#96bf48]" viewBox="0 0 24 24" fill="currentColor">
+    <div className="max-w-md">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 bg-[#96bf48]/10 rounded-2xl flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#96bf48]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
           </svg>
         </div>
         <div>
-          <h3 className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>Connect Shopify Store</h3>
-          <p className="text-xs text-zinc-400">Import orders automatically for print fulfillment</p>
+          <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>Connect your Shopify store</h3>
+          <p className="text-sm text-zinc-400">Orders sync automatically. No API keys needed.</p>
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-xs text-amber-800 leading-relaxed">
-        <strong>Setup:</strong> In your Shopify admin, go to <strong>Settings → Apps and sales channels → Develop apps</strong>, create a custom app, and grant <code className="bg-amber-100 px-1 rounded">read_orders</code> access. Copy the Admin API access token below.
+      {/* How it works */}
+      <div className="flex flex-col gap-3 mb-8">
+        {[
+          { n: "1", text: "Enter your Shopify store URL below" },
+          { n: "2", text: "You'll be redirected to Shopify to approve access" },
+          { n: "3", text: "Click Install — you're done. Orders appear instantly." },
+        ].map((step) => (
+          <div key={step.n} className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-zinc-900 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{step.n}</div>
+            <p className="text-sm text-zinc-600">{step.text}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Shop Domain</label>
+      <div className="flex gap-2">
+        <div className="flex-1 relative">
           <input
-            value={domain} onChange={(e) => setDomain(e.target.value)}
+            value={domain}
+            onChange={(e) => { setDomain(e.target.value); setError(""); }}
+            onKeyDown={(e) => e.key === "Enter" && handleConnect()}
             placeholder="your-store.myshopify.com"
             className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Admin API Access Token</label>
-          <input
-            value={token} onChange={(e) => setToken(e.target.value)}
-            type="password"
-            placeholder="shpat_••••••••••••••••••••••••••••••••"
-            className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 font-mono"
-          />
-        </div>
-        {error && <p className="text-xs text-red-500">{error}</p>}
         <button
           onClick={handleConnect}
-          disabled={loading || !domain.trim() || !token.trim()}
-          className="px-6 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors"
+          disabled={loading || !domain.trim()}
+          className="px-5 py-3 rounded-xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 disabled:opacity-40 transition-colors whitespace-nowrap flex items-center gap-2"
         >
-          {loading ? "Connecting…" : "Connect Store"}
+          {loading ? (
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          ) : "Connect →"}
         </button>
       </div>
+      {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
     </div>
   );
 }

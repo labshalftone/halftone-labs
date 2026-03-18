@@ -2054,6 +2054,24 @@ export default function AccountPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen,    setCartOpen]    = useState(false);
 
+  // Handle redirect back from Shopify OAuth or tab param in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab    = params.get("tab") as ActiveTab | null;
+    const shopify = params.get("shopify");
+    if (tab && ["dashboard","orders","designs","branding","stores","shopify","invoices","settings"].includes(tab)) {
+      setActiveTab(tab);
+    }
+    if (shopify === "connected" || shopify === "error") {
+      setActiveTab("shopify");
+    }
+    // Clean URL without reloading
+    if (tab || shopify) {
+      const clean = window.location.pathname;
+      window.history.replaceState({}, "", clean);
+    }
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
