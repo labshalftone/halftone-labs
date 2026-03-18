@@ -42,8 +42,20 @@ export default function AcademyPage() {
       </nav>
 
       {/* Hero */}
-      <section className="border-b border-zinc-100 bg-gradient-to-b from-zinc-950 to-zinc-900 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <section className="relative border-b border-zinc-100 text-white overflow-hidden">
+        {/* Background GIF */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://www.rovoassembly.com/_next/image?url=https%3A%2F%2Fa.storyblok.com%2Ff%2F281507%2F600x338%2F7a44f9d1c8%2Fgarment-wash-gif.gif%2Fm%2F0x0%2F&w=1200&q=75"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Black overlay */}
+        <div className="absolute inset-0 bg-black/70" />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 md:py-28">
           <div className="max-w-3xl">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-4">Halftone Academy</p>
             <h1 className="text-4xl md:text-6xl font-black leading-[1.05] mb-6" style={{ letterSpacing: "-0.04em" }}>
