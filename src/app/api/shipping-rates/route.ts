@@ -74,21 +74,22 @@ export async function POST(req: NextRequest) {
       console.warn("[shiprocket] no PIN provided — using fallback rates");
     } else {
       try {
-        const payload = {
+        const qs = new URLSearchParams({
           pickup_postcode:   PICKUP_PIN,
           delivery_postcode: pin,
-          cod: 0, weight: 0.5, length: 30, breadth: 25, height: 2,
-        };
-        console.log("[shiprocket] serviceability request:", JSON.stringify(payload));
-        const res = await fetch(
-          "https://apiv2.shiprocket.in/v1/external/courier/serviceability/",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(8000),
-          }
-        );
+          cod:    "0",
+          weight: "0.5",
+          length: "30",
+          breadth: "25",
+          height: "2",
+        });
+        const url = `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?${qs}`;
+        console.log("[shiprocket] serviceability GET:", url);
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(8000),
+        });
         const data = await res.json();
         if (!res.ok) {
           console.error(`[shiprocket] serviceability failed (${res.status}):`, JSON.stringify(data));
