@@ -471,17 +471,18 @@ function PushToShopifyModal({
 }: {
   design: Design; userId: string; onClose: () => void; onDone: (shopifyProductId: string) => void;
 }) {
-  const [price,   setPrice]   = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
-  const [done,    setDone]    = useState<string | null>(null); // shopifyUrl
+  const [price,      setPrice]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+  const [done,       setDone]       = useState<string | null>(null); // shopifyUrl
+  const [reauthShop, setReauthShop] = useState<string | null>(null); // triggers re-auth UI
 
   const isUpdate = !!design.shopify_product_id;
 
   const handlePush = async () => {
     const retail = parseFloat(price);
     if (!retail || retail <= 0) { setError("Enter a valid retail price"); return; }
-    setLoading(true); setError(null);
+    setLoading(true); setError(null); setReauthShop(null);
     try {
       const res = await fetch("/api/shopify/push-product", {
         method: "POST",
@@ -489,7 +490,13 @@ function PushToShopifyModal({
         body: JSON.stringify({ userId, designId: design.id, retailPrice: retail }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Push failed");
+      if (!res.ok) {
+        if (json.error === "reauth_required" && json.shopDomain) {
+          setReauthShop(json.shopDomain);
+          return;
+        }
+        throw new Error(typeof json.error === "string" ? json.error : "Push failed");
+      }
       setDone(json.shopifyUrl);
       onDone(json.shopifyProductId);
     } catch (e: unknown) {
@@ -589,11 +596,24 @@ function PushToShopifyModal({
               )}
             </div>
 
-            {error && (
+            {reauthShop && (
+              <div className="mb-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm">
+                <p className="font-bold text-amber-800 mb-1">Store needs updated access</p>
+                <p className="text-amber-700 mb-3">Your store connection needs the &ldquo;write products&rdquo; permission. Click below — Shopify will ask you to approve it, then you&rsquo;re done.</p>
+                <a
+                  href={`/api/shopify/auth?shop=${reauthShop}&userId=${userId}`}
+                  className="inline-block w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm text-center transition-colors"
+                >
+                  Re-authorize Store (5 sec) →
+                </a>
+              </div>
+            )}
+
+            {error && !reauthShop && (
               <div className="mb-4 px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium">{error}</div>
             )}
 
-            <button onClick={handlePush} disabled={loading}
+            <button onClick={handlePush} disabled={loading || !!reauthShop}
               className="w-full py-3.5 rounded-2xl font-black text-sm transition-all bg-[#96bf48] hover:bg-[#85ad3d] text-white disabled:opacity-60 flex items-center justify-center gap-2">
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Pushing…</>

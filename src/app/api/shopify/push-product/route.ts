@@ -90,6 +90,13 @@ export async function POST(req: NextRequest) {
     let shopifyProductId: string | null = design.shopify_product_id ?? null;
     let shopifyUrl: string | null = null;
 
+    // Helper: detect if a Shopify error response is a scope/permission issue
+    const isScopeError = (status: number, errors: unknown) => {
+      if (status === 403) return true;
+      const str = JSON.stringify(errors ?? "").toLowerCase();
+      return str.includes("scope") || str.includes("approval") || str.includes("permission") || str.includes("unauthorized");
+    };
+
     if (shopifyProductId) {
       // Update existing product
       const res = await fetch(`${baseUrl}/products/${shopifyProductId}.json`, {
@@ -100,6 +107,9 @@ export async function POST(req: NextRequest) {
       const json = await res.json();
       if (!res.ok) {
         console.error("[push-product] update failed:", json);
+        if (isScopeError(res.status, json.errors)) {
+          return NextResponse.json({ error: "reauth_required", shopDomain: shop_domain }, { status: 403 });
+        }
         return NextResponse.json({ error: json.errors || "Shopify update failed" }, { status: 502 });
       }
       shopifyUrl = `https://${shop_domain}/admin/products/${shopifyProductId}`;
@@ -113,6 +123,9 @@ export async function POST(req: NextRequest) {
       const json = await res.json();
       if (!res.ok || !json.product?.id) {
         console.error("[push-product] create failed:", json);
+        if (isScopeError(res.status, json.errors)) {
+          return NextResponse.json({ error: "reauth_required", shopDomain: shop_domain }, { status: 403 });
+        }
         return NextResponse.json({ error: json.errors || "Shopify create failed" }, { status: 502 });
       }
       shopifyProductId = String(json.product.id);
