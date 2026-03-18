@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 
 type StoreStats = {
   id: string;
@@ -144,10 +143,10 @@ export default function OrgDashboard({ orgSlug, userId, onManage }: Props) {
         className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-zinc-800">Revenue by Store / Artist</h2>
-          <Link href="/studio"
+          <button onClick={onManage}
             className="text-xs font-semibold text-violet-600 hover:text-violet-800 transition-colors">
             Add store →
-          </Link>
+          </button>
         </div>
 
         {loading ? (
