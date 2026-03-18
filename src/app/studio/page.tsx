@@ -637,11 +637,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       {/* ── Left: live mockup panel ── */}
       <div className="hidden lg:flex flex-col items-center justify-center w-[44%] bg-white relative p-10 border-r border-zinc-100">
         <button onClick={onClose}
-          className="absolute top-6 left-6 flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
+          className="absolute top-[72px] left-6 flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Back
         </button>
-        <div className="absolute top-6 right-6 text-right">
+        <div className="absolute top-[72px] right-6 text-right">
           <p className="text-[0.65rem] font-mono text-zinc-400">{product.gsm}</p>
           <p className="text-sm font-black" style={{ letterSpacing: "-0.03em" }}>{product.name}</p>
         </div>
@@ -709,7 +709,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
         </div>
 
         {/* Steps */}
-        <div className="flex items-center gap-0 px-6 lg:px-10 pt-6 pb-4 border-b border-zinc-50">
+        <div className="flex items-center gap-0 px-6 lg:px-10 pt-6 lg:pt-[72px] pb-4 border-b border-zinc-50">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center">
               <button onClick={() => i < step && setStep(i)}
