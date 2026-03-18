@@ -11,8 +11,7 @@ import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-contex
 const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
 
 const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
+  { label: "Products", href: "/products" },
   { label: "How it works", href: "/how-it-works" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Journal", href: "/journal" },
@@ -250,6 +249,10 @@ export default function Navbar() {
                   </a>
                 )
               ))}
+              <Link href="/products" onClick={() => setMenuOpen(false)}
+                className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
+                Products
+              </Link>
               <Link href="/contact" onClick={() => setMenuOpen(false)}
                 className="text-2xl text-halftone-dark" style={{ letterSpacing: "-0.04em" }}>
                 Get in touch
