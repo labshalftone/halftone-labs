@@ -63,3 +63,26 @@ export async function GET(req: NextRequest) {
     transactions: transactions ?? [],
   });
 }
+
+const ALLOWED_CURRENCIES = ["INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD"];
+
+// PATCH /api/wallet  — update currency
+// Body: { userId, currency }
+export async function PATCH(req: NextRequest) {
+  const { userId, currency } = await req.json();
+  if (!userId || !currency) {
+    return NextResponse.json({ error: "userId and currency required" }, { status: 400 });
+  }
+  if (!ALLOWED_CURRENCIES.includes(currency)) {
+    return NextResponse.json({ error: "Unsupported currency" }, { status: 400 });
+  }
+
+  const db = createAdminClient();
+  const { error } = await db
+    .from("wallets")
+    .update({ currency, updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true, currency });
+}

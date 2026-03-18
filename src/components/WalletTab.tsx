@@ -41,6 +41,21 @@ export default function WalletTab({ userId }: { userId: string }) {
   const [processing, setProcessing]       = useState(false);
   const [error, setError]                 = useState<string | null>(null);
   const [activeFlowTab, setActiveFlowTab] = useState<"inflow" | "outflow">("inflow");
+  const [changingCurrency, setChangingCurrency]   = useState(false);
+  const [selectedCurrency, setSelectedCurrency]   = useState<string>("");
+  const [currencySaving, setCurrencySaving]       = useState(false);
+  const [currencyError, setCurrencyError]         = useState<string | null>(null);
+
+  const CURRENCIES = [
+    { code: "INR", symbol: "₹", name: "Indian Rupee" },
+    { code: "USD", symbol: "$", name: "US Dollar" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "GBP", symbol: "£", name: "British Pound" },
+    { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+    { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
+    { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+  ];
 
   const loadWallet = useCallback(async () => {
     if (!userId) return;
@@ -158,6 +173,33 @@ export default function WalletTab({ userId }: { userId: string }) {
     }
   };
 
+  const handleSaveCurrency = async () => {
+    if (!selectedCurrency || selectedCurrency === currency) {
+      setChangingCurrency(false);
+      return;
+    }
+    setCurrencySaving(true);
+    setCurrencyError(null);
+    try {
+      const res = await fetch("/api/wallet", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, currency: selectedCurrency }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCurrency(selectedCurrency);
+        setChangingCurrency(false);
+      } else {
+        setCurrencyError(data.error ?? "Failed to update currency");
+      }
+    } catch {
+      setCurrencyError("Something went wrong. Please try again.");
+    } finally {
+      setCurrencySaving(false);
+    }
+  };
+
   const filteredTransactions = transactions.filter((t) =>
     activeFlowTab === "inflow" ? t.type === "credit" : t.type === "debit"
   );
@@ -258,18 +300,66 @@ export default function WalletTab({ userId }: { userId: string }) {
       {/* Store billing currency */}
       <div className="bg-white rounded-2xl border border-zinc-100 p-6 mb-4">
         <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Store billing currency</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-700">₹</div>
-            <span className="font-bold text-zinc-900 text-sm">INR</span>
+
+        {!changingCurrency ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-700">
+                {CURRENCIES.find((c) => c.code === currency)?.symbol ?? currency}
+              </div>
+              <span className="font-bold text-zinc-900 text-sm">{currency}</span>
+            </div>
+            <button
+              onClick={() => { setSelectedCurrency(currency); setChangingCurrency(true); setCurrencyError(null); }}
+              className="px-4 py-2 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-semibold hover:border-zinc-400 hover:text-zinc-900 transition-colors"
+            >
+              Change
+            </button>
           </div>
-          <button
-            disabled
-            className="px-4 py-2 rounded-xl border border-zinc-200 text-zinc-400 text-xs font-semibold opacity-50 cursor-not-allowed"
-          >
-            Change
-          </button>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-2">
+              {CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => setSelectedCurrency(c.code)}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                    selectedCurrency === c.code
+                      ? "border-zinc-900 bg-zinc-900 text-white"
+                      : "border-zinc-200 hover:border-zinc-400 text-zinc-700"
+                  }`}
+                >
+                  <span className="text-sm font-bold w-6 text-center">{c.symbol}</span>
+                  <div>
+                    <p className="text-xs font-bold leading-none">{c.code}</p>
+                    <p className={`text-[10px] mt-0.5 leading-none ${selectedCurrency === c.code ? "text-zinc-300" : "text-zinc-400"}`}>{c.name}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {currencyError && <p className="text-xs text-red-500">{currencyError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveCurrency}
+                disabled={currencySaving || !selectedCurrency}
+                className="flex-1 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+              >
+                {currencySaving ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                ) : null}
+                Save
+              </button>
+              <button
+                onClick={() => { setChangingCurrency(false); setCurrencyError(null); }}
+                className="px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-500 text-sm font-semibold hover:text-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Wallet Transaction Record */}
