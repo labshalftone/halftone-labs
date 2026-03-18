@@ -97,69 +97,83 @@ export async function POST(req: NextRequest) {
           console.log(`[shiprocket] serviceability status=${res.status}, message="${data?.message}", couriers=${data?.data?.available_courier_companies?.length ?? 0}`);
         }
 
-        const couriers: Array<{ courier_name: string; rate: number; etd: string | number }> =
-          data?.data?.available_courier_companies ?? [];
+        const couriers: Array<{
+          courier_name: string; rate: number; etd: string | number;
+          mode?: string; [k: string]: unknown;
+        }> = data?.data?.available_courier_companies ?? [];
 
         if (couriers.length > 0) {
-          // ETD from Shiprocket can be a date string ("Mar 24, 2026") or number of days
+          // Log first courier to inspect all available fields
+          console.log("[shiprocket] sample courier fields:", JSON.stringify(couriers[0]));
+          console.log(`[shiprocket] all couriers: ${couriers.map(c => `${c.courier_name}|mode=${c.mode}|₹${c.rate}`).join(" / ")}`);
+
+          // ETD: Shiprocket returns a date string ("Mar 24, 2026") or number of days
           const etdToDays = (etd: string | number): number => {
             if (typeof etd === "number") return etd;
             const d = new Date(etd);
-            if (!isNaN(d.getTime())) {
-              return Math.max(1, Math.ceil((d.getTime() - Date.now()) / 86_400_000));
-            }
-            // Try parsing plain number string like "4"
+            if (!isNaN(d.getTime())) return Math.max(1, Math.ceil((d.getTime() - Date.now()) / 86_400_000));
             const n = parseFloat(String(etd));
             return isNaN(n) ? 7 : n;
           };
-
           const etdLabel = (etd: string | number): string => {
-            const days = etdToDays(etd);
-            return `${days}–${days + 1} days`;
+            const d = etdToDays(etd);
+            return `${d}–${d + 1} days`;
           };
 
-          // Preferred reliable carriers (India Post excluded — unreliable tracking)
-          const PREFERRED = ["delhivery", "blue dart", "dtdc", "xpressbees", "ekart", "shadowfax"];
-          const EXCLUDE    = ["india post", "speed post"];
+          // Detect mode: use `mode` field if present, else infer from courier name
+          const getMode = (c: typeof couriers[0]): "air" | "surface" | "other" => {
+            const m = String(c.mode ?? "").toLowerCase();
+            const n = c.courier_name.toLowerCase();
+            if (m.includes("air")     || n.includes("air"))     return "air";
+            if (m.includes("surface") || n.includes("surface")) return "surface";
+            return "other";
+          };
 
-          const isPreferred = (name: string) => PREFERRED.some(p => name.toLowerCase().includes(p));
-          const isExcluded  = (name: string) => EXCLUDE.some(e => name.toLowerCase().includes(e));
+          // Exclude India Post (no tracking, unreliable)
+          const EXCLUDE = ["india post", "speed post"];
+          const pool = couriers.filter(c => !EXCLUDE.some(e => c.courier_name.toLowerCase().includes(e)));
 
-          const preferred = couriers.filter(c => isPreferred(c.courier_name));
-          const others    = couriers.filter(c => !isExcluded(c.courier_name) && !isPreferred(c.courier_name));
-          const pool      = [...preferred, ...others];
+          const airCouriers     = pool.filter(c => getMode(c) === "air");
+          const surfaceCouriers = pool.filter(c => getMode(c) === "surface");
+          // "other" goes into both buckets as fallback
+          const otherCouriers   = pool.filter(c => getMode(c) === "other");
 
-          // Sort by rate
-          const sortedPool = [...pool].sort((a, b) => a.rate - b.rate);
-          const all        = sortedPool.length > 0 ? sortedPool : [...couriers].sort((a, b) => a.rate - b.rate);
+          const cheapest = (list: typeof couriers) =>
+            [...list].sort((a, b) => a.rate - b.rate)[0] ?? null;
 
-          const std  = all[0];
-          // Express: fastest by ETD that is different from std
-          const express = [...all].sort((a, b) => etdToDays(a.etd) - etdToDays(b.etd))
-            .find(c => c.courier_name !== std.courier_name && etdToDays(c.etd) < etdToDays(std.etd)) ?? null;
+          const air     = cheapest([...airCouriers,     ...otherCouriers]);
+          const surface = cheapest([...surfaceCouriers, ...otherCouriers]);
 
-          console.log(`[shiprocket] standard=${std.courier_name} ₹${std.rate} ${etdToDays(std.etd)}d | express=${express?.courier_name ?? "none"}`);
-          console.log(`[shiprocket] all pool: ${all.slice(0, 5).map(c => `${c.courier_name}(₹${c.rate})`).join(", ")}`);
+          console.log(`[shiprocket] air=${air?.courier_name ?? "none"} ₹${air?.rate} | surface=${surface?.courier_name ?? "none"} ₹${surface?.rate}`);
 
-          const opts = [
-            {
-              id:      "domestic-standard",
-              label:   "Standard Delivery",
-              carrier: std.courier_name,
-              rate:    Math.max(99, Math.ceil(std.rate / 10) * 10),
-              days:    etdLabel(std.etd),
-            },
-          ];
-          if (express) {
+          const opts = [];
+          if (surface) {
             opts.push({
-              id:      "domestic-express",
-              label:   "Express Delivery",
-              carrier: express.courier_name,
-              rate:    Math.max(149, Math.ceil(express.rate / 10) * 10 + 30),
-              days:    etdLabel(express.etd),
+              id:      "domestic-surface",
+              label:   "Surface Delivery",
+              carrier: "Standard",
+              rate:    Math.max(99, Math.ceil(surface.rate / 10) * 10),
+              days:    etdLabel(surface.etd),
             });
           }
-          return NextResponse.json({ options: opts });
+          if (air && (!surface || air.courier_name !== surface.courier_name)) {
+            opts.push({
+              id:      "domestic-air",
+              label:   "Air Delivery",
+              carrier: "Express",
+              rate:    Math.max(surface ? surface.rate + 10 : 99, Math.ceil(air.rate / 10) * 10),
+              days:    etdLabel(air.etd),
+            });
+          }
+          // Fallback: if we only got "other" couriers with no mode distinction, show one option
+          if (opts.length === 0 && pool.length > 0) {
+            const best = cheapest(pool)!;
+            opts.push({
+              id: "domestic-standard", label: "Standard Delivery", carrier: "Standard",
+              rate: Math.max(99, Math.ceil(best.rate / 10) * 10), days: etdLabel(best.etd),
+            });
+          }
+          if (opts.length > 0) return NextResponse.json({ options: opts });
         }
         console.warn("[shiprocket] 0 couriers returned — using fallback rates");
       } catch (e) {
