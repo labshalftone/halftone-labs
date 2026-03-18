@@ -97,30 +97,66 @@ export async function POST(req: NextRequest) {
           console.log(`[shiprocket] serviceability status=${res.status}, message="${data?.message}", couriers=${data?.data?.available_courier_companies?.length ?? 0}`);
         }
 
-        const couriers: Array<{ courier_name: string; rate: number; etd: number }> =
+        const couriers: Array<{ courier_name: string; rate: number; etd: string | number }> =
           data?.data?.available_courier_companies ?? [];
 
         if (couriers.length > 0) {
-          const sorted = [...couriers].sort((a, b) => a.rate - b.rate);
-          const std  = sorted[0];
-          const fast = sorted.find((c) => Number(c.etd) <= 3) ?? null;
-          console.log(`[shiprocket] cheapest=${std.courier_name} ₹${std.rate} ${std.etd}d`);
+          // ETD from Shiprocket can be a date string ("Mar 24, 2026") or number of days
+          const etdToDays = (etd: string | number): number => {
+            if (typeof etd === "number") return etd;
+            const d = new Date(etd);
+            if (!isNaN(d.getTime())) {
+              return Math.max(1, Math.ceil((d.getTime() - Date.now()) / 86_400_000));
+            }
+            // Try parsing plain number string like "4"
+            const n = parseFloat(String(etd));
+            return isNaN(n) ? 7 : n;
+          };
+
+          const etdLabel = (etd: string | number): string => {
+            const days = etdToDays(etd);
+            return `${days}–${days + 1} days`;
+          };
+
+          // Preferred reliable carriers (India Post excluded — unreliable tracking)
+          const PREFERRED = ["delhivery", "blue dart", "dtdc", "xpressbees", "ekart", "shadowfax"];
+          const EXCLUDE    = ["india post", "speed post"];
+
+          const isPreferred = (name: string) => PREFERRED.some(p => name.toLowerCase().includes(p));
+          const isExcluded  = (name: string) => EXCLUDE.some(e => name.toLowerCase().includes(e));
+
+          const preferred = couriers.filter(c => isPreferred(c.courier_name));
+          const others    = couriers.filter(c => !isExcluded(c.courier_name) && !isPreferred(c.courier_name));
+          const pool      = [...preferred, ...others];
+
+          // Sort by rate
+          const sortedPool = [...pool].sort((a, b) => a.rate - b.rate);
+          const all        = sortedPool.length > 0 ? sortedPool : [...couriers].sort((a, b) => a.rate - b.rate);
+
+          const std  = all[0];
+          // Express: fastest by ETD that is different from std
+          const express = [...all].sort((a, b) => etdToDays(a.etd) - etdToDays(b.etd))
+            .find(c => c.courier_name !== std.courier_name && etdToDays(c.etd) < etdToDays(std.etd)) ?? null;
+
+          console.log(`[shiprocket] standard=${std.courier_name} ₹${std.rate} ${etdToDays(std.etd)}d | express=${express?.courier_name ?? "none"}`);
+          console.log(`[shiprocket] all pool: ${all.slice(0, 5).map(c => `${c.courier_name}(₹${c.rate})`).join(", ")}`);
+
           const opts = [
             {
-              id: "domestic-standard",
-              label: "Standard Delivery",
+              id:      "domestic-standard",
+              label:   "Standard Delivery",
               carrier: std.courier_name,
-              rate: Math.max(99, Math.ceil(std.rate / 10) * 10),
-              days: `${std.etd} days`,
+              rate:    Math.max(99, Math.ceil(std.rate / 10) * 10),
+              days:    etdLabel(std.etd),
             },
           ];
-          if (fast && fast.courier_name !== std.courier_name) {
+          if (express) {
             opts.push({
-              id: "domestic-express",
-              label: "Express Delivery",
-              carrier: fast.courier_name,
-              rate: Math.max(149, Math.ceil(fast.rate / 10) * 10 + 40),
-              days: `${fast.etd} days`,
+              id:      "domestic-express",
+              label:   "Express Delivery",
+              carrier: express.courier_name,
+              rate:    Math.max(149, Math.ceil(express.rate / 10) * 10 + 30),
+              days:    etdLabel(express.etd),
             });
           }
           return NextResponse.json({ options: opts });
