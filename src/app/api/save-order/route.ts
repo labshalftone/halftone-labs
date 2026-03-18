@@ -1,17 +1,17 @@
 // ALTER TABLE orders ADD COLUMN IF NOT EXISTS front_design_url text;
 // ALTER TABLE orders ADD COLUMN IF NOT EXISTS back_design_url text;
+// ALTER TABLE orders ADD COLUMN IF NOT EXISTS mockup_url text;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 
 async function uploadDesign(db: ReturnType<typeof createAdminClient>, dataUrl: string, path: string): Promise<string | null> {
   try {
-    const base64 = dataUrl.split(",")[1];
+    const [header, base64] = dataUrl.split(",");
     if (!base64) return null;
     const buffer = Buffer.from(base64, "base64");
-    const { error } = await db.storage.from("store-assets").upload(path, buffer, {
-      contentType: "image/png", upsert: true,
-    });
+    const contentType = header.includes("jpeg") ? "image/jpeg" : "image/png";
+    const { error } = await db.storage.from("store-assets").upload(path, buffer, { contentType, upsert: true });
     if (error) return null;
     const { data } = db.storage.from("store-assets").getPublicUrl(path);
     return data.publicUrl;
@@ -26,20 +26,19 @@ export async function POST(req: NextRequest) {
       product, color, size, printTier, printDimensions,
       blankPrice, printPrice, shipping, total,
       couponCode, discountAmount,
-      frontDesignUrl, backDesignUrl,
+      frontDesignUrl, backDesignUrl, mockupUrl,
       customerName, customerEmail, customerPhone,
       address, city, pin, country, userId,
     } = body;
 
     const db = createAdminClient();
 
-    // Upload design files if present
-    const frontDesignStorageUrl = frontDesignUrl
-      ? await uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)
-      : null;
-    const backDesignStorageUrl = backDesignUrl
-      ? await uploadDesign(db, backDesignUrl, `designs/${orderRef}/back.png`)
-      : null;
+    // Upload design files + placement mockup in parallel
+    const [frontDesignStorageUrl, backDesignStorageUrl, mockupStorageUrl] = await Promise.all([
+      frontDesignUrl ? uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)    : null,
+      backDesignUrl  ? uploadDesign(db, backDesignUrl,  `designs/${orderRef}/back.png`)     : null,
+      mockupUrl      ? uploadDesign(db, mockupUrl,      `designs/${orderRef}/mockup.jpg`)   : null,
+    ]);
 
     // Save order
     const { data: order, error } = await db.from("orders").insert({
@@ -57,6 +56,7 @@ export async function POST(req: NextRequest) {
       discount_amount: discountAmount ?? 0,
       front_design_url: frontDesignStorageUrl,
       back_design_url: backDesignStorageUrl,
+      mockup_url: mockupStorageUrl,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,

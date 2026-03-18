@@ -46,6 +46,7 @@ type Order = {
   created_at: string;
   front_design_url: string | null;
   back_design_url: string | null;
+  mockup_url: string | null;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -301,7 +302,7 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     </span>
                   )}
                 </div>
-                {!(selected.front_design_url || selected.back_design_url) ? (
+                {!(selected.front_design_url || selected.back_design_url || selected.mockup_url) ? (
                   <div className="flex items-center gap-2 text-zinc-400 text-xs py-2">
                     <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -309,25 +310,55 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     No design files received for this order.
                   </div>
                 ) : (
-                  <div className="flex gap-3 flex-wrap">
-                    {([
-                      { url: selected.front_design_url, label: "Front" },
-                      { url: selected.back_design_url,  label: "Back"  },
-                    ] as const).map(({ url, label }) => url && (
-                      <div key={label} className="flex flex-col gap-2 p-3 rounded-xl border border-zinc-100 bg-zinc-50">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt={`${label} design`}
-                          className="w-28 h-28 object-contain rounded-lg bg-white border border-zinc-100" />
-                        <p className="text-[0.65rem] font-bold text-zinc-500 text-center">{label} print</p>
-                        <div className="flex gap-1.5">
-                          <a href={url} target="_blank" rel="noopener noreferrer"
-                            className="flex-1 text-center text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
-                            View ↗
-                          </a>
-                          <DownloadButton url={url} filename={`${selected.ref}-${label.toLowerCase()}-design.png`} />
+                  <div className="flex flex-col gap-4">
+                    {/* Placement mockup — shown large so printer can see position clearly */}
+                    {selected.mockup_url && (
+                      <div>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 mb-2">Placement mockup</p>
+                        <div className="flex gap-3 items-start">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={selected.mockup_url} alt="Placement mockup"
+                            className="w-48 h-auto rounded-xl border border-zinc-200 bg-zinc-50 object-contain" />
+                          <div className="flex flex-col gap-1.5">
+                            <p className="text-xs text-zinc-500 leading-relaxed max-w-[160px]">
+                              Shows the customer&apos;s design position and scale on the garment.
+                            </p>
+                            <a href={selected.mockup_url} target="_blank" rel="noopener noreferrer"
+                              className="text-center text-[0.65rem] font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
+                              View full ↗
+                            </a>
+                            <DownloadButton url={selected.mockup_url} filename={`${selected.ref}-mockup.jpg`} />
+                          </div>
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Raw design files */}
+                    {(selected.front_design_url || selected.back_design_url) && (
+                      <div>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 mb-2">Raw design files (for print)</p>
+                        <div className="flex gap-3 flex-wrap">
+                          {([
+                            { url: selected.front_design_url, label: "Front" },
+                            { url: selected.back_design_url,  label: "Back"  },
+                          ] as const).map(({ url, label }) => url && (
+                            <div key={label} className="flex flex-col gap-2 p-3 rounded-xl border border-zinc-100 bg-zinc-50">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt={`${label} design`}
+                                className="w-28 h-28 object-contain rounded-lg bg-white border border-zinc-100" />
+                              <p className="text-[0.65rem] font-bold text-zinc-500 text-center">{label} print</p>
+                              <div className="flex gap-1.5">
+                                <a href={url} target="_blank" rel="noopener noreferrer"
+                                  className="flex-1 text-center text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
+                                  View ↗
+                                </a>
+                                <DownloadButton url={url} filename={`${selected.ref}-${label.toLowerCase()}-design.png`} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
