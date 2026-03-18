@@ -172,11 +172,71 @@ export default function CheckoutPage() {
     setCouponLoading(false);
   };
 
+  // Shared helper: save order + increment coupon + clear cart
+  const saveAndComplete = async (ref: string, paymentId: string, razorpayOrderId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const saveRes = await fetch("/api/save-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderRef: ref,
+        razorpayPaymentId: paymentId,
+        razorpayOrderId,
+        product: items.map((i) => `${i.productName} ${i.gsm}`).join(" + "),
+        color: items.map((i) => i.color).join(", "),
+        size: items.map((i) => i.size).join(", "),
+        printTier: items.map((i) => i.printTier).filter(Boolean).join(", ") || null,
+        printDimensions: items.map((i) => i.printDims).filter(Boolean).join(", ") || null,
+        blankPrice: items.reduce((s, i) => s + i.blankPrice, 0),
+        printPrice: items.reduce((s, i) => s + i.printPrice, 0),
+        shipping: selectedShipping?.rate ?? 0,
+        total: grandTotalINR,
+        currency,
+        totalForeign: grandTotalForeign,
+        couponCode: appliedCoupon?.code ?? null,
+        discountAmount: discount,
+        frontDesignUrl: items.map(i => i.frontDesignUrl || "").find(Boolean) ?? null,
+        backDesignUrl:  items.map(i => i.backDesignUrl  || "").find(Boolean) ?? null,
+        mockupUrl:      items.map(i => i.thumbnail      || "").find(Boolean) ?? null,
+        customerName: form.name,
+        customerEmail: form.email,
+        customerPhone: form.phone,
+        address: form.address + ", " + form.city + (form.pin ? " " + form.pin : "") + (form.state ? ", " + form.state : ""),
+        city: form.city,
+        pin: form.pin,
+        country,
+        userId: session?.user?.id ?? null,
+      }),
+    });
+    if (!saveRes.ok) {
+      const errData = await saveRes.json().catch(() => ({}));
+      throw new Error(errData.error ?? `Order save failed (${saveRes.status})`);
+    }
+    if (appliedCoupon?.code) {
+      await fetch("/api/coupon", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: appliedCoupon.code }),
+      });
+    }
+    clearCart();
+    setOrderSuccess({ ref });
+  };
+
   const handlePay = async () => {
     if (!form.name || !form.email || !form.address || !form.city || !selectedShipping) return;
     setPaying(true); setPayError("");
+
+    const ref = `HL${Date.now().toString(36).toUpperCase()}`;
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      // ── Zero-total: skip Razorpay entirely ──────────────────────────────
+      if (grandTotalINR === 0) {
+        await saveAndComplete(ref, "FREE", "FREE");
+        return;
+      }
+
+      // ── Normal paid flow ────────────────────────────────────────────────
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -192,55 +252,8 @@ export default function CheckoutPage() {
           prefill: { name: form.name, email: form.email, contact: form.phone },
           theme: { color: "#f15533" },
           handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string }) => {
-            const ref = `HL${Date.now().toString(36).toUpperCase()}`;
             try {
-              const saveRes = await fetch("/api/save-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  orderRef: ref,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpayOrderId: response.razorpay_order_id,
-                  product: items.map((i) => `${i.productName} ${i.gsm}`).join(" + "),
-                  color: items.map((i) => i.color).join(", "),
-                  size: items.map((i) => i.size).join(", "),
-                  printTier: items.map((i) => i.printTier).filter(Boolean).join(", ") || null,
-                  printDimensions: items.map((i) => i.printDims).filter(Boolean).join(", ") || null,
-                  blankPrice: items.reduce((s, i) => s + i.blankPrice, 0),
-                  printPrice: items.reduce((s, i) => s + i.printPrice, 0),
-                  shipping: selectedShipping.rate,
-                  total: grandTotalINR,
-                  currency,
-                  totalForeign: grandTotalForeign,
-                  couponCode: appliedCoupon?.code ?? null,
-                  discountAmount: discount,
-                  frontDesignUrl: items.map(i => i.frontDesignUrl || "").find(Boolean) ?? null,
-                  backDesignUrl:  items.map(i => i.backDesignUrl  || "").find(Boolean) ?? null,
-                  mockupUrl:      items.map(i => i.thumbnail      || "").find(Boolean) ?? null,
-                  customerName: form.name,
-                  customerEmail: form.email,
-                  customerPhone: form.phone,
-                  address: form.address + ", " + form.city + (form.pin ? " " + form.pin : "") + (form.state ? ", " + form.state : ""),
-                  city: form.city,
-                  pin: form.pin,
-                  country,
-                  userId: session?.user?.id ?? null,
-                }),
-              });
-              if (!saveRes.ok) {
-                const errData = await saveRes.json().catch(() => ({}));
-                throw new Error(errData.error ?? `Order save failed (${saveRes.status})`);
-              }
-              // Increment coupon uses
-              if (appliedCoupon?.code) {
-                await fetch("/api/coupon", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ code: appliedCoupon.code }),
-                });
-              }
-              clearCart();
-              setOrderSuccess({ ref });
+              await saveAndComplete(ref, response.razorpay_payment_id, response.razorpay_order_id);
               resolve();
             } catch (err) { reject(err); }
           },
