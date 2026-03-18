@@ -12,6 +12,8 @@ import { PRODUCTS } from "@/lib/products";
 import ShopifyTab from "@/components/ShopifyTab";
 import WalletTab from "@/components/WalletTab";
 import OverviewTab from "@/components/OverviewTab";
+import OrgDashboard from "@/components/OrgDashboard";
+import OrgSettings from "@/components/OrgSettings";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -2512,6 +2514,16 @@ function SettingsTab({
   );
 }
 
+type UserOrg = {
+  id: string;
+  slug: string;
+  name: string;
+  logo_url: string | null;
+  role: string;
+  owner_id: string;
+  description: string | null;
+};
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function AccountPage() {
   const router = useRouter();
@@ -2522,6 +2534,18 @@ export default function AccountPage() {
   const [activeTab,   setActiveTab]   = useState<ActiveTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen,    setCartOpen]    = useState(false);
+
+  // Org context
+  const [userOrgs,         setUserOrgs]         = useState<UserOrg[]>([]);
+  const [activeOrg,        setActiveOrg]        = useState<UserOrg | null>(null);
+  const [showOrgSwitcher,  setShowOrgSwitcher]  = useState(false);
+  const [showOrgSettings,  setShowOrgSettings]  = useState(false);
+  const [showCreateOrg,    setShowCreateOrg]    = useState(false);
+  const [newOrgName,       setNewOrgName]       = useState("");
+  const [newOrgSlug,       setNewOrgSlug]       = useState("");
+  const [newOrgDesc,       setNewOrgDesc]       = useState("");
+  const [creatingOrg,      setCreatingOrg]      = useState(false);
+  const [createOrgError,   setCreateOrgError]   = useState("");
 
   // Handle redirect back from Shopify OAuth or tab param in URL
   useEffect(() => {
@@ -2552,6 +2576,33 @@ export default function AccountPage() {
     };
     init();
   }, [router]);
+
+  // Fetch orgs once user loads
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/organizations?userId=${user.id}`)
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d)) setUserOrgs(d); })
+      .catch(() => {});
+  }, [user?.id]);
+
+  async function handleCreateOrg(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user?.id) return;
+    setCreatingOrg(true); setCreateOrgError("");
+    const res = await fetch("/api/organizations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, name: newOrgName, slug: newOrgSlug, description: newOrgDesc || null }),
+    });
+    const d = await res.json();
+    if (!res.ok) { setCreateOrgError(d.error ?? "Failed"); setCreatingOrg(false); return; }
+    setUserOrgs((prev) => [...prev, d]);
+    setActiveOrg(d);
+    setShowCreateOrg(false);
+    setNewOrgName(""); setNewOrgSlug(""); setNewOrgDesc("");
+    setCreatingOrg(false);
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -2587,6 +2638,83 @@ export default function AccountPage() {
           <Link href="/" className="text-base font-black text-zinc-900" style={{ letterSpacing: "-0.05em" }}>
             Halftone Labs
           </Link>
+        </div>
+
+        {/* Org / context switcher */}
+        <div className="px-3 py-2 border-b border-zinc-100 relative">
+          <button
+            onClick={() => setShowOrgSwitcher((v) => !v)}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors"
+          >
+            {activeOrg ? (
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
+                {activeOrg.name.slice(0, 2).toUpperCase()}
+              </div>
+            ) : (
+              <div className="w-6 h-6 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 flex-shrink-0">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
+            <span className="flex-1 text-left text-xs font-bold text-zinc-700 truncate">
+              {activeOrg ? activeOrg.name : "Personal"}
+            </span>
+            <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+            </svg>
+          </button>
+
+          {/* Switcher dropdown */}
+          <AnimatePresence>
+            {showOrgSwitcher && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                transition={{ duration: 0.12 }}
+                className="absolute left-3 right-3 top-full mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 overflow-hidden"
+              >
+                {/* Personal */}
+                <button
+                  onClick={() => { setActiveOrg(null); setShowOrgSwitcher(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-zinc-50 ${!activeOrg ? "bg-zinc-50 text-zinc-900" : "text-zinc-600"}`}
+                >
+                  <div className="w-5 h-5 rounded-md bg-zinc-200 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  Personal
+                  {!activeOrg && <span className="ml-auto text-[10px] text-zinc-400">active</span>}
+                </button>
+                {/* Orgs */}
+                {userOrgs.map((org) => (
+                  <button key={org.id}
+                    onClick={() => { setActiveOrg(org); setShowOrgSwitcher(false); setActiveTab("dashboard"); }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-zinc-50 ${activeOrg?.id === org.id ? "bg-zinc-50 text-zinc-900" : "text-zinc-600"}`}
+                  >
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-[9px] font-black">
+                      {org.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <span className="flex-1 truncate text-left">{org.name}</span>
+                    <span className="text-[10px] font-normal text-zinc-400 capitalize">{org.role}</span>
+                    {activeOrg?.id === org.id && <span className="text-[10px] text-zinc-400">active</span>}
+                  </button>
+                ))}
+                {/* Create new org */}
+                <div className="border-t border-zinc-100">
+                  <button
+                    onClick={() => { setShowCreateOrg(true); setShowOrgSwitcher(false); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-violet-600 hover:bg-violet-50 transition-colors"
+                  >
+                    <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center text-violet-500 text-xs font-black">+</div>
+                    New organization
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Nav */}
@@ -2634,8 +2762,17 @@ export default function AccountPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="font-black text-zinc-900 capitalize">
-              {activeTab === "dashboard" ? "Dashboard" : NAV.find((n) => n.id === activeTab)?.label}
+            <h1 className="font-black text-zinc-900 capitalize flex items-center gap-2">
+              {activeTab === "dashboard" && activeOrg ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[9px] font-black">
+                    {activeOrg.name.slice(0, 2).toUpperCase()}
+                  </span>
+                  {activeOrg.name}
+                </span>
+              ) : (
+                activeTab === "dashboard" ? "Dashboard" : NAV.find((n) => n.id === activeTab)?.label
+              )}
             </h1>
           </div>
 
@@ -2667,11 +2804,66 @@ export default function AccountPage() {
           </div>
         </header>
 
+        {/* Create org modal */}
+        <AnimatePresence>
+          {showCreateOrg && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+              onClick={(e) => { if (e.target === e.currentTarget) setShowCreateOrg(false); }}>
+              <motion.div initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
+                className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+                <h3 className="text-lg font-black text-zinc-900 mb-1" style={{ letterSpacing: "-0.04em" }}>Create Organization</h3>
+                <p className="text-xs text-zinc-400 mb-5">For labels, agencies, festivals — manage multiple stores from one dashboard.</p>
+                <form onSubmit={handleCreateOrg} className="space-y-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Organization name *</label>
+                    <input className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors"
+                      placeholder="Gully Gang" value={newOrgName} required
+                      onChange={(e) => { setNewOrgName(e.target.value); setNewOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-")); }} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">URL handle *</label>
+                    <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+                      <span className="px-3 py-2.5 text-zinc-400 text-xs border-r border-zinc-200 bg-zinc-50 font-mono whitespace-nowrap">halftonelabs.in/org/</span>
+                      <input className="flex-1 px-3 py-2.5 text-sm font-mono outline-none"
+                        placeholder="gully-gang" value={newOrgSlug} required
+                        onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Description</label>
+                    <textarea className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none"
+                      rows={2} placeholder="India's premier hip-hop label" value={newOrgDesc}
+                      onChange={(e) => setNewOrgDesc(e.target.value)} />
+                  </div>
+                  {createOrgError && <p className="text-xs text-red-500 font-semibold">{createOrgError}</p>}
+                  <div className="flex gap-2 pt-1">
+                    <button type="button" onClick={() => setShowCreateOrg(false)}
+                      className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={creatingOrg}
+                      className="flex-1 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-bold hover:bg-violet-700 disabled:opacity-40 transition-colors">
+                      {creatingOrg ? "Creating…" : "Create org →"}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Page content */}
         <main className="flex-1 p-6 lg:p-8 max-w-5xl w-full mx-auto">
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
-              {activeTab === "dashboard" && <OverviewTab userId={user?.id ?? ""} userName={user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? ""} onTopUp={() => setActiveTab("wallet")} />}
+            <motion.div key={activeTab + (activeOrg?.slug ?? "personal")} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
+              {activeTab === "dashboard" && !activeOrg && <OverviewTab userId={user?.id ?? ""} userName={user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? ""} onTopUp={() => setActiveTab("wallet")} />}
+              {activeTab === "dashboard" && activeOrg && !showOrgSettings && (
+                <OrgDashboard orgSlug={activeOrg.slug} userId={user?.id ?? ""} onManage={() => setShowOrgSettings(true)} />
+              )}
+              {activeTab === "dashboard" && activeOrg && showOrgSettings && (
+                <OrgSettings org={activeOrg} userId={user?.id ?? ""} onUpdated={(updated) => { setActiveOrg(updated); setUserOrgs((prev) => prev.map((o) => o.id === updated.id ? { ...o, ...updated } : o)); }} onClose={() => setShowOrgSettings(false)} />
+              )}
               {activeTab === "orders"    && <OrdersTab orders={orders} user={user} />}
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
