@@ -351,7 +351,15 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
     // Get first matched line item for product details
     const firstMatched = order.line_items.find((l) => l.hlProduct !== null);
-    const totalInr = Math.round(Number(order.total_price));
+
+    // Production cost = blank + print per item × qty (NOT the Shopify retail price)
+    const productionCost = order.line_items.reduce((sum, l) => {
+      const blank = l.hlProduct?.blankPrice ?? 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const print = (l.hlProduct as any)?.printPrice ?? 0;
+      return sum + (blank + print) * (l.quantity ?? 1);
+    }, 0);
+    const totalInr = Math.round(productionCost);
 
     const res = await fetch("/api/shopify/orders/confirm", {
       method: "POST",
@@ -560,6 +568,20 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                     {/* Confirm via Wallet button */}
                     {!isConfirmed && (
                       <div className="flex flex-col gap-2">
+                        {order.anyMatched && (() => {
+                          const cost = order.line_items.reduce((s, l) => {
+                            const b = l.hlProduct?.blankPrice ?? 0;
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const p = (l.hlProduct as any)?.printPrice ?? 0;
+                            return s + (b + p) * (l.quantity ?? 1);
+                          }, 0);
+                          return cost > 0 ? (
+                            <p className="text-xs text-zinc-400 text-center">
+                              Production cost: <span className="font-bold text-zinc-700">₹{Math.round(cost).toLocaleString("en-IN")}</span>
+                              <span className="ml-1 text-zinc-300">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
+                            </p>
+                          ) : null;
+                        })()}
                         {confirmError[order.id] && (
                           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 font-medium">
                             {confirmError[order.id]}
@@ -579,7 +601,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                               </svg>
-                              Confirm via Wallet →
+                              Pay Production Cost via Wallet →
                             </>
                           )}
                         </button>
