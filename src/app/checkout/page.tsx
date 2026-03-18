@@ -758,10 +758,9 @@ export default function CheckoutPage() {
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                     placeholder={country === "IN" ? "PIN code" : "Postal code"} />
                 </div>
-                {country === "IN" && (
-                  <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
-                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="State" />
-                )}
+                <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  placeholder={country === "IN" ? "State" : "State / Province / Region"} />
               </div>
 
               {/* Billing toggle */}
