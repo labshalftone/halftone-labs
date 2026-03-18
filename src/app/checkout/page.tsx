@@ -87,6 +87,7 @@ export default function CheckoutPage() {
   const [shippingOptions,  setShippingOptions]  = useState<ShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [loadingShipping,  setLoadingShipping]  = useState(false);
+  const [pinLookupLoading, setPinLookupLoading] = useState(false);
 
   // Coupon state
   const [couponInput,   setCouponInput]   = useState("");
@@ -151,6 +152,25 @@ export default function CheckoutPage() {
       }
     } catch {}
     setLoadingShipping(false);
+  }, []);
+
+  // Auto-fill city + state from India PIN code
+  const lookupPincode = useCallback(async (pin: string) => {
+    if (!/^\d{6}$/.test(pin)) return;
+    setPinLookupLoading(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const data = await res.json();
+      if (data?.[0]?.Status === "Success" && data[0].PostOffice?.length > 0) {
+        const po = data[0].PostOffice[0];
+        setForm(f => ({
+          ...f,
+          city:  po.District || po.Name || f.city,
+          state: po.State    || f.state,
+        }));
+      }
+    } catch {}
+    setPinLookupLoading(false);
   }, []);
 
   // Re-fetch when country or total qty changes
@@ -759,10 +779,32 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
-                  <input value={form.pin} onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value }))}
-                    onBlur={(e) => country === "IN" && e.target.value && fetchShipping(country, e.target.value, totalQty)}
-                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    placeholder={country === "IN" ? "PIN code" : "Postal code"} />
+                  <div className="relative">
+                    <input
+                      value={form.pin}
+                      onChange={(e) => {
+                        const val = country === "IN"
+                          ? e.target.value.replace(/\D/g, "").slice(0, 6)
+                          : e.target.value;
+                        setForm(f => ({ ...f, pin: val }));
+                        if (country === "IN" && val.length === 6) {
+                          lookupPincode(val);
+                          fetchShipping(country, val, totalQty);
+                        }
+                      }}
+                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 pr-9"
+                      placeholder={country === "IN" ? "PIN code" : "Postal code"}
+                      inputMode={country === "IN" ? "numeric" : "text"}
+                      maxLength={country === "IN" ? 6 : undefined}
+                    />
+                    {pinLookupLoading && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 animate-spin text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
                   className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
