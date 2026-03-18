@@ -347,6 +347,8 @@ type Design = {
   thumbnail: string | null; back_thumbnail: string | null;
   front_design_url: string | null; back_design_url: string | null;
   created_at: string;
+  sku: string | null;
+  shopify_product_id: string | null;
 };
 
 // ── Add-to-Cart Modal ─────────────────────────────────────────────────────────
@@ -463,6 +465,149 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
   );
 }
 
+// ── Push to Shopify Modal ─────────────────────────────────────────────────────
+function PushToShopifyModal({
+  design, userId, onClose, onDone,
+}: {
+  design: Design; userId: string; onClose: () => void; onDone: (shopifyProductId: string) => void;
+}) {
+  const [price,   setPrice]   = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState<string | null>(null);
+  const [done,    setDone]    = useState<string | null>(null); // shopifyUrl
+
+  const isUpdate = !!design.shopify_product_id;
+
+  const handlePush = async () => {
+    const retail = parseFloat(price);
+    if (!retail || retail <= 0) { setError("Enter a valid retail price"); return; }
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/shopify/push-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, designId: design.id, retailPrice: retail }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Push failed");
+      setDone(json.shopifyUrl);
+      onDone(json.shopifyProductId);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
+        className="relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md p-6 shadow-2xl z-10">
+
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              {/* Shopify bag icon */}
+              <svg className="w-5 h-5 text-[#96bf48]" viewBox="0 0 109.5 124.5" fill="currentColor">
+                <path d="M74.7 14.8s-1.4-.4-3.6-.8c-.2-1.2-.9-2.3-1.9-3.3-2.9-3-7.1-4.6-12.6-4.6-.1 0-1.2-5.6-4-5.6H28.2c-2.8 0-2.8 3.7-2.8 3.7L24 18.9c-4.5.7-8.7 2-10.4 2.4C7.5 22.8 7 23.2 6.3 29L.3 78.7C-.3 82.9 2.8 87 7.1 87h95.4c4.3 0 7.4-4.1 6.8-8.3L100.1 22C99.4 16.1 98.9 15.7 93 14.3c-2.1-.5-9.8-1.9-18.3 0zM68.6 16c-5.5 1.3-11.5 1.7-17.5 1.6L52 8.9c4.2.1 7.4 1.3 9.5 3.4.9 1 1.6 2.3 2 3.7h5.1zm-22.1.1L47.3 8.9c4.1 0 7.3 1.3 9.4 3.4.9 1 1.5 2.2 1.9 3.7-6 .1-12-.5-12.1-.9z"/>
+              </svg>
+              <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>
+                {isUpdate ? "Update Shopify Product" : "Push to Shopify"}
+              </h3>
+            </div>
+            <p className="text-sm text-zinc-400">{design.name} · {design.product_name}</p>
+            {design.sku && (
+              <p className="text-xs font-mono text-zinc-400 mt-0.5">SKU: {design.sku}</p>
+            )}
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-500 text-lg leading-none">&times;</button>
+        </div>
+
+        {done ? (
+          <div className="text-center py-4">
+            <div className="text-4xl mb-3">🎉</div>
+            <p className="font-black text-zinc-900 mb-1">
+              {isUpdate ? "Product updated!" : "Product pushed!"}
+            </p>
+            <p className="text-sm text-zinc-500 mb-5">Your design is now live in your Shopify store.</p>
+            <div className="flex gap-3">
+              <a href={done} target="_blank" rel="noopener noreferrer"
+                className="flex-1 py-3 rounded-2xl bg-zinc-900 text-white font-black text-sm text-center hover:bg-zinc-700 transition-colors">
+                View in Shopify →
+              </a>
+              <button onClick={onClose}
+                className="flex-1 py-3 rounded-2xl border border-zinc-200 text-zinc-600 font-bold text-sm hover:border-zinc-400 transition-colors">
+                Close
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* What gets pushed */}
+            <div className="bg-zinc-50 rounded-2xl p-4 mb-5 text-sm space-y-1.5">
+              <p className="font-bold text-zinc-700 mb-2 text-xs uppercase tracking-wider">What will be pushed</p>
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-green-500">✓</span> Product listing with title &amp; description
+              </div>
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-green-500">✓</span> Sizes XS → 3XL as variants
+              </div>
+              {(design.thumbnail || design.back_thumbnail) && (
+                <div className="flex items-center gap-2 text-zinc-600">
+                  <span className="text-green-500">✓</span> Mockup image{design.back_thumbnail ? "s (front + back)" : ""}
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-green-500">✓</span> SKU per variant: <span className="font-mono text-xs">{design.sku || "HLD-…"}-S/M/…</span>
+              </div>
+            </div>
+
+            {/* Retail price input */}
+            <div className="mb-5">
+              <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 block mb-2">
+                Retail Price (₹)
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">₹</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="e.g. 699"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full pl-8 pr-4 py-3 rounded-2xl border-2 border-zinc-200 focus:border-zinc-900 outline-none font-black text-zinc-900 text-lg transition-colors"
+                />
+              </div>
+              {price && Number(price) > 0 && (
+                <p className="text-xs text-zinc-400 mt-1.5 ml-1">
+                  Your cost: ₹{(design.blank_price + design.print_price).toLocaleString("en-IN")} ·
+                  Margin: ₹{(Number(price) - design.blank_price - design.print_price).toLocaleString("en-IN")}
+                </p>
+              )}
+            </div>
+
+            {error && (
+              <div className="mb-4 px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium">{error}</div>
+            )}
+
+            <button onClick={handlePush} disabled={loading}
+              className="w-full py-3.5 rounded-2xl font-black text-sm transition-all bg-[#96bf48] hover:bg-[#85ad3d] text-white disabled:opacity-60 flex items-center justify-center gap-2">
+              {loading ? (
+                <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Pushing…</>
+              ) : (
+                isUpdate ? "Update Product in Shopify →" : "Push to Shopify →"
+              )}
+            </button>
+          </>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Designs Tab ────────────────────────────────────────────────────────────────
 function downloadThumbnail(url: string, name: string, suffix = "mockup") {
   const a = document.createElement("a");
@@ -472,10 +617,12 @@ function downloadThumbnail(url: string, name: string, suffix = "mockup") {
 }
 
 function DesignsTab({ userId, email }: { userId: string | null; email: string | null }) {
-  const [designs,    setDesigns]    = useState<Design[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [deleting,   setDeleting]   = useState<string | null>(null);
-  const [cartDesign, setCartDesign] = useState<Design | null>(null);
+  const [designs,     setDesigns]     = useState<Design[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [deleting,    setDeleting]    = useState<string | null>(null);
+  const [cartDesign,  setCartDesign]  = useState<Design | null>(null);
+  const [pushDesign,  setPushDesign]  = useState<Design | null>(null);
+  const [hasShopify,  setHasShopify]  = useState<boolean | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -486,6 +633,15 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
       .then((d) => setDesigns(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false));
   }, [userId, email]);
+
+  // Check if user has a connected Shopify store
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/shopify/connect?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => setHasShopify(!!d.connected))
+      .catch(() => setHasShopify(false));
+  }, [userId]);
 
   const handleDelete = async (id: string) => {
     setDeleting(id);
@@ -566,11 +722,31 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">Size {d.size}</span>
                   {d.print_tier && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-500">{d.print_tier}</span>}
                   {d.has_design && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">DTG Print</span>}
+                  {d.shopify_product_id && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f0f7e6] text-[#5a8a1a]">On Shopify</span>}
                 </div>
                 <p className="text-xs font-bold text-zinc-900 mt-2">₹{(d.blank_price + d.print_price).toLocaleString("en-IN")} /unit</p>
-                <p className="text-[10px] text-zinc-300 mt-0.5">
-                  Saved {new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {d.sku && <p className="text-[10px] font-mono text-zinc-400">{d.sku}</p>}
+                  <p className="text-[10px] text-zinc-300">
+                    Saved {new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+
+                {/* Push to Shopify — shown when store is connected */}
+                {hasShopify && userId && (
+                  <button
+                    onClick={() => setPushDesign(d)}
+                    className={`w-full mt-3 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      d.shopify_product_id
+                        ? "bg-[#f0f7e6] text-[#5a8a1a] hover:bg-[#e4f0d5]"
+                        : "bg-[#f4fce8] text-[#5a8a1a] border border-[#96bf48]/30 hover:bg-[#ebf5d5]"
+                    }`}>
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 109.5 124.5" fill="currentColor">
+                      <path d="M74.7 14.8s-1.4-.4-3.6-.8c-.2-1.2-.9-2.3-1.9-3.3-2.9-3-7.1-4.6-12.6-4.6-.1 0-1.2-5.6-4-5.6H28.2c-2.8 0-2.8 3.7-2.8 3.7L24 18.9c-4.5.7-8.7 2-10.4 2.4C7.5 22.8 7 23.2 6.3 29L.3 78.7C-.3 82.9 2.8 87 7.1 87h95.4c4.3 0 7.4-4.1 6.8-8.3L100.1 22C99.4 16.1 98.9 15.7 93 14.3c-2.1-.5-9.8-1.9-18.3 0zM68.6 16c-5.5 1.3-11.5 1.7-17.5 1.6L52 8.9c4.2.1 7.4 1.3 9.5 3.4.9 1 1.6 2.3 2 3.7h5.1zm-22.1.1L47.3 8.9c4.1 0 7.3 1.3 9.4 3.4.9 1 1.5 2.2 1.9 3.7-6 .1-12-.5-12.1-.9z"/>
+                    </svg>
+                    {d.shopify_product_id ? "Update on Shopify" : "Push to Shopify"}
+                  </button>
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-3">
@@ -619,6 +795,19 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
 
       <AnimatePresence>
         {cartDesign && <AddToCartModal design={cartDesign} onClose={() => setCartDesign(null)} />}
+        {pushDesign && userId && (
+          <PushToShopifyModal
+            design={pushDesign}
+            userId={userId}
+            onClose={() => setPushDesign(null)}
+            onDone={(shopifyProductId) => {
+              setDesigns((prev) => prev.map((d) =>
+                d.id === pushDesign.id ? { ...d, shopify_product_id: shopifyProductId } : d
+              ));
+              setTimeout(() => setPushDesign(null), 2000);
+            }}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

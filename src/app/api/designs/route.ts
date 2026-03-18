@@ -21,6 +21,8 @@ async function uploadDataUrl(db: ReturnType<typeof createAdminClient>, dataUrl: 
 //   ALTER TABLE designs ADD COLUMN IF NOT EXISTS back_print_tier text;
 //   ALTER TABLE designs ADD COLUMN IF NOT EXISTS front_print_price numeric DEFAULT 0;
 //   ALTER TABLE designs ADD COLUMN IF NOT EXISTS back_print_price numeric DEFAULT 0;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS sku text;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS shopify_product_id text;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -78,6 +80,10 @@ export async function POST(req: NextRequest) {
 
     const designId = data.id;
 
+    // Generate canonical SKU: HLD-{first8charsOfId}
+    const sku = `HLD-${designId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+    await db.from("designs").update({ sku }).eq("id", designId);
+
     // Legacy path: if data URLs were sent instead of storage URLs, upload them now
     if (!resolvedFrontUrl && frontDesignDataUrl) {
       resolvedFrontUrl = await uploadDataUrl(db, frontDesignDataUrl, `designs/${designId}/front.png`);
@@ -94,7 +100,7 @@ export async function POST(req: NextRequest) {
       }).eq("id", designId);
     }
 
-    return NextResponse.json({ success: true, designId });
+    return NextResponse.json({ success: true, designId, sku });
   } catch (err) {
     console.error("save-design error:", err);
     return NextResponse.json({ error: "Failed to save design" }, { status: 500 });
