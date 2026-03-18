@@ -54,6 +54,12 @@ type Order = {
   razorpay_payment_id: string | null;
   refund_id: string | null;
   milestones: { id: string; title: string; description: string; created_at: string }[];
+  // Enriched by admin API
+  is_shopify_order: boolean | null;
+  merchant_name: string | null;
+  merchant_email: string | null;
+  shopify_domain: string | null;
+  shopify_store_name: string | null;
 };
 
 type Coupon = {
@@ -279,6 +285,11 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
               </div>
               <p className="text-xs text-zinc-500 font-semibold">{order.customer_name}</p>
               <p className="text-xs text-zinc-400 mt-0.5">{order.product_name} · ₹{order.total.toLocaleString("en-IN")}</p>
+              {order.is_shopify_order && order.shopify_domain && (
+                <p className="text-[0.65rem] font-bold mt-0.5" style={{ color: "#96bf48" }}>
+                  Shopify · {order.merchant_name ?? order.merchant_email ?? order.shopify_domain}
+                </p>
+              )}
               <p className="text-[0.65rem] text-zinc-300 mt-0.5">{new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
             </button>
           ))}
@@ -309,6 +320,20 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
 
               {/* Cards */}
               <div className="grid grid-cols-2 gap-4">
+                {selected.is_shopify_order && (
+                  <div className="col-span-2 rounded-2xl p-5 border shadow-sm" style={{ background: "#f6faf0", borderColor: "rgba(150,191,72,0.3)" }}>
+                    <p className="text-[0.62rem] font-bold uppercase tracking-widest mb-3" style={{ color: "#96bf48" }}>Shopify Merchant</p>
+                    <p className="font-bold text-zinc-900">{selected.merchant_name ?? "—"}</p>
+                    {selected.merchant_email && (
+                      <a href={`mailto:${selected.merchant_email}`} className="text-xs text-blue-600 hover:underline block">{selected.merchant_email}</a>
+                    )}
+                    {selected.shopify_domain && (
+                      <a href={`https://${selected.shopify_domain}`} target="_blank" rel="noreferrer" className="text-xs block mt-1 hover:underline" style={{ color: "#96bf48" }}>
+                        {selected.shopify_store_name ?? selected.shopify_domain} ↗
+                      </a>
+                    )}
+                  </div>
+                )}
                 <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
                   <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Customer</p>
                   <p className="font-bold text-zinc-900">{selected.customer_name}</p>

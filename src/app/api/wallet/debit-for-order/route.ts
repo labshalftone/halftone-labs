@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Debit — guard with gte check to prevent race
-  const { error: updateErr, count } = await db
+  const { error: updateErr, data: updated } = await db
     .from("wallets")
     .update({ balance: balance - amtNum, updated_at: new Date().toISOString() })
     .eq("user_id", userId)
     .gte("balance", amtNum)
-    .select("id", { count: "exact", head: true });
+    .select("id");
 
-  if (updateErr || count === 0) {
+  if (updateErr || !updated || updated.length === 0) {
     return NextResponse.json({ error: "insufficient_balance", balance }, { status: 402 });
   }
 
