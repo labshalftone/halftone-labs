@@ -191,6 +191,7 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
       printDims:       order.print_dimensions ?? "",
       printTechnique:  "none",
       blankPrice:      order.blank_price ?? 0,
+      neckLabel:       false,
     });
   };
 
@@ -369,6 +370,7 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
       printDims:        "",
       printTechnique:   design.has_design ? "DTG" : "none",
       blankPrice:       design.blank_price,
+      neckLabel:        false,
       thumbnail:        design.thumbnail ?? "",
     });
     setAdded(true);

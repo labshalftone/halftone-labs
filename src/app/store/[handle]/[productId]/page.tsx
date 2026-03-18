@@ -110,6 +110,7 @@ export default function ProductPage({
       backDesignUrl: product.design_back_url ?? "",
       qty: 1,
       gsm: "",
+      neckLabel: false,
     });
     // Record where checkout was initiated from so the checkout page can show the right back button
     sessionStorage.setItem(
