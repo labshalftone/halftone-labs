@@ -9,6 +9,7 @@ import { useCart } from "@/lib/cart-context";
 import CartDrawer from "@/components/CartDrawer";
 import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
 import { PRODUCTS } from "@/lib/products";
+import ShopifyTab from "@/components/ShopifyTab";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -27,7 +28,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "settings" | "invoices";
+type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "shopify" | "settings" | "invoices";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -55,6 +56,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
   )},
+  { id: "shopify", label: "Shopify Orders", icon: (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
+    </svg>
+  )},
   { id: "invoices", label: "Invoices", icon: (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -80,7 +86,7 @@ function DashboardTab({ orders, user, onTab }: {
   const STEPS = [
     { n: 1, title: "Place your first order",  desc: "Choose a product, upload your design, and customise it in Studio.", done: orders.length > 0,                       cta: "Go to Studio →",   href: "/studio" },
     { n: 2, title: "Track your order",         desc: "Follow real-time milestones from print to doorstep.",             done: active.length > 0 || delivered.length > 0, cta: "Track order →",    href: "/track" },
-    { n: 3, title: "Connect your store",       desc: "Link your Shopify store to automate fulfilment at scale.",        done: false,                                      cta: "Coming soon",      href: "#" },
+    { n: 3, title: "Connect your store",       desc: "Link your Shopify store to automate fulfilment at scale.",        done: false,                                      cta: "Connect Shopify →", href: "#shopify" },
   ];
 
   return (
@@ -104,7 +110,9 @@ function DashboardTab({ orders, user, onTab }: {
             <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Step {step.n}</p>
             <h3 className="font-black text-zinc-900 text-sm mb-1">{step.title}</h3>
             <p className="text-xs text-zinc-500 mb-4 leading-relaxed">{step.desc}</p>
-            {step.href === "#" ? (
+            {step.href === "#shopify" ? (
+              <button onClick={() => onTab("shopify")} className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors">{step.cta}</button>
+            ) : step.href === "#" ? (
               <span className="text-xs font-semibold text-zinc-400">{step.cta}</span>
             ) : (
               <Link href={step.href} className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors">{step.cta}</Link>
@@ -2181,6 +2189,7 @@ export default function AccountPage() {
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
+              {activeTab === "shopify"   && <ShopifyTab userId={user?.id ?? ""} />}
               {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>
