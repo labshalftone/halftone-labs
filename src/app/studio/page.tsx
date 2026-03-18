@@ -29,47 +29,42 @@ async function makeThumbnail(src: string): Promise<string> {
   });
 }
 
+// pos mirrors exactly what DesignPlacer renders:
+//   x, y  = design centre as % of container (same coordinate space as zone)
+//   size  = design width as % of container width (height derived from natural aspect ratio)
 async function makeCompositeThumbnail(
   mockupSrc: string,
   designSrc: string,
-  zone: { left: number; top: number; width: number; height: number }
+  pos: { x: number; y: number; size: number }
 ): Promise<string> {
   return new Promise((resolve) => {
     const mockup = new Image();
     mockup.onload = () => {
-      // Match the mockup's natural aspect ratio so the photo isn't distorted
-      const W = 800;
+      // Canvas matches the mockup's natural aspect ratio — no squishing
+      const W = 900;
       const H = Math.round(W * (mockup.naturalHeight / mockup.naturalWidth));
       const canvas = document.createElement("canvas");
       canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext("2d");
       if (!ctx) { resolve(""); return; }
 
-      // White background so transparent PNG areas don't go black on JPEG export
+      // White bg so transparent PNGs don't export as black on JPEG
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, W, H);
-
-      // Draw the mockup photo filling the full canvas (no distortion — aspect matches)
       ctx.drawImage(mockup, 0, 0, W, H);
 
       const design = new Image();
       design.onload = () => {
-        // Convert zone percentages → pixels relative to canvas size
-        const zL = (zone.left   / 100) * W;
-        const zT = (zone.top    / 100) * H;
-        const zW = (zone.width  / 100) * W;
-        const zH = (zone.height / 100) * H;
-
-        // Scale design to fit ~85% of the zone, preserving its aspect ratio
-        const a = design.naturalWidth / design.naturalHeight;
-        let dw = zW * 0.85;
-        let dh = dw / a;
-        if (dh > zH * 0.85) { dh = zH * 0.85; dw = dh * a; }
-
-        ctx.drawImage(design, zL + (zW - dw) / 2, zT + (zH - dh) / 2, dw, dh);
-        resolve(canvas.toDataURL("image/jpeg", 0.92));
+        // Replicate browser layout: centre at (pos.x%, pos.y%), width = pos.size%
+        const cx = (pos.x    / 100) * W;
+        const cy = (pos.y    / 100) * H;
+        const dw = (pos.size / 100) * W;
+        // Height preserves natural aspect ratio — same as the <img> tag behaviour
+        const dh = dw * (design.naturalHeight / design.naturalWidth);
+        ctx.drawImage(design, cx - dw / 2, cy - dh / 2, dw, dh);
+        resolve(canvas.toDataURL("image/jpeg", 0.93));
       };
-      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.92));
+      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.93));
       design.src = designSrc;
     };
     mockup.onerror = () => resolve("");
@@ -132,11 +127,12 @@ const PHOTO_ZONE = {
 };
 
 function DesignPlacer({
-  designSrc, mockupSrc, zoneKey, onPriceChange, photoZone,
+  designSrc, mockupSrc, zoneKey, onPriceChange, photoZone, onPositionChange,
 }: {
   designSrc: string; mockupSrc: string; zoneKey: keyof typeof PHOTO_ZONE;
   onPriceChange: (price: number, tier: string, dims: string) => void;
   photoZone: typeof PHOTO_ZONE;
+  onPositionChange?: (pos: { x: number; y: number; size: number }) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onPriceChangeRef = useRef(onPriceChange);
@@ -171,6 +167,13 @@ function DesignPlacer({
       y: Math.max(zone.top  + hy, Math.min(zone.top  + zone.height - hy, y)),
     };
   }, [zone]);
+
+  // Report actual design position to parent so it can generate accurate thumbnails
+  const onPositionChangeRef = useRef(onPositionChange);
+  useEffect(() => { onPositionChangeRef.current = onPositionChange; });
+  useEffect(() => {
+    onPositionChangeRef.current?.({ x: pos.x, y: pos.y, size: pos.size });
+  }, [pos]);
 
   // Price calculation — size relative to zone → square inches
   useEffect(() => {
@@ -517,6 +520,9 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [backPrintTier,   setBackPrintTier]   = useState("");
   const [frontPrintDims,  setFrontPrintDims]  = useState("");
   const [noDesign,        setNoDesign]        = useState(false);
+  // Track actual design position from each DesignPlacer for pixel-perfect thumbnails
+  const [frontPos, setFrontPos] = useState<{ x: number; y: number; size: number } | null>(null);
+  const [backPos,  setBackPos]  = useState<{ x: number; y: number; size: number } | null>(null);
 
   const [added,  setAdded]  = useState(false);
   const [saving, setSaving] = useState(false);
@@ -546,12 +552,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const zone = photoZone[zoneKey];
-      // Generate composite thumbnail (mockup photo + design overlay), same as cart
-      const thumbnail = color.mockupFront && frontDesignSrc
-        ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, zone)
-        : color.mockupFront && backDesignSrc
-        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, zone)
+      // Generate composite thumbnail using exact design position from DesignPlacer
+      const thumbnail = color.mockupFront && frontDesignSrc && frontPos
+        ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, frontPos)
+        : color.mockupFront && backDesignSrc && backPos
+        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, backPos)
         : frontDesignSrc || backDesignSrc
         ? await makeThumbnail(frontDesignSrc || backDesignSrc)
         : "";
@@ -576,11 +581,10 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   };
 
   const handleAddToCart = async () => {
-    const zone = photoZone[zoneKey];
-    const thumbnail = color.mockupFront && frontDesignSrc
-      ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, zone)
-      : color.mockupFront && backDesignSrc
-      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, zone)
+    const thumbnail = color.mockupFront && frontDesignSrc && frontPos
+      ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, frontPos)
+      : color.mockupFront && backDesignSrc && backPos
+      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, backPos)
       : "";
     addItem({
       productId: product.id, productName: product.name, gsm: product.gsm,
@@ -653,10 +657,12 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
             previewSide === "front" ? (
               <DesignPlacer key="fp" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
                 photoZone={photoZone}
+                onPositionChange={(p) => setFrontPos(p)}
                 onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
             ) : (
               <DesignPlacer key="bp" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
                 photoZone={photoZone}
+                onPositionChange={(p) => setBackPos(p)}
                 onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
             )
           ) : (
@@ -840,6 +846,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                         <div className="lg:hidden mb-4">
                           <DesignPlacer key="fpm" designSrc={frontDesignSrc} mockupSrc={color.mockupFront ?? ""} zoneKey={zoneKey}
                             photoZone={photoZone}
+                            onPositionChange={(p) => setFrontPos(p)}
                             onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">
@@ -882,6 +889,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                         <div className="lg:hidden mb-4">
                           <DesignPlacer key="bpm" designSrc={backDesignSrc} mockupSrc={color.mockupBack ?? color.mockupFront ?? ""} zoneKey={zoneKey}
                             photoZone={photoZone}
+                            onPositionChange={(p) => setBackPos(p)}
                             onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl mb-3">

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import CartDrawer from "@/components/CartDrawer";
 import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
+import { PRODUCTS } from "@/lib/products";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -301,42 +302,45 @@ type Design = {
   blank_price: number; print_price: number; has_design: boolean; thumbnail: string | null; created_at: string;
 };
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
-
 // ── Add-to-Cart Modal ─────────────────────────────────────────────────────────
 function AddToCartModal({ design, onClose }: { design: Design; onClose: () => void }) {
   const { addItem } = useCart();
-  const [qty,  setQty]  = useState(1);
-  const [size, setSize] = useState(design.size || "M");
-  const [side, setSide] = useState<"front" | "back" | "both">("front");
+  const [qty,   setQty]   = useState(1);
+  const [size,  setSize]  = useState(design.size || "M");
   const [added, setAdded] = useState(false);
 
+  // Look up the product's actual sizes; fall back to a sensible default set
+  const product   = PRODUCTS.find((p) => p.id === design.product_id);
+  const sizeList  = product?.sizes ?? ["S", "M", "L", "XL", "2XL"];
+
+  // Make sure the initially selected size is valid for this product
+  const validSize = sizeList.includes(size) ? size : (sizeList.includes(design.size) ? design.size : sizeList[1] ?? sizeList[0]);
+
+  const unitPrice = design.blank_price + design.print_price;
+
   const handleAdd = () => {
-    const thumb = design.thumbnail ?? "";
     addItem({
       productId:        design.product_id || "custom",
       productName:      design.product_name,
       gsm:              design.gsm,
       color:            design.color_name,
       colorHex:         design.color_hex,
-      size,
+      size:             validSize,
       qty,
-      frontDesignUrl:   (side === "front" || side === "both") ? thumb : "",
-      backDesignUrl:    (side === "back"  || side === "both") ? thumb : "",
-      frontPrintPrice:  (side === "front" || side === "both") ? design.print_price : 0,
-      backPrintPrice:   (side === "back"  || side === "both") ? design.print_price : 0,
-      frontPrintTier:   (side === "front" || side === "both") ? (design.print_tier ?? "") : "",
-      backPrintTier:    (side === "back"  || side === "both") ? (design.print_tier ?? "") : "",
+      frontDesignUrl:   design.has_design ? (design.thumbnail ?? "") : "",
+      backDesignUrl:    "",
+      frontPrintPrice:  design.has_design ? design.print_price : 0,
+      backPrintPrice:   0,
+      frontPrintTier:   design.print_tier ?? "",
+      backPrintTier:    "",
       printDims:        "",
       printTechnique:   design.has_design ? "DTG" : "none",
       blankPrice:       design.blank_price,
+      thumbnail:        design.thumbnail ?? "",
     });
     setAdded(true);
     setTimeout(() => { setAdded(false); onClose(); }, 900);
   };
-
-  const sidePrint = side === "both" ? design.print_price * 2 : design.print_price;
-  const unitPrice = design.blank_price + sidePrint;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -347,43 +351,25 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>Add to Cart</h3>
-            <p className="text-sm text-zinc-400">{design.name} · {design.product_name}</p>
+            <p className="text-sm text-zinc-400">{design.name} · {design.product_name} · {design.color_name}</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-500 text-lg leading-none">&times;</button>
         </div>
 
-        {/* Size picker */}
-        <div className="mb-5">
+        {/* Size picker — uses actual product sizes */}
+        <div className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Size</p>
           <div className="flex flex-wrap gap-2">
-            {SIZES.map((s) => (
+            {sizeList.map((s) => (
               <button key={s} onClick={() => setSize(s)}
-                className={`px-3.5 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${size === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                className={`px-3.5 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${validSize === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
                 {s}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Print side */}
-        <div className="mb-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Print side</p>
-          <div className="grid grid-cols-3 gap-2">
-            {([
-              { val: "front", label: "Front only" },
-              { val: "back",  label: "Back only" },
-              { val: "both",  label: "Both sides" },
-            ] as const).map(({ val, label }) => (
-              <button key={val} onClick={() => setSide(val)}
-                className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${side === val ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
-                {label}
-                {val === "both" && <span className="block text-[9px] font-normal opacity-70">2× print</span>}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Qty */}
+        {/* Quantity */}
         <div className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Quantity</p>
           <div className="flex items-center gap-4">
@@ -394,15 +380,21 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
               <button onClick={() => setQty(qty + 1)}
                 className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-700 hover:border-zinc-400 transition-colors font-bold text-lg leading-none">+</button>
             </div>
-            <p className="text-sm text-zinc-500">
-              ₹{(unitPrice * qty).toLocaleString("en-IN")} total
-            </p>
+            <p className="text-sm text-zinc-500">₹{(unitPrice * qty).toLocaleString("en-IN")} total</p>
           </div>
         </div>
 
+        {/* Print summary — read-only, no side picker */}
+        {design.has_design && (
+          <div className="flex items-center justify-between bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 mb-5 text-sm">
+            <span className="text-zinc-500 text-xs">Print · {design.print_tier ?? "Custom"}</span>
+            <span className="font-black text-orange-600">+₹{design.print_price.toLocaleString("en-IN")}</span>
+          </div>
+        )}
+
         <button onClick={handleAdd}
           className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all ${added ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
-          {added ? "✓ Added to cart!" : `Add ${qty} × ${size} to cart →`}
+          {added ? "✓ Added to cart!" : `Add ${qty} × ${validSize} to cart — ₹${(unitPrice * qty).toLocaleString("en-IN")} →`}
         </button>
       </motion.div>
     </div>
