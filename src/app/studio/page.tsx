@@ -603,14 +603,15 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       // Use data URL refs for canvas ops — fast, local, no CORS
       const fDataUrl = frontDesignDataUrl.current || frontDesignSrc;
       const bDataUrl = backDesignDataUrl.current  || backDesignSrc;
-      // Generate composite thumbnail using exact design position from DesignPlacer
-      const thumbnail = color.mockupFront && fDataUrl && frontPos
-        ? await makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
-        : color.mockupFront && bDataUrl && backPos
-        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, bDataUrl, backPos)
-        : fDataUrl || bDataUrl
-        ? await makeThumbnail(fDataUrl || bDataUrl)
-        : "";
+      // Generate BOTH composites independently (same logic as handleAddToCart)
+      const [thumbnail, backThumbnail] = await Promise.all([
+        color.mockupFront && fDataUrl && frontPos
+          ? makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
+          : fDataUrl ? makeThumbnail(fDataUrl) : Promise.resolve(""),
+        color.mockupBack && bDataUrl && backPos
+          ? makeCompositeThumbnail(color.mockupBack, bDataUrl, backPos)
+          : Promise.resolve(""),
+      ]);
       await fetch("/api/designs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -620,11 +621,17 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           productId: product.id, productName: product.name, gsm: product.gsm,
           colorName: color.name, colorHex: color.hex, size,
           printTier: [frontPrintTier, backPrintTier].filter(Boolean).join(" + ") || null,
+          frontPrintTier: frontPrintTier || null,
+          backPrintTier:  backPrintTier  || null,
           printDims: frontPrintDims || null,
           blankPrice: product.blankPrice, printPrice: totalPrint,
-          hasDesign: hasAnyDesign, thumbnail,
-          frontDesignDataUrl: frontDesignSrc || null,
-          backDesignDataUrl:  backDesignSrc  || null,
+          frontPrintPrice, backPrintPrice,
+          hasDesign: hasAnyDesign,
+          thumbnail:     thumbnail     || null,
+          backThumbnail: backThumbnail || null,
+          // Pass already-uploaded storage URLs directly — no re-upload needed
+          frontDesignUrl: frontDesignSrc || null,
+          backDesignUrl:  backDesignSrc  || null,
         }),
       });
       setSaved(true);
@@ -637,11 +644,15 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     // Use data URL refs for canvas — local, instant, no CORS risk
     const fDataUrl = frontDesignDataUrl.current || frontDesignSrc;
     const bDataUrl = backDesignDataUrl.current  || backDesignSrc;
-    const thumbnail = color.mockupFront && fDataUrl && frontPos
-      ? await makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
-      : color.mockupFront && bDataUrl && backPos
-      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, bDataUrl, backPos)
-      : "";
+    // Generate both front and back composites independently
+    const [thumbnail, backThumbnail] = await Promise.all([
+      color.mockupFront && fDataUrl && frontPos
+        ? makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
+        : Promise.resolve(""),
+      color.mockupBack && bDataUrl && backPos
+        ? makeCompositeThumbnail(color.mockupBack, bDataUrl, backPos)
+        : Promise.resolve(""),
+    ]);
     addItem({
       productId: product.id, productName: product.name, gsm: product.gsm,
       color: color.name, colorHex: color.hex, size, qty: 1,
@@ -653,6 +664,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       blankPrice: product.blankPrice,
       neckLabel,
       thumbnail,
+      backThumbnail,
       mockupFront: color.mockupFront ?? "",
     });
     // Record that checkout was initiated from Studio

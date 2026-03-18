@@ -1,6 +1,7 @@
 // ALTER TABLE orders ADD COLUMN IF NOT EXISTS front_design_url text;
 // ALTER TABLE orders ADD COLUMN IF NOT EXISTS back_design_url text;
 // ALTER TABLE orders ADD COLUMN IF NOT EXISTS mockup_url text;
+// ALTER TABLE orders ADD COLUMN IF NOT EXISTS back_mockup_url text;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
       blankPrice, printPrice, shipping, total,
       couponCode, discountAmount,
       neckLabel,
-      frontDesignUrl, backDesignUrl, mockupUrl,
+      frontDesignUrl, backDesignUrl, mockupUrl, backMockupUrl,
       customerName, customerEmail, customerPhone,
       address, city, pin, country, userId,
     } = body;
@@ -130,15 +131,17 @@ export async function POST(req: NextRequest) {
     console.log(`[save-order] ${orderRef} — frontDesignUrl: ${frontDesignUrl ? `${frontDesignUrl.slice(0, 30)}… (${frontDesignUrl.length} chars)` : "null"}`);
     console.log(`[save-order] ${orderRef} — backDesignUrl: ${backDesignUrl ? `${backDesignUrl.slice(0, 30)}… (${backDesignUrl.length} chars)` : "null"}`);
     console.log(`[save-order] ${orderRef} — mockupUrl: ${mockupUrl ? `${mockupUrl.slice(0, 30)}… (${mockupUrl.length} chars)` : "null"}`);
+    console.log(`[save-order] ${orderRef} — backMockupUrl: ${backMockupUrl ? `${backMockupUrl.slice(0, 30)}… (${backMockupUrl.length} chars)` : "null"}`);
 
-    // Upload design files + placement mockup in parallel
-    const [frontDesignStorageUrl, backDesignStorageUrl, mockupStorageUrl] = await Promise.all([
-      frontDesignUrl ? uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)    : null,
-      backDesignUrl  ? uploadDesign(db, backDesignUrl,  `designs/${orderRef}/back.png`)     : null,
-      mockupUrl      ? uploadDesign(db, mockupUrl,      `designs/${orderRef}/mockup.jpg`)   : null,
+    // Upload design files + placement mockups in parallel
+    const [frontDesignStorageUrl, backDesignStorageUrl, mockupStorageUrl, backMockupStorageUrl] = await Promise.all([
+      frontDesignUrl ? uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)         : null,
+      backDesignUrl  ? uploadDesign(db, backDesignUrl,  `designs/${orderRef}/back.png`)          : null,
+      mockupUrl      ? uploadDesign(db, mockupUrl,      `designs/${orderRef}/mockup.jpg`)        : null,
+      backMockupUrl  ? uploadDesign(db, backMockupUrl,  `designs/${orderRef}/mockup-back.jpg`)   : null,
     ]);
 
-    console.log(`[save-order] ${orderRef} — uploads: front=${frontDesignStorageUrl ? "OK" : "null"}, back=${backDesignStorageUrl ? "OK" : "null"}, mockup=${mockupStorageUrl ? "OK" : "null"}`);
+    console.log(`[save-order] ${orderRef} — uploads: front=${frontDesignStorageUrl ? "OK" : "null"}, back=${backDesignStorageUrl ? "OK" : "null"}, mockup=${mockupStorageUrl ? "OK" : "null"}, backMockup=${backMockupStorageUrl ? "OK" : "null"}`);
 
     // Save order
     const { data: order, error } = await db.from("orders").insert({
@@ -158,6 +161,7 @@ export async function POST(req: NextRequest) {
       front_design_url: frontDesignStorageUrl,
       back_design_url: backDesignStorageUrl,
       mockup_url: mockupStorageUrl,
+      back_mockup_url: backMockupStorageUrl,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,

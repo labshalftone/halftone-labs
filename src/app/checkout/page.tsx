@@ -96,7 +96,17 @@ export default function CheckoutPage() {
 
   const [paying,       setPaying]       = useState(false);
   const [payError,     setPayError]     = useState("");
-  const [orderSuccess, setOrderSuccess] = useState<{ ref: string } | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState<{
+    ref: string;
+    name: string;
+    email: string;
+    items: typeof items;
+    total: number;
+    shipping: number;
+    shippingLabel: string;
+    couponCode: string | null;
+    discount: number;
+  } | null>(null);
 
   // Track where checkout was initiated from (studio vs store)
   type CheckoutOrigin = { type: "studio" } | { type: "store"; handle: string; name: string };
@@ -196,9 +206,10 @@ export default function CheckoutPage() {
         couponCode: appliedCoupon?.code ?? null,
         discountAmount: discount,
         neckLabel: items.some(i => i.neckLabel),
-        frontDesignUrl: items.map(i => i.frontDesignUrl || "").find(Boolean) ?? null,
-        backDesignUrl:  items.map(i => i.backDesignUrl  || "").find(Boolean) ?? null,
-        mockupUrl:      items.map(i => i.thumbnail      || "").find(Boolean) ?? null,
+        frontDesignUrl: items.map(i => i.frontDesignUrl  || "").find(Boolean) ?? null,
+        backDesignUrl:  items.map(i => i.backDesignUrl   || "").find(Boolean) ?? null,
+        mockupUrl:      items.map(i => i.thumbnail       || "").find(Boolean) ?? null,
+        backMockupUrl:  items.map(i => i.backThumbnail   || "").find(Boolean) ?? null,
         customerName: form.name,
         customerEmail: form.email,
         customerPhone: form.phone,
@@ -220,8 +231,22 @@ export default function CheckoutPage() {
         body: JSON.stringify({ code: appliedCoupon.code }),
       });
     }
+    // Snapshot cart items before clearing
+    const itemsSnapshot = [...items];
+    const shippingSnapshot = selectedShipping?.rate ?? 0;
+    const shippingLabelSnapshot = selectedShipping?.label ?? "Standard Shipping";
     clearCart();
-    setOrderSuccess({ ref });
+    setOrderSuccess({
+      ref,
+      name: form.name,
+      email: form.email,
+      items: itemsSnapshot,
+      total: grandTotalINR,
+      shipping: shippingSnapshot,
+      shippingLabel: shippingLabelSnapshot,
+      couponCode: appliedCoupon?.code ?? null,
+      discount,
+    });
   };
 
   const handlePay = async () => {
@@ -295,35 +320,383 @@ export default function CheckoutPage() {
 
   // ── Success ──
   if (orderSuccess) {
+    const successItems = orderSuccess.items;
+    const successTotal = orderSuccess.total;
+    const productSubtotal = successItems.reduce((s, i) => s + (i.blankPrice + i.printPrice) * i.qty, 0);
+    const printSub   = successItems.reduce((s, i) => s + i.printPrice * i.qty, 0);
+    const blankSub   = successItems.reduce((s, i) => s + i.blankPrice * i.qty, 0);
+    const neckSub    = successItems.reduce((s, i) => s + (i.neckLabel ? 7 * i.qty : 0), 0);
+    const gstAmount  = isINR ? Math.round((productSubtotal + neckSub - orderSuccess.discount + orderSuccess.shipping) * GST_RATE) : 0;
+
+    // Estimated dates based on today
+    const addDays = (d: number) => {
+      const dt = new Date(); dt.setDate(dt.getDate() + d);
+      return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    };
+
+    const steps = [
+      { icon: "✓",  label: "Order confirmed",   sub: "Payment received",           date: "Today",        done: true  },
+      { icon: "🎨", label: "Design approved",    sub: "We verify your artwork",      date: addDays(2),     done: false },
+      { icon: "👕", label: "In production",      sub: "Printed & quality checked",  date: addDays(5),     done: false },
+      { icon: "📦", label: "Shipped",            sub: "Out for delivery",            date: addDays(7),     done: false },
+    ];
+
+    // Pick best thumbnail for display (prefer composite mockup)
+    const heroThumb = successItems[0]?.thumbnail || successItems[0]?.frontDesignUrl || null;
+    const [refCopied, setRefCopied] = useState(false);
+
+    const copyRef = () => {
+      navigator.clipboard.writeText(orderSuccess.ref).then(() => {
+        setRefCopied(true);
+        setTimeout(() => setRefCopied(false), 2000);
+      });
+    };
+
     return (
-      <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl max-w-md w-full p-10 text-center shadow-sm border border-zinc-100">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-black mb-1" style={{ letterSpacing: "-0.04em" }}>Order Placed!</h2>
-          <p className="text-zinc-500 text-sm mb-2">Order reference:</p>
-          <p className="text-2xl font-mono font-bold text-orange-500 mb-4">{orderSuccess.ref}</p>
-          <p className="text-zinc-500 text-sm mb-6">
-            Confirmation sent to <strong>{form.email}</strong>. Track at{" "}
-            <Link href="/track" className="text-orange-500 underline">/track</Link>.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <Link href="/track">
-              <button className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors">
-                Track Order
+      <div className="min-h-screen bg-[#f8f7f5]">
+        {/* Top bar */}
+        <div className="sticky top-0 z-20 bg-[#f8f7f5]/95 backdrop-blur-sm border-b border-zinc-100 px-5 py-4 flex items-center justify-between">
+          <span className="text-lg font-black tracking-tight" style={{ letterSpacing: "-0.04em" }}>Halftone Labs</span>
+          <span className="text-xs font-mono text-zinc-400">#{orderSuccess.ref}</span>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 pb-36 pt-8">
+
+          {/* ── HERO ──────────────────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative rounded-3xl overflow-hidden mb-8 p-8 md:p-12 flex flex-col md:flex-row items-center gap-8"
+            style={{ background: "linear-gradient(135deg, #111111 0%, #1a1a2e 100%)" }}
+          >
+            {/* Animated glow rings */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.25, 0.15] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="absolute -top-16 -left-16 w-64 h-64 rounded-full"
+                style={{ background: "radial-gradient(circle, #f97316 0%, transparent 70%)" }}
+              />
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
+                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                className="absolute -bottom-16 -right-8 w-56 h-56 rounded-full"
+                style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)" }}
+              />
+            </div>
+
+            {/* Left: checkmark + message */}
+            <div className="relative flex flex-col items-center md:items-start text-center md:text-left flex-1">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.1 }}
+                className="w-16 h-16 rounded-2xl bg-green-500 flex items-center justify-center mb-5 shadow-lg shadow-green-900/30"
+              >
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+                <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-2">Order Confirmed</p>
+                <h1 className="text-3xl md:text-4xl font-black text-white mb-3 leading-tight" style={{ letterSpacing: "-0.04em" }}>
+                  Thank you,<br />{orderSuccess.name.split(" ")[0]}! 🎉
+                </h1>
+                <p className="text-zinc-400 text-sm mb-5 leading-relaxed max-w-sm">
+                  Your custom tee is in our queue. We&apos;ll get it printed and shipped within 5–7 business days.
+                </p>
+
+                {/* Order ref chip */}
+                <button onClick={copyRef} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition-colors text-white group">
+                  <span className="text-xs font-mono font-semibold tracking-widest">#{orderSuccess.ref}</span>
+                  {refCopied
+                    ? <svg className="w-3.5 h-3.5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    : <svg className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="9" y="9" width="13" height="13" rx="2"/><path strokeLinecap="round" strokeLinejoin="round" d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  }
+                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors">{refCopied ? "Copied!" : "Copy"}</span>
+                </button>
+              </motion.div>
+            </div>
+
+            {/* Right: product thumbnail */}
+            {heroThumb && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.35, type: "spring", stiffness: 200 }}
+                className="relative flex-shrink-0"
+              >
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl"
+                  style={{ background: successItems[0]?.colorHex + "33" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={heroThumb} alt="Your order" className="w-full h-full object-contain p-2" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-[#111]">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* ── PROGRESS TIMELINE ─────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 mb-6"
+          >
+            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-5">Your order journey</p>
+            <div className="grid grid-cols-4 gap-2">
+              {steps.map((step, idx) => (
+                <div key={step.label} className="flex flex-col items-center text-center relative">
+                  {/* Connector line */}
+                  {idx < steps.length - 1 && (
+                    <div className="absolute top-4 left-1/2 w-full h-0.5 z-0"
+                      style={{ background: idx === 0 ? "#22c55e" : "#e4e4e7" }} />
+                  )}
+                  <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-sm mb-2 border-2 ${
+                    step.done
+                      ? "bg-green-500 border-green-500 text-white"
+                      : idx === 1
+                      ? "bg-orange-100 border-orange-300 text-orange-500"
+                      : "bg-zinc-100 border-zinc-200 text-zinc-400"
+                  }`}>
+                    {step.icon}
+                  </div>
+                  <p className={`text-[11px] font-bold leading-tight ${step.done ? "text-zinc-900" : "text-zinc-400"}`}>{step.label}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5 leading-tight hidden md:block">{step.sub}</p>
+                  <span className={`text-[10px] font-semibold mt-1 px-1.5 py-0.5 rounded-full ${step.done ? "bg-green-50 text-green-600" : "bg-zinc-100 text-zinc-400"}`}>
+                    {step.date}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── MAIN GRID ─────────────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38 }}
+            className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6"
+          >
+            {/* LEFT col — Receipt (wider) */}
+            <div className="md:col-span-3 flex flex-col gap-6">
+
+              {/* Items */}
+              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+                  <p className="font-black text-sm" style={{ letterSpacing: "-0.03em" }}>Items ordered</p>
+                  <span className="text-xs text-zinc-400">{successItems.reduce((s, i) => s + i.qty, 0)} item{successItems.reduce((s, i) => s + i.qty, 0) !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="divide-y divide-zinc-50">
+                  {successItems.map((item) => {
+                    const thumb = item.thumbnail || item.frontDesignUrl || item.backDesignUrl;
+                    return (
+                      <div key={item.cartId} className="flex gap-4 px-6 py-4">
+                        {/* Thumbnail */}
+                        <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center"
+                          style={{ background: item.colorHex + "22", border: `2px solid ${item.colorHex}33` }}>
+                          {thumb
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={thumb} alt={item.productName} className="w-full h-full object-contain" />
+                            : <div className="w-8 h-8 rounded-lg" style={{ background: item.colorHex }} />
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm text-zinc-900 truncate">{item.productName}{item.qty > 1 ? ` ×${item.qty}` : ""}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="flex items-center gap-1 text-xs text-zinc-500">
+                              <span className="w-3 h-3 rounded-full inline-block flex-shrink-0" style={{ background: item.colorHex }} />
+                              {item.color}
+                            </span>
+                            <span className="text-zinc-300 text-xs">·</span>
+                            <span className="text-xs font-semibold text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-full">{item.size}</span>
+                            {item.side !== "none" && (
+                              <>
+                                <span className="text-zinc-300 text-xs">·</span>
+                                <span className="text-xs text-zinc-500">{item.side === "both" ? "Front + Back" : `${item.side} print`}</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex gap-2 mt-1.5 flex-wrap">
+                            {item.printTier && (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100">
+                                {item.printTechnique} · {item.printTier}
+                              </span>
+                            )}
+                            {item.neckLabel && (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">
+                                🏷️ Neck label
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-bold text-sm text-zinc-900">₹{((item.blankPrice + item.printPrice) * item.qty).toLocaleString("en-IN")}</p>
+                          {item.qty > 1 && <p className="text-[10px] text-zinc-400">₹{(item.blankPrice + item.printPrice).toLocaleString("en-IN")} each</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Receipt breakdown */}
+                <div className="px-6 py-4 bg-zinc-50/70 border-t border-zinc-100 flex flex-col gap-2">
+                  <div className="flex justify-between text-sm text-zinc-500">
+                    <span>Products</span><span>₹{blankSub.toLocaleString("en-IN")}</span>
+                  </div>
+                  {printSub > 0 && (
+                    <div className="flex justify-between text-sm text-zinc-500">
+                      <span>Customization</span><span>₹{printSub.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {neckSub > 0 && (
+                    <div className="flex justify-between text-sm text-zinc-500">
+                      <span>Neck labels</span><span>₹{neckSub.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {orderSuccess.discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600 font-semibold">
+                      <span>Discount{orderSuccess.couponCode ? ` (${orderSuccess.couponCode})` : ""}</span>
+                      <span>−₹{orderSuccess.discount.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm text-zinc-500">
+                    <span>{orderSuccess.shippingLabel || "Shipping"}</span>
+                    <span>{orderSuccess.shipping === 0 ? <span className="text-green-600 font-semibold">Free</span> : `₹${orderSuccess.shipping.toLocaleString("en-IN")}`}</span>
+                  </div>
+                  {isINR && gstAmount > 0 && (
+                    <div className="flex justify-between text-sm text-zinc-500">
+                      <span>GST (5%)</span><span>₹{gstAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-black text-base pt-3 mt-1 border-t border-zinc-200">
+                    <span>Total paid</span>
+                    <span className="text-orange-600">₹{successTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Guarantee strip */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon: "🎨", title: "Print verified", body: "We review every design before printing" },
+                  { icon: "✅", title: "Quality check", body: "Inspected before it ships to you" },
+                  { icon: "📦", title: "Tracked delivery", body: "End-to-end courier tracking" },
+                ].map(({ icon, title, body }) => (
+                  <div key={title} className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-4 text-center">
+                    <p className="text-2xl mb-1.5">{icon}</p>
+                    <p className="text-xs font-black text-zinc-900 mb-1">{title}</p>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed">{body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT col — Contact + delivery info */}
+            <div className="md:col-span-2 flex flex-col gap-4">
+
+              {/* Email confirmation */}
+              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4.5 h-4.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Confirmation sent</p>
+                </div>
+                <p className="text-xs font-semibold text-zinc-900 bg-zinc-100 px-3 py-2 rounded-xl mb-2 truncate">{orderSuccess.email}</p>
+                <p className="text-xs text-zinc-400 leading-relaxed">Check your inbox (and spam) for a full order confirmation with tracking details.</p>
+              </div>
+
+              {/* Delivery info */}
+              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4.5 h-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Delivering to</p>
+                </div>
+                <p className="text-sm font-semibold text-zinc-900 mb-0.5">{orderSuccess.name}</p>
+                <p className="text-xs text-zinc-500 leading-relaxed">{form.address}</p>
+                <p className="text-xs text-zinc-500">{form.city}{form.pin ? ` — ${form.pin}` : ""}{form.state ? `, ${form.state}` : ""}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                  <span className="text-xs font-semibold text-orange-600">Est. delivery by {addDays(7)}</span>
+                </div>
+              </div>
+
+              {/* Need help */}
+              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center flex-shrink-0 text-base">💬</div>
+                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Need help?</p>
+                </div>
+                <a href="mailto:hello@halftonelabs.in" className="block text-sm font-bold text-orange-500 hover:underline mb-1">hello@halftonelabs.in</a>
+                <p className="text-xs text-zinc-400 leading-relaxed">We respond within 24 hours. Reference your order number <span className="font-mono font-semibold text-zinc-600">#{orderSuccess.ref}</span> when writing in.</p>
+              </div>
+
+              {/* All sales final */}
+              <div className="flex items-start gap-2.5 px-4 py-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+                <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  <strong>All sales are final.</strong> Every product is custom made to order just for you — no returns or exchanges.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ── INSTAGRAM STRIP ────────────────────────────────────────────── */}
+          <motion.a
+            href="https://instagram.com/halftonelabs"
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.55 }}
+            className="block w-full rounded-2xl overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #f97316 0%, #f43f5e 100%)" }}
+          >
+            <div className="flex items-center justify-between px-7 py-5">
+              <div>
+                <p className="text-white font-black text-base mb-0.5">Tag us when it arrives! 🤙</p>
+                <p className="text-orange-100 text-sm">Share a photo <strong>@halftonelabs</strong> for a surprise gift 🎁</p>
+              </div>
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </div>
+            </div>
+          </motion.a>
+        </div>
+
+        {/* ── FIXED BOTTOM BAR ───────────────────────────────────────────── */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-zinc-100 px-4 py-3 z-10 shadow-xl">
+          <div className="max-w-4xl mx-auto flex gap-3">
+            <Link href={`/track?ref=${orderSuccess.ref}&email=${encodeURIComponent(orderSuccess.email)}`} className="flex-1">
+              <button className="w-full py-3.5 rounded-2xl bg-zinc-900 text-white font-black text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                Track order
               </button>
             </Link>
-            <Link href={checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/studio"}>
-              <button className="px-5 py-2.5 rounded-full border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
-                {checkoutOrigin.type === "store" ? `Back to ${checkoutOrigin.name || "Store"}` : "Back to Studio"}
+            <Link href={checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/products"} className="flex-1">
+              <button className="w-full py-3.5 rounded-2xl border-2 border-zinc-200 text-zinc-700 font-bold text-sm hover:bg-zinc-50 transition-colors">
+                Continue shopping →
               </button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }

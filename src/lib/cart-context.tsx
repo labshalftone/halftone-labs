@@ -28,8 +28,9 @@ export interface CartItem {
   blankPrice: number;       // per unit blank garment price
   neckLabel: boolean;       // DTF neck label transfer (+₹7/piece)
 
-  // Composite thumbnail — mockup with design overlaid (optional)
-  thumbnail?: string;
+  // Composite thumbnails — mockup with design overlaid (optional)
+  thumbnail?: string;     // front-side composite
+  backThumbnail?: string; // back-side composite
   mockupFront?: string;
 
   // Derived — computed by addItem, do not set manually
@@ -81,7 +82,7 @@ function deriveFields(item: AddItemPayload): Omit<CartItem, "cartId"> {
   const designDataUrl = item.frontDesignUrl || item.backDesignUrl;
   const tiers = [item.frontPrintTier, item.backPrintTier].filter(Boolean);
   const printTier   = tiers.length > 1 ? tiers.join(" + ") : tiers[0] ?? "";
-  return { ...item, printPrice, side, hasDesign, designDataUrl, printTier, thumbnail: item.thumbnail ?? "", mockupFront: item.mockupFront ?? "" };
+  return { ...item, printPrice, side, hasDesign, designDataUrl, printTier, thumbnail: item.thumbnail ?? "", backThumbnail: item.backThumbnail ?? "", mockupFront: item.mockupFront ?? "" };
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {

@@ -330,8 +330,13 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
 // ── Design type ───────────────────────────────────────────────────────────────
 type Design = {
   id: string; name: string; product_id: string; product_name: string; gsm: string;
-  color_name: string; color_hex: string; size: string; print_tier: string | null;
-  blank_price: number; print_price: number; has_design: boolean; thumbnail: string | null;
+  color_name: string; color_hex: string; size: string;
+  print_tier: string | null;
+  front_print_tier: string | null; back_print_tier: string | null;
+  blank_price: number; print_price: number;
+  front_print_price: number | null; back_print_price: number | null;
+  has_design: boolean;
+  thumbnail: string | null; back_thumbnail: string | null;
   front_design_url: string | null; back_design_url: string | null;
   created_at: string;
 };
@@ -353,6 +358,19 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
   const unitPrice = design.blank_price + design.print_price;
 
   const handleAdd = () => {
+    const hasBoth = !!(design.front_design_url && design.back_design_url);
+    // Split print price evenly if we have per-side data, otherwise put all on front
+    const fPrice = design.front_print_price != null
+      ? design.front_print_price
+      : hasBoth ? Math.round(design.print_price / 2) : design.print_price;
+    const bPrice = design.back_print_price != null
+      ? design.back_print_price
+      : hasBoth ? design.print_price - fPrice : 0;
+    // Split print tiers: use saved per-side tiers, or split the combined string
+    const tierParts = (design.print_tier ?? "").split(" + ");
+    const fTier = design.front_print_tier ?? tierParts[0] ?? "";
+    const bTier = design.back_print_tier  ?? (hasBoth ? (tierParts[1] ?? tierParts[0] ?? "") : "");
+
     addItem({
       productId:        design.product_id || "custom",
       productName:      design.product_name,
@@ -363,15 +381,16 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
       qty,
       frontDesignUrl:   design.has_design ? (design.front_design_url ?? design.thumbnail ?? "") : "",
       backDesignUrl:    design.has_design ? (design.back_design_url ?? "") : "",
-      frontPrintPrice:  design.has_design ? design.print_price : 0,
-      backPrintPrice:   0,
-      frontPrintTier:   design.print_tier ?? "",
-      backPrintTier:    "",
+      frontPrintPrice:  design.has_design ? fPrice : 0,
+      backPrintPrice:   design.has_design ? bPrice : 0,
+      frontPrintTier:   fTier,
+      backPrintTier:    bTier,
       printDims:        "",
       printTechnique:   design.has_design ? "DTG" : "none",
       blankPrice:       design.blank_price,
       neckLabel:        false,
-      thumbnail:        design.thumbnail ?? "",
+      thumbnail:        design.thumbnail     ?? "",
+      backThumbnail:    design.back_thumbnail ?? "",
     });
     setAdded(true);
     setTimeout(() => { setAdded(false); onClose(); }, 900);
@@ -437,11 +456,10 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
 }
 
 // ── Designs Tab ────────────────────────────────────────────────────────────────
-function downloadThumbnail(thumbnail: string, name: string) {
-  // thumbnail is a data URL (jpeg) — convert to blob and trigger download
+function downloadThumbnail(url: string, name: string, suffix = "mockup") {
   const a = document.createElement("a");
-  a.href = thumbnail;
-  a.download = `${name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-mockup.jpg`;
+  a.href = url;
+  a.download = `${name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-${suffix}.jpg`;
   a.click();
 }
 
@@ -509,18 +527,26 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     Custom print
                   </span>
                 )}
-                {/* Download overlay — appears on hover if thumbnail exists */}
-                {d.thumbnail && (
-                  <button
-                    onClick={() => downloadThumbnail(d.thumbnail!, d.name)}
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity backdrop-blur-[2px]"
-                    title="Download mockup"
+                {/* Download overlay — appears on hover */}
+                {(d.thumbnail || d.back_thumbnail) && (
+                  <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity backdrop-blur-[2px]"
                   >
-                    <svg className="w-6 h-6 text-white drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-                    <span className="text-white text-[10px] font-bold drop-shadow">Download mockup</span>
-                  </button>
+                    {d.thumbnail && (
+                      <button onClick={() => downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-zinc-800 text-[10px] font-bold transition-colors shadow">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        {d.back_thumbnail ? "Front mockup" : "Download mockup"}
+                      </button>
+                    )}
+                    {d.back_thumbnail && (
+                      <button onClick={() => downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-zinc-800 text-[10px] font-bold transition-colors shadow">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        Back mockup
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -549,11 +575,21 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   </button>
                   {d.thumbnail && (
                     <button
-                      onClick={() => downloadThumbnail(d.thumbnail!, d.name)}
+                      onClick={() => downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup")}
                       className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
-                      title="Download mockup">
+                      title={d.back_thumbnail ? "Download front mockup" : "Download mockup"}>
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                    </button>
+                  )}
+                  {d.back_thumbnail && (
+                    <button
+                      onClick={() => downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup")}
+                      className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+                      title="Download back mockup">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                       </svg>
                     </button>
                   )}

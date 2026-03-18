@@ -15,6 +15,12 @@ async function uploadDataUrl(db: ReturnType<typeof createAdminClient>, dataUrl: 
 }
 
 // POST /api/designs — save a design
+// SQL migrations (run once):
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS back_thumbnail text;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS front_print_tier text;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS back_print_tier text;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS front_print_price numeric DEFAULT 0;
+//   ALTER TABLE designs ADD COLUMN IF NOT EXISTS back_print_price numeric DEFAULT 0;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -22,8 +28,13 @@ export async function POST(req: NextRequest) {
       userId, customerEmail, name,
       productId, productName, gsm,
       colorName, colorHex, size,
-      printTier, printDims, blankPrice, printPrice,
-      hasDesign, thumbnail,
+      printTier, frontPrintTier, backPrintTier,
+      printDims, blankPrice, printPrice,
+      frontPrintPrice, backPrintPrice,
+      hasDesign, thumbnail, backThumbnail,
+      // Already-uploaded Supabase storage URLs (preferred path)
+      frontDesignUrl, backDesignUrl,
+      // Legacy: data URLs (kept for backwards compat)
       frontDesignDataUrl, backDesignDataUrl,
     } = body;
 
@@ -33,40 +44,53 @@ export async function POST(req: NextRequest) {
 
     const db = createAdminClient();
 
+    // Resolve design file URLs — prefer already-uploaded storage URLs
+    let resolvedFrontUrl: string | null = frontDesignUrl ?? null;
+    let resolvedBackUrl:  string | null = backDesignUrl  ?? null;
+
     // Insert design row first to get the ID
     const { data, error } = await db.from("designs").insert({
-      user_id:        userId ?? null,
-      customer_email: customerEmail?.toLowerCase().trim() ?? null,
-      name:           name || `${productName} – ${colorName}`,
-      product_id:     productId,
-      product_name:   productName,
+      user_id:           userId ?? null,
+      customer_email:    customerEmail?.toLowerCase().trim() ?? null,
+      name:              name || `${productName} – ${colorName}`,
+      product_id:        productId,
+      product_name:      productName,
       gsm,
-      color_name:     colorName,
-      color_hex:      colorHex,
+      color_name:        colorName,
+      color_hex:         colorHex,
       size,
-      print_tier:     printTier || null,
-      print_dims:     printDims || null,
-      blank_price:    blankPrice ?? 0,
-      print_price:    printPrice ?? 0,
-      has_design:     hasDesign ?? false,
-      thumbnail:      thumbnail ?? null,
+      print_tier:        printTier || null,
+      front_print_tier:  frontPrintTier || null,
+      back_print_tier:   backPrintTier  || null,
+      print_dims:        printDims || null,
+      blank_price:       blankPrice ?? 0,
+      print_price:       printPrice ?? 0,
+      front_print_price: frontPrintPrice ?? 0,
+      back_print_price:  backPrintPrice  ?? 0,
+      has_design:        hasDesign ?? false,
+      thumbnail:         thumbnail      || null,
+      back_thumbnail:    backThumbnail  || null,
+      front_design_url:  resolvedFrontUrl,
+      back_design_url:   resolvedBackUrl,
     }).select("id").single();
 
     if (error) throw error;
 
     const designId = data.id;
 
-    // Upload raw design files to storage in parallel (non-blocking — don't fail save if uploads fail)
-    const [frontUrl, backUrl] = await Promise.all([
-      frontDesignDataUrl ? uploadDataUrl(db, frontDesignDataUrl, `designs/${designId}/front.png`) : null,
-      backDesignDataUrl  ? uploadDataUrl(db, backDesignDataUrl,  `designs/${designId}/back.png`)  : null,
-    ]);
+    // Legacy path: if data URLs were sent instead of storage URLs, upload them now
+    if (!resolvedFrontUrl && frontDesignDataUrl) {
+      resolvedFrontUrl = await uploadDataUrl(db, frontDesignDataUrl, `designs/${designId}/front.png`);
+    }
+    if (!resolvedBackUrl && backDesignDataUrl) {
+      resolvedBackUrl = await uploadDataUrl(db, backDesignDataUrl, `designs/${designId}/back.png`);
+    }
 
-    // Update row with design file URLs if we got them
-    if (frontUrl || backUrl) {
+    // Update row with any freshly-uploaded URLs
+    if (resolvedFrontUrl || resolvedBackUrl) {
       await db.from("designs").update({
-        ...(frontUrl ? { front_design_url: frontUrl } : {}),
-        ...(backUrl  ? { back_design_url:  backUrl  } : {}),
+        ...(resolvedFrontUrl ? { front_design_url: resolvedFrontUrl } : {}),
+        ...(resolvedBackUrl  ? { back_design_url:  resolvedBackUrl  } : {}),
       }).eq("id", designId);
     }
 
