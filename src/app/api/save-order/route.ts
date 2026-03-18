@@ -176,6 +176,98 @@ export async function POST(req: NextRequest) {
       description: "Payment confirmed. Your order is in our queue.",
     });
 
+    // Auto-create GST invoice for this order (non-blocking)
+    (async () => {
+      try {
+        const GST_RATE = parseFloat(process.env.INVOICE_GST_RATE ?? "0.05");
+        const year = new Date().getFullYear();
+
+        // Fetch user profile for GST info
+        let gstNumber: string | null = null;
+        let gstCompanyName: string | null = null;
+        if (userId) {
+          const { data: profile } = await db
+            .from("user_profiles")
+            .select("gst_number, company_name")
+            .eq("user_id", userId)
+            .maybeSingle();
+          if (profile) {
+            gstNumber = profile.gst_number ?? null;
+            gstCompanyName = profile.company_name ?? null;
+          }
+        }
+
+        // Generate invoice number: count invoices this year + 1
+        const { count: invCount } = await db
+          .from("invoices")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", `${year}-01-01T00:00:00.000Z`);
+        const seq = (((invCount ?? 0) + 1)).toString().padStart(4, "0");
+        const invoiceNumber = `HL-${year}-${seq}`;
+
+        const itemSubtotal = Number(blankPrice ?? 0) + Number(printPrice ?? 0);
+        const cgst = Math.round(itemSubtotal * 0.025 * 100) / 100;
+        const sgst = Math.round(itemSubtotal * 0.025 * 100) / 100;
+        const invoiceSubtotal = itemSubtotal;
+        const gstAmount = Math.round((itemSubtotal + Number(shipping ?? 0)) * GST_RATE * 100) / 100;
+
+        const items = [
+          {
+            description: `${product ?? "T-Shirt"} — ${color ?? ""} / ${size ?? ""}${printTier ? ` with ${printTier} print` : ""}`,
+            hsn: "610910",
+            qty: 1,
+            rate: itemSubtotal,
+            cgst_rate: 2.5,
+            sgst_rate: 2.5,
+            cgst,
+            sgst,
+            amount: itemSubtotal + cgst + sgst,
+            order_ref: orderRef,
+          },
+        ];
+
+        if (Number(shipping ?? 0) > 0) {
+          const shippingAmt = Number(shipping);
+          const sCgst = Math.round(shippingAmt * 0.025 * 100) / 100;
+          const sSgst = Math.round(shippingAmt * 0.025 * 100) / 100;
+          items.push({
+            description: "Shipping & Handling",
+            hsn: "996812",
+            qty: 1,
+            rate: shippingAmt,
+            cgst_rate: 2.5,
+            sgst_rate: 2.5,
+            cgst: sCgst,
+            sgst: sSgst,
+            amount: shippingAmt + sCgst + sSgst,
+            order_ref: orderRef,
+          });
+        }
+
+        await db.from("invoices").insert({
+          invoice_number: invoiceNumber,
+          type: "order",
+          order_id: order.id,
+          user_id: userId ?? null,
+          customer_email: customerEmail?.toLowerCase().trim() ?? null,
+          subtotal: invoiceSubtotal,
+          gst_amount: gstAmount,
+          total: Number(total ?? 0),
+          status: "issued",
+          gst_number: gstNumber,
+          company_name: gstCompanyName,
+          customer_name: customerName ?? null,
+          customer_address: `${address ?? ""}, ${city ?? ""} - ${pin ?? ""}`,
+          items,
+          issued_at: new Date().toISOString(),
+        });
+
+        console.log(`[save-order] Invoice ${invoiceNumber} created for order ${orderRef}`);
+      } catch (e) {
+        console.error("[save-order] invoice creation failed:", e);
+      }
+    })().catch((e) => console.error("[save-order] invoice block failed:", e));
+
     // Fire order confirmation email directly via Resend (non-blocking)
     sendConfirmationEmail({
       orderRef, customerName, customerEmail,

@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, customerEmail, name, phone, addressLine1, addressLine2, city, state, pin, country } = body;
+    const { userId, customerEmail, name, phone, addressLine1, addressLine2, city, state, pin, country, gstNumber, companyName } = body;
     if (!userId && !customerEmail) return NextResponse.json({ error: "userId or email required" }, { status: 400 });
 
     const db = createAdminClient();
@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
       state,
       pin,
       country: country ?? "IN",
+      gst_number: gstNumber ?? null,
+      company_name: companyName ?? null,
       updated_at: new Date().toISOString(),
     }, { onConflict: userId ? "user_id" : "customer_email" }).select("id").single();
 

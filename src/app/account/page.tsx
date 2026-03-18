@@ -27,7 +27,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "settings";
+type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "settings" | "invoices";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -53,6 +53,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "stores", label: "Stores", icon: (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  )},
+  { id: "invoices", label: "Invoices", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   )},
   { id: "settings", label: "Account Settings", icon: (
@@ -1572,6 +1577,132 @@ function StoresTab({ userId }: { userId: string | null }) {
   );
 }
 
+// ── Invoices Tab ───────────────────────────────────────────────────────────────
+type Invoice = {
+  id: string;
+  invoice_number: string;
+  type: string;
+  order_id: string | null;
+  month: string | null;
+  subtotal: number;
+  gst_amount: number;
+  total: number;
+  status: string;
+  issued_at: string;
+  created_at: string;
+};
+
+function InvoicesTab({ userId, email }: { userId: string | null; email: string | null }) {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (userId) params.set("userId", userId);
+    else if (email) params.set("email", email);
+    else { setLoading(false); return; }
+    fetch(`/api/invoices?${params}`)
+      .then((r) => r.json())
+      .then((d) => setInvoices(Array.isArray(d) ? d : []))
+      .catch(() => setInvoices([]))
+      .finally(() => setLoading(false));
+  }, [userId, email]);
+
+  const fmt = (n: number) => `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Invoices</h2>
+        <p className="text-xs text-zinc-400">GST tax invoices auto-generated for every order</p>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-zinc-400 py-12 justify-center">
+          <div className="w-5 h-5 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
+          Loading invoices…
+        </div>
+      ) : invoices.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-zinc-100 p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-50 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="font-bold text-zinc-700 mb-1">No invoices yet</p>
+          <p className="text-sm text-zinc-400">Invoices are generated automatically for every order you place.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
+          <div className="hidden sm:grid grid-cols-5 gap-4 px-6 py-3 bg-zinc-50 border-b border-zinc-100">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Invoice #</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Date</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Type</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">Total</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">Actions</span>
+          </div>
+          <div className="divide-y divide-zinc-100">
+            {invoices.map((inv) => (
+              <div key={inv.id} className="grid sm:grid-cols-5 grid-cols-2 gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors items-center">
+                <div>
+                  <p className="font-bold text-zinc-900 text-sm">{inv.invoice_number}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">GST Invoice</p>
+                </div>
+                <div>
+                  <p className="text-sm text-zinc-700">
+                    {new Date(inv.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+                <div className="hidden sm:block">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    inv.type === "monthly"
+                      ? "bg-purple-50 text-purple-700"
+                      : "bg-orange-50 text-orange-700"
+                  }`}>
+                    {inv.type === "monthly" ? "Monthly" : "Per order"}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="font-black text-zinc-900">{fmt(inv.total)}</p>
+                  <p className="text-[10px] text-zinc-400">incl. GST {fmt(inv.gst_amount)}</p>
+                </div>
+                <div className="text-right">
+                  <a
+                    href={`/invoice/${encodeURIComponent(inv.invoice_number)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    View / Print
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 bg-violet-50 rounded-2xl border border-violet-100 p-5">
+        <div className="flex items-start gap-3">
+          <svg className="w-4 h-4 text-violet-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="text-sm font-bold text-violet-900 mb-1">About your invoices</p>
+            <p className="text-xs text-violet-700 leading-relaxed">
+              A GST tax invoice is automatically created for each order. Monthly consolidated invoices are emailed on the 1st of every month.
+              Add your GSTIN in <strong>Account Settings</strong> to have it printed on all future invoices.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Settings Tab ───────────────────────────────────────────────────────────────
 function SettingsTab({
   user, onSignOut, userId, email,
@@ -1584,6 +1715,8 @@ function SettingsTab({
   const { currency, setCurrency } = useCurrency();
   const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
   const [addr, setAddr]       = useState({ name: "", phone: "", address_line1: "", address_line2: "", city: "", state: "", pin: "", country: "IN" });
+  const [gstNumber, setGstNumber] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [saving, setSaving]   = useState(false);
   const [saved,  setSaved]    = useState(false);
   const [loadingAddr, setLoadingAddr] = useState(true);
@@ -1624,6 +1757,8 @@ function SettingsTab({
             pin:          d.pin           ?? "",
             country:      d.country       ?? "IN",
           });
+          setGstNumber(d.gst_number ?? "");
+          setCompanyName(d.company_name ?? "");
         }
       })
       .finally(() => setLoadingAddr(false));
@@ -1646,6 +1781,8 @@ function SettingsTab({
           state:        addr.state,
           pin:          addr.pin,
           country:      addr.country,
+          gstNumber,
+          companyName,
         }),
       });
       setSaved(true);
@@ -1754,6 +1891,34 @@ function SettingsTab({
           </div>
         )}
         <p className="text-xs text-zinc-400 mt-3">Credits are applied automatically after the referred order ships.</p>
+      </div>
+
+      {/* GST / Billing Info */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
+            <svg className="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-black text-zinc-900">GST / Billing Details</h3>
+            <p className="text-xs text-zinc-400">Added to all your GST tax invoices</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Company / Business name <span className="text-zinc-300 normal-case">(optional)</span></label>
+            <input className={inputCls} placeholder="e.g. Acme Designs Pvt. Ltd." value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">GSTIN <span className="text-zinc-300 normal-case">(optional — 15 char GST number)</span></label>
+            <input className={inputCls} placeholder="e.g. 27XXXXX" value={gstNumber} onChange={(e) => setGstNumber(e.target.value.toUpperCase())} maxLength={15} />
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            If you have a GST number, it will appear on your invoices. Invoices are auto-generated for every order and available in the <strong className="text-zinc-600">Invoices</strong> tab.
+          </p>
+        </div>
       </div>
 
       {/* Default shipping address */}
@@ -1978,6 +2143,7 @@ export default function AccountPage() {
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
+              {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>
           </AnimatePresence>
