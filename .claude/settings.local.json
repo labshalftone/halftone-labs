@@ -61,7 +61,10 @@
       "WebFetch(domain:partners.shopify.com)",
       "WebFetch(domain:www.shopify.com)",
       "Bash(shopify app:*)",
-      "Bash(taskkill /F /IM node.exe /T)"
+      "Bash(taskkill /F /IM node.exe /T)",
+      "Bash(ls \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\api\\\\stores\\\\payout-stats\"\" 2>/dev/null && ls \"C:UsersronitfRAMERsrcappapiprofilebank-account\"\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\academy\\\\[slug]\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\help\\\\[slug]\")"
     ]
   }
 }

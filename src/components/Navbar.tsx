@@ -15,6 +15,8 @@ const navLinks = [
   { label: "How it works", href: "/how-it-works" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Journal", href: "/journal" },
+  { label: "Academy", href: "/academy" },
+  { label: "Help", href: "/help" },
 ];
 
 export default function Navbar() {

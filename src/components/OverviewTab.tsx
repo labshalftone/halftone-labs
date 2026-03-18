@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import LearnLink from "@/components/LearnLink";
 
 type DashboardData = {
   totalRevenue: number;
@@ -191,7 +192,7 @@ export default function OverviewTab({ userId, userName, onTopUp }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-2 items-center"
       >
         <Link
           href="/studio"
@@ -223,6 +224,11 @@ export default function OverviewTab({ userId, userName, onTopUp }: Props) {
           </svg>
           View Shopify Orders
         </button>
+        <LearnLink
+          href="/academy/how-to-launch-your-first-merch-drop"
+          label="Launch guide"
+          type="academy"
+        />
       </motion.div>
 
       {/* Recent orders */}

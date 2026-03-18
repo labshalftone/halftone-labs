@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DropBuilder, { type DropDraft } from "./DropBuilder";
+import LearnLink from "@/components/LearnLink";
 
 type Design = {
   id: string;
@@ -302,15 +303,22 @@ export default function DropsTab({ userId }: Props) {
           <h2 className="text-xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Drops</h2>
           <p className="text-sm text-zinc-500 mt-0.5">Limited releases, collections & campaigns</p>
         </div>
-        <button
-          onClick={() => openBuilder()}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors shadow-sm"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New Drop
-        </button>
+        <div className="flex items-center gap-2">
+          <LearnLink
+            href="/academy/how-to-launch-your-first-merch-drop"
+            label="Drop guide"
+            type="academy"
+          />
+          <button
+            onClick={() => openBuilder()}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors shadow-sm"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New Drop
+          </button>
+        </div>
       </div>
 
       {/* Summary stat pills */}
