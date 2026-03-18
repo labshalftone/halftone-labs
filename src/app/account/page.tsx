@@ -14,6 +14,7 @@ import WalletTab from "@/components/WalletTab";
 import OverviewTab from "@/components/OverviewTab";
 import OrgDashboard from "@/components/OrgDashboard";
 import OrgSettings from "@/components/OrgSettings";
+import DropsTab from "@/components/DropsTab";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -32,7 +33,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings";
+type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -48,6 +49,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "designs", label: "Designs", icon: (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+    </svg>
+  )},
+  { id: "drops", label: "Drops", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
     </svg>
   )},
   { id: "branding", label: "Branding", icon: (
@@ -2552,7 +2558,7 @@ export default function AccountPage() {
     const params = new URLSearchParams(window.location.search);
     const tab    = params.get("tab") as ActiveTab | null;
     const shopify = params.get("shopify");
-    if (tab && ["dashboard","orders","designs","branding","stores","shopify","wallet","invoices","settings"].includes(tab)) {
+    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","wallet","invoices","settings"].includes(tab)) {
       setActiveTab(tab);
     }
     if (shopify === "connected" || shopify === "error") {
@@ -2866,6 +2872,7 @@ export default function AccountPage() {
               )}
               {activeTab === "orders"    && <OrdersTab orders={orders} user={user} />}
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
+              {activeTab === "drops"     && <DropsTab userId={user?.id ?? ""} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
               {activeTab === "shopify"   && <ShopifyTab userId={user?.id ?? ""} />}
