@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: {
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </CartProvider>
         </CurrencyProvider>
+        <Analytics />
       </body>
     </html>
   );
