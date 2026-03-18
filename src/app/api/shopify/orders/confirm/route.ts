@@ -180,13 +180,12 @@ export async function POST(req: NextRequest) {
       country: shippingAddress?.country_code ?? "IN",
       status: "Order Placed",
       user_id: userId,
-      razorpay_payment_id: null,
+      razorpay_payment_id: "WALLET",
       razorpay_order_id: null,
       front_design_url: frontDesignUrl,
       back_design_url:  backDesignUrl,
       mockup_url:       mockupUrl,
       back_mockup_url:  backMockupUrl,
-      razorpay_payment_id: "WALLET",
     }).select("id").single();
 
     if (orderError) {
