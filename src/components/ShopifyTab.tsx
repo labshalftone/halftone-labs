@@ -33,7 +33,18 @@ interface EnrichedOrder {
   fulfillment_status: string | null;
   total_price: string; currency: string;
   line_items: EnrichedLineItem[];
-  shipping_address: { name: string; address1: string; city: string; province: string; country: string; zip: string } | null;
+  shipping_address: {
+    name: string;
+    company: string | null;
+    address1: string;
+    address2: string | null;
+    city: string;
+    province: string;
+    zip: string;
+    country: string;
+    country_name: string | null;
+    phone: string | null;
+  } | null;
   note: string | null;
   hlStatus: string | null;
   hlOrderRef: string | null;
@@ -316,6 +327,8 @@ function SkuMapper({ userId }: { userId: string }) {
 }
 
 // ── Orders list ───────────────────────────────────────────────────────────────
+type ShippingOption = { type: "surface" | "air"; label: string; rate: number; days: string };
+
 function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string }) {
   const [orders, setOrders]         = useState<EnrichedOrder[]>([]);
   const [loading, setLoading]       = useState(true);
@@ -324,6 +337,10 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
   const [confirmError, setConfirmError] = useState<Record<number, string>>({});
   const [expanded, setExpanded]     = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  // Per-order shipping: rates fetched + user selection
+  const [shippingRates,    setShippingRates]    = useState<Record<number, ShippingOption[]>>({});
+  const [shippingLoading,  setShippingLoading]  = useState<Record<number, boolean>>({});
+  const [selectedShipping, setSelectedShipping] = useState<Record<number, ShippingOption | null>>({});
 
   const fetchOrders = useCallback(async () => {
     setLoading(true); setError("");
@@ -345,6 +362,51 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
       .catch(() => {});
   }, [userId]);
 
+  // Fetch Surface + Air shipping rates for a domestic order
+  const fetchShippingRates = async (order: EnrichedOrder) => {
+    const pin = order.shipping_address?.zip;
+    const isDomestic = order.shipping_address?.country === "IN" || order.shipping_address?.country === "India";
+    if (!pin || !isDomestic) return;
+    if (shippingRates[order.id]) return; // already fetched
+
+    setShippingLoading((p) => ({ ...p, [order.id]: true }));
+    try {
+      const qty = order.line_items.reduce((s, l) => s + (l.quantity ?? 1), 0);
+      const weight = Math.max(0.5, Math.ceil((qty * 0.3 + 0.1) / 0.5) * 0.5);
+      const res = await fetch("/api/shipping-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin, country: "IN", weight, qty }),
+      });
+      const data = await res.json();
+      const raw: { id: string; label: string; carrier: string; rate: number; days: string }[] = data.rates ?? [];
+      // Map to surface/air
+      const options: ShippingOption[] = [];
+      const surface = raw.find((r) => r.id?.toLowerCase().includes("surface") || r.label?.toLowerCase().includes("surface"));
+      const air     = raw.find((r) => r.id?.toLowerCase().includes("air")     || r.label?.toLowerCase().includes("air"));
+      if (surface) options.push({ type: "surface", label: surface.label, rate: surface.rate, days: surface.days });
+      if (air)     options.push({ type: "air",     label: air.label,     rate: air.rate,     days: air.days });
+      // Fallback fixed rates if API returns nothing useful
+      if (options.length === 0) {
+        options.push({ type: "surface", label: "Surface Shipping", rate: 80,  days: "7–10 days" });
+        options.push({ type: "air",     label: "Air Shipping",     rate: 120, days: "3–5 days"  });
+      }
+      setShippingRates((p) => ({ ...p, [order.id]: options }));
+      // Default to surface
+      setSelectedShipping((p) => ({ ...p, [order.id]: options[0] ?? null }));
+    } catch {
+      setShippingRates((p) => ({
+        ...p,
+        [order.id]: [
+          { type: "surface", label: "Surface Shipping", rate: 80,  days: "7–10 days" },
+          { type: "air",     label: "Air Shipping",     rate: 120, days: "3–5 days"  },
+        ],
+      }));
+      setSelectedShipping((p) => ({ ...p, [order.id]: { type: "surface", label: "Surface Shipping", rate: 80, days: "7–10 days" } }));
+    }
+    setShippingLoading((p) => ({ ...p, [order.id]: false }));
+  };
+
   const handleConfirmViaWallet = async (order: EnrichedOrder) => {
     setConfirming(order.id);
     setConfirmError((prev) => { const next = { ...prev }; delete next[order.id]; return next; });
@@ -359,7 +421,8 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
       const print = (l.hlProduct as any)?.printPrice ?? 0;
       return sum + (blank + print) * (l.quantity ?? 1);
     }, 0);
-    const totalInr = Math.round(productionCost);
+    const shippingCost = selectedShipping[order.id]?.rate ?? 0;
+    const totalInr = Math.round(productionCost + shippingCost);
 
     const res = await fetch("/api/shopify/orders/confirm", {
       method: "POST",
@@ -377,8 +440,8 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
         productName:        firstMatched?.hlProduct?.productName ?? order.line_items[0]?.title ?? null,
         colorName:          firstMatched?.hlProduct?.colorName ?? null,
         sizeName:           firstMatched?.hlProduct?.size ?? null,
-        shippingAmount:     0,
-        customerPhone:      null,
+        shippingAmount:     shippingCost,
+        customerPhone:      order.shipping_address?.phone ?? null,
       }),
     });
     const data = await res.json();
@@ -453,7 +516,11 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
           <motion.div key={order.id} layout className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
             {/* Order header */}
             <button
-              onClick={() => setExpanded(isExpanded ? null : order.id)}
+              onClick={() => {
+                const next = isExpanded ? null : order.id;
+                setExpanded(next);
+                if (next) fetchShippingRates(order);
+              }}
               className="w-full flex items-center justify-between px-5 py-4 text-left"
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -549,13 +616,50 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
                     {/* Shipping address */}
                     {order.shipping_address && (
-                      <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-600">
-                        <p className="font-semibold text-zinc-700 mb-1">Ship to</p>
+                      <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-600 space-y-0.5">
+                        <p className="font-semibold text-zinc-700 mb-1.5">Ship to</p>
+                        {order.shipping_address.company && <p className="font-medium">{order.shipping_address.company}</p>}
                         <p>{order.shipping_address.name}</p>
-                        <p>{order.shipping_address.address1}, {order.shipping_address.city}, {order.shipping_address.province} {order.shipping_address.zip}</p>
-                        <p>{order.shipping_address.country}</p>
+                        <p>{order.shipping_address.address1}</p>
+                        {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
+                        <p>{order.shipping_address.city}{order.shipping_address.province ? `, ${order.shipping_address.province}` : ""} {order.shipping_address.zip}</p>
+                        <p>{order.shipping_address.country_name ?? order.shipping_address.country}</p>
+                        {order.shipping_address.phone && <p className="text-zinc-400">{order.shipping_address.phone}</p>}
                       </div>
                     )}
+
+                    {/* Shipping method selector (domestic India only) */}
+                    {!isConfirmed && order.anyMatched && (() => {
+                      const isDomestic = order.shipping_address?.country === "IN" || order.shipping_address?.country === "India";
+                      if (!isDomestic) return null;
+                      const rates = shippingRates[order.id];
+                      const isLoadingRates = shippingLoading[order.id];
+                      const sel = selectedShipping[order.id];
+                      return (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Shipping Method</p>
+                          {isLoadingRates ? (
+                            <p className="text-xs text-zinc-400">Fetching rates…</p>
+                          ) : rates ? (
+                            <div className="flex gap-2">
+                              {rates.map((opt) => (
+                                <button key={opt.type} type="button"
+                                  onClick={() => setSelectedShipping((p) => ({ ...p, [order.id]: opt }))}
+                                  className={`flex-1 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
+                                    sel?.type === opt.type
+                                      ? "border-zinc-900 bg-zinc-900 text-white"
+                                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                                  }`}>
+                                  <p className="text-xs font-black capitalize">{opt.type === "surface" ? "🚛 Surface" : "✈️ Air"}</p>
+                                  <p className={`text-[10px] mt-0.5 ${sel?.type === opt.type ? "text-zinc-300" : "text-zinc-400"}`}>{opt.days}</p>
+                                  <p className={`text-sm font-black mt-1 ${sel?.type === opt.type ? "text-white" : "text-zinc-900"}`}>₹{opt.rate}</p>
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
 
                     {/* HL order ref if confirmed */}
                     {isConfirmed && order.hlOrderRef && (
@@ -569,17 +673,24 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                     {!isConfirmed && (
                       <div className="flex flex-col gap-2">
                         {order.anyMatched && (() => {
-                          const cost = order.line_items.reduce((s, l) => {
+                          const prodCost = order.line_items.reduce((s, l) => {
                             const b = l.hlProduct?.blankPrice ?? 0;
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const p = (l.hlProduct as any)?.printPrice ?? 0;
                             return s + (b + p) * (l.quantity ?? 1);
                           }, 0);
-                          return cost > 0 ? (
-                            <p className="text-xs text-zinc-400 text-center">
-                              Production cost: <span className="font-bold text-zinc-700">₹{Math.round(cost).toLocaleString("en-IN")}</span>
-                              <span className="ml-1 text-zinc-300">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
-                            </p>
+                          const shpCost = selectedShipping[order.id]?.rate ?? 0;
+                          const total = Math.round(prodCost + shpCost);
+                          return prodCost > 0 ? (
+                            <div className="text-xs text-zinc-400 text-center space-y-0.5">
+                              <p>
+                                Products: <span className="font-bold text-zinc-700">₹{Math.round(prodCost).toLocaleString("en-IN")}</span>
+                                {shpCost > 0 && <> · Shipping: <span className="font-bold text-zinc-700">₹{shpCost.toLocaleString("en-IN")}</span></>}
+                              </p>
+                              <p>Total to deduct: <span className="font-black text-zinc-900">₹{total.toLocaleString("en-IN")}</span>
+                                <span className="ml-1 text-zinc-300">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
+                              </p>
+                            </div>
                           ) : null;
                         })()}
                         {confirmError[order.id] && (
