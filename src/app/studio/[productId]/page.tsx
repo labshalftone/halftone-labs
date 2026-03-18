@@ -60,6 +60,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
   const product = PRODUCTS.find((p) => p.id === productId);
 
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+  const [photoSide, setPhotoSide] = useState<"front" | "back">("front");
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   if (!product) {
@@ -104,31 +105,57 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="flex flex-col items-center gap-6"
+            className="flex flex-col gap-3"
           >
+            {/* Main image */}
             <div
-              className="w-full rounded-2xl flex items-center justify-center p-8"
+              className="w-full rounded-2xl overflow-hidden"
               style={{ background: selectedColor.hex === "#FFFFFF" ? "#efefed" : "#f0ede8" }}
             >
-              <TeeMockup color={selectedColor.hex} isOversized={isOversized} />
+              {selectedColor.mockupFront ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photoSide === "front" ? selectedColor.mockupFront : (selectedColor.mockupBack ?? selectedColor.mockupFront)}
+                  alt={`${product.name} in ${selectedColor.name} — ${photoSide}`}
+                  className="w-full object-cover transition-all duration-300"
+                />
+              ) : (
+                <div className="p-8">
+                  <TeeMockup color={selectedColor.hex} isOversized={isOversized} />
+                </div>
+              )}
             </div>
 
-            {/* Color swatches (duplicate for mobile — same as right column on desktop) */}
-            <div className="flex items-center gap-2 flex-wrap justify-center md:hidden">
+            {/* Front / Back toggle */}
+            {selectedColor.mockupBack && (
+              <div className="flex gap-2">
+                {(["front", "back"] as const).map((side) => (
+                  <button
+                    key={side}
+                    onClick={() => setPhotoSide(side)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all ${
+                      photoSide === side
+                        ? "bg-zinc-900 text-white"
+                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                    }`}
+                  >
+                    {side}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Color swatches mobile */}
+            <div className="flex items-center gap-2 flex-wrap md:hidden">
               {product.colors.map((c, i) => (
                 <button
                   key={c.name}
                   title={c.name}
-                  onClick={() => setSelectedColorIdx(i)}
+                  onClick={() => { setSelectedColorIdx(i); setPhotoSide("front"); }}
                   className="w-8 h-8 rounded-full transition-transform"
                   style={{
                     background: c.hex,
-                    border:
-                      i === selectedColorIdx
-                        ? "2.5px solid #f97316"
-                        : c.hex === "#FFFFFF"
-                        ? "1.5px solid #d1d5db"
-                        : "2.5px solid transparent",
+                    border: i === selectedColorIdx ? "2.5px solid #f97316" : c.hex === "#FFFFFF" ? "1.5px solid #d1d5db" : "2.5px solid transparent",
                     transform: i === selectedColorIdx ? "scale(1.18)" : "scale(1)",
                   }}
                 />
@@ -179,7 +206,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                   <button
                     key={c.name}
                     title={c.name}
-                    onClick={() => setSelectedColorIdx(i)}
+                    onClick={() => { setSelectedColorIdx(i); setPhotoSide("front"); }}
                     className="w-8 h-8 rounded-full transition-transform"
                     style={{
                       background: c.hex,

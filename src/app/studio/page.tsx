@@ -917,10 +917,21 @@ function ProductCard({ product, onOrder, onBulkQuote }: {
           ))}
         </div>
 
-        <div className="px-10 pt-10 pb-4">
-          <div className="w-full max-w-[180px] mx-auto drop-shadow-sm">
-            <TeeMockup color={activeColor.hex} isOversized={isOversized} />
-          </div>
+        <div className="aspect-square w-full overflow-hidden">
+          {activeColor.mockupFront ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={activeColor.mockupFront}
+              alt={`${product.name} in ${activeColor.name}`}
+              className="w-full h-full object-cover transition-all duration-300"
+            />
+          ) : (
+            <div className="px-10 pt-10 pb-4 h-full flex items-center">
+              <div className="w-full max-w-[180px] mx-auto drop-shadow-sm">
+                <TeeMockup color={activeColor.hex} isOversized={isOversized} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
