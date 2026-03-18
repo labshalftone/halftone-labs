@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
 import SizeGuide from "@/components/SizeGuide";
 import { useCurrency } from "@/lib/currency-context";
+import { PRINT_TIERS, getTier, PRODUCTS } from "@/lib/products";
 
 // ─── THUMBNAIL ────────────────────────────────────────────────────────────────
 
@@ -49,104 +50,7 @@ function clampInZone(x: number, y: number, size: number) {
   };
 }
 
-const PRINT_TIERS = [
-  { label: '5×5"',     sqin: 25,    price: 120 },
-  { label: '6×10"',    sqin: 60,    price: 180 },
-  { label: '8.5×11"',  sqin: 93.5,  price: 230 },
-  { label: '12×12"',   sqin: 144,   price: 280 },
-  { label: '14×16"',   sqin: 224,   price: 330 },
-  { label: '19×15.5"', sqin: 294.5, price: 400 },
-];
-
-function getTier(sqin: number) {
-  return PRINT_TIERS.find((t) => sqin <= t.sqin) ?? PRINT_TIERS[PRINT_TIERS.length - 1];
-}
-
-const PRODUCTS = [
-  {
-    id: "regular-tee",
-    name: "Regular Tee",
-    gsm: "180 GSM",
-    spec: "100% combed ring-spun cotton",
-    fit: "Regular unisex fit, slightly tapered",
-    blankPrice: 400,
-    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
-    colors: [
-      { name: "White",  hex: "#FFFFFF", border: true },
-      { name: "Black",  hex: "#111111" },
-      { name: "Navy",   hex: "#1B2A4A" },
-      { name: "Maroon", hex: "#6B2D2D" },
-    ],
-    bulkTiers: [
-      { qty: "50–99",   priceInr: 349 },
-      { qty: "100–249", priceInr: 299 },
-      { qty: "250+",    priceInr: 249 },
-    ],
-    tag: "Bestseller",
-  },
-  {
-    id: "oversized-tee-sj",
-    name: "Oversized Tee",
-    gsm: "220 GSM · Single Jersey",
-    spec: "100% combed cotton, single jersey knit",
-    fit: "Drop-shoulder oversized, loopback",
-    blankPrice: 500,
-    sizes: ["S", "M", "L", "XL", "2XL"],
-    colors: [
-      { name: "White", hex: "#FFFFFF", border: true },
-      { name: "Black", hex: "#111111" },
-    ],
-    bulkTiers: [
-      { qty: "50–99",   priceInr: 449 },
-      { qty: "100–249", priceInr: 399 },
-      { qty: "250+",    priceInr: 349 },
-    ],
-    tag: "New",
-  },
-  {
-    id: "oversized-tee-ft",
-    name: "Oversized Tee",
-    gsm: "240 GSM · French Terry",
-    spec: "100% combed cotton, french terry",
-    fit: "Drop-shoulder oversized, looped back",
-    blankPrice: 600,
-    sizes: ["S", "M", "L", "XL", "2XL"],
-    colors: [
-      { name: "Black",      hex: "#111111" },
-      { name: "White",      hex: "#FFFFFF", border: true },
-      { name: "Royal Blue", hex: "#2355C0" },
-      { name: "Baby Pink",  hex: "#F5C2C7" },
-      { name: "Red",        hex: "#C0392B" },
-    ],
-    bulkTiers: [
-      { qty: "50–99",   priceInr: 549 },
-      { qty: "100–249", priceInr: 499 },
-      { qty: "250+",    priceInr: 449 },
-    ],
-    tag: null,
-  },
-  {
-    id: "baby-tee",
-    name: "Baby Tee",
-    gsm: "180 GSM",
-    spec: "100% combed ring-spun cotton",
-    fit: "Cropped fitted cut, women's silhouette",
-    blankPrice: 380,
-    sizes: ["XS", "S", "M", "L", "XL"],
-    colors: [
-      { name: "White",    hex: "#FFFFFF", border: true },
-      { name: "Black",    hex: "#111111" },
-      { name: "Baby Pink", hex: "#F5C2C7" },
-      { name: "Lavender", hex: "#C9B8E8" },
-    ],
-    bulkTiers: [
-      { qty: "50–99",   priceInr: 329 },
-      { qty: "100–249", priceInr: 279 },
-      { qty: "250+",    priceInr: 239 },
-    ],
-    tag: null,
-  },
-];
+// PRINT_TIERS, getTier, and PRODUCTS are imported from @/lib/products above.
 
 // ─── TEE SVG ──────────────────────────────────────────────────────────────────
 
@@ -379,32 +283,32 @@ function PrintTechniqueInfoModal({ onClose }: { onClose: () => void }) {
     {
       id: "DTG",
       label: "Direct-to-Garment",
-      sub: "Ink printed directly onto fabric",
+      sub: "Our signature technique — refined over thousands of prints",
       color: "#111111",
       accent: "text-zinc-600",
       checkColor: "bg-zinc-900",
       pros: [
-        "Soft hand-feel — becomes part of the fabric",
-        "Full colour & photographic gradients",
-        "Best on white & light-coloured fabrics",
-        "No MOQ — perfect for single prints",
+        "Breathable & soft — ink becomes part of the fabric",
+        "Vibrant full-colour reproduction & photographic gradients",
+        "Natural hand-feel that gets better with every wash",
+        "Works on all garment colours — light, mid-tone, and dark",
+        "No MOQ — perfect for single pieces",
       ],
-      cons: ["Fades slightly faster on dark fabrics", "Not recommended for black or very dark garments"],
+      cons: [],
     },
     {
       id: "DTF",
       label: "Direct-to-Film",
-      sub: "Design heat-pressed from film onto fabric",
-      color: "#f97316",
-      accent: "text-orange-500",
-      checkColor: "bg-orange-500",
+      sub: "A film-transfer option for specific design styles",
+      color: "#71717a",
+      accent: "text-zinc-400",
+      checkColor: "bg-zinc-400",
       pros: [
-        "Works on ANY colour — including black",
-        "Vibrant pop-out colours with crisp edges",
-        "Slightly raised texture for extra depth",
-        "Superior wash fastness vs DTG",
+        "Slightly raised, textured finish",
+        "Suits bold, thick-outline graphic prints",
+        "Available on request",
       ],
-      cons: ["Slightly stiffer feel than DTG", "Less suitable for very fine photographic gradients"],
+      cons: ["Less breathable than DTG", "Stiffer hand-feel — sits on top of the fabric", "Not our recommended default"],
     },
   ];
 
@@ -429,7 +333,7 @@ function PrintTechniqueInfoModal({ onClose }: { onClose: () => void }) {
           <div>
             <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">Halftone Labs</p>
             <h2 className="text-lg font-black" style={{ letterSpacing: "-0.03em" }}>Print Techniques</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">DTG vs DTF — what&apos;s the difference?</p>
+            <p className="text-xs text-zinc-400 mt-0.5">How we bring your design to life</p>
           </div>
           <button
             onClick={onClose}
@@ -490,13 +394,13 @@ function PrintTechniqueInfoModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
 
-          {/* Quick pick tip */}
-          <div className="flex items-start gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3">
+          {/* Recommendation tip */}
+          <div className="flex items-start gap-2.5 bg-zinc-900 rounded-xl px-4 py-3">
             <svg className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
             </svg>
-            <p className="text-xs text-orange-800 leading-relaxed">
-              <strong>Quick pick:</strong> Light garment + photographic design? Go DTG. Dark garment or bold graphic? Go DTF.
+            <p className="text-xs text-white leading-relaxed">
+              <strong className="text-orange-400">We recommend DTG for almost everything.</strong> It&apos;s breathable, looks incredible, and we&apos;ve perfected it over thousands of prints. Choose DTF only if you specifically want a raised, textured finish.
             </p>
           </div>
         </div>
@@ -767,7 +671,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                         className={`py-3.5 px-4 rounded-xl border-2 text-left transition-all ${technique === t ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
                         <span className="block text-sm font-black" style={{ letterSpacing: "-0.02em" }}>{t}</span>
                         <span className={`block text-[10px] font-normal mt-0.5 ${technique === t ? "text-zinc-300" : "text-zinc-400"}`}>
-                          {t === "DTG" ? "Natural feel · light fabrics" : "Vibrant on any colour"}
+                          {t === "DTG" ? "Our standard · breathable & vivid" : "Raised texture · on request"}
                         </span>
                       </button>
                     ))}
@@ -1143,50 +1047,63 @@ export default function StudioPage() {
           </div>
         </div>
 
-        {/* ── DTG vs DTF ── */}
+        {/* ── Print Technique ── */}
         <div className="max-w-6xl mx-auto px-6 pb-24">
           <div className="border-t border-zinc-200/60 pt-16">
             <div className="text-center mb-10">
-              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">Print Techniques</p>
+              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">Our Print Process</p>
               <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
-                DTG vs DTF — what&apos;s the difference?
+                We&apos;ve perfected DTG printing
               </h2>
+              <p className="text-zinc-500 text-sm mt-3 max-w-lg mx-auto leading-relaxed">
+                Direct-to-Garment is our signature technique — refined over thousands of prints. Breathable, vibrant, and designed to feel like it was always part of the fabric.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
-              {[
-                {
-                  id: "DTG", color: "#111", label: "Direct-to-Garment", sub: "Ink printed directly onto fabric",
-                  pros: ["Soft hand-feel — part of the fabric","Full colour & photographic gradients","Best on white & light fabrics","No MOQ — perfect for singles"],
-                  accent: "text-zinc-600",
-                },
-                {
-                  id: "DTF", color: "#f97316", label: "Direct-to-Film", sub: "Design printed on film, heat-pressed",
-                  pros: ["Works on ANY colour — even black","Vibrant pop-out colours, crisp edges","Slightly raised texture","Better wash fastness than DTG"],
-                  accent: "text-orange-500",
-                },
-              ].map((t) => (
-                <div key={t.id} className="bg-white rounded-2xl p-6 border border-zinc-100">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: t.color }}>
-                      <span className="text-white text-xs font-black">{t.id}</span>
-                    </div>
-                    <div>
-                      <p className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.02em" }}>{t.label}</p>
-                      <p className="text-[0.7rem] text-zinc-400">{t.sub}</p>
-                    </div>
+              <div className="bg-zinc-900 text-white rounded-2xl p-6 border border-zinc-800 relative overflow-hidden">
+                <div className="absolute top-4 right-4 text-[0.6rem] font-black uppercase tracking-widest bg-orange-500 text-white px-2 py-0.5 rounded-full">Recommended</div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+                    <span className="text-zinc-900 text-xs font-black">DTG</span>
                   </div>
-                  <ul className="space-y-2">
-                    {t.pros.map((pro) => (
-                      <li key={pro} className="flex items-start gap-2 text-xs text-zinc-600">
-                        <svg className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${t.accent}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        {pro}
-                      </li>
-                    ))}
-                  </ul>
+                  <div>
+                    <p className="font-black text-white text-sm" style={{ letterSpacing: "-0.02em" }}>Direct-to-Garment</p>
+                    <p className="text-[0.7rem] text-zinc-400">Ink printed directly into the fabric</p>
+                  </div>
                 </div>
-              ))}
+                <ul className="space-y-2">
+                  {["Breathable — feels like part of the garment","Vibrant full-colour reproduction & photographic detail","Soft, natural hand-feel that improves with washing","Works beautifully across all garment colours","No MOQ — single pieces welcome"].map((pro) => (
+                    <li key={pro} className="flex items-start gap-2 text-xs text-zinc-300">
+                      <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      {pro}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-zinc-100">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-zinc-500 text-xs font-black">DTF</span>
+                  </div>
+                  <div>
+                    <p className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.02em" }}>Direct-to-Film</p>
+                    <p className="text-[0.7rem] text-zinc-400">Film transfer, heat-pressed onto fabric</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {["Slightly raised, textured finish","Suits bold graphics with thick outlines","Available on request for specific designs"].map((pro) => (
+                    <li key={pro} className="flex items-start gap-2 text-xs text-zinc-500">
+                      <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      {pro}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[0.65rem] text-zinc-400 mt-4 pt-3 border-t border-zinc-100">
+                  Not sure? Default to DTG — you won&apos;t be disappointed.
+                </p>
+              </div>
             </div>
 
             <div className="text-center">

@@ -21,7 +21,7 @@ const STEPS = [
   {
     n: "03",
     title: "We validate & print",
-    body: "Our team checks your file for resolution, bleed, and colour profile before production starts. DTG for a natural soft feel on lighter garments. DTF for vibrant, edge-to-edge colour on any base. We'll flag it if something needs adjusting.",
+    body: "Our team checks your file for resolution, bleed, and colour profile before production starts. We use DTG as our standard — it's breathable, vibrant, and we've perfected it over thousands of prints. DTF is available on request for specific design styles. We'll flag it if something needs adjusting.",
     tag: "Same day",
   },
   {

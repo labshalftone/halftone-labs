@@ -15,8 +15,8 @@ const faqs = [
     a: "On-demand Studio orders ship within 5–7 business days domestically. Custom bulk drops — the kind with bespoke construction, specialty printing, or full packaging — take 3–4 weeks depending on complexity and volume. We'll give you a clear timeline upfront, not a vague estimate.",
   },
   {
-    q: "What's the difference between DTG and DTF printing?",
-    a: "DTG (Direct-to-Garment) prints ink directly onto the fabric — great for soft, breathable prints on light and mid-tone garments. DTF (Direct-to-Film) transfers a printed film onto the garment, giving you sharper edges, vivid colour on dark fabrics, and the ability to print on almost any material. We use both, and we'll recommend the right one for your artwork.",
+    q: "What print technique do you use?",
+    a: "DTG (Direct-to-Garment) is our signature technique — ink is printed directly into the fabric for a breathable, soft feel that looks incredible and only gets better with wear. We've refined it over thousands of prints and recommend it for virtually every design. DTF (Direct-to-Film) is also available on request; it creates a slightly raised, textured finish suited to specific bold graphic styles — but for most designs, DTG is simply the better experience.",
   },
   {
     q: "Can I order a sample before committing to bulk?",
