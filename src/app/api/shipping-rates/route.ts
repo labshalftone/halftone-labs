@@ -220,10 +220,16 @@ export async function POST(req: NextRequest) {
   const token = await getShiprocketToken();
   if (token) {
     try {
+      // Shiprocket international API needs integer weight (rounds up to nearest 0.5 kg slab, min 1)
+      const intlWeight = Math.max(1, Math.ceil(weight));
       const qs = new URLSearchParams({
         pickup_postcode:  PICKUP_PIN,
         delivery_country: country,
-        weight:           String(weight),
+        weight:           String(intlWeight),
+        length:           "30",
+        breadth:          "25",
+        height:           "2",
+        declared_value:   "1000",
         cod:              "0",
       });
       const url = `https://apiv2.shiprocket.in/v1/external/courier/international/serviceability?${qs}`;
