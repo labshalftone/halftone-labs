@@ -35,30 +35,41 @@ async function makeCompositeThumbnail(
   zone: { left: number; top: number; width: number; height: number }
 ): Promise<string> {
   return new Promise((resolve) => {
-    const SIZE = 300;
-    const canvas = document.createElement("canvas");
-    canvas.width = SIZE; canvas.height = SIZE;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) { resolve(""); return; }
-
     const mockup = new Image();
-    mockup.crossOrigin = "anonymous";
     mockup.onload = () => {
-      ctx.drawImage(mockup, 0, 0, SIZE, SIZE);
+      // Match the mockup's natural aspect ratio so the photo isn't distorted
+      const W = 800;
+      const H = Math.round(W * (mockup.naturalHeight / mockup.naturalWidth));
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(""); return; }
+
+      // White background so transparent PNG areas don't go black on JPEG export
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, W, H);
+
+      // Draw the mockup photo filling the full canvas (no distortion — aspect matches)
+      ctx.drawImage(mockup, 0, 0, W, H);
+
       const design = new Image();
       design.onload = () => {
-        const zLeft   = (zone.left   / 100) * SIZE;
-        const zTop    = (zone.top    / 100) * SIZE;
-        const zWidth  = (zone.width  / 100) * SIZE;
-        const zHeight = (zone.height / 100) * SIZE;
-        const aspect = design.width / design.height;
-        let dw = zWidth * 0.75;
-        let dh = dw / aspect;
-        if (dh > zHeight * 0.75) { dh = zHeight * 0.75; dw = dh * aspect; }
-        ctx.drawImage(design, zLeft + (zWidth - dw) / 2, zTop + (zHeight - dh) / 2, dw, dh);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
+        // Convert zone percentages → pixels relative to canvas size
+        const zL = (zone.left   / 100) * W;
+        const zT = (zone.top    / 100) * H;
+        const zW = (zone.width  / 100) * W;
+        const zH = (zone.height / 100) * H;
+
+        // Scale design to fit ~85% of the zone, preserving its aspect ratio
+        const a = design.naturalWidth / design.naturalHeight;
+        let dw = zW * 0.85;
+        let dh = dw / a;
+        if (dh > zH * 0.85) { dh = zH * 0.85; dw = dh * a; }
+
+        ctx.drawImage(design, zL + (zW - dw) / 2, zT + (zH - dh) / 2, dw, dh);
+        resolve(canvas.toDataURL("image/jpeg", 0.92));
       };
-      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.85));
+      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.92));
       design.src = designSrc;
     };
     mockup.onerror = () => resolve("");
