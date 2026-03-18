@@ -131,13 +131,18 @@ export default function CheckoutPage() {
   // Numeric amount in the selected currency (for Razorpay charge)
   const grandTotalForeign = toForeignAmount(grandTotalINR, currency);
 
-  const fetchShipping = useCallback(async (countryCode: string, pin: string) => {
+  // Weight: ~300g per tee + 100g packaging, billed in 0.5kg slabs
+  const totalQty    = items.reduce((s, i) => s + i.qty, 0);
+  const weightKg    = Math.max(0.5, Math.ceil((totalQty * 0.3 + 0.1) / 0.5) * 0.5);
+
+  const fetchShipping = useCallback(async (countryCode: string, pin: string, qty = 1) => {
     setLoadingShipping(true);
     try {
+      const weight = Math.max(0.5, Math.ceil((qty * 0.3 + 0.1) / 0.5) * 0.5);
       const res = await fetch("/api/shipping-rates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country: countryCode, pin: pin || "201304" }),
+        body: JSON.stringify({ country: countryCode, pin: pin || "201304", weight }),
       });
       const data = await res.json();
       if (data.options?.length) {
@@ -148,7 +153,8 @@ export default function CheckoutPage() {
     setLoadingShipping(false);
   }, []);
 
-  useEffect(() => { fetchShipping(country, form.pin); }, [country]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Re-fetch when country or total qty changes
+  useEffect(() => { fetchShipping(country, form.pin, totalQty); }, [country, totalQty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load Razorpay
   useEffect(() => {
@@ -754,7 +760,7 @@ export default function CheckoutPage() {
                   <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
                   <input value={form.pin} onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value }))}
-                    onBlur={(e) => country === "IN" && e.target.value && fetchShipping(country, e.target.value)}
+                    onBlur={(e) => country === "IN" && e.target.value && fetchShipping(country, e.target.value, totalQty)}
                     className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                     placeholder={country === "IN" ? "PIN code" : "Postal code"} />
                 </div>
@@ -804,7 +810,7 @@ export default function CheckoutPage() {
               ) : shippingOptions.length === 0 ? (
                 <div className="text-sm text-zinc-400">
                   Enter your address to see shipping options.{" "}
-                  <button onClick={() => fetchShipping(country, form.pin)} className="text-orange-500 underline">Refresh</button>
+                  <button onClick={() => fetchShipping(country, form.pin, totalQty)} className="text-orange-500 underline">Refresh</button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
