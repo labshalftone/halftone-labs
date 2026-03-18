@@ -70,7 +70,7 @@ async function sendConfirmationEmail(params: {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      from: "Halftone Labs <onboarding@resend.dev>",
+      from: "Halftone Labs <orders@halftonelabs.in>",
       to: [customerEmail],
       subject: `Your order #${orderRef} is confirmed ✓`,
       html,
