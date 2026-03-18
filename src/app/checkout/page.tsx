@@ -96,6 +96,7 @@ export default function CheckoutPage() {
 
   const [paying,       setPaying]       = useState(false);
   const [payError,     setPayError]     = useState("");
+  const [refCopied,    setRefCopied]    = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<{
     ref: string;
     name: string;
@@ -343,7 +344,6 @@ export default function CheckoutPage() {
 
     // Pick best thumbnail for display (prefer composite mockup)
     const heroThumb = successItems[0]?.thumbnail || successItems[0]?.frontDesignUrl || null;
-    const [refCopied, setRefCopied] = useState(false);
 
     const copyRef = () => {
       navigator.clipboard.writeText(orderSuccess.ref).then(() => {
