@@ -525,6 +525,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [backPos,  setBackPos]  = useState<{ x: number; y: number; size: number } | null>(null);
 
   const [added,  setAdded]  = useState(false);
+  const [neckLabel, setNeckLabel] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
 
@@ -532,7 +533,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const zoneKey: keyof typeof PHOTO_ZONE =
     product.id === "baby-tee" ? "baby" : isOversized ? "oversized" : "regular";
   const totalPrint   = frontPrintPrice + backPrintPrice;
-  const itemTotal    = product.blankPrice + totalPrint;
+  const itemTotal    = product.blankPrice + totalPrint + (neckLabel ? 7 : 0);
   const hasAnyDesign = !!frontDesignSrc || !!backDesignSrc;
   const canAddToCart = hasAnyDesign || noDesign;
 
@@ -603,6 +604,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       printDims: frontPrintDims,
       printTechnique: hasAnyDesign ? technique : "none",
       blankPrice: product.blankPrice,
+      neckLabel,
       thumbnail,
       mockupFront: color.mockupFront ?? "",
     });
@@ -955,6 +957,26 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                       <span className="text-sm font-bold text-orange-600">+{fmt(backPrintPrice)}</span>
                     </div>
                   )}
+                  {/* Neck label add-on */}
+                  <button
+                    type="button"
+                    onClick={() => setNeckLabel((v) => !v)}
+                    className={`w-full flex items-center justify-between mt-2 px-3 py-2.5 rounded-xl border transition-all ${
+                      neckLabel
+                        ? "border-orange-300 bg-orange-50"
+                        : "border-zinc-200 bg-white hover:border-zinc-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 transition-colors ${neckLabel ? "bg-orange-500" : "border-2 border-zinc-300"}`}>
+                        {neckLabel && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                      <span className="text-xs font-semibold text-zinc-700">DTF Neck label</span>
+                      <span className="text-[10px] text-zinc-400">(your uploaded label)</span>
+                    </div>
+                    <span className={`text-xs font-bold ${neckLabel ? "text-orange-600" : "text-zinc-400"}`}>+{fmt(7)}</span>
+                  </button>
+
                   <div className="flex justify-between pt-2 mt-1 border-t border-zinc-200">
                     <span className="text-xs font-black text-zinc-900 uppercase tracking-tight">Item total</span>
                     <span className="font-black text-zinc-900">{fmt(itemTotal)}</span>

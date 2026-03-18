@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
-export const GST_RATE = 0.05; // 5% on products and shipping
+export const GST_RATE = 0.05;         // 5% on products and shipping
+export const NECK_LABEL_PRICE = 7;    // ₹7 per piece for DTF neck label
 
 export interface CartItem {
   cartId: string;
@@ -25,6 +26,7 @@ export interface CartItem {
   printTechnique: "DTG" | "DTF" | "none"; // print method
 
   blankPrice: number;       // per unit blank garment price
+  neckLabel: boolean;       // DTF neck label transfer (+₹7/piece)
 
   // Composite thumbnail — mockup with design overlaid (optional)
   thumbnail?: string;
@@ -50,10 +52,11 @@ interface CartContextType {
   removeItem: (cartId: string) => void;
   updateQty: (cartId: string, qty: number) => void;
   clearCart: () => void;
-  itemsSubtotal: number;   // blank price × qty across all items
-  printSubtotal: number;   // print price × qty across all items
+  itemsSubtotal: number;        // blank price × qty across all items
+  printSubtotal: number;        // print price × qty across all items
+  neckLabelSubtotal: number;    // ₹7 × qty for items with neck label
   count: number;
-  total: number;           // items + print (no shipping, no tax)
+  total: number;                // items + print + neckLabel (no shipping, no tax)
 }
 
 const CartContext = createContext<CartContextType>({
@@ -64,6 +67,7 @@ const CartContext = createContext<CartContextType>({
   clearCart: () => {},
   itemsSubtotal: 0,
   printSubtotal: 0,
+  neckLabelSubtotal: 0,
   count: 0,
   total: 0,
 });
@@ -110,13 +114,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => setItems([]), []);
 
-  const itemsSubtotal = items.reduce((s, i) => s + i.blankPrice * i.qty, 0);
-  const printSubtotal = items.reduce((s, i) => s + i.printPrice * i.qty, 0);
-  const total  = itemsSubtotal + printSubtotal;
+  const itemsSubtotal     = items.reduce((s, i) => s + i.blankPrice * i.qty, 0);
+  const printSubtotal     = items.reduce((s, i) => s + i.printPrice * i.qty, 0);
+  const neckLabelSubtotal = items.reduce((s, i) => s + (i.neckLabel ? NECK_LABEL_PRICE * i.qty : 0), 0);
+  const total  = itemsSubtotal + printSubtotal + neckLabelSubtotal;
   const count  = items.reduce((s, i) => s + i.qty, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, itemsSubtotal, printSubtotal, count, total }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, itemsSubtotal, printSubtotal, neckLabelSubtotal, count, total }}>
       {children}
     </CartContext.Provider>
   );

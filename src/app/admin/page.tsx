@@ -49,6 +49,7 @@ type Order = {
   mockup_url: string | null;
   courier: string | null;
   tracking_number: string | null;
+  neck_label: boolean;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -294,6 +295,12 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                       <span className="text-xs font-semibold text-zinc-800">{v}</span>
                     </div>
                   ))}
+                  {selected.neck_label && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 border border-orange-200">
+                      <span className="text-xs">🏷️</span>
+                      <span className="text-xs font-semibold text-orange-700">DTF Neck Label (+₹7/pc)</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

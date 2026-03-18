@@ -72,7 +72,7 @@ function InfoTooltip({ text }: { text: string }) {
 }
 
 export default function CheckoutPage() {
-  const { items, itemsSubtotal, printSubtotal, total, clearCart } = useCart();
+  const { items, itemsSubtotal, printSubtotal, neckLabelSubtotal, total, clearCart } = useCart();
   const { currency, fmt } = useCurrency();
   const isINR = currency === "INR";
 
@@ -195,6 +195,7 @@ export default function CheckoutPage() {
         totalForeign: grandTotalForeign,
         couponCode: appliedCoupon?.code ?? null,
         discountAmount: discount,
+        neckLabel: items.some(i => i.neckLabel),
         frontDesignUrl: items.map(i => i.frontDesignUrl || "").find(Boolean) ?? null,
         backDesignUrl:  items.map(i => i.backDesignUrl  || "").find(Boolean) ?? null,
         mockupUrl:      items.map(i => i.thumbnail      || "").find(Boolean) ?? null,
@@ -534,6 +535,12 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-zinc-500">Customization</span>
                     <span>{fmt(printSubtotal)}</span>
+                  </div>
+                )}
+                {neckLabelSubtotal > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-zinc-500">Neck label</span>
+                    <span>{fmt(neckLabelSubtotal)}</span>
                   </div>
                 )}
                 {appliedCoupon && (
