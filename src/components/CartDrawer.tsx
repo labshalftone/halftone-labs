@@ -152,9 +152,9 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                   <p className="text-[10px] text-zinc-400">Final total incl. shipping shown at checkout</p>
                 </div>
 
-                <Link href="/checkout" onClick={onClose}>
-                  <button className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 transition-colors">
-                    Checkout →
+                <Link href="/cart" onClick={onClose}>
+                  <button className="w-full py-4 rounded-2xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors">
+                    View Cart & Checkout →
                   </button>
                 </Link>
                 <button onClick={clearCart} className="w-full mt-2 py-2 text-xs text-zinc-400 hover:text-red-500 transition-colors">
