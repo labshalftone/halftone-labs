@@ -145,7 +145,7 @@ function DesignPlacer({
       <div
         ref={containerRef}
         className="relative w-full select-none overflow-hidden rounded-xl"
-        style={{ background: "#f0ede8", touchAction: "none" }}
+        style={{ background: "#ffffff", touchAction: "none" }}
         onPointerMove={(e) => {
           if (!dragging.current) return;
           const p = toPct(e.clientX, e.clientY);
@@ -561,7 +561,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   return (
     <div className="fixed inset-0 z-50 flex overflow-hidden bg-white">
       {/* ── Left: live mockup panel ── */}
-      <div className="hidden lg:flex flex-col items-center justify-center w-[44%] bg-[#f8f7f5] relative p-10 border-r border-zinc-100">
+      <div className="hidden lg:flex flex-col items-center justify-center w-[44%] bg-white relative p-10 border-r border-zinc-100">
         <button onClick={onClose}
           className="absolute top-6 left-6 flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -572,9 +572,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           <p className="text-sm font-black" style={{ letterSpacing: "-0.03em" }}>{product.name}</p>
         </div>
 
-        {/* Halftone dot bg */}
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+        {/* Halftone dot bg — only show when no real photo (SVG fallback) */}
+        {!color.mockupFront && (
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+        )}
 
         <div className="w-full max-w-xs relative z-10">
           {step === 1 && activeDesignSrc ? (
