@@ -1,0 +1,15 @@
+name = "Halftone Studio"
+client_id = "6268e1115314037c2920ec668a099c6b"
+application_url = "https://halftonelabs.in"
+embedded = false
+
+[auth]
+redirect_urls = [
+  "https://halftonelabs.in/api/shopify/callback"
+]
+
+[webhooks]
+api_version = "2026-01"
+
+[access_scopes]
+scopes = "read_orders,write_fulfillments"
