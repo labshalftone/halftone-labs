@@ -95,9 +95,11 @@ export default function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError,   setCouponError]   = useState("");
 
-  const [paying,       setPaying]       = useState(false);
-  const [payError,     setPayError]     = useState("");
-  const [refCopied,    setRefCopied]    = useState(false);
+  const [paying,        setPaying]        = useState(false);
+  const [payError,      setPayError]      = useState("");
+  const [refCopied,     setRefCopied]     = useState(false);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [useWallet,     setUseWallet]     = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<{
     ref: string;
     name: string;
@@ -183,6 +185,19 @@ export default function CheckoutPage() {
     document.head.appendChild(s);
     return () => { try { document.head.removeChild(s); } catch {} };
   }, []);
+
+  // Fetch wallet balance for logged-in INR users
+  useEffect(() => {
+    if (!isINR) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id;
+      if (!uid) return;
+      fetch(`/api/wallet?userId=${uid}`)
+        .then((r) => r.json())
+        .then((d) => { if (typeof d.balance === "number") setWalletBalance(d.balance); })
+        .catch(() => {});
+    });
+  }, [isINR]);
 
   const handleApplyCoupon = async () => {
     const trimmed = couponInput.trim().toUpperCase();
@@ -289,7 +304,36 @@ export default function CheckoutPage() {
         return;
       }
 
-      // ── Normal paid flow ────────────────────────────────────────────────
+      // ── Wallet payment ───────────────────────────────────────────────────
+      if (useWallet && isINR) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const uid = session?.user?.id;
+        if (!uid) { setPayError("Please sign in to use your wallet."); return; }
+
+        const debitRes = await fetch("/api/wallet/debit-for-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: uid, amount: grandTotalINR, orderRef: ref }),
+        });
+        const debitData = await debitRes.json();
+
+        if (debitRes.status === 402) {
+          const shortfall = grandTotalINR - (debitData.balance ?? 0);
+          setPayError(`Insufficient wallet balance. You need ₹${shortfall.toLocaleString("en-IN")} more. Top up in Account → Wallet.`);
+          return;
+        }
+        if (!debitRes.ok) {
+          setPayError(debitData.error ?? "Wallet payment failed");
+          return;
+        }
+
+        // Wallet debited — save order with WALLET as payment reference
+        await saveAndComplete(ref, `WALLET-${uid.slice(0, 8)}`, "WALLET");
+        setWalletBalance(debitData.newBalance ?? null);
+        return;
+      }
+
+      // ── Normal Razorpay flow ─────────────────────────────────────────────
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1001,21 +1045,61 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* ── Wallet payment option (INR + logged in + has balance) ── */}
+              {isINR && walletBalance !== null && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => { setUseWallet(!useWallet); setPayError(""); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border-2 transition-all text-sm ${
+                      useWallet
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5 font-bold">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      Pay from Wallet
+                    </span>
+                    <span className={`text-xs font-black ${useWallet ? "text-zinc-300" : walletBalance >= grandTotalINR ? "text-emerald-600" : "text-zinc-400"}`}>
+                      Balance: ₹{walletBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </span>
+                  </button>
+                  {useWallet && walletBalance < grandTotalINR && (
+                    <p className="text-xs text-amber-600 mt-1.5 ml-1">
+                      Short by ₹{(grandTotalINR - walletBalance).toLocaleString("en-IN")} —{" "}
+                      <a href="/account?tab=wallet" className="underline font-semibold">top up wallet</a>
+                    </p>
+                  )}
+                </div>
+              )}
+
               {payError && (
                 <div className="mt-4 px-4 py-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200">{payError}</div>
               )}
 
               <button
                 onClick={handlePay}
-                disabled={paying || !form.name || !form.email || !form.address || !form.city || !selectedShipping}
-                className="w-full mt-5 py-4 rounded-2xl bg-orange-500 text-white font-black text-base hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                disabled={paying || !form.name || !form.email || !form.address || !form.city || !selectedShipping || (useWallet && walletBalance !== null && walletBalance < grandTotalINR)}
+                className={`w-full mt-5 py-4 rounded-2xl font-black text-base disabled:opacity-40 transition-colors flex items-center justify-center gap-2 text-white ${
+                  useWallet ? "bg-zinc-900 hover:bg-zinc-700" : "bg-orange-500 hover:bg-orange-600"
+                }`}>
                 {paying ? (
                   <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Processing…</>
+                ) : useWallet ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Pay {fmt(grandTotalINR)} from Wallet →
+                  </>
                 ) : <>Pay {fmt(grandTotalINR)} →</>}
               </button>
 
               <p className="text-xs text-zinc-400 text-center mt-3">
-                Secured by Razorpay · <a href="mailto:hello@halftonelabs.in" className="underline">hello@halftonelabs.in</a>
+                {useWallet ? "Instant payment from your Halftone wallet" : "Secured by Razorpay"} · <a href="mailto:hello@halftonelabs.in" className="underline">hello@halftonelabs.in</a>
               </p>
               <div className="mt-3 flex items-start gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3">
                 <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
