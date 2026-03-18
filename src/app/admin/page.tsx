@@ -47,6 +47,8 @@ type Order = {
   front_design_url: string | null;
   back_design_url: string | null;
   mockup_url: string | null;
+  courier: string | null;
+  tracking_number: string | null;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -168,6 +170,27 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
   const [filterStatus, setFilterStatus] = useState("All");
   const [milestoneForm, setMilestoneForm] = useState({ title: "", description: "", status: "" });
   const [adding, setAdding] = useState(false);
+  const [trackingForm, setTrackingForm] = useState({ courier: "", awb: "" });
+  const [savingTracking, setSavingTracking] = useState(false);
+  const [trackingSaved, setTrackingSaved] = useState(false);
+
+  const saveTracking = async () => {
+    if (!selected || !trackingForm.courier || !trackingForm.awb) return;
+    setSavingTracking(true);
+    setTrackingSaved(false);
+    const res = await fetch("/api/admin/tracking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ orderId: selected.id, courier: trackingForm.courier, trackingNumber: trackingForm.awb }),
+    });
+    if (res.ok) {
+      setTrackingSaved(true);
+      setTrackingForm({ courier: "", awb: "" });
+      await onRefresh();
+      setTimeout(() => setTrackingSaved(false), 3000);
+    }
+    setSavingTracking(false);
+  };
 
   const addMilestone = async () => {
     if (!selected || !milestoneForm.title) return;
@@ -289,6 +312,61 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                       <p className={`text-sm mt-0.5 ${bold ? "font-black text-zinc-900" : "font-semibold text-zinc-700"}`}>{v}</p>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Shipping Info */}
+              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
+                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Shipping Info</p>
+
+                {/* Show existing tracking if set */}
+                {selected.courier && selected.tracking_number && (
+                  <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[0.6rem] font-bold uppercase tracking-widest text-blue-400 mb-0.5">Current tracking</p>
+                      <p className="text-sm font-black text-blue-900">{selected.courier} · <span className="tracking-wider">{selected.tracking_number}</span></p>
+                    </div>
+                    <span className="text-[0.6rem] font-bold text-blue-400 bg-blue-100 px-2 py-0.5 rounded-full">Saved</span>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 block mb-1">Courier</label>
+                      <select
+                        value={trackingForm.courier}
+                        onChange={(e) => setTrackingForm({ ...trackingForm, courier: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                      >
+                        <option value="">Select courier…</option>
+                        {["Delhivery","Blue Dart","DTDC","Xpressbees","Ecom Express","Shadow Fax","Ekart","Shiprocket","Other"].map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 block mb-1">AWB / Tracking No.</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1234567890"
+                        value={trackingForm.awb}
+                        onChange={(e) => setTrackingForm({ ...trackingForm, awb: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={saveTracking}
+                    disabled={savingTracking || !trackingForm.courier || !trackingForm.awb}
+                    className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${
+                      trackingSaved
+                        ? "bg-green-500 text-white"
+                        : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40"
+                    }`}
+                  >
+                    {savingTracking ? "Saving…" : trackingSaved ? "✓ Saved & email sent!" : "Save tracking + mark Shipped + notify customer →"}
+                  </button>
                 </div>
               </div>
 

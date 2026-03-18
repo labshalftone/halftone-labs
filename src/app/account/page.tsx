@@ -23,6 +23,7 @@ type Order = {
   id: string; ref: string; product_name: string; color: string; size: string;
   print_tier: string; print_dimensions?: string; blank_price?: number; print_price?: number;
   total: number; status: string; created_at: string;
+  courier?: string | null; tracking_number?: string | null;
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
@@ -246,41 +247,66 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                   {isOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden border-t border-zinc-100">
-                      <div className="px-5 py-5 flex flex-col sm:flex-row gap-6">
-                        <div className="flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-4">Order Timeline</p>
-                          {order.milestones.length === 0 ? (
-                            <p className="text-xs text-zinc-400">No updates yet.</p>
-                          ) : (
-                            order.milestones.map((m, i) => (
-                              <div key={m.id} className="flex gap-3">
-                                <div className="flex flex-col items-center">
-                                  <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: sc.dot }} />
-                                  {i < order.milestones.length - 1 && <div className="w-px flex-1 my-1 bg-zinc-200" style={{ minHeight: 16 }} />}
-                                </div>
-                                <div className="pb-3">
-                                  <p className="text-sm font-bold text-zinc-800">{m.title}</p>
-                                  {!!m.description && <p className="text-xs text-zinc-500">{String(m.description)}</p>}
-                                  <p className="text-[10px] text-zinc-400 mt-0.5">
-                                    {new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                                  </p>
-                                </div>
+                      <div className="px-5 py-5 flex flex-col gap-5">
+                        {/* Shipping / tracking card — shown when AWB is available */}
+                        {order.courier && order.tracking_number && (
+                          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 flex items-start justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                </svg>
                               </div>
-                            ))
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-2 sm:w-40">
-                          <Link href={`/track?ref=${order.ref}&email=${user?.email ?? ""}`}
-                            className="text-center px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
-                            Full tracking →
-                          </Link>
-                          <Link href="/studio"
-                            className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
-                            Order again
-                          </Link>
-                          <button onClick={() => handleReorder(order)} className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">
-                            Reorder ↻
-                          </button>
+                              <div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-0.5">Shipped via {order.courier}</p>
+                                <p className="text-sm font-black text-blue-900 tracking-wider">{order.tracking_number}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(order.tracking_number!)}
+                              className="text-[10px] font-bold text-blue-500 hover:text-blue-700 transition-colors flex-shrink-0 mt-1"
+                            >
+                              Copy AWB
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row gap-6">
+                          {/* Timeline */}
+                          <div className="flex-1">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-4">Order Timeline</p>
+                            {order.milestones.length === 0 ? (
+                              <p className="text-xs text-zinc-400">No updates yet — we&apos;ll email you when your order moves.</p>
+                            ) : (
+                              order.milestones.map((m, i) => (
+                                <div key={m.id} className="flex gap-3">
+                                  <div className="flex flex-col items-center">
+                                    <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: sc.dot }} />
+                                    {i < order.milestones.length - 1 && <div className="w-px flex-1 my-1 bg-zinc-200" style={{ minHeight: 16 }} />}
+                                  </div>
+                                  <div className="pb-3">
+                                    <p className="text-sm font-bold text-zinc-800">{m.title}</p>
+                                    {!!m.description && <p className="text-xs text-zinc-500">{String(m.description)}</p>}
+                                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                                      {new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex flex-col gap-2 sm:w-36">
+                            <Link href="/studio"
+                              className="text-center px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+                              + New order
+                            </Link>
+                            <button onClick={() => handleReorder(order)}
+                              className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">
+                              Reorder ↻
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
