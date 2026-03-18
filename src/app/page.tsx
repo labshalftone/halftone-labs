@@ -4,6 +4,8 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import TrustedBy from "@/components/TrustedBy";
+import Testimonial from "@/components/Testimonial";
 import { getFeaturedArticles, ACADEMY_CATEGORIES } from "@/content/academy";
 
 const FEATURED_ARTICLES = getFeaturedArticles().slice(0, 4);
@@ -430,63 +432,7 @@ function AcademyStrip() {
   );
 }
 
-// ——— 6. Trust / Social Proof ————————————————————————
-function Trust() {
-  const stats = [
-    { value: "1,000+", label: "Orders shipped" },
-    { value: "12+", label: "Drops launched" },
-    { value: "India", label: "Based & built" },
-  ];
-
-  return (
-    <section className="bg-white border-t border-zinc-100 py-24 md:py-32">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-
-          <Reveal>
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-400 mb-4">
-              Trusted by
-            </p>
-            <h2
-              className="text-3xl md:text-4xl font-black text-zinc-900 mb-8"
-              style={{ letterSpacing: "-0.04em" }}
-            >
-              Real artists.
-              <br />
-              Real drops.
-            </h2>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="border border-zinc-200 rounded-xl px-4 py-2.5">
-                <p className="text-xs font-black text-zinc-900 uppercase tracking-widest">
-                  ADHD India
-                </p>
-              </div>
-              <p className="text-xs text-zinc-400" style={{ fontWeight: 500 }}>
-                + more launching soon
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-3 gap-8">
-            {stats.map((stat, i) => (
-              <Reveal key={stat.label} delay={i * 0.1}>
-                <p
-                  className="text-3xl md:text-4xl font-black text-zinc-900 mb-1"
-                  style={{ letterSpacing: "-0.04em" }}
-                >
-                  {stat.value}
-                </p>
-                <p className="text-xs text-zinc-400" style={{ fontWeight: 500 }}>
-                  {stat.label}
-                </p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+// ——— 6. Trust / Testimonials — see imported Testimonial + TrustedBy components
 
 // ——— 7. Final CTA ————————————————————————————————————
 function FinalCTA() {
@@ -634,11 +580,12 @@ export default function Home() {
     <main>
       <Navbar />
       <Hero />
+      <TrustedBy />
       <HowItWorks />
       <BuiltFor />
       <DropFeatures />
       <AcademyStrip />
-      <Trust />
+      <Testimonial />
       <FinalCTA />
       <Footer />
     </main>
