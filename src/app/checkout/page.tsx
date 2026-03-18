@@ -108,7 +108,8 @@ export default function CheckoutPage() {
     } catch { /* ignore */ }
   }, []);
 
-  const shippingCost    = selectedShipping?.rate ?? 0;
+  const isFreeShipping  = appliedCoupon?.discount_type === "percent" && appliedCoupon?.discount_value === 100;
+  const shippingCost    = isFreeShipping ? 0 : (selectedShipping?.rate ?? 0);
   const discount        = appliedCoupon?.discount_amount ?? 0;
   const discountedTotal = Math.max(0, total - discount);
   // GST only applies to INR (domestic India) orders
@@ -535,7 +536,9 @@ export default function CheckoutPage() {
                       <InfoTooltip text="Shipping fees DO NOT include customs duties and handling charges for international orders." />
                     )}
                   </span>
-                  <span>{selectedShipping ? fmt(shippingCost) : "—"}</span>
+                  <span className={isFreeShipping ? "text-green-600 font-semibold" : ""}>
+                    {isFreeShipping ? "Free 🎉" : selectedShipping ? fmt(shippingCost) : "—"}
+                  </span>
                 </div>
                 {isINR && (
                   <div className="flex justify-between text-sm">
