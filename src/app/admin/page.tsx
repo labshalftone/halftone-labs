@@ -1271,6 +1271,245 @@ function StudioPanel({ secret }: { secret: string }) {
   );
 }
 
+// ── Wallets panel ─────────────────────────────────────────────────────────────
+
+type WalletRow = {
+  id: string;
+  user_id: string;
+  balance: number;
+  currency: string;
+  updated_at: string;
+  email: string | null;
+  name: string | null;
+  company: string | null;
+  transactions: {
+    id: string;
+    amount: number;
+    type: string;
+    description: string | null;
+    reference_id: string | null;
+    created_at: string;
+  }[];
+};
+
+function WalletsPanel({ secret }: { secret: string }) {
+  const [wallets, setWallets] = useState<WalletRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [adjusting, setAdjusting] = useState<string | null>(null);
+  const [adjAmount, setAdjAmount] = useState("");
+  const [adjDesc, setAdjDesc] = useState("");
+  const [adjType, setAdjType] = useState<"credit" | "debit">("credit");
+  const [adjLoading, setAdjLoading] = useState(false);
+  const [adjError, setAdjError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const fetchWallets = async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/wallet", { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+    setWallets(Array.isArray(data) ? data : []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchWallets(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAdjust = async (userId: string) => {
+    const amt = parseFloat(adjAmount);
+    if (!amt || amt <= 0) { setAdjError("Enter a valid amount"); return; }
+    setAdjLoading(true); setAdjError(null);
+    const res = await fetch("/api/admin/wallet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ userId, amount: amt, type: adjType, description: adjDesc || undefined }),
+    });
+    const json = await res.json();
+    if (!res.ok) { setAdjError(json.error ?? "Failed"); }
+    else {
+      setAdjusting(null); setAdjAmount(""); setAdjDesc(""); setAdjType("credit");
+      await fetchWallets();
+    }
+    setAdjLoading(false);
+  };
+
+  const totalCredit = wallets.reduce((s, w) => s + w.balance, 0);
+  const usersWithBalance = wallets.filter((w) => w.balance > 0).length;
+
+  const filtered = wallets.filter((w) => {
+    const q = search.toLowerCase();
+    return !q || (w.email ?? "").includes(q) || (w.name ?? "").toLowerCase().includes(q) || (w.company ?? "").toLowerCase().includes(q);
+  });
+
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex-shrink-0 px-8 py-6 border-b border-zinc-200 bg-white">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Wallets</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">{wallets.length} wallet{wallets.length !== 1 ? "s" : ""}</p>
+          </div>
+          <button onClick={fetchWallets}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Refresh
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: "Total Outstanding Credit", value: `₹${totalCredit.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-emerald-600" },
+            { label: "Users with Balance", value: String(usersWithBalance), accent: "text-blue-600" },
+            { label: "Total Wallets", value: String(wallets.length), accent: "text-zinc-900" },
+          ].map((s) => (
+            <div key={s.label} className="bg-zinc-50 rounded-2xl px-5 py-4">
+              <p className="text-xs text-zinc-400 font-semibold mb-1">{s.label}</p>
+              <p className={`text-2xl font-black ${s.accent}`} style={{ letterSpacing: "-0.04em" }}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="mt-4 relative">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email…"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:border-zinc-400 bg-white" />
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto px-8 py-4 space-y-3">
+        {loading ? (
+          <div className="flex items-center justify-center py-16 text-zinc-400 text-sm">Loading…</div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="font-semibold text-sm text-zinc-600">No wallets found</p>
+            <p className="text-xs text-zinc-400 mt-1">Wallets are created automatically when users top up.</p>
+          </div>
+        ) : (
+          filtered.map((w) => (
+            <div key={w.user_id} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
+              {/* Row header */}
+              <div className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-zinc-50 transition-colors"
+                onClick={() => setExpanded(expanded === w.user_id ? null : w.user_id)}>
+                <div className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-100 flex-shrink-0">
+                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-zinc-900 truncate">{w.name ?? w.email ?? w.user_id}</p>
+                  <p className="text-xs text-zinc-400 truncate">{w.email ?? "—"}{w.company ? ` · ${w.company}` : ""}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className={`text-lg font-black ${w.balance > 0 ? "text-emerald-600" : "text-zinc-400"}`}
+                    style={{ letterSpacing: "-0.03em" }}>
+                    ₹{w.balance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-[10px] text-zinc-400">{w.transactions.length} txn{w.transactions.length !== 1 ? "s" : ""}</p>
+                </div>
+                <svg className={`w-4 h-4 text-zinc-400 flex-shrink-0 transition-transform ${expanded === w.user_id ? "rotate-180" : ""}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+
+              {/* Expanded */}
+              <AnimatePresence>
+                {expanded === w.user_id && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+                    className="border-t border-zinc-100 overflow-hidden">
+                    <div className="px-5 py-4 space-y-4">
+
+                      {/* Adjust balance buttons */}
+                      {adjusting !== w.user_id ? (
+                        <div className="flex gap-2">
+                          <button onClick={() => { setAdjusting(w.user_id); setAdjType("credit"); setAdjError(null); }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-bold hover:bg-emerald-100 transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                            Add Credit
+                          </button>
+                          <button onClick={() => { setAdjusting(w.user_id); setAdjType("debit"); setAdjError(null); }}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                            Deduct
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="bg-zinc-50 rounded-xl p-4 space-y-3">
+                          <div className="flex gap-2">
+                            <button onClick={() => setAdjType("credit")}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "credit" ? "bg-emerald-500 text-white" : "bg-white border border-zinc-200 text-zinc-600"}`}>
+                              + Credit
+                            </button>
+                            <button onClick={() => setAdjType("debit")}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "debit" ? "bg-red-500 text-white" : "bg-white border border-zinc-200 text-zinc-600"}`}>
+                              − Deduct
+                            </button>
+                          </div>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                            <input type="number" min="1" placeholder="Amount" value={adjAmount} onChange={(e) => setAdjAmount(e.target.value)}
+                              className="w-full pl-7 pr-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold focus:outline-none focus:border-zinc-400" />
+                          </div>
+                          <input placeholder="Note (optional)" value={adjDesc} onChange={(e) => setAdjDesc(e.target.value)}
+                            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:border-zinc-400" />
+                          {adjError && <p className="text-xs text-red-500">{adjError}</p>}
+                          <div className="flex gap-2">
+                            <button onClick={() => handleAdjust(w.user_id)} disabled={adjLoading}
+                              className={`flex-1 py-2.5 rounded-xl text-sm font-black text-white transition-colors disabled:opacity-60 ${adjType === "credit" ? "bg-emerald-500 hover:bg-emerald-600" : "bg-red-500 hover:bg-red-600"}`}>
+                              {adjLoading ? "Saving…" : adjType === "credit" ? "Add Credit" : "Deduct"}
+                            </button>
+                            <button onClick={() => { setAdjusting(null); setAdjAmount(""); setAdjDesc(""); setAdjError(null); }}
+                              className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-600 hover:bg-zinc-50">
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Transaction history */}
+                      <div>
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Transaction History</p>
+                        {w.transactions.length === 0 ? (
+                          <p className="text-xs text-zinc-400 py-2">No transactions yet.</p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {w.transactions.map((t) => (
+                              <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-zinc-50 text-sm">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${t.type === "credit" ? "bg-emerald-500" : "bg-red-400"}`} />
+                                  <div className="min-w-0">
+                                    <p className="text-zinc-700 font-medium text-xs truncate">{t.description ?? (t.type === "credit" ? "Credit" : "Debit")}</p>
+                                    <p className="text-zinc-400 text-[10px]">{fmtDate(t.created_at)}</p>
+                                  </div>
+                                </div>
+                                <span className={`font-black text-sm flex-shrink-0 ml-3 ${t.type === "credit" ? "text-emerald-600" : "text-red-500"}`}>
+                                  {t.type === "credit" ? "+" : "−"}₹{t.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* User ID (for reference) */}
+                      <p className="text-[10px] font-mono text-zinc-300 break-all">uid: {w.user_id}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Users panel ───────────────────────────────────────────────────────────────
 
 type UserProfile = {
@@ -1773,7 +2012,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics" | "studio" | "users";
+type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -1827,6 +2066,11 @@ export default function AdminPage() {
       label: "Studio",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
     },
+    {
+      id: "wallets",
+      label: "Wallets",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>,
+    },
   ];
 
   return (
@@ -1867,6 +2111,7 @@ export default function AdminPage() {
           {tab === "analytics" && <AnalyticsPanel orders={orders} />}
           {tab === "studio"    && <StudioPanel    secret={secret} />}
           {tab === "users"     && <UsersPanel     secret={secret} />}
+          {tab === "wallets"   && <WalletsPanel   secret={secret} />}
         </div>
       </div>
     </div>
