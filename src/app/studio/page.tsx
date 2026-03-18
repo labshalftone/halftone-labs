@@ -93,7 +93,14 @@ function DesignPlacer({
   const onPriceChangeRef = useRef(onPriceChange);
   useEffect(() => { onPriceChangeRef.current = onPriceChange; });
 
-  const zone = PHOTO_ZONE[zoneKey];
+  const defaultZone = PHOTO_ZONE[zoneKey];
+  const [zone, setZone] = useState(defaultZone);
+
+  // Calibration mode — lets user drag the zone box itself
+  const [calibrating, setCalibrating] = useState(false);
+  const draggingZone = useRef(false);
+  const zoneDragOffset = useRef({ dx: 0, dy: 0 });
+
   const minSize = zone.width * 0.12;
   const maxSize = zone.width * 0.90;
   const initSize = zone.width * 0.38;
@@ -138,91 +145,130 @@ function DesignPlacer({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Photo canvas with draggable design overlay */}
+      {/* Photo canvas */}
       <div
         ref={containerRef}
         className="relative w-full select-none overflow-hidden rounded-xl"
         style={{ background: "#ffffff", touchAction: "none" }}
         onPointerMove={(e) => {
-          if (!dragging.current) return;
           const p = toPct(e.clientX, e.clientY);
-          setPos((prev) => ({
-            ...clamp(p.x - dragOffset.current.dx, p.y - dragOffset.current.dy, prev.size),
-            size: prev.size,
-          }));
+          if (calibrating && draggingZone.current) {
+            // Move zone box
+            const newLeft = Math.max(0, Math.min(100 - zone.width, p.x - zoneDragOffset.current.dx));
+            const newTop  = Math.max(0, Math.min(100 - zone.height, p.y - zoneDragOffset.current.dy));
+            setZone((z) => ({ ...z, left: newLeft, top: newTop }));
+          } else if (!calibrating && dragging.current) {
+            setPos((prev) => ({
+              ...clamp(p.x - dragOffset.current.dx, p.y - dragOffset.current.dy, prev.size),
+              size: prev.size,
+            }));
+          }
         }}
-        onPointerUp={() => { dragging.current = false; }}
-        onPointerLeave={() => { dragging.current = false; }}
+        onPointerUp={() => { dragging.current = false; draggingZone.current = false; }}
+        onPointerLeave={() => { dragging.current = false; draggingZone.current = false; }}
       >
         {/* Real product photo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={mockupSrc} alt="product" className="w-full block pointer-events-none" draggable={false} />
 
-        {/* Print-zone outline */}
+        {/* Print-zone outline — draggable in calibration mode */}
         <div
-          className="absolute pointer-events-none"
+          className={`absolute ${calibrating ? "cursor-move" : "pointer-events-none"}`}
           style={{
             left: `${zone.left}%`, top: `${zone.top}%`,
             width: `${zone.width}%`, height: `${zone.height}%`,
-            border: "2px dashed rgba(241,85,51,0.75)",
+            border: calibrating ? "2px dashed #3b82f6" : "2px dashed rgba(241,85,51,0.75)",
             borderRadius: "4px",
-            boxShadow: "0 0 0 1px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04)",
-            background: "rgba(241,85,51,0.04)",
+            background: calibrating ? "rgba(59,130,246,0.08)" : "rgba(241,85,51,0.04)",
           }}
+          onPointerDown={calibrating ? (e) => {
+            e.preventDefault();
+            (e.target as HTMLElement).setPointerCapture(e.pointerId);
+            draggingZone.current = true;
+            const p = toPct(e.clientX, e.clientY);
+            zoneDragOffset.current = { dx: p.x - zone.left, dy: p.y - zone.top };
+          } : undefined}
         />
 
-        {/* Draggable design */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={designSrc}
-          alt="your design"
-          draggable={false}
-          className="absolute cursor-grab active:cursor-grabbing"
-          style={{
-            left: `${pos.x}%`, top: `${pos.y}%`,
-            width: `${pos.size}%`,
-            transform: "translate(-50%, -50%)",
-            touchAction: "none",
-            userSelect: "none",
-          }}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            (e.target as HTMLImageElement).setPointerCapture(e.pointerId);
-            dragging.current = true;
-            const p = toPct(e.clientX, e.clientY);
-            dragOffset.current = { dx: p.x - pos.x, dy: p.y - pos.y };
-          }}
-        />
+        {/* Draggable design — hidden in calibration mode */}
+        {!calibrating && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={designSrc}
+            alt="your design"
+            draggable={false}
+            className="absolute cursor-grab active:cursor-grabbing"
+            style={{
+              left: `${pos.x}%`, top: `${pos.y}%`,
+              width: `${pos.size}%`,
+              transform: "translate(-50%, -50%)",
+              touchAction: "none",
+              userSelect: "none",
+            }}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              (e.target as HTMLImageElement).setPointerCapture(e.pointerId);
+              dragging.current = true;
+              const p = toPct(e.clientX, e.clientY);
+              dragOffset.current = { dx: p.x - pos.x, dy: p.y - pos.y };
+            }}
+          />
+        )}
+
+        {/* Calibration readout */}
+        {calibrating && (
+          <div className="absolute top-2 right-2 bg-zinc-900/90 text-white rounded-lg px-2.5 py-1.5 text-[10px] font-mono leading-relaxed pointer-events-none">
+            <div>left: {zone.left.toFixed(1)}%</div>
+            <div>top: {zone.top.toFixed(1)}%</div>
+            <div>w: {zone.width.toFixed(1)}%  h: {zone.height.toFixed(1)}%</div>
+          </div>
+        )}
 
         {/* Hint */}
-        <p className="absolute bottom-2 inset-x-0 text-center text-[9px] text-white/60 pointer-events-none drop-shadow">
-          drag to reposition · stays within print zone
-        </p>
+        {!calibrating && (
+          <p className="absolute bottom-2 inset-x-0 text-center text-[9px] text-zinc-300 pointer-events-none drop-shadow">
+            drag to reposition · stays within print zone
+          </p>
+        )}
       </div>
 
-      {/* Size slider */}
-      <div>
-        <div className="flex justify-between text-xs mb-2">
-          <span className="font-medium text-zinc-600">Design size</span>
-          <span className="font-bold text-orange-500">{pct}% of print area</span>
+      {/* Calibration toggle */}
+      <button
+        onClick={() => setCalibrating((c) => !c)}
+        className={`text-[10px] font-semibold self-end px-2.5 py-1 rounded-full border transition-all ${
+          calibrating
+            ? "bg-blue-50 border-blue-300 text-blue-600"
+            : "border-zinc-200 text-zinc-400 hover:text-zinc-600 hover:border-zinc-300"
+        }`}
+      >
+        {calibrating ? "⟵ Done adjusting zone" : "⚙ Adjust zone"}
+      </button>
+
+      {/* Size slider — hidden while calibrating */}
+      {!calibrating && (
+        <div>
+          <div className="flex justify-between text-xs mb-2">
+            <span className="font-medium text-zinc-600">Design size</span>
+            <span className="font-bold text-orange-500">{pct}% of print area</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPos((p) => { const s = Math.max(minSize, p.size - step); return { size: s, ...clamp(p.x, p.y, s) }; })}
+              className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+            >−</button>
+            <input
+              type="range" min={minSize} max={maxSize} step={0.5} value={pos.size}
+              onChange={(e) => { const s = Number(e.target.value); setPos((p) => ({ size: s, ...clamp(p.x, p.y, s) })); }}
+              className="flex-1 accent-orange-500 h-1.5"
+            />
+            <button
+              onClick={() => setPos((p) => { const s = Math.min(maxSize, p.size + step); return { size: s, ...clamp(p.x, p.y, s) }; })}
+              className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
+            >+</button>
+          </div>
+          <p className="text-[10px] text-zinc-300 text-center mt-1.5">Design stays within the dashed print zone</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setPos((p) => { const s = Math.max(minSize, p.size - step); return { size: s, ...clamp(p.x, p.y, s) }; })}
-            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
-          >−</button>
-          <input
-            type="range" min={minSize} max={maxSize} step={0.5} value={pos.size}
-            onChange={(e) => { const s = Number(e.target.value); setPos((p) => ({ size: s, ...clamp(p.x, p.y, s) })); }}
-            className="flex-1 accent-orange-500 h-1.5"
-          />
-          <button
-            onClick={() => setPos((p) => { const s = Math.min(maxSize, p.size + step); return { size: s, ...clamp(p.x, p.y, s) }; })}
-            className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-900 transition-all font-bold text-lg leading-none flex-shrink-0"
-          >+</button>
-        </div>
-        <p className="text-[10px] text-zinc-300 text-center mt-1.5">Design stays within the dashed print zone</p>
-      </div>
+      )}
     </div>
   );
 }
