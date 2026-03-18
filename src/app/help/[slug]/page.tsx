@@ -35,15 +35,15 @@ export default async function HelpArticlePage({ params }: Props) {
       {/* Nav */}
       <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-zinc-100">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center shrink-0">
             <span className="text-base text-zinc-900" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Halftone Labs</span>
-            <span className="mx-3 w-px h-4 bg-zinc-300 self-center" />
-            <span className="text-[11px] font-bold tracking-[0.18em] text-zinc-400 uppercase">Help</span>
+            <span className="hidden sm:block mx-3 w-px h-4 bg-zinc-300 self-center" />
+            <span className="hidden sm:block text-[11px] font-bold tracking-[0.18em] text-zinc-400 uppercase">Help</span>
           </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/academy" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Academy</Link>
-            <Link href="/help" className="text-sm font-semibold text-zinc-900">Help</Link>
-            <Link href="/account" className="text-sm font-semibold bg-zinc-900 text-white px-3 py-1.5 rounded-full hover:bg-zinc-700 transition-colors">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link href="/academy" className="hidden sm:block text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Academy</Link>
+            <Link href="/help" className="hidden sm:block text-sm font-semibold text-zinc-900">Help</Link>
+            <Link href="/account" className="text-sm font-semibold bg-zinc-900 text-white px-3 py-1.5 rounded-full hover:bg-zinc-700 transition-colors whitespace-nowrap">
               Dashboard →
             </Link>
           </div>
