@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Halftone Labs <orders@halftonelabs.in>",
+        from: "Halftone Labs <onboarding@resend.dev>",
         to: [customerEmail],
         subject: `Your order #${orderRef} is confirmed ✓`,
         html,
