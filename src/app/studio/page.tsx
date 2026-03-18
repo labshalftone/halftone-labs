@@ -39,6 +39,7 @@ async function makeCompositeThumbnail(
 ): Promise<string> {
   return new Promise((resolve) => {
     const mockup = new Image();
+    mockup.crossOrigin = "anonymous";
     mockup.onload = () => {
       // Canvas matches the mockup's natural aspect ratio — no squishing
       const W = 900;
@@ -53,7 +54,12 @@ async function makeCompositeThumbnail(
       ctx.fillRect(0, 0, W, H);
       ctx.drawImage(mockup, 0, 0, W, H);
 
+      const safeExport = () => {
+        try { return canvas.toDataURL("image/jpeg", 0.93); } catch { return ""; }
+      };
+
       const design = new Image();
+      design.crossOrigin = "anonymous";
       design.onload = () => {
         // Replicate browser layout: centre at (pos.x%, pos.y%), width = pos.size%
         const cx = (pos.x    / 100) * W;
@@ -61,10 +67,12 @@ async function makeCompositeThumbnail(
         const dw = (pos.size / 100) * W;
         // Height preserves natural aspect ratio — same as the <img> tag behaviour
         const dh = dw * (design.naturalHeight / design.naturalWidth);
-        ctx.drawImage(design, cx - dw / 2, cy - dh / 2, dw, dh);
-        resolve(canvas.toDataURL("image/jpeg", 0.93));
+        try {
+          ctx.drawImage(design, cx - dw / 2, cy - dh / 2, dw, dh);
+        } catch { /* tainted — skip design overlay */ }
+        resolve(safeExport());
       };
-      design.onerror = () => resolve(canvas.toDataURL("image/jpeg", 0.93));
+      design.onerror = () => resolve(safeExport());
       design.src = designSrc;
     };
     mockup.onerror = () => resolve("");
@@ -512,8 +520,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
   const [activeTab,       setActiveTab]       = useState<"front" | "back">("front");
   const [previewSide,     setPreviewSide]     = useState<"front" | "back">("front");
-  const [frontDesignSrc,  setFrontDesignSrc]  = useState("");
-  const [backDesignSrc,   setBackDesignSrc]   = useState("");
+  const [frontDesignSrc,     setFrontDesignSrc]     = useState("");
+  const [backDesignSrc,      setBackDesignSrc]       = useState("");
+  // Raw data URLs — only used for canvas / thumbnail generation (never stored in cart/localStorage)
+  const frontDesignDataUrl = useRef("");
+  const backDesignDataUrl  = useRef("");
   const [frontPrintPrice, setFrontPrintPrice] = useState(0);
   const [backPrintPrice,  setBackPrintPrice]  = useState(0);
   const [frontPrintTier,  setFrontPrintTier]  = useState("");
@@ -558,6 +569,10 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
         reader.readAsDataURL(file);
       });
 
+      // Stash data URL for canvas/thumbnail use (never goes into localStorage)
+      if (side === "front") frontDesignDataUrl.current = previewUrl;
+      else                  backDesignDataUrl.current  = previewUrl;
+
       // Show preview immediately
       if (side === "front") { setFrontDesignSrc(previewUrl); setNoDesign(false); }
       else                  { setBackDesignSrc(previewUrl);  setNoDesign(false); }
@@ -585,13 +600,16 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      // Use data URL refs for canvas ops — fast, local, no CORS
+      const fDataUrl = frontDesignDataUrl.current || frontDesignSrc;
+      const bDataUrl = backDesignDataUrl.current  || backDesignSrc;
       // Generate composite thumbnail using exact design position from DesignPlacer
-      const thumbnail = color.mockupFront && frontDesignSrc && frontPos
-        ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, frontPos)
-        : color.mockupFront && backDesignSrc && backPos
-        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, backPos)
-        : frontDesignSrc || backDesignSrc
-        ? await makeThumbnail(frontDesignSrc || backDesignSrc)
+      const thumbnail = color.mockupFront && fDataUrl && frontPos
+        ? await makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
+        : color.mockupFront && bDataUrl && backPos
+        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, bDataUrl, backPos)
+        : fDataUrl || bDataUrl
+        ? await makeThumbnail(fDataUrl || bDataUrl)
         : "";
       await fetch("/api/designs", {
         method: "POST",
@@ -616,10 +634,13 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   };
 
   const handleAddToCart = async () => {
-    const thumbnail = color.mockupFront && frontDesignSrc && frontPos
-      ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, frontPos)
-      : color.mockupFront && backDesignSrc && backPos
-      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, backPos)
+    // Use data URL refs for canvas — local, instant, no CORS risk
+    const fDataUrl = frontDesignDataUrl.current || frontDesignSrc;
+    const bDataUrl = backDesignDataUrl.current  || backDesignSrc;
+    const thumbnail = color.mockupFront && fDataUrl && frontPos
+      ? await makeCompositeThumbnail(color.mockupFront, fDataUrl, frontPos)
+      : color.mockupFront && bDataUrl && backPos
+      ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, bDataUrl, backPos)
       : "";
     addItem({
       productId: product.id, productName: product.name, gsm: product.gsm,
@@ -901,7 +922,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onFileChange(e, "front")} />
                           </label>
                           <span className="text-zinc-200">·</span>
-                          <button onClick={() => { setFrontDesignSrc(""); setFrontPrintPrice(0); setFrontPrintTier(""); setFrontPrintDims(""); }}
+                          <button onClick={() => { setFrontDesignSrc(""); frontDesignDataUrl.current = ""; setFrontPrintPrice(0); setFrontPrintTier(""); setFrontPrintDims(""); }}
                             className="text-xs text-zinc-400 font-semibold underline hover:text-red-500 transition-colors">Remove</button>
                         </div>
                       </div>
@@ -947,7 +968,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => onFileChange(e, "back")} />
                           </label>
                           <span className="text-zinc-200">·</span>
-                          <button onClick={() => { setBackDesignSrc(""); setBackPrintPrice(0); setBackPrintTier(""); }}
+                          <button onClick={() => { setBackDesignSrc(""); backDesignDataUrl.current = ""; setBackPrintPrice(0); setBackPrintTier(""); }}
                             className="text-xs text-zinc-400 font-semibold underline hover:text-red-500 transition-colors">Remove</button>
                         </div>
                       </div>
