@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PRODUCTS } from "@/lib/products";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -760,7 +761,7 @@ function StudioPanel({ secret }: { secret: string }) {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Studio Products</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">{products.length} product{products.length !== 1 ? "s" : ""}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">{PRODUCTS.length + products.length} product{(PRODUCTS.length + products.length) !== 1 ? "s" : ""} ({PRODUCTS.length} built-in)</p>
               </div>
               <button
                 onClick={openCreate}
@@ -885,52 +886,72 @@ function StudioPanel({ secret }: { secret: string }) {
 
             {/* Product list */}
             {productsLoading && <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>}
-            {!productsLoading && products.length === 0 && (
-              <div className="text-center py-16 text-zinc-400">
-                <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                <p className="font-semibold text-sm">No studio products yet</p>
-                <p className="text-xs mt-1">Create your first product above</p>
-              </div>
-            )}
-            <div className="flex flex-col gap-3">
-              {products.map((p) => (
-                <div key={p.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${p.active ? "border-zinc-200" : "border-zinc-100 opacity-60"}`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
-                        <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
-                          {p.active ? "ACTIVE" : "INACTIVE"}
-                        </span>
+            {!productsLoading && (
+              <div className="flex flex-col gap-3">
+                {/* ── Built-in (hardcoded) products ── */}
+                <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 px-1">Built-in products</p>
+                {PRODUCTS.map((p) => (
+                  <div key={p.id} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
+                          <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">BUILT-IN</span>
+                          <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">ACTIVE</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+                          {p.gsm && <span className="font-mono">{p.gsm}</span>}
+                          <span className="font-semibold text-zinc-800">₹{p.blankPrice.toLocaleString("en-IN")}</span>
+                          <span className="capitalize">{p.id.includes("oversized") ? "oversized" : p.id.includes("baby") ? "baby" : "regular"}</span>
+                          <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
-                        {p.gsm && <span className="font-mono">{p.gsm}</span>}
-                        <span className="font-semibold text-zinc-800">₹{p.blank_price.toLocaleString("en-IN")}</span>
-                        <span className="capitalize">{p.type}</span>
-                        {p.colors?.length > 0 && <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Active toggle */}
-                      <button
-                        onClick={() => toggleActive(p.id, !p.active)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.active ? "bg-zinc-900" : "bg-zinc-300"}`}
-                      >
-                        <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${p.active ? "translate-x-5" : "translate-x-0.5"}`} />
-                      </button>
-                      {/* Edit */}
-                      <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      </button>
-                      {/* Delete */}
-                      <button onClick={() => deleteProduct(p.id)} disabled={deleting === p.id} className="p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
+                      <span className="text-[0.65rem] text-zinc-400 font-medium self-center">Defined in code</span>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+
+                {/* ── DB products ── */}
+                {products.length > 0 && (
+                  <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 px-1 mt-2">Custom products</p>
+                )}
+                {products.map((p) => (
+                  <div key={p.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${p.active ? "border-zinc-200" : "border-zinc-100 opacity-60"}`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
+                          <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
+                            {p.active ? "ACTIVE" : "INACTIVE"}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+                          {p.gsm && <span className="font-mono">{p.gsm}</span>}
+                          <span className="font-semibold text-zinc-800">₹{p.blank_price.toLocaleString("en-IN")}</span>
+                          <span className="capitalize">{p.type}</span>
+                          {p.colors?.length > 0 && <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button onClick={() => toggleActive(p.id, !p.active)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.active ? "bg-zinc-900" : "bg-zinc-300"}`}>
+                          <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${p.active ? "translate-x-5" : "translate-x-0.5"}`} />
+                        </button>
+                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button onClick={() => deleteProduct(p.id)} disabled={deleting === p.id} className="p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {products.length === 0 && (
+                  <p className="text-xs text-zinc-400 text-center py-4">No custom products yet — create one above</p>
+                )}
+              </div>
+            )}
           </>
         )}
 
