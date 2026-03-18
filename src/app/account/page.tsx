@@ -639,7 +639,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
     if (!userId) return;
     fetch(`/api/shopify/connect?userId=${userId}`)
       .then((r) => r.json())
-      .then((d) => setHasShopify(!!d.connected))
+      .then((d) => setHasShopify(!!d.connection))
       .catch(() => setHasShopify(false));
   }, [userId]);
 
