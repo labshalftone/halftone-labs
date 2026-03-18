@@ -138,3 +138,37 @@ export async function DELETE(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }
+
+// PATCH /api/designs — update design name/pricing
+// Body: { id, userId, name?, blankPrice?, printPrice? }
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { id, userId, name, blankPrice, printPrice } = body;
+    if (!id || !userId) {
+      return NextResponse.json({ error: "id and userId required" }, { status: 400 });
+    }
+
+    const update: Record<string, unknown> = {};
+    if (name !== undefined) update.name = name;
+    if (blankPrice !== undefined) update.blank_price = blankPrice;
+    if (printPrice !== undefined) update.print_price = printPrice;
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    const db = createAdminClient();
+    const { error } = await db
+      .from("designs")
+      .update(update)
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[designs/PATCH]", err);
+    return NextResponse.json({ error: "Failed to update design" }, { status: 500 });
+  }
+}

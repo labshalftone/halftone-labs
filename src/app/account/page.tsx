@@ -11,6 +11,7 @@ import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-contex
 import { PRODUCTS } from "@/lib/products";
 import ShopifyTab from "@/components/ShopifyTab";
 import WalletTab from "@/components/WalletTab";
+import OverviewTab from "@/components/OverviewTab";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -1411,6 +1412,98 @@ function PushDesignModal({
 }
 
 
+type PayoutStats = {
+  totalEarned: number;
+  pendingPayout: number;
+  nextPayoutDate: string | null;
+  lastPayoutDate: string | null;
+};
+
+function PayoutBanner({ userId }: { userId: string | null }) {
+  const [stats, setStats] = useState<PayoutStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    fetch(`/api/stores/payout-stats?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => setStats(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  const fmt = (n: number) =>
+    `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmtDate = (d: string | null) =>
+    d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
+
+  if (loading) return (
+    <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-5 mb-6 animate-pulse">
+      <div className="h-4 w-40 bg-emerald-100 rounded mb-3" />
+      <div className="grid grid-cols-3 gap-4">
+        {[1,2,3].map((i) => <div key={i} className="h-12 bg-emerald-100 rounded-xl" />)}
+      </div>
+    </div>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl border mb-6 overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)", borderColor: "#bbf7d0" }}
+    >
+      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">💰</span>
+          <p className="text-sm font-bold text-emerald-800">Your Earnings</p>
+        </div>
+        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+          Payouts every 2 weeks
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-px bg-emerald-100 mx-5 mb-5 mt-3 rounded-xl overflow-hidden">
+        <div className="bg-white px-4 py-3 rounded-l-xl">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Earned</p>
+          <p className="text-xl font-black text-zinc-900">{fmt(stats?.totalEarned ?? 0)}</p>
+          <p className="text-[10px] text-zinc-400 mt-0.5">all time</p>
+        </div>
+        <div className="bg-white px-4 py-3">
+          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Pending Payout</p>
+          <p className="text-xl font-black text-amber-600">{fmt(stats?.pendingPayout ?? 0)}</p>
+          <p className="text-[10px] text-zinc-400 mt-0.5">will be transferred</p>
+        </div>
+        <div className="bg-white px-4 py-3 rounded-r-xl">
+          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Next Payout</p>
+          <p className="text-base font-black text-emerald-700">{fmtDate(stats?.nextPayoutDate ?? null)}</p>
+          <p className="text-[10px] text-zinc-400 mt-0.5">direct to bank</p>
+        </div>
+      </div>
+
+      {(stats?.pendingPayout ?? 0) > 0 && (
+        <div className="px-5 pb-4">
+          <div className="bg-emerald-700 text-white rounded-xl px-4 py-3 flex items-center gap-3">
+            <span className="text-base">🎉</span>
+            <p className="text-xs font-semibold leading-relaxed">
+              <strong>{fmt(stats!.pendingPayout)}</strong> is on its way to your bank account on{" "}
+              <strong>{fmtDate(stats!.nextPayoutDate)}</strong>. Your money is real and coming — no action needed.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {(stats?.pendingPayout ?? 0) === 0 && (
+        <div className="px-5 pb-4">
+          <p className="text-xs text-emerald-700 bg-white/60 rounded-xl px-4 py-2.5 leading-relaxed">
+            Earnings from delivered store orders are transferred to your registered bank account on the <strong>15th and last day</strong> of every month. Add your bank account in <strong>Account Settings</strong> to receive payouts.
+          </p>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 function StoresTab({ userId }: { userId: string | null }) {
   const [store, setStore] = useState<ArtistStore | null>(null);
   const [products, setProducts] = useState<StoreProductRow[]>([]);
@@ -1642,6 +1735,9 @@ function StoresTab({ userId }: { userId: string | null }) {
         <PushDesignModal store={store} userId={userId} onClose={() => setShowAddProduct(false)}
           onAdded={(p) => setProducts((prev) => [...prev, p])} />
       )}
+
+      {/* Payout clarity banner */}
+      <PayoutBanner userId={userId} />
 
       {/* Store header */}
       <div className="flex items-start justify-between mb-6">
@@ -1989,6 +2085,67 @@ function SettingsTab({
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCopied, setReferralCopied] = useState(false);
 
+  // Bank account state
+  const [bankAccount, setBankAccount] = useState({ accountHolderName: "", accountNumber: "", confirmAccountNumber: "", ifscCode: "", bankName: "", accountType: "savings" });
+  const [bankMasked, setBankMasked]   = useState<string | null>(null);
+  const [bankSaving, setBankSaving]   = useState(false);
+  const [bankSaved, setBankSaved]     = useState(false);
+  const [bankError, setBankError]     = useState("");
+  const [loadingBank, setLoadingBank] = useState(true);
+
+  useEffect(() => {
+    if (!userId) { setLoadingBank(false); return; }
+    fetch(`/api/profile/bank-account?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d) {
+          setBankMasked(d.account_number_masked ?? null);
+          setBankAccount((prev) => ({
+            ...prev,
+            accountHolderName: d.account_holder_name ?? "",
+            ifscCode:          d.ifsc_code          ?? "",
+            bankName:          d.bank_name          ?? "",
+            accountType:       d.account_type       ?? "savings",
+          }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingBank(false));
+  }, [userId]);
+
+  const handleSaveBank = async () => {
+    setBankError("");
+    if (!bankAccount.accountNumber || !bankAccount.confirmAccountNumber) {
+      setBankError("Please enter and confirm your account number."); return;
+    }
+    if (bankAccount.accountNumber !== bankAccount.confirmAccountNumber) {
+      setBankError("Account numbers do not match."); return;
+    }
+    if (!bankAccount.ifscCode || !bankAccount.bankName || !bankAccount.accountHolderName) {
+      setBankError("Please fill in all required fields."); return;
+    }
+    setBankSaving(true);
+    try {
+      const res = await fetch("/api/profile/bank-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, ...bankAccount }),
+      });
+      if (res.ok) {
+        const masked = "•".repeat(Math.max(0, bankAccount.accountNumber.length - 4)) + bankAccount.accountNumber.slice(-4);
+        setBankMasked(masked);
+        setBankAccount((prev) => ({ ...prev, accountNumber: "", confirmAccountNumber: "" }));
+        setBankSaved(true);
+        setTimeout(() => setBankSaved(false), 3000);
+      } else {
+        const d = await res.json();
+        setBankError(d.error ?? "Failed to save.");
+      }
+    } finally {
+      setBankSaving(false);
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
     fetch(`/api/referrals?userId=${userId}`)
@@ -2185,6 +2342,98 @@ function SettingsTab({
             If you have a GST number, it will appear on your invoices. Invoices are auto-generated for every order and available in the <strong className="text-zinc-600">Invoices</strong> tab.
           </p>
         </div>
+      </div>
+
+      {/* Bank Account for Payouts */}
+      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-black text-zinc-900">Bank Account for Payouts</h3>
+            <p className="text-xs text-zinc-400">Store sale earnings are transferred here every 2 weeks</p>
+          </div>
+        </div>
+
+        {bankMasked && (
+          <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
+            <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <p className="text-xs font-bold text-emerald-800">Bank account saved</p>
+              <p className="text-xs text-emerald-600 font-mono mt-0.5">{bankAccount.bankName} · {bankMasked}</p>
+            </div>
+          </div>
+        )}
+
+        {loadingBank ? (
+          <div className="flex items-center gap-2 text-sm text-zinc-400 py-4">
+            <div className="w-4 h-4 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
+            Loading bank details…
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div>
+              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Holder Name *</label>
+              <input className={inputCls} placeholder="As per bank records" value={bankAccount.accountHolderName}
+                onChange={(e) => setBankAccount({ ...bankAccount, accountHolderName: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Number *</label>
+                <input className={inputCls} type="password" placeholder="Enter account number" value={bankAccount.accountNumber}
+                  onChange={(e) => setBankAccount({ ...bankAccount, accountNumber: e.target.value })} autoComplete="off" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Confirm Account No. *</label>
+                <input className={inputCls} placeholder="Re-enter account number" value={bankAccount.confirmAccountNumber}
+                  onChange={(e) => setBankAccount({ ...bankAccount, confirmAccountNumber: e.target.value })} autoComplete="off" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">IFSC Code *</label>
+                <input className={inputCls} placeholder="e.g. HDFC0001234" value={bankAccount.ifscCode}
+                  onChange={(e) => setBankAccount({ ...bankAccount, ifscCode: e.target.value.toUpperCase() })} maxLength={11} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Bank Name *</label>
+                <input className={inputCls} placeholder="e.g. HDFC Bank" value={bankAccount.bankName}
+                  onChange={(e) => setBankAccount({ ...bankAccount, bankName: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Type</label>
+              <div className="flex gap-2">
+                {["savings", "current"].map((t) => (
+                  <button key={t} type="button"
+                    onClick={() => setBankAccount({ ...bankAccount, accountType: t })}
+                    className={`px-4 py-2 rounded-xl border text-sm font-bold capitalize transition-all ${
+                      bankAccount.accountType === t
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-200 text-zinc-600 hover:border-zinc-400"
+                    }`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {bankError && <p className="text-red-500 text-xs font-semibold">{bankError}</p>}
+            <button onClick={handleSaveBank} disabled={bankSaving}
+              className={`mt-1 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+                bankSaved ? "bg-emerald-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"
+              } disabled:opacity-50`}>
+              {bankSaving ? "Saving…" : bankSaved ? "✓ Bank account saved!" : bankMasked ? "Update bank account" : "Save bank account"}
+            </button>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Your bank details are stored securely and used only for transferring your store earnings. We never share this information.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Default shipping address */}
@@ -2422,7 +2671,7 @@ export default function AccountPage() {
         <main className="flex-1 p-6 lg:p-8 max-w-5xl w-full mx-auto">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
-              {activeTab === "dashboard" && <DashboardTab orders={orders} user={user} onTab={setActiveTab} />}
+              {activeTab === "dashboard" && <OverviewTab userId={user?.id ?? ""} userName={user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? ""} onTopUp={() => setActiveTab("wallet")} />}
               {activeTab === "orders"    && <OrdersTab orders={orders} user={user} />}
               {activeTab === "designs"   && <DesignsTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
