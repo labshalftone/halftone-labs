@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 const API_KEY     = process.env.SHOPIFY_API_KEY!;
-const SCOPES      = process.env.SHOPIFY_SCOPES ?? "read_orders,write_fulfillments";
+const SCOPES      = process.env.SHOPIFY_SCOPES ?? "read_orders,write_fulfillments,write_products";
 const REDIRECT_URI = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://halftonelabs.in"}/api/shopify/callback`;
 
 // GET /api/shopify/auth?shop=store.myshopify.com&userId=...
