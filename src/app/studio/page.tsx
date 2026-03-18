@@ -455,6 +455,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
       printTechnique: hasAnyDesign ? technique : "none",
       blankPrice: product.blankPrice,
     });
+    // Record that checkout was initiated from Studio
+    sessionStorage.setItem("checkout_origin", JSON.stringify({ type: "studio" }));
     setAdded(true);
   };
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
 import StoreNavbar from "@/components/StoreNavbar";
+import SizeGuide, { type ProductKey } from "@/components/SizeGuide";
 import type { Store, StoreProduct } from "../page";
 
 const DARK_COLORS = ["#111111", "#1B2A4A", "#2355C0", "#C0392B", "#6B2D2D"];
@@ -68,6 +69,7 @@ export default function ProductPage({
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
   const [view, setView] = useState<"photo" | "mockup">("photo");
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const { addItem } = useCart();
   const { fmt } = useCurrency();
@@ -109,6 +111,11 @@ export default function ProductPage({
       qty: 1,
       gsm: "",
     });
+    // Record where checkout was initiated from so the checkout page can show the right back button
+    sessionStorage.setItem(
+      "checkout_origin",
+      JSON.stringify({ type: "store", handle, name: store?.artist_name ?? "" })
+    );
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
@@ -144,6 +151,15 @@ export default function ProductPage({
   const displayImage = product.image_url || product.design_front_url;
   const isOversized = product.product_id.includes("oversized");
   const hasPhoto = !!displayImage;
+
+  // Determine default size guide tab from product_id
+  const sizeGuideTab: ProductKey = product.product_id.includes("baby")
+    ? "baby"
+    : product.product_id.includes("french") || product.product_id.includes("-ft")
+    ? "oversized-ft"
+    : product.product_id.includes("oversized")
+    ? "oversized-sj"
+    : "regular";
 
   return (
     <div className="min-h-screen" style={{ background: "#f8f7f5" }}>
@@ -242,7 +258,15 @@ export default function ProductPage({
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Size</p>
-                <span className="text-xs font-bold text-zinc-900">{selectedSize}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-zinc-900">{selectedSize}</span>
+                  <button
+                    onClick={() => setSizeGuideOpen(true)}
+                    className="text-xs font-semibold text-orange-500 hover:text-orange-600 underline underline-offset-2 transition-colors"
+                  >
+                    Size Guide
+                  </button>
+                </div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {product.sizes.map((s) => (
@@ -339,6 +363,14 @@ export default function ProductPage({
           <span>Shipped in 5–7 days</span>
         </div>
       </div>
+
+      {/* Size Guide Modal */}
+      <SizeGuide
+        open={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+        defaultTab={sizeGuideTab}
+        showBranding={false}
+      />
     </div>
   );
 }

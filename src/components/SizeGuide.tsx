@@ -6,69 +6,108 @@ import { motion, AnimatePresence } from "framer-motion";
 type Props = {
   open: boolean;
   onClose: () => void;
+  defaultTab?: ProductKey;
+  showBranding?: boolean;
 };
 
-type ProductKey = "regular" | "oversized-sj" | "oversized-ft" | "baby";
+export type ProductKey = "regular" | "oversized-sj" | "oversized-ft" | "baby";
 
-interface SizeRow {
-  size: string;
-  chest: number;
-  length: number;
-  shoulder: number;
+interface Column { key: string; label: string; }
+interface SizeEntry { [key: string]: string | number; }
+interface ProductData {
+  columns: Column[];
+  rows: SizeEntry[];
+  note: string;
 }
 
 const TABS: { key: ProductKey; label: string }[] = [
   { key: "regular",      label: "Regular Tee" },
-  { key: "oversized-sj", label: "Oversized Tee (SJ)" },
-  { key: "oversized-ft", label: "Oversized Tee (FT)" },
+  { key: "oversized-sj", label: "Oversized (220 GSM)" },
+  { key: "oversized-ft", label: "Oversized (French Terry)" },
   { key: "baby",         label: "Baby Tee" },
 ];
 
-const DATA: Record<ProductKey, SizeRow[]> = {
-  regular: [
-    { size: "XS",  chest: 34, length: 26, shoulder: 15 },
-    { size: "S",   chest: 36, length: 27, shoulder: 16 },
-    { size: "M",   chest: 38, length: 28, shoulder: 17 },
-    { size: "L",   chest: 40, length: 29, shoulder: 18 },
-    { size: "XL",  chest: 42, length: 30, shoulder: 19 },
-    { size: "2XL", chest: 44, length: 31, shoulder: 20 },
-    { size: "3XL", chest: 46, length: 32, shoulder: 21 },
-  ],
-  "oversized-sj": [
-    { size: "S",   chest: 44, length: 28, shoulder: 20 },
-    { size: "M",   chest: 46, length: 29, shoulder: 21 },
-    { size: "L",   chest: 48, length: 30, shoulder: 22 },
-    { size: "XL",  chest: 50, length: 31, shoulder: 23 },
-    { size: "2XL", chest: 52, length: 32, shoulder: 24 },
-  ],
-  "oversized-ft": [
-    { size: "S",   chest: 44, length: 28, shoulder: 20 },
-    { size: "M",   chest: 46, length: 29, shoulder: 21 },
-    { size: "L",   chest: 48, length: 30, shoulder: 22 },
-    { size: "XL",  chest: 50, length: 31, shoulder: 23 },
-    { size: "2XL", chest: 52, length: 32, shoulder: 24 },
-  ],
-  baby: [
-    { size: "XS", chest: 30, length: 20, shoulder: 12 },
-    { size: "S",  chest: 32, length: 21, shoulder: 13 },
-    { size: "M",  chest: 34, length: 22, shoulder: 14 },
-    { size: "L",  chest: 36, length: 23, shoulder: 15 },
-    { size: "XL", chest: 38, length: 24, shoulder: 16 },
-  ],
+const DATA: Record<ProductKey, ProductData> = {
+  regular: {
+    columns: [
+      { key: "size",   label: "Size" },
+      { key: "chest",  label: "Chest" },
+      { key: "length", label: "Length" },
+    ],
+    rows: [
+      { size: "S",   chest: 38, length: 26 },
+      { size: "M",   chest: 40, length: 27 },
+      { size: "L",   chest: 42, length: 28 },
+      { size: "XL",  chest: 44, length: 29 },
+      { size: "2XL", chest: 46, length: 30 },
+    ],
+    note: "The final size may vary by +/- 0.5 inches.",
+  },
+  "oversized-sj": {
+    columns: [
+      { key: "size",   label: "Size" },
+      { key: "chest",  label: "Chest" },
+      { key: "length", label: "Length" },
+    ],
+    rows: [
+      { size: "S",   chest: 40, length: 27 },
+      { size: "M",   chest: 42, length: 28 },
+      { size: "L",   chest: 44, length: 29 },
+      { size: "XL",  chest: 46, length: 30 },
+      { size: "2XL", chest: 48, length: 30.5 },
+    ],
+    note: "The final size may vary by +/- 0.5 inches.",
+  },
+  "oversized-ft": {
+    columns: [
+      { key: "size",     label: "Size" },
+      { key: "chest",    label: "Chest" },
+      { key: "length",   label: "Length" },
+      { key: "shoulder", label: "Shoulder" },
+      { key: "sleeve",   label: "Sleeve" },
+    ],
+    rows: [
+      { size: "XS",  chest: 40, length: 27,   shoulder: 19, sleeve: 8.7  },
+      { size: "S",   chest: 42, length: 27.5, shoulder: 20, sleeve: 9.25 },
+      { size: "M",   chest: 44, length: 28,   shoulder: 21, sleeve: 9.75 },
+      { size: "L",   chest: 46, length: 28.5, shoulder: 22, sleeve: 10.25 },
+      { size: "XL",  chest: 48, length: 29,   shoulder: 23, sleeve: 11   },
+      { size: "2XL", chest: 50, length: 29.5, shoulder: 24, sleeve: 11.25 },
+    ],
+    note: "The final size may vary by +/- 1 inch.",
+  },
+  baby: {
+    columns: [
+      { key: "size",   label: "Size" },
+      { key: "bust",   label: "Bust" },
+      { key: "length", label: "Length" },
+      { key: "waist",  label: "Waist" },
+    ],
+    rows: [
+      { size: "XS",  bust: 26, length: 18, waist: 26 },
+      { size: "S",   bust: 29, length: 19, waist: 28 },
+      { size: "M",   bust: 31, length: 19, waist: 30 },
+      { size: "L",   bust: 33, length: 20, waist: 32 },
+      { size: "XL",  bust: 35, length: 20, waist: 34 },
+      { size: "2XL", bust: 36, length: 20, waist: 36 },
+    ],
+    note: "The final size may vary by +/- 0.5 inches.",
+  },
 };
 
 const IN_TO_CM = 2.54;
 
-function fmt(val: number, cm: boolean) {
+function fmtVal(val: string | number, cm: boolean) {
+  if (typeof val === "string") return val;
   return cm ? (val * IN_TO_CM).toFixed(1) : String(val);
 }
 
-export default function SizeGuide({ open, onClose }: Props) {
-  const [activeTab, setActiveTab] = useState<ProductKey>("regular");
+export default function SizeGuide({ open, onClose, defaultTab = "regular", showBranding = true }: Props) {
+  const [activeTab, setActiveTab] = useState<ProductKey>(defaultTab);
   const [useCm, setUseCm] = useState(false);
 
-  const rows = DATA[activeTab];
-  const unit = useCm ? "cm" : "inches";
+  const { columns, rows, note } = DATA[activeTab];
+  const unit = useCm ? "cm" : "in";
 
   return (
     <AnimatePresence>
@@ -94,7 +133,9 @@ export default function SizeGuide({ open, onClose }: Props) {
             {/* Header */}
             <div className="bg-zinc-900 text-white px-6 py-5 flex items-center justify-between flex-shrink-0">
               <div>
-                <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">Halftone Labs</p>
+                {showBranding && (
+                  <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">Halftone Labs</p>
+                )}
                 <h2 className="text-lg font-black" style={{ letterSpacing: "-0.03em" }}>Size Guide</h2>
               </div>
               <div className="flex items-center gap-3">
@@ -142,24 +183,34 @@ export default function SizeGuide({ open, onClose }: Props) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200">
-                    <th className="text-left pb-3 text-xs font-black uppercase tracking-widest text-zinc-400">Size</th>
-                    <th className="text-right pb-3 text-xs font-black uppercase tracking-widest text-zinc-400">Chest ({unit})</th>
-                    <th className="text-right pb-3 text-xs font-black uppercase tracking-widest text-zinc-400">Length ({unit})</th>
-                    <th className="text-right pb-3 text-xs font-black uppercase tracking-widest text-zinc-400">Shoulder ({unit})</th>
+                    {columns.map((col, i) => (
+                      <th
+                        key={col.key}
+                        className={`pb-3 text-xs font-black uppercase tracking-widest text-zinc-400 ${i === 0 ? "text-left" : "text-right"}`}
+                      >
+                        {col.label}{i > 0 ? ` (${unit})` : ""}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, i) => (
                     <tr
-                      key={row.size}
+                      key={String(row.size)}
                       className={`border-b border-zinc-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-zinc-50"}`}
                     >
-                      <td className="py-3 pl-1">
-                        <span className="font-black text-zinc-900 text-sm">{row.size}</span>
-                      </td>
-                      <td className="py-3 text-right font-semibold text-zinc-700">{fmt(row.chest, useCm)}</td>
-                      <td className="py-3 text-right font-semibold text-zinc-700">{fmt(row.length, useCm)}</td>
-                      <td className="py-3 pr-1 text-right font-semibold text-zinc-700">{fmt(row.shoulder, useCm)}</td>
+                      {columns.map((col, ci) => (
+                        <td
+                          key={col.key}
+                          className={`py-3 ${ci === 0 ? "pl-1" : "text-right"} ${ci === columns.length - 1 ? "pr-1" : ""}`}
+                        >
+                          {ci === 0 ? (
+                            <span className="font-black text-zinc-900 text-sm">{row[col.key]}</span>
+                          ) : (
+                            <span className="font-semibold text-zinc-700">{fmtVal(row[col.key], useCm)}</span>
+                          )}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -171,7 +222,7 @@ export default function SizeGuide({ open, onClose }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  All measurements in inches. For best fit, measure around the fullest part of your chest.
+                  All measurements in inches. {note}
                 </p>
               </div>
             </div>

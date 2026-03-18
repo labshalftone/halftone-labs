@@ -98,6 +98,16 @@ export default function CheckoutPage() {
   const [payError,     setPayError]     = useState("");
   const [orderSuccess, setOrderSuccess] = useState<{ ref: string } | null>(null);
 
+  // Track where checkout was initiated from (studio vs store)
+  type CheckoutOrigin = { type: "studio" } | { type: "store"; handle: string; name: string };
+  const [checkoutOrigin, setCheckoutOrigin] = useState<CheckoutOrigin>({ type: "studio" });
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("checkout_origin");
+      if (raw) setCheckoutOrigin(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+
   const shippingCost    = selectedShipping?.rate ?? 0;
   const discount        = appliedCoupon?.discount_amount ?? 0;
   const discountedTotal = Math.max(0, total - discount);
@@ -241,15 +251,19 @@ export default function CheckoutPage() {
 
   // ── Empty cart ──
   if (items.length === 0 && !orderSuccess) {
+    const backHref = checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/studio";
+    const backLabel = checkoutOrigin.type === "store" ? `← Back to ${checkoutOrigin.name || "Store"}` : "← Back to Studio";
     return (
       <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6">
         <div className="text-center">
           <div className="text-6xl mb-4">🛒</div>
           <h1 className="text-2xl font-black mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
-          <p className="text-zinc-500 mb-6">Add some products from the Studio first.</p>
-          <Link href="/studio">
+          <p className="text-zinc-500 mb-6">
+            {checkoutOrigin.type === "store" ? "Browse products and add them to your cart." : "Add some products from the Studio first."}
+          </p>
+          <Link href={backHref}>
             <button className="px-6 py-3 rounded-full bg-zinc-900 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors">
-              Go to Studio
+              {backLabel}
             </button>
           </Link>
         </div>
@@ -281,9 +295,9 @@ export default function CheckoutPage() {
                 Track Order
               </button>
             </Link>
-            <Link href="/studio">
+            <Link href={checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/studio"}>
               <button className="px-5 py-2.5 rounded-full border border-zinc-200 text-sm font-medium hover:bg-zinc-50 transition-colors">
-                Back to Studio
+                {checkoutOrigin.type === "store" ? `Back to ${checkoutOrigin.name || "Store"}` : "Back to Studio"}
               </button>
             </Link>
           </div>
@@ -296,10 +310,6 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-[#f8f7f5] pt-20">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <Link href="/studio" className="text-sm text-zinc-400 hover:text-zinc-700 flex items-center gap-1.5 mb-4">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Back to Studio
-          </Link>
           <h1 className="text-3xl font-black" style={{ letterSpacing: "-0.04em" }}>Checkout</h1>
         </div>
 
@@ -548,6 +558,14 @@ export default function CheckoutPage() {
               <p className="text-xs text-zinc-400 text-center mt-3">
                 Secured by Razorpay · <a href="mailto:hello@halftonelabs.in" className="underline">hello@halftonelabs.in</a>
               </p>
+              <div className="mt-3 flex items-start gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3">
+                <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  <strong className="text-zinc-700">All sales are final.</strong> No exchanges or returns — every product is custom made to order just for you.
+                </p>
+              </div>
             </div>
           </div>
         </div>
