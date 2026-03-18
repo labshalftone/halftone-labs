@@ -2,28 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PICKUP_PIN = "144004";
 
-// DHL Express international rate card from India (INR, inc. fuel surcharge ~28%)
-// base = rate for 0.5 kg | perKg = rate per additional kg above 0.5 kg
-// Source: DHL Express India published rates + ~28% margin
+// DHL Express international rate card from India (INR, ~45% margin over cost)
+// base = rate for first 0.5 kg | perKg = rate per additional kg above 0.5 kg
 const INTL_RATES: Record<string, {
   carrier: string; days: string;
   base: number;   // price for first 0.5 kg
   perKg: number;  // price per additional kg (or part thereof)
 }> = {
-  US: { carrier: "DHL Express", days: "7–10 business days", base: 1599, perKg: 520 },
-  CA: { carrier: "DHL Express", days: "7–12 business days", base: 1899, perKg: 580 },
-  GB: { carrier: "DHL Express", days: "5–8 business days",  base: 1399, perKg: 480 },
-  DE: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
-  FR: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
-  NL: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
-  IT: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
-  ES: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
-  AU: { carrier: "DHL Express", days: "8–12 business days", base: 1799, perKg: 560 },
-  SG: { carrier: "DHL Express", days: "3–5 business days",  base: 849,  perKg: 320 },
-  TH: { carrier: "DHL Express", days: "4–7 business days",  base: 899,  perKg: 340 },
-  AE: { carrier: "DHL Express", days: "4–6 business days",  base: 999,  perKg: 360 },
-  JP: { carrier: "DHL Express", days: "5–8 business days",  base: 1299, perKg: 430 },
-  NZ: { carrier: "DHL Express", days: "9–14 business days", base: 1899, perKg: 580 },
+  US: { carrier: "DHL Express", days: "7–10 business days", base: 1999, perKg: 650 },
+  CA: { carrier: "DHL Express", days: "7–12 business days", base: 2399, perKg: 720 },
+  GB: { carrier: "DHL Express", days: "5–8 business days",  base: 1799, perKg: 600 },
+  DE: { carrier: "DHL Express", days: "6–9 business days",  base: 1899, perKg: 610 },
+  FR: { carrier: "DHL Express", days: "6–9 business days",  base: 1899, perKg: 610 },
+  NL: { carrier: "DHL Express", days: "6–9 business days",  base: 1899, perKg: 610 },
+  IT: { carrier: "DHL Express", days: "6–9 business days",  base: 1899, perKg: 610 },
+  ES: { carrier: "DHL Express", days: "6–9 business days",  base: 1899, perKg: 610 },
+  AU: { carrier: "DHL Express", days: "8–12 business days", base: 2299, perKg: 700 },
+  SG: { carrier: "DHL Express", days: "3–5 business days",  base: 1099, perKg: 400 },
+  TH: { carrier: "DHL Express", days: "4–7 business days",  base: 1149, perKg: 420 },
+  AE: { carrier: "DHL Express", days: "4–6 business days",  base: 1299, perKg: 450 },
+  JP: { carrier: "DHL Express", days: "5–8 business days",  base: 1649, perKg: 540 },
+  NZ: { carrier: "DHL Express", days: "9–14 business days", base: 2399, perKg: 720 },
 };
 
 // Compute weight-based international rate
@@ -241,9 +240,9 @@ export async function POST(req: NextRequest) {
       options: [{ id: `intl-${country}`, label: "International Express", carrier: intl.carrier, rate: intl.rate, days: intl.days }],
     });
   }
-  // Unknown country — generic weight-based rate (~DHL zone 8)
-  const genericBase = 2199;
-  const genericExtra = Math.max(0, Math.ceil((weight - 0.5) / 0.5)) * 300;
+  // Unknown country — generic weight-based rate (~DHL zone 8, ~45% margin)
+  const genericBase = 2699;
+  const genericExtra = Math.max(0, Math.ceil((weight - 0.5) / 0.5)) * 400;
   const genericRate  = Math.ceil((genericBase + genericExtra) / 10) * 10;
   console.log(`[intl] unknown country=${country} weight=${weight}kg → ₹${genericRate}`);
   return NextResponse.json({
