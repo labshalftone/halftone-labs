@@ -2,23 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PICKUP_PIN = "144004";
 
-// Fallback international rates (Shiprocket DHL/Aramex + 28% margin, from Noida)
-const INTL_FALLBACK: Record<string, { label: string; carrier: string; rate: number; days: string }> = {
-  US: { label: "United States",  carrier: "DHL Express", rate: 1599, days: "7–10 business days" },
-  CA: { label: "Canada",         carrier: "DHL Express", rate: 1899, days: "7–12 business days" },
-  GB: { label: "United Kingdom", carrier: "DHL Express", rate: 1399, days: "5–8 business days" },
-  DE: { label: "Germany",        carrier: "DHL Express", rate: 1499, days: "6–9 business days" },
-  FR: { label: "France",         carrier: "DHL Express", rate: 1499, days: "6–9 business days" },
-  NL: { label: "Netherlands",    carrier: "DHL Express", rate: 1499, days: "6–9 business days" },
-  IT: { label: "Italy",          carrier: "DHL Express", rate: 1499, days: "6–9 business days" },
-  ES: { label: "Spain",          carrier: "DHL Express", rate: 1499, days: "6–9 business days" },
-  AU: { label: "Australia",      carrier: "DHL Express", rate: 1799, days: "8–12 business days" },
-  SG: { label: "Singapore",      carrier: "DHL Express", rate: 849,  days: "3–5 business days" },
-  TH: { label: "Thailand",       carrier: "DHL Express", rate: 899,  days: "4–7 business days" },
-  AE: { label: "UAE",            carrier: "DHL Express", rate: 999,  days: "4–6 business days" },
-  JP: { label: "Japan",          carrier: "DHL Express", rate: 1299, days: "5–8 business days" },
-  NZ: { label: "New Zealand",    carrier: "DHL Express", rate: 1899, days: "9–14 business days" },
+// DHL Express international rate card from India (INR, inc. fuel surcharge ~28%)
+// base = rate for 0.5 kg | perKg = rate per additional kg above 0.5 kg
+// Source: DHL Express India published rates + ~28% margin
+const INTL_RATES: Record<string, {
+  carrier: string; days: string;
+  base: number;   // price for first 0.5 kg
+  perKg: number;  // price per additional kg (or part thereof)
+}> = {
+  US: { carrier: "DHL Express", days: "7–10 business days", base: 1599, perKg: 520 },
+  CA: { carrier: "DHL Express", days: "7–12 business days", base: 1899, perKg: 580 },
+  GB: { carrier: "DHL Express", days: "5–8 business days",  base: 1399, perKg: 480 },
+  DE: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
+  FR: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
+  NL: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
+  IT: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
+  ES: { carrier: "DHL Express", days: "6–9 business days",  base: 1499, perKg: 490 },
+  AU: { carrier: "DHL Express", days: "8–12 business days", base: 1799, perKg: 560 },
+  SG: { carrier: "DHL Express", days: "3–5 business days",  base: 849,  perKg: 320 },
+  TH: { carrier: "DHL Express", days: "4–7 business days",  base: 899,  perKg: 340 },
+  AE: { carrier: "DHL Express", days: "4–6 business days",  base: 999,  perKg: 360 },
+  JP: { carrier: "DHL Express", days: "5–8 business days",  base: 1299, perKg: 430 },
+  NZ: { carrier: "DHL Express", days: "9–14 business days", base: 1899, perKg: 580 },
 };
+
+// Compute weight-based international rate
+// weight = actual shipment weight in kg (already in 0.5kg slabs from checkout)
+function intlRate(country: string, weight: number): { rate: number; carrier: string; days: string } | null {
+  const r = INTL_RATES[country];
+  if (!r) return null;
+  // Additional weight above the base 0.5 kg, billed per 0.5 kg slab
+  const extraSlabs = Math.max(0, Math.ceil((weight - 0.5) / 0.5));
+  const raw = r.base + extraSlabs * (r.perKg / 2); // perKg / 2 = per 0.5 kg
+  return { rate: Math.ceil(raw / 10) * 10, carrier: r.carrier, days: r.days };
+}
 
 let _token: string | null = null;
 let _tokenExpiry = 0;
@@ -217,15 +234,19 @@ export async function POST(req: NextRequest) {
   }
 
   // ── International ─────────────────────────────────────────────────────────
-  // Use hardcoded rates (Shiprocket intl API not enabled on this account)
-  const r = INTL_FALLBACK[country];
-  if (r) {
+  const intl = intlRate(country, weight);
+  if (intl) {
+    console.log(`[intl] country=${country} weight=${weight}kg → ₹${intl.rate}`);
     return NextResponse.json({
-      options: [{ id: `intl-${country}`, label: "International Express", carrier: r.carrier, rate: r.rate, days: r.days }],
+      options: [{ id: `intl-${country}`, label: "International Express", carrier: intl.carrier, rate: intl.rate, days: intl.days }],
     });
   }
-  // Unknown country — generic rate
+  // Unknown country — generic weight-based rate (~DHL zone 8)
+  const genericBase = 2199;
+  const genericExtra = Math.max(0, Math.ceil((weight - 0.5) / 0.5)) * 300;
+  const genericRate  = Math.ceil((genericBase + genericExtra) / 10) * 10;
+  console.log(`[intl] unknown country=${country} weight=${weight}kg → ₹${genericRate}`);
   return NextResponse.json({
-    options: [{ id: "intl-generic", label: "International Express", carrier: "DHL Express", rate: 2199, days: "10–15 business days" }],
+    options: [{ id: "intl-generic", label: "International Express", carrier: "DHL Express", rate: genericRate, days: "10–15 business days" }],
   });
 }
