@@ -78,12 +78,9 @@ function TeeMockup({ color, isOversized }: { color: string; isOversized?: boolea
 // ─── DESIGN PLACER ────────────────────────────────────────────────────────────
 // Print zone as % of the photo container — portrait orientation (taller than wide)
 const PHOTO_ZONE = {
-  // Regular tee: set-in sleeves; body seams ~22–78%; collar ~14%; hem ~88%
-  regular:  { left: 29, top: 14, width: 42, height: 52 },
-  // Oversized/FT: drop-shoulder; body seams ~20–80%; collar ~13%; hem ~89%
-  oversized: { left: 27, top: 13, width: 46, height: 54 },
-  // Baby tee: wide but crop; shorter overall — zone stays within cropped body
-  baby:     { left: 27, top: 16, width: 46, height: 32 },
+  regular:  { left: 30, top: 18, width: 40, height: 46 },
+  oversized: { left: 28, top: 17, width: 44, height: 48 },
+  baby:     { left: 28, top: 20, width: 44, height: 28 },
 };
 
 function DesignPlacer({
