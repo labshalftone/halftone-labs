@@ -190,6 +190,7 @@ export default function WalletTab({ userId }: { userId: string }) {
       const data = await res.json();
       if (res.ok) {
         setCurrency(selectedCurrency);
+        if (data.newBalance !== undefined) setBalance(Number(data.newBalance));
         setChangingCurrency(false);
       } else {
         setCurrencyError(data.error ?? "Failed to update currency");

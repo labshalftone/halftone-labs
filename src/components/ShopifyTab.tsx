@@ -337,6 +337,18 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
   const [confirmError, setConfirmError] = useState<Record<number, string>>({});
   const [expanded, setExpanded]     = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletCurrency, setWalletCurrency] = useState<string>("INR");
+  const [inrToWalletRate, setInrToWalletRate] = useState<number>(1);
+
+  const CURRENCY_SYMBOLS: Record<string, string> = {
+    INR: "₹", USD: "$", EUR: "€", GBP: "£",
+    AED: "د.إ", SGD: "S$", AUD: "A$", CAD: "C$",
+  };
+  const fmtWallet = (inrAmount: number) => {
+    if (walletCurrency === "INR") return `₹${Math.round(inrAmount).toLocaleString("en-IN")}`;
+    const converted = Math.round(inrAmount * inrToWalletRate * 100) / 100;
+    return `${CURRENCY_SYMBOLS[walletCurrency] ?? walletCurrency}${converted.toFixed(2)}`;
+  };
   // Per-order shipping: rates fetched + user selection
   const [shippingRates,    setShippingRates]    = useState<Record<number, ShippingOption[]>>({});
   const [shippingLoading,  setShippingLoading]  = useState<Record<number, boolean>>({});
@@ -353,12 +365,26 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  // Fetch wallet balance for display
+  // Fetch wallet balance + currency, then live rate if non-INR
   useEffect(() => {
     if (!userId) return;
     fetch(`/api/wallet?userId=${userId}`)
       .then((r) => r.json())
-      .then((d) => { if (d.balance !== undefined) setWalletBalance(Number(d.balance)); })
+      .then(async (d) => {
+        if (d.balance !== undefined) setWalletBalance(Number(d.balance));
+        const cur = d.currency ?? "INR";
+        setWalletCurrency(cur);
+        if (cur !== "INR") {
+          try {
+            const rr = await fetch(`https://api.frankfurter.app/latest?from=INR&to=${cur}`);
+            if (rr.ok) {
+              const rd = await rr.json();
+              const rate = Number(rd.rates?.[cur] ?? 0);
+              if (rate > 0) setInrToWalletRate(rate);
+            }
+          } catch { /* ignore */ }
+        }
+      })
       .catch(() => {});
   }, [userId]);
 
@@ -443,6 +469,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
         shippingAmount:     shippingCost,
         customerPhone:      order.shipping_address?.phone ?? null,
         designId:           firstMatched?.hlProduct?.productId ?? null,
+        walletCurrency,
       }),
     });
     const data = await res.json();
@@ -463,7 +490,10 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
     // Success — refresh wallet balance too
     fetch(`/api/wallet?userId=${userId}`)
       .then((r) => r.json())
-      .then((d) => { if (d.balance !== undefined) setWalletBalance(Number(d.balance)); })
+      .then((d) => {
+        if (d.balance !== undefined) setWalletBalance(Number(d.balance));
+        if (d.currency) setWalletCurrency(d.currency);
+      })
       .catch(() => {});
     fetchOrders();
   };
@@ -501,7 +531,9 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
-              Wallet: ₹{Number(walletBalance).toLocaleString("en-IN")}
+              Wallet: {walletCurrency !== "INR"
+                ? `${CURRENCY_SYMBOLS[walletCurrency] ?? walletCurrency}${Number(walletBalance).toFixed(2)}`
+                : `₹${Number(walletBalance).toLocaleString("en-IN")}`}
             </span>
           )}
           <button onClick={fetchOrders} className="text-xs text-orange-500 hover:text-orange-600 transition-colors">↻ Refresh</button>
@@ -685,10 +717,11 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                           return prodCost > 0 ? (
                             <div className="text-xs text-zinc-400 text-center space-y-0.5">
                               <p>
-                                Products: <span className="font-bold text-zinc-700">₹{Math.round(prodCost).toLocaleString("en-IN")}</span>
-                                {shpCost > 0 && <> · Shipping: <span className="font-bold text-zinc-700">₹{shpCost.toLocaleString("en-IN")}</span></>}
+                                Products: <span className="font-bold text-zinc-700">{fmtWallet(prodCost)}</span>
+                                {shpCost > 0 && <> · Shipping: <span className="font-bold text-zinc-700">{fmtWallet(shpCost)}</span></>}
                               </p>
-                              <p>Total to deduct: <span className="font-black text-zinc-900">₹{total.toLocaleString("en-IN")}</span>
+                              <p>Total to deduct: <span className="font-black text-zinc-900">{fmtWallet(total)}</span>
+                                {walletCurrency !== "INR" && <span className="ml-1 text-zinc-300">(₹{total.toLocaleString("en-IN")} INR)</span>}
                                 <span className="ml-1 text-zinc-300">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
                               </p>
                             </div>

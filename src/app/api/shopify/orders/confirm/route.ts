@@ -115,15 +115,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "totalInr required for wallet payment" }, { status: 400 });
     }
 
-    // 1. Get wallet balance
+    // 1. Get wallet balance + currency
     const { data: wallet } = await db
       .from("wallets")
-      .select("balance")
+      .select("balance, currency")
       .eq("user_id", userId)
       .maybeSingle();
 
     const currentBalance = Number(wallet?.balance ?? 0);
-    if (!wallet || currentBalance < amountInr) {
+    const storedCurrency = wallet?.currency ?? "INR";
+
+    // Convert INR production cost → wallet currency for the debit
+    let amountToDebit = amountInr;
+    if (storedCurrency !== "INR") {
+      try {
+        const rr = await fetch(
+          `https://api.frankfurter.app/latest?from=INR&to=${storedCurrency}`,
+          { signal: AbortSignal.timeout(6000) }
+        );
+        if (rr.ok) {
+          const rd = await rr.json();
+          const rate = Number(rd.rates?.[storedCurrency] ?? 0);
+          if (rate > 0) amountToDebit = Math.round(amountInr * rate * 100) / 100;
+        }
+      } catch (e) {
+        console.warn("[shopify/confirm] exchange rate fetch failed, using INR amount:", e);
+      }
+    }
+
+    if (!wallet || currentBalance < amountToDebit) {
       return NextResponse.json(
         { error: "insufficient_balance", balance: currentBalance },
         { status: 402 }
@@ -131,12 +151,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 2a. Debit wallet — only update if balance still sufficient (atomic check)
-    const newBalance = currentBalance - amountInr;
+    const newBalance = Math.round((currentBalance - amountToDebit) * 100) / 100;
     const { error: debitError, data: debitData } = await db
       .from("wallets")
       .update({ balance: newBalance, updated_at: new Date().toISOString() })
       .eq("user_id", userId)
-      .gte("balance", amountInr)
+      .gte("balance", amountToDebit)
       .select("id");
 
     if (debitError || !debitData || debitData.length === 0) {
@@ -152,10 +172,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2b. Insert debit transaction
+    // 2b. Insert debit transaction (amount in wallet currency)
     await db.from("wallet_transactions").insert({
       user_id: userId,
-      amount: amountInr,
+      amount: amountToDebit,
       type: "debit",
       description: `Shopify order ${shopifyOrderNumber ?? hlOrderRef}`,
       reference_id: hlOrderRef,

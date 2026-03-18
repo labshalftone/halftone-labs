@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
 
 const ALLOWED_CURRENCIES = ["INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD"];
 
-// PATCH /api/wallet  — update currency
+// PATCH /api/wallet  — update currency + convert balance at live exchange rate
 // Body: { userId, currency }
 export async function PATCH(req: NextRequest) {
   const { userId, currency } = await req.json();
@@ -78,11 +78,40 @@ export async function PATCH(req: NextRequest) {
   }
 
   const db = createAdminClient();
+
+  // Fetch current wallet to get existing balance + currency
+  const { data: currentWallet } = await db
+    .from("wallets")
+    .select("balance, currency")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const currentCurrency = currentWallet?.currency ?? "INR";
+  let newBalance = Number(currentWallet?.balance ?? 0);
+
+  // Convert balance using live rate if currency actually changed
+  if (currentCurrency !== currency && newBalance > 0) {
+    try {
+      const rateRes = await fetch(
+        `https://api.frankfurter.app/latest?from=${currentCurrency}&to=${currency}`,
+        { signal: AbortSignal.timeout(6000) }
+      );
+      if (rateRes.ok) {
+        const rateData = await rateRes.json();
+        const rate = Number(rateData.rates?.[currency] ?? 0);
+        if (rate > 0) newBalance = Math.round(newBalance * rate * 100) / 100;
+      }
+    } catch (e) {
+      console.warn("[wallet/patch] exchange rate fetch failed:", e);
+      // Proceed with currency change but keep unconverted balance
+    }
+  }
+
   const { error } = await db
     .from("wallets")
-    .update({ currency, updated_at: new Date().toISOString() })
+    .update({ currency, balance: newBalance, updated_at: new Date().toISOString() })
     .eq("user_id", userId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true, currency });
+  return NextResponse.json({ success: true, currency, newBalance });
 }
