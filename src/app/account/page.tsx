@@ -299,7 +299,9 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
 type Design = {
   id: string; name: string; product_id: string; product_name: string; gsm: string;
   color_name: string; color_hex: string; size: string; print_tier: string | null;
-  blank_price: number; print_price: number; has_design: boolean; thumbnail: string | null; created_at: string;
+  blank_price: number; print_price: number; has_design: boolean; thumbnail: string | null;
+  front_design_url: string | null; back_design_url: string | null;
+  created_at: string;
 };
 
 // ── Add-to-Cart Modal ─────────────────────────────────────────────────────────
@@ -327,8 +329,8 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
       colorHex:         design.color_hex,
       size:             validSize,
       qty,
-      frontDesignUrl:   design.has_design ? (design.thumbnail ?? "") : "",
-      backDesignUrl:    "",
+      frontDesignUrl:   design.has_design ? (design.front_design_url ?? design.thumbnail ?? "") : "",
+      backDesignUrl:    design.has_design ? (design.back_design_url ?? "") : "",
       frontPrintPrice:  design.has_design ? design.print_price : 0,
       backPrintPrice:   0,
       frontPrintTier:   design.print_tier ?? "",

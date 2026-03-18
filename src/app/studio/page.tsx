@@ -541,9 +541,15 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    if (side === "front") { setFrontDesignSrc(url); setNoDesign(false); }
-    else                  { setBackDesignSrc(url);  setNoDesign(false); }
+    // Use FileReader to get a data URL — blob URLs can't be sent to the server
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      if (!dataUrl) return;
+      if (side === "front") { setFrontDesignSrc(dataUrl); setNoDesign(false); }
+      else                  { setBackDesignSrc(dataUrl);  setNoDesign(false); }
+    };
+    reader.readAsDataURL(file);
     setPreviewSide(side);
     e.target.value = "";
   };
@@ -572,6 +578,8 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           printDims: frontPrintDims || null,
           blankPrice: product.blankPrice, printPrice: totalPrint,
           hasDesign: hasAnyDesign, thumbnail,
+          frontDesignDataUrl: frontDesignSrc || null,
+          backDesignDataUrl:  backDesignSrc  || null,
         }),
       });
       setSaved(true);

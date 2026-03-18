@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 
+async function uploadDataUrl(db: ReturnType<typeof createAdminClient>, dataUrl: string, path: string): Promise<string | null> {
+  try {
+    const [header, base64] = dataUrl.split(",");
+    if (!base64) return null;
+    const buffer = Buffer.from(base64, "base64");
+    const contentType = header.includes("jpeg") ? "image/jpeg" : "image/png";
+    const { error } = await db.storage.from("store-assets").upload(path, buffer, { contentType, upsert: true });
+    if (error) { console.error(`[designs] storage upload failed for ${path}:`, error.message); return null; }
+    const { data } = db.storage.from("store-assets").getPublicUrl(path);
+    return data.publicUrl;
+  } catch (e) { console.error(`[designs] upload exception for ${path}:`, e); return null; }
+}
+
 // POST /api/designs — save a design
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +24,7 @@ export async function POST(req: NextRequest) {
       colorName, colorHex, size,
       printTier, printDims, blankPrice, printPrice,
       hasDesign, thumbnail,
+      frontDesignDataUrl, backDesignDataUrl,
     } = body;
 
     if (!userId && !customerEmail) {
@@ -18,6 +32,8 @@ export async function POST(req: NextRequest) {
     }
 
     const db = createAdminClient();
+
+    // Insert design row first to get the ID
     const { data, error } = await db.from("designs").insert({
       user_id:        userId ?? null,
       customer_email: customerEmail?.toLowerCase().trim() ?? null,
@@ -37,7 +53,24 @@ export async function POST(req: NextRequest) {
     }).select("id").single();
 
     if (error) throw error;
-    return NextResponse.json({ success: true, designId: data.id });
+
+    const designId = data.id;
+
+    // Upload raw design files to storage in parallel (non-blocking — don't fail save if uploads fail)
+    const [frontUrl, backUrl] = await Promise.all([
+      frontDesignDataUrl ? uploadDataUrl(db, frontDesignDataUrl, `designs/${designId}/front.png`) : null,
+      backDesignDataUrl  ? uploadDataUrl(db, backDesignDataUrl,  `designs/${designId}/back.png`)  : null,
+    ]);
+
+    // Update row with design file URLs if we got them
+    if (frontUrl || backUrl) {
+      await db.from("designs").update({
+        ...(frontUrl ? { front_design_url: frontUrl } : {}),
+        ...(backUrl  ? { back_design_url:  backUrl  } : {}),
+      }).eq("id", designId);
+    }
+
+    return NextResponse.json({ success: true, designId });
   } catch (err) {
     console.error("save-design error:", err);
     return NextResponse.json({ error: "Failed to save design" }, { status: 500 });

@@ -5,12 +5,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 
-async function uploadDesign(db: ReturnType<typeof createAdminClient>, dataUrl: string, path: string): Promise<string | null> {
+async function uploadDesign(db: ReturnType<typeof createAdminClient>, urlOrDataUrl: string, path: string): Promise<string | null> {
   try {
-    const [header, base64] = dataUrl.split(",");
-    if (!base64) { console.error(`[save-order] uploadDesign: no base64 data for ${path}`); return null; }
-    const buffer = Buffer.from(base64, "base64");
-    const contentType = header.includes("jpeg") ? "image/jpeg" : "image/png";
+    let buffer: Buffer;
+    let contentType: string;
+
+    if (urlOrDataUrl.startsWith("data:")) {
+      // data URL — decode base64
+      const [header, base64] = urlOrDataUrl.split(",");
+      if (!base64) { console.error(`[save-order] uploadDesign: no base64 data for ${path}`); return null; }
+      buffer = Buffer.from(base64, "base64");
+      contentType = header.includes("jpeg") ? "image/jpeg" : "image/png";
+    } else {
+      // Regular URL (e.g. Supabase storage URL) — fetch it
+      const res = await fetch(urlOrDataUrl);
+      if (!res.ok) { console.error(`[save-order] uploadDesign: fetch failed for ${path}: ${res.status}`); return null; }
+      const arrayBuf = await res.arrayBuffer();
+      buffer = Buffer.from(arrayBuf);
+      contentType = res.headers.get("content-type") ?? "image/png";
+    }
+
     const { error } = await db.storage.from("store-assets").upload(path, buffer, { contentType, upsert: true });
     if (error) { console.error(`[save-order] storage upload failed for ${path}:`, error.message); return null; }
     const { data } = db.storage.from("store-assets").getPublicUrl(path);
