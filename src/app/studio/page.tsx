@@ -372,6 +372,139 @@ function BulkQuoteModal({ product, onClose }: { product: typeof PRODUCTS[0]; onC
   );
 }
 
+// ─── PRINT TECHNIQUE INFO MODAL ───────────────────────────────────────────────
+
+function PrintTechniqueInfoModal({ onClose }: { onClose: () => void }) {
+  const techniques = [
+    {
+      id: "DTG",
+      label: "Direct-to-Garment",
+      sub: "Ink printed directly onto fabric",
+      color: "#111111",
+      accent: "text-zinc-600",
+      checkColor: "bg-zinc-900",
+      pros: [
+        "Soft hand-feel — becomes part of the fabric",
+        "Full colour & photographic gradients",
+        "Best on white & light-coloured fabrics",
+        "No MOQ — perfect for single prints",
+      ],
+      cons: ["Fades slightly faster on dark fabrics", "Not recommended for black or very dark garments"],
+    },
+    {
+      id: "DTF",
+      label: "Direct-to-Film",
+      sub: "Design heat-pressed from film onto fabric",
+      color: "#f97316",
+      accent: "text-orange-500",
+      checkColor: "bg-orange-500",
+      pros: [
+        "Works on ANY colour — including black",
+        "Vibrant pop-out colours with crisp edges",
+        "Slightly raised texture for extra depth",
+        "Superior wash fastness vs DTG",
+      ],
+      cons: ["Slightly stiffer feel than DTG", "Less suitable for very fine photographic gradients"],
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 40 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28 }}
+        className="relative z-10 w-full sm:max-w-xl bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+      >
+        {/* Header */}
+        <div className="bg-zinc-900 text-white px-6 py-5 flex items-center justify-between flex-shrink-0">
+          <div>
+            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">Halftone Labs</p>
+            <h2 className="text-lg font-black" style={{ letterSpacing: "-0.03em" }}>Print Techniques</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">DTG vs DTF — what&apos;s the difference?</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 hover:text-white flex-shrink-0"
+            aria-label="Close"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
+          {techniques.map((t) => (
+            <div key={t.id} className="bg-zinc-50 rounded-2xl p-5 border border-zinc-100">
+              {/* Title row */}
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: t.color }}
+                >
+                  <span className="text-white text-xs font-black">{t.id}</span>
+                </div>
+                <div>
+                  <p className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.02em" }}>{t.label}</p>
+                  <p className="text-[0.7rem] text-zinc-400">{t.sub}</p>
+                </div>
+              </div>
+
+              {/* Pros */}
+              <ul className="space-y-2 mb-3">
+                {t.pros.map((pro) => (
+                  <li key={pro} className="flex items-start gap-2 text-xs text-zinc-700">
+                    <span className={`w-4 h-4 rounded-full ${t.checkColor} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    {pro}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Cons */}
+              <ul className="space-y-1.5 pt-3 border-t border-zinc-200">
+                {t.cons.map((con) => (
+                  <li key={con} className="flex items-start gap-2 text-xs text-zinc-400">
+                    <span className="w-4 h-4 rounded-full bg-zinc-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-2.5 h-2.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+                      </svg>
+                    </span>
+                    {con}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Quick pick tip */}
+          <div className="flex items-start gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3">
+            <svg className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-orange-800 leading-relaxed">
+              <strong>Quick pick:</strong> Light garment + photographic design? Go DTG. Dark garment or bold graphic? Go DTF.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── CONFIGURATOR ─────────────────────────────────────────────────────────────
 
 const STEPS = ["Style", "Design"];
@@ -384,6 +517,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
   const [color,     setColor]     = useState(product.colors[0]);
   const [size,      setSize]      = useState(product.sizes[2] ?? product.sizes[0]);
   const [technique, setTechnique] = useState<"DTG" | "DTF">("DTG");
+  const [techInfoOpen, setTechInfoOpen] = useState(false);
 
   const [activeTab,       setActiveTab]       = useState<"front" | "back">("front");
   const [previewSide,     setPreviewSide]     = useState<"front" | "back">("front");
@@ -615,7 +749,18 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
 
                 {/* Technique */}
                 <div className="mb-8">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Print Technique</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400">Print Technique</p>
+                    <button
+                      onClick={() => setTechInfoOpen(true)}
+                      className="flex items-center gap-1 text-[0.65rem] font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      What&apos;s the difference?
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     {(["DTG", "DTF"] as const).map((t) => (
                       <button key={t} onClick={() => setTechnique(t)}
@@ -815,6 +960,11 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Print technique info modal */}
+      <AnimatePresence>
+        {techInfoOpen && <PrintTechniqueInfoModal onClose={() => setTechInfoOpen(false)} />}
+      </AnimatePresence>
     </div>
   );
 }
