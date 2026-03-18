@@ -99,13 +99,63 @@ export async function GET(req: NextRequest) {
     skuMappingMap[m.shopify_sku] = m;
   }
 
+  // Collect unique base SKUs for design-based SKUs (format: HLD-{8chars}-{SIZE})
+  // Strip last segment (size) to get the base SKU used as designs.sku
+  const designBaseSkuSet = new Set<string>();
+  for (const order of shopifyOrders) {
+    for (const line of order.line_items) {
+      const sku = line.sku ?? "";
+      if (sku.startsWith("HLD-")) {
+        const parts = sku.split("-");
+        if (parts.length >= 3) {
+          // Base SKU is everything except the last segment
+          const baseSku = parts.slice(0, parts.length - 1).join("-");
+          designBaseSkuSet.add(baseSku);
+        }
+      }
+    }
+  }
+
+  // Query designs table for those base SKUs
+  type DesignRow = { id: string; product_name: string; color_name: string; blank_price: number; print_price: number | null; gsm: string | null; sku: string | null };
+  const designLookupMap: Record<string, DesignRow> = {};
+  if (designBaseSkuSet.size > 0) {
+    const { data: designRows } = await db
+      .from("designs")
+      .select("id, product_name, color_name, blank_price, print_price, gsm, sku")
+      .eq("user_id", userId)
+      .in("sku", Array.from(designBaseSkuSet));
+    for (const d of designRows ?? []) {
+      if (d.sku) designLookupMap[d.sku] = d;
+    }
+  }
+
+  // Extended product shape that covers both catalog and design-based matches
+  type EnrichedHLProduct = {
+    sku: string;
+    productId: string;
+    productName: string;
+    colorName: string;
+    colorHex: string | null;
+    size: string;
+    gsm: string | null;
+    blankPrice: number;
+    printPrice?: number;
+  };
+
   // Enrich each order line item with HL product match
   const enriched = shopifyOrders.map((order) => {
     const hlStatus = confirmedMap[String(order.id)] ?? null;
     const enrichedLines = order.line_items.map((line) => {
       const sku = line.sku ?? "";
+      let hlProduct: EnrichedHLProduct | null = null;
+
       // 1. Try direct SKU catalog match (merchant uses our SKU format)
-      let hlProduct = sku ? lookupSku(sku) : null;
+      const catalogMatch = sku ? lookupSku(sku) : null;
+      if (catalogMatch) {
+        hlProduct = catalogMatch;
+      }
+
       // 2. Try custom mapping
       if (!hlProduct && sku && skuMappingMap[sku]) {
         const m = skuMappingMap[sku];
@@ -120,6 +170,30 @@ export async function GET(req: NextRequest) {
           blankPrice:  m.hl_blank_price,
         };
       }
+
+      // 3. Try design-based SKU (format: HLD-{8chars}-{SIZE})
+      if (!hlProduct && sku.startsWith("HLD-")) {
+        const parts = sku.split("-");
+        if (parts.length >= 3) {
+          const baseSku = parts.slice(0, parts.length - 1).join("-");
+          const size = parts[parts.length - 1] ?? "";
+          const design = designLookupMap[baseSku];
+          if (design) {
+            hlProduct = {
+              sku,
+              productId:   design.id,
+              productName: design.product_name,
+              colorName:   design.color_name,
+              colorHex:    null,
+              size,
+              gsm:         design.gsm ?? null,
+              blankPrice:  design.blank_price,
+              printPrice:  design.print_price ?? undefined,
+            };
+          }
+        }
+      }
+
       return { ...line, hlProduct: hlProduct ?? null };
     });
 

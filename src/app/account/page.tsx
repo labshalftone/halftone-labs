@@ -10,6 +10,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
 import { PRODUCTS } from "@/lib/products";
 import ShopifyTab from "@/components/ShopifyTab";
+import WalletTab from "@/components/WalletTab";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -28,7 +29,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "shopify" | "settings" | "invoices";
+type ActiveTab = "dashboard" | "orders" | "designs" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -59,6 +60,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "shopify", label: "Shopify Orders", icon: (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
+    </svg>
+  )},
+  { id: "wallet", label: "Wallet", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
     </svg>
   )},
   { id: "invoices", label: "Invoices", icon: (
@@ -2268,7 +2274,7 @@ export default function AccountPage() {
     const params = new URLSearchParams(window.location.search);
     const tab    = params.get("tab") as ActiveTab | null;
     const shopify = params.get("shopify");
-    if (tab && ["dashboard","orders","designs","branding","stores","shopify","invoices","settings"].includes(tab)) {
+    if (tab && ["dashboard","orders","designs","branding","stores","shopify","wallet","invoices","settings"].includes(tab)) {
       setActiveTab(tab);
     }
     if (shopify === "connected" || shopify === "error") {
@@ -2417,6 +2423,7 @@ export default function AccountPage() {
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
               {activeTab === "shopify"   && <ShopifyTab userId={user?.id ?? ""} />}
+              {activeTab === "wallet"    && <WalletTab userId={user?.id ?? ""} />}
               {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>

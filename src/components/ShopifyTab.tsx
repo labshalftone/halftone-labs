@@ -317,11 +317,13 @@ function SkuMapper({ userId }: { userId: string }) {
 
 // ── Orders list ───────────────────────────────────────────────────────────────
 function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string }) {
-  const [orders, setOrders]     = useState<EnrichedOrder[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
+  const [orders, setOrders]         = useState<EnrichedOrder[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState("");
   const [confirming, setConfirming] = useState<number | null>(null);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [confirmError, setConfirmError] = useState<Record<number, string>>({});
+  const [expanded, setExpanded]     = useState<number | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true); setError("");
@@ -334,8 +336,23 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  const handleConfirm = async (order: EnrichedOrder) => {
+  // Fetch wallet balance for display
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/wallet?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.balance !== undefined) setWalletBalance(Number(d.balance)); })
+      .catch(() => {});
+  }, [userId]);
+
+  const handleConfirmViaWallet = async (order: EnrichedOrder) => {
     setConfirming(order.id);
+    setConfirmError((prev) => { const next = { ...prev }; delete next[order.id]; return next; });
+
+    // Get first matched line item for product details
+    const firstMatched = order.line_items.find((l) => l.hlProduct !== null);
+    const totalInr = Math.round(Number(order.total_price));
+
     const res = await fetch("/api/shopify/orders/confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -347,12 +364,36 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
         shippingAddress:    order.shipping_address,
         customerEmail:      order.email,
         customerName:       order.shipping_address?.name ?? null,
+        useWallet:          true,
+        totalInr,
+        productName:        firstMatched?.hlProduct?.productName ?? order.line_items[0]?.title ?? null,
+        colorName:          firstMatched?.hlProduct?.colorName ?? null,
+        sizeName:           firstMatched?.hlProduct?.size ?? null,
+        shippingAmount:     0,
+        customerPhone:      null,
       }),
     });
     const data = await res.json();
     setConfirming(null);
-    if (res.ok) fetchOrders();
-    else alert(data.error ?? "Failed to confirm order");
+
+    if (res.status === 402) {
+      const balance = data.balance ?? 0;
+      setConfirmError((prev) => ({
+        ...prev,
+        [order.id]: `Insufficient wallet balance (₹${Number(balance).toLocaleString("en-IN")}). Top up in the Wallet tab.`,
+      }));
+      return;
+    }
+    if (!res.ok) {
+      setConfirmError((prev) => ({ ...prev, [order.id]: data.error ?? "Failed to confirm order" }));
+      return;
+    }
+    // Success — refresh wallet balance too
+    fetch(`/api/wallet?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.balance !== undefined) setWalletBalance(Number(d.balance)); })
+      .catch(() => {});
+    fetchOrders();
   };
 
   if (loading) {
@@ -380,9 +421,19 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
         <p className="text-xs text-zinc-400">{orders.length} orders from {shopDomain}</p>
-        <button onClick={fetchOrders} className="text-xs text-orange-500 hover:text-orange-600 transition-colors">↻ Refresh</button>
+        <div className="flex items-center gap-3">
+          {walletBalance !== null && (
+            <span className="flex items-center gap-1 text-xs font-semibold bg-zinc-100 text-zinc-600 rounded-full px-3 py-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              Wallet: ₹{Number(walletBalance).toLocaleString("en-IN")}
+            </span>
+          )}
+          <button onClick={fetchOrders} className="text-xs text-orange-500 hover:text-orange-600 transition-colors">↻ Refresh</button>
+        </div>
       </div>
 
       {orders.map((order) => {
@@ -506,21 +557,33 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                       </div>
                     )}
 
-                    {/* Confirm button */}
+                    {/* Confirm via Wallet button */}
                     {!isConfirmed && (
-                      <button
-                        onClick={() => handleConfirm(order)}
-                        disabled={isConfirming || !order.anyMatched}
-                        className="w-full py-3 rounded-xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
-                      >
-                        {isConfirming ? (
-                          <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Confirming…</>
-                        ) : !order.anyMatched ? (
-                          "Map SKUs to confirm"
-                        ) : (
-                          "Confirm for Production →"
+                      <div className="flex flex-col gap-2">
+                        {confirmError[order.id] && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 font-medium">
+                            {confirmError[order.id]}
+                          </div>
                         )}
-                      </button>
+                        <button
+                          onClick={() => handleConfirmViaWallet(order)}
+                          disabled={isConfirming || !order.anyMatched}
+                          className="w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-black hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                        >
+                          {isConfirming ? (
+                            <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Confirming…</>
+                          ) : !order.anyMatched ? (
+                            "Map SKUs to confirm"
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                              </svg>
+                              Confirm via Wallet →
+                            </>
+                          )}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </motion.div>
