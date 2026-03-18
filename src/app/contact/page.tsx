@@ -45,25 +45,23 @@ export default function ContactPage() {
   const inputCls = "w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors";
 
   return (
-    <div className="min-h-screen bg-[#f8f7f5]">
+    <div className="min-h-screen bg-[#f8f7f5] pt-16">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-zinc-900 pt-14">
-        <div className="max-w-5xl mx-auto px-6 py-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-500 mb-3">Halftone Labs</p>
-            <h1 className="text-5xl md:text-6xl font-black text-white leading-[0.95] mb-4" style={{ letterSpacing: "-0.05em" }}>
-              Get in touch
-            </h1>
-            <p className="text-zinc-400 text-lg max-w-md leading-relaxed">
-              Questions about your order, a design, or just want to say hi? Fill in the form and we&apos;ll get back to you within 24 hours.
-            </p>
-          </motion.div>
-        </div>
+      <div className="pt-24 pb-10 max-w-5xl mx-auto px-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-3">Halftone Labs</p>
+          <h1 className="text-5xl md:text-6xl font-black text-zinc-900 leading-[0.95] mb-4" style={{ letterSpacing: "-0.05em" }}>
+            Get in touch
+          </h1>
+          <p className="text-zinc-500 text-lg max-w-md leading-relaxed">
+            Questions about your order, a design, or just want to say hi? Fill in the form and we&apos;ll get back to you within 24 hours.
+          </p>
+        </motion.div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-5 gap-10">
+      <div className="max-w-5xl mx-auto px-6 pb-16 grid grid-cols-1 md:grid-cols-5 gap-10">
 
         {/* Form */}
         <motion.div

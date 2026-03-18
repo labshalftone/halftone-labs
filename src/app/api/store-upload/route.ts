@@ -9,24 +9,40 @@ import { createAdminClient } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { fileName, base64, contentType } = await req.json();
-    if (!base64 || !fileName) {
-      return NextResponse.json({ error: "fileName and base64 required" }, { status: 400 });
+    const contentType = req.headers.get("content-type") ?? "";
+    let buffer: Buffer;
+    let fileName: string;
+    let mimeType: string;
+
+    if (contentType.includes("multipart/form-data")) {
+      // Preferred: multipart form upload (no base64 overhead, no body size issues)
+      const formData = await req.formData();
+      const file = formData.get("file") as File | null;
+      if (!file) return NextResponse.json({ error: "file required" }, { status: 400 });
+      const bytes = await file.arrayBuffer();
+      buffer = Buffer.from(bytes);
+      fileName = file.name;
+      mimeType = file.type || "image/jpeg";
+    } else {
+      // Fallback: base64 JSON (small payloads like thumbnails only)
+      const body = await req.json();
+      const { fileName: fn, base64, contentType: ct } = body;
+      if (!base64 || !fn) {
+        return NextResponse.json({ error: "fileName and base64 required" }, { status: 400 });
+      }
+      const raw = (base64 as string).includes(",") ? (base64 as string).split(",")[1] : base64;
+      buffer = Buffer.from(raw, "base64");
+      fileName = fn;
+      mimeType = ct ?? "image/jpeg";
     }
 
     const supabase = createAdminClient();
-
-    // Strip data URL prefix if present
-    const raw = base64.includes(",") ? base64.split(",")[1] : base64;
-    const buffer = Buffer.from(raw, "base64");
-
-    // Unique path to avoid collisions
     const ext = fileName.split(".").pop() ?? "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { data, error } = await supabase.storage
       .from("store-assets")
-      .upload(path, buffer, { contentType: contentType ?? "image/png", upsert: false });
+      .upload(path, buffer, { contentType: mimeType, upsert: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
