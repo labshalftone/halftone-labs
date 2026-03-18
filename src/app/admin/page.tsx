@@ -1172,6 +1172,366 @@ function StudioPanel({ secret }: { secret: string }) {
   );
 }
 
+// ── Users panel ───────────────────────────────────────────────────────────────
+
+type UserProfile = {
+  id: string;
+  user_id: string | null;
+  customer_email: string;
+  name: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+  pin: string | null;
+  country: string | null;
+  gst_number: string | null;
+  company_name: string | null;
+  created_at: string;
+  order_count: number;
+  total_spend: number;
+  neck_label_orders: number;
+  last_order_at: string | null;
+  order_statuses: string[];
+  orders: {
+    id: string;
+    ref: string;
+    customer_email: string;
+    user_id: string | null;
+    total: number;
+    status: string;
+    neck_label: boolean;
+    created_at: string;
+    product_name: string;
+    mockup_url: string | null;
+    front_design_url: string | null;
+    back_design_url: string | null;
+    customer_name: string | null;
+  }[];
+};
+
+function UserAvatar({ name, email, size = 32 }: { name: string | null; email: string; size?: number }) {
+  const initials = (name ?? email).slice(0, 2).toUpperCase();
+  const colors = ["#f97316", "#8b5cf6", "#0ea5e9", "#10b981", "#f43f5e", "#6366f1"];
+  const idx = (name ?? email).charCodeAt(0) % colors.length;
+  return (
+    <div
+      className="flex items-center justify-center rounded-full flex-shrink-0 font-black text-white"
+      style={{ width: size, height: size, background: colors[idx], fontSize: size * 0.35 }}
+    >
+      {initials}
+    </div>
+  );
+}
+
+function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: () => void; secret: string }) {
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const activeOrders = user.orders.filter((o) =>
+    o.status !== "Delivered" && o.status !== "Cancelled"
+  ).length;
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+      <div className="max-w-3xl mx-auto flex flex-col gap-5">
+        {/* Back */}
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors self-start">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          All Users
+        </button>
+
+        {/* User header */}
+        <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <UserAvatar name={user.name} email={user.customer_email} size={56} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
+                  {user.name ?? user.customer_email}
+                </h2>
+                {user.gst_number && (
+                  <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">GST</span>
+                )}
+                {user.neck_label_orders > 0 && (
+                  <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">🏷️ Neck Label</span>
+                )}
+              </div>
+              <a href={`mailto:${user.customer_email}`} className="text-sm text-blue-600 hover:underline font-medium">{user.customer_email}</a>
+              {user.phone && <p className="text-xs text-zinc-500 mt-0.5">{user.phone}</p>}
+              {(user.city || user.state) && (
+                <p className="text-xs text-zinc-500 mt-0.5">{[user.city, user.state].filter(Boolean).join(", ")}</p>
+              )}
+              {user.company_name && (
+                <p className="text-xs text-zinc-600 font-semibold mt-0.5">{user.company_name}{user.gst_number ? ` · GST: ${user.gst_number}` : ""}</p>
+              )}
+              <p className="text-[0.65rem] text-zinc-400 mt-1.5">
+                Member since {new Date(user.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: "Total Orders", value: String(user.order_count), accent: "text-blue-600" },
+            { label: "Total Spend", value: `₹${user.total_spend.toLocaleString("en-IN")}`, accent: "text-orange-600" },
+            { label: "Neck Label", value: String(user.neck_label_orders), accent: "text-violet-600" },
+            { label: "Active", value: String(activeOrders), accent: "text-green-600" },
+          ].map((s) => (
+            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm text-center">
+              <p className={`text-2xl font-black ${s.accent}`}>{s.value}</p>
+              <p className="text-[0.62rem] text-zinc-400 mt-1 font-medium">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Orders list */}
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-zinc-100">
+            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400">Order History</p>
+          </div>
+          {user.orders.length === 0 ? (
+            <p className="text-sm text-zinc-400 text-center py-8">No orders yet</p>
+          ) : (
+            <div className="divide-y divide-zinc-100">
+              {user.orders.map((o) => {
+                const expanded = expandedOrder === o.id;
+                return (
+                  <div key={o.id}>
+                    <button
+                      className="w-full text-left px-5 py-4 hover:bg-zinc-50 transition-colors"
+                      onClick={() => setExpandedOrder(expanded ? null : o.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {o.mockup_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={o.mockup_url} alt="mockup" className="w-10 h-10 rounded-lg object-contain bg-zinc-100 border border-zinc-200 flex-shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-black text-zinc-900">#{o.ref}</span>
+                            <StatusBadge status={o.status} />
+                            {o.neck_label && (
+                              <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700">🏷️</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-500 mt-0.5 truncate">{o.product_name}</p>
+                          <p className="text-[0.62rem] text-zinc-300 mt-0.5">{new Date(o.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-sm font-black text-zinc-900">₹{o.total.toLocaleString("en-IN")}</p>
+                          <div className="flex gap-1 justify-end mt-1">
+                            {o.front_design_url && <span className="w-2 h-2 rounded-full bg-green-400 inline-block" title="Front design" />}
+                            {o.back_design_url && <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" title="Back design" />}
+                          </div>
+                          <svg className={`w-4 h-4 text-zinc-300 ml-auto mt-1 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                      </div>
+                    </button>
+
+                    {expanded && (o.front_design_url || o.back_design_url || o.mockup_url) && (
+                      <div className="px-5 pb-4 bg-zinc-50 border-t border-zinc-100">
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 py-3">Design Files</p>
+                        <div className="flex gap-3 flex-wrap">
+                          {o.mockup_url && (
+                            <div className="flex flex-col gap-1.5 items-center">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={o.mockup_url} alt="Mockup" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
+                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Mockup</p>
+                              <div className="flex gap-1">
+                                <a href={o.mockup_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <DownloadButton url={o.mockup_url} filename={`${o.ref}-mockup.jpg`} />
+                              </div>
+                            </div>
+                          )}
+                          {o.front_design_url && (
+                            <div className="flex flex-col gap-1.5 items-center">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={o.front_design_url} alt="Front" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
+                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Front</p>
+                              <div className="flex gap-1">
+                                <a href={o.front_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <DownloadButton url={o.front_design_url} filename={`${o.ref}-front.png`} />
+                              </div>
+                            </div>
+                          )}
+                          {o.back_design_url && (
+                            <div className="flex flex-col gap-1.5 items-center">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={o.back_design_url} alt="Back" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
+                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Back</p>
+                              <div className="flex gap-1">
+                                <a href={o.back_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <DownloadButton url={o.back_design_url} filename={`${o.ref}-back.png`} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UsersPanel({ secret }: { secret: string }) {
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/users", { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+    setUsers(Array.isArray(data) ? data : []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchUsers(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (selectedUser) {
+    return <UserDetailView user={selectedUser} onBack={() => setSelectedUser(null)} secret={secret} />;
+  }
+
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
+    return !q
+      || (u.name ?? "").toLowerCase().includes(q)
+      || u.customer_email.toLowerCase().includes(q)
+      || (u.city ?? "").toLowerCase().includes(q)
+      || (u.company_name ?? "").toLowerCase().includes(q);
+  });
+
+  const totalUsers = users.length;
+  const totalOrders = users.reduce((s, u) => s + u.order_count, 0);
+  const totalRevenue = users.reduce((s, u) => s + u.total_spend, 0);
+  const usersWithNeckLabel = users.filter((u) => u.neck_label_orders > 0).length;
+
+  // Top spenders threshold (top 20%)
+  const topThreshold = users.length > 0 ? users[Math.floor(users.length * 0.2)]?.total_spend ?? 0 : 0;
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+      <div className="max-w-5xl mx-auto flex flex-col gap-5">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Users</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">{totalUsers} registered user{totalUsers !== 1 ? "s" : ""}</p>
+          </div>
+          <button onClick={fetchUsers} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Refresh
+          </button>
+        </div>
+
+        {/* Stats strip */}
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: "Total Users", value: String(totalUsers), accent: "text-blue-600" },
+            { label: "Total Orders", value: String(totalOrders), accent: "text-zinc-900" },
+            { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-orange-600" },
+            { label: "Neck Label Users", value: String(usersWithNeckLabel), accent: "text-violet-600" },
+          ].map((s) => (
+            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm text-center">
+              <p className={`text-xl font-black ${s.accent}`}>{s.value}</p>
+              <p className="text-[0.62rem] text-zinc-400 mt-1 font-medium">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" /></svg>
+          <input
+            type="text"
+            placeholder="Search by name, email, city, company…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          />
+        </div>
+
+        {/* Table */}
+        {loading ? (
+          <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16 text-zinc-400">
+            <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            <p className="font-semibold text-sm">No users found</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+            {/* Table header */}
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b border-zinc-100 bg-zinc-50">
+              {["User", "City", "Orders", "Neck Label", "Spend", ""].map((h) => (
+                <span key={h} className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400">{h}</span>
+              ))}
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {filtered.map((u) => {
+                const isTopSpender = u.total_spend >= topThreshold && u.total_spend > 0;
+                return (
+                  <div
+                    key={u.id}
+                    className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 items-center px-5 py-3.5 hover:bg-zinc-50 transition-colors ${isTopSpender ? "border-l-2 border-l-orange-400" : ""}`}
+                  >
+                    {/* Name / Email */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <UserAvatar name={u.name} email={u.customer_email} size={32} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-zinc-900 truncate">{u.name ?? u.customer_email}</p>
+                        {u.name && <p className="text-xs text-zinc-400 truncate">{u.customer_email}</p>}
+                        {u.gst_number && (
+                          <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">GST</span>
+                        )}
+                      </div>
+                    </div>
+                    {/* City */}
+                    <div>
+                      <p className="text-xs text-zinc-600 font-medium">{u.city ?? "—"}</p>
+                      {u.state && <p className="text-[0.6rem] text-zinc-400">{u.state}</p>}
+                    </div>
+                    {/* Orders */}
+                    <p className="text-sm font-bold text-zinc-800">{u.order_count}</p>
+                    {/* Neck label */}
+                    <p className="text-sm font-semibold text-zinc-600">
+                      {u.neck_label_orders > 0 ? (
+                        <span className="inline-flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-orange-400 inline-block" />
+                          {u.neck_label_orders}
+                        </span>
+                      ) : "—"}
+                    </p>
+                    {/* Spend */}
+                    <p className={`text-sm font-black ${isTopSpender ? "text-orange-600" : "text-zinc-800"}`}>
+                      ₹{u.total_spend.toLocaleString("en-IN")}
+                    </p>
+                    {/* Action */}
+                    <button
+                      onClick={() => setSelectedUser(u)}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors whitespace-nowrap"
+                    >
+                      View →
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Analytics panel ───────────────────────────────────────────────────────────
 
 function AnalyticsPanel({ orders }: { orders: Order[] }) {
@@ -1314,7 +1674,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics" | "studio";
+type Tab = "orders" | "coupons" | "analytics" | "studio" | "users";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -1357,6 +1717,11 @@ export default function AdminPage() {
       id: "analytics",
       label: "Analytics",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
     },
     {
       id: "studio",
@@ -1402,6 +1767,7 @@ export default function AdminPage() {
           {tab === "coupons"   && <CouponsPanel   secret={secret} />}
           {tab === "analytics" && <AnalyticsPanel orders={orders} />}
           {tab === "studio"    && <StudioPanel    secret={secret} />}
+          {tab === "users"     && <UsersPanel     secret={secret} />}
         </div>
       </div>
     </div>
