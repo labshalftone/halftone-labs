@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 
+
 // ── Order confirmation email ───────────────────────────────────────────────────
 async function sendConfirmationEmail(params: {
   orderRef: string; customerName: string; customerEmail: string;
@@ -124,12 +125,19 @@ export async function POST(req: NextRequest) {
 
     const db = createAdminClient();
 
+    // Debug: log what we received
+    console.log(`[save-order] ${orderRef} — frontDesignUrl: ${frontDesignUrl ? `${frontDesignUrl.slice(0, 30)}… (${frontDesignUrl.length} chars)` : "null"}`);
+    console.log(`[save-order] ${orderRef} — backDesignUrl: ${backDesignUrl ? `${backDesignUrl.slice(0, 30)}… (${backDesignUrl.length} chars)` : "null"}`);
+    console.log(`[save-order] ${orderRef} — mockupUrl: ${mockupUrl ? `${mockupUrl.slice(0, 30)}… (${mockupUrl.length} chars)` : "null"}`);
+
     // Upload design files + placement mockup in parallel
     const [frontDesignStorageUrl, backDesignStorageUrl, mockupStorageUrl] = await Promise.all([
       frontDesignUrl ? uploadDesign(db, frontDesignUrl, `designs/${orderRef}/front.png`)    : null,
       backDesignUrl  ? uploadDesign(db, backDesignUrl,  `designs/${orderRef}/back.png`)     : null,
       mockupUrl      ? uploadDesign(db, mockupUrl,      `designs/${orderRef}/mockup.jpg`)   : null,
     ]);
+
+    console.log(`[save-order] ${orderRef} — uploads: front=${frontDesignStorageUrl ? "OK" : "null"}, back=${backDesignStorageUrl ? "OK" : "null"}, mockup=${mockupStorageUrl ? "OK" : "null"}`);
 
     // Save order
     const { data: order, error } = await db.from("orders").insert({
