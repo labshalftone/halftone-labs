@@ -535,8 +535,15 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const primarySrc = frontDesignSrc || backDesignSrc;
-      const thumbnail  = primarySrc ? await makeThumbnail(primarySrc) : "";
+      const zone = photoZone[zoneKey];
+      // Generate composite thumbnail (mockup photo + design overlay), same as cart
+      const thumbnail = color.mockupFront && frontDesignSrc
+        ? await makeCompositeThumbnail(color.mockupFront, frontDesignSrc, zone)
+        : color.mockupFront && backDesignSrc
+        ? await makeCompositeThumbnail(color.mockupBack ?? color.mockupFront, backDesignSrc, zone)
+        : frontDesignSrc || backDesignSrc
+        ? await makeThumbnail(frontDesignSrc || backDesignSrc)
+        : "";
       await fetch("/api/designs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

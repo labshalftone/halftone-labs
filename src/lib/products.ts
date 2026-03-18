@@ -24,7 +24,7 @@ export const PRODUCTS = [
     spec: "100% combed ring-spun cotton",
     fit: "Regular unisex fit, slightly tapered",
     blankPrice: 400,
-    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
     colors: [
       {
         name: "White", hex: "#FFFFFF", border: true,
@@ -140,6 +140,9 @@ export const PRODUCTS = [
         name: "White", hex: "#FFFFFF", border: true,
         mockupFront: "/mockups/baby-tee/Mannequin_Image1.png",
         mockupBack:  "/mockups/baby-tee/Mannequin_Image3.png",
+      },
+      {
+        name: "Black", hex: "#111111",
       },
       {
         name: "Baby Pink", hex: "#F5C2C7",

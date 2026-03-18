@@ -410,6 +410,14 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
 }
 
 // ── Designs Tab ────────────────────────────────────────────────────────────────
+function downloadThumbnail(thumbnail: string, name: string) {
+  // thumbnail is a data URL (jpeg) — convert to blob and trigger download
+  const a = document.createElement("a");
+  a.href = thumbnail;
+  a.download = `${name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-mockup.jpg`;
+  a.click();
+}
+
 function DesignsTab({ userId, email }: { userId: string | null; email: string | null }) {
   const [designs,    setDesigns]    = useState<Design[]>([]);
   const [loading,    setLoading]    = useState(true);
@@ -462,10 +470,10 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
             <motion.div key={d.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 hover:shadow-sm transition-all">
               {/* Thumbnail */}
-              <div className="h-36 flex items-center justify-center relative" style={{ background: d.color_hex || "#f4f4f5" }}>
+              <div className="h-40 flex items-center justify-center relative overflow-hidden group/thumb" style={{ background: d.thumbnail ? "#ffffff" : (d.color_hex || "#f4f4f5") }}>
                 {d.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={d.thumbnail} alt={d.name} className="w-24 h-24 object-contain drop-shadow-md" />
+                  <img src={d.thumbnail} alt={d.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="text-4xl opacity-40">👕</div>
                 )}
@@ -473,6 +481,19 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   <span className="absolute top-2 right-2 text-[9px] font-black px-2 py-0.5 rounded-full bg-white/80 text-zinc-600 backdrop-blur-sm">
                     Custom print
                   </span>
+                )}
+                {/* Download overlay — appears on hover if thumbnail exists */}
+                {d.thumbnail && (
+                  <button
+                    onClick={() => downloadThumbnail(d.thumbnail!, d.name)}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity backdrop-blur-[2px]"
+                    title="Download mockup"
+                  >
+                    <svg className="w-6 h-6 text-white drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <span className="text-white text-[10px] font-bold drop-shadow">Download mockup</span>
+                  </button>
                 )}
               </div>
 
@@ -499,6 +520,16 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     </svg>
                     Add to Cart
                   </button>
+                  {d.thumbnail && (
+                    <button
+                      onClick={() => downloadThumbnail(d.thumbnail!, d.name)}
+                      className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+                      title="Download mockup">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                    </button>
+                  )}
                   <button onClick={() => handleDelete(d.id)} disabled={deleting === d.id}
                     className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-red-200 hover:text-red-500 transition-colors disabled:opacity-40"
                     title="Delete design">
@@ -794,25 +825,33 @@ function StoreTeePreview({
   );
 }
 
-// ── Upload helper (reads file → calls /api/store-upload) ──────────────────────
+// ── Upload helpers ─────────────────────────────────────────────────────────────
+
+/** Upload a File using multipart/form-data — no base64 overhead, no body-size 413 */
 async function uploadFileToStorage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const res = await fetch("/api/store-upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fileName: file.name, base64: reader.result as string, contentType: file.type }),
-        });
-        const data = await res.json();
-        if (!res.ok) reject(new Error(data.error ?? "Upload failed"));
-        else resolve(data.url as string);
-      } catch (e) { reject(e); }
-    };
-    reader.onerror = () => reject(new Error("File read failed"));
-    reader.readAsDataURL(file);
-  });
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/store-upload", { method: "POST", body: form });
+  const text = await res.text();
+  let data: { url?: string; error?: string } = {};
+  try { data = JSON.parse(text); } catch { throw new Error(text || "Upload failed"); }
+  if (!res.ok) throw new Error(data.error ?? "Upload failed");
+  return data.url!;
+}
+
+/** Upload a base64 data-URL (thumbnails ≤ 30 KB — safe as JSON) */
+async function uploadDataUrlToStorage(dataUrl: string, fileName: string): Promise<string | null> {
+  try {
+    const res = await fetch("/api/store-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileName, base64: dataUrl, contentType: "image/jpeg" }),
+    });
+    const text = await res.text();
+    let data: { url?: string } = {};
+    try { data = JSON.parse(text); } catch { return null; }
+    return res.ok ? (data.url ?? null) : null;
+  } catch { return null; }
 }
 
 // Type for designs fetched from the API
@@ -887,23 +926,11 @@ function PushDesignModal({
       try { finalImageUrl = await uploadFileToStorage(imageFile); }
       catch (e) { setErr((e as Error).message ?? "Upload failed"); setSaving(false); return; }
     } else if (selected.thumbnail && selected.thumbnail.startsWith("data:")) {
-      // Upload the design thumbnail to storage so it's a permanent URL
-      try {
-        const res = await fetch("/api/store-upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: `thumb-${selected.id}.jpg`,
-            base64: selected.thumbnail,
-            contentType: "image/jpeg",
-          }),
-        });
-        const data = await res.json();
-        if (res.ok) finalImageUrl = data.url;
-      } catch { /* use null */ }
+      // Thumbnail is a small base64 JPEG — safe to upload via JSON
+      finalImageUrl = await uploadDataUrlToStorage(selected.thumbnail, `thumb-${selected.id}.jpg`);
     }
 
-    const res = await fetch(`/api/stores/${store.handle}/products`, {
+    const prodRes = await fetch(`/api/stores/${store.handle}/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -920,8 +947,10 @@ function PushDesignModal({
         print_technique: "DTG",
       }),
     });
-    const data = await res.json();
-    if (!res.ok) { setErr(data.error ?? "Failed"); setSaving(false); return; }
+    const prodText = await prodRes.text();
+    let data: StoreProductRow & { error?: string };
+    try { data = JSON.parse(prodText); } catch { setErr(prodText || "Failed"); setSaving(false); return; }
+    if (!prodRes.ok) { setErr(data.error ?? "Failed"); setSaving(false); return; }
     onAdded(data);
     onClose();
   }
@@ -1206,14 +1235,17 @@ function StoresTab({ userId }: { userId: string | null }) {
     };
     if (finalImageUrl) body.image_url = finalImageUrl;
 
-    const res = await fetch(`/api/stores/${store.handle}/products?id=${productId}`, {
+    const patchRes = await fetch(`/api/stores/${store.handle}/products?id=${productId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const data = await res.json();
-    if (res.ok) {
-      setProducts((prev) => prev.map((p) => p.id === productId ? { ...p, ...data } : p));
+    if (patchRes.ok) {
+      const patchText = await patchRes.text();
+      try {
+        const patchData = JSON.parse(patchText);
+        setProducts((prev) => prev.map((p) => p.id === productId ? { ...p, ...patchData } : p));
+      } catch { /* ignore parse error, still close the edit form */ }
       setEditingProductId(null);
     }
     setEditSaving(false);
