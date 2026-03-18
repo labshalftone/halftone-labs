@@ -78,9 +78,9 @@ function TeeMockup({ color, isOversized }: { color: string; isOversized?: boolea
 // ─── DESIGN PLACER ────────────────────────────────────────────────────────────
 // Print zone as % of the photo container — portrait orientation (taller than wide)
 const PHOTO_ZONE = {
-  regular:  { left: 30, top: 18, width: 40, height: 46 },
-  oversized: { left: 28, top: 17, width: 44, height: 48 },
-  baby:     { left: 28, top: 20, width: 44, height: 28 },
+  regular:  { left: 30, top: 23, width: 40, height: 46 },
+  oversized: { left: 28, top: 22, width: 44, height: 48 },
+  baby:     { left: 28, top: 25, width: 44, height: 28 },
 };
 
 function DesignPlacer({
