@@ -93,7 +93,8 @@ export async function GET(req: NextRequest) {
     .select("shopify_sku, hl_product_id, hl_product_name, hl_color_name, hl_color_hex, hl_size, hl_gsm, hl_blank_price")
     .eq("user_id", userId);
 
-  const skuMappingMap: Record<string, typeof skuMappings extends null ? never : (typeof skuMappings)[0]> = {};
+  type SkuMappingRow = { shopify_sku: string; hl_product_id: string; hl_product_name: string; hl_color_name: string; hl_color_hex: string; hl_size: string; hl_gsm: string; hl_blank_price: number };
+  const skuMappingMap: Record<string, SkuMappingRow> = {};
   for (const m of skuMappings ?? []) {
     skuMappingMap[m.shopify_sku] = m;
   }
