@@ -55,9 +55,10 @@ function UsageMeter({
 // ─── Plan badge ───────────────────────────────────────────────────────────────
 function PlanBadge({ plan, status }: { plan: PlanKey; status: string }) {
   const colors: Record<PlanKey, string> = {
-    free:         "bg-zinc-100 text-zinc-600",
-    studio:       "bg-brand-8 text-brand",
-    organization: "bg-zinc-900 text-white",
+    free:     "bg-zinc-100 text-zinc-600",
+    launch:   "bg-brand-8 text-brand",
+    scale:    "bg-violet-100 text-violet-700",
+    business: "bg-zinc-900 text-white",
   };
   return (
     <span className={`inline-block text-[0.68rem] font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-lg ${colors[plan]}`}>
@@ -127,40 +128,50 @@ function UpgradeCard({
 
   const highlights: Record<PlanKey, string[]> = {
     free: [],
-    studio: [
-      "Up to 10 active drops",
+    launch: [
+      "Up to 5 active drops",
+      "Unlimited designs",
       "Custom branding on your storefront",
       "Custom domain",
       "Shopify integration",
       "Full analytics + CSV export",
+    ],
+    scale: [
+      "Up to 20 active drops",
+      "3 storefronts",
+      "Up to 5 team members",
+      "White-label — remove Halftone branding",
+      "API access",
       "Priority support",
     ],
-    organization: [
+    business: [
       "Unlimited drops",
-      "Up to 10 team members",
-      "White-label — remove Halftone branding",
-      "3 storefronts",
-      "API access",
+      "Unlimited storefronts",
+      "Unlimited team members",
       "Dedicated account manager",
+      "Bulk discounts",
+      "Custom billing",
     ],
   };
 
+  const isDark = to === "business";
+
   return (
-    <div className={`rounded-xl border p-5 ${to === "organization" ? "bg-zinc-950 border-zinc-800" : "bg-white border-zinc-200"}`}>
+    <div className={`rounded-xl border p-5 ${isDark ? "bg-zinc-950 border-zinc-800" : "bg-white border-zinc-200"}`}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${to === "organization" ? "text-zinc-400" : "text-brand"}`}>
+          <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDark ? "text-zinc-400" : "text-brand"}`}>
             {plan.name}
           </p>
-          <p className={`text-sm font-medium leading-snug ${to === "organization" ? "text-white" : "text-zinc-900"}`}>
+          <p className={`text-sm font-medium leading-snug ${isDark ? "text-white" : "text-zinc-900"}`}>
             {plan.tagline}
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className={`text-xl font-bold tracking-tight ${to === "organization" ? "text-white" : "text-zinc-900"}`}>
+          <p className={`text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}>
             ₹{price.toLocaleString("en-IN")}
           </p>
-          <p className={`text-[0.7rem] ${to === "organization" ? "text-zinc-500" : "text-zinc-400"}`}>
+          <p className={`text-[0.7rem] ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
             / month{billing === "annual" ? " · billed annually" : ""}
           </p>
         </div>
@@ -169,8 +180,8 @@ function UpgradeCard({
       <ul className="space-y-2 mb-5">
         {highlights[to].map((item) => (
           <li key={item} className="flex items-center gap-2 text-xs">
-            <Check className={`w-3.5 h-3.5 shrink-0 ${to === "organization" ? "text-emerald-400" : "text-brand"}`} />
-            <span className={to === "organization" ? "text-zinc-300" : "text-zinc-600"}>{item}</span>
+            <Check className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-brand"}`} />
+            <span className={isDark ? "text-zinc-300" : "text-zinc-600"}>{item}</span>
           </li>
         ))}
       </ul>
@@ -178,7 +189,7 @@ function UpgradeCard({
       <Link
         href={`/pricing?plan=${to}`}
         className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-          to === "organization"
+          isDark
             ? "bg-white text-zinc-900 hover:bg-zinc-100"
             : "bg-zinc-900 text-white hover:bg-zinc-800"
         }`}
@@ -230,8 +241,9 @@ export default function BillingTab({ userId }: BillingTabProps) {
 
   // Determine upgrade path
   const nextPlan: PlanKey | null =
-    plan === "free" ? "studio" :
-    plan === "studio" ? "organization" :
+    plan === "free"   ? "launch"   :
+    plan === "launch" ? "scale"    :
+    plan === "scale"  ? "business" :
     null;
 
   return (
@@ -277,7 +289,7 @@ export default function BillingTab({ userId }: BillingTabProps) {
               <div className="text-xs text-zinc-400">
                 Switch to annual to save{" "}
                 <span className="text-emerald-600 font-semibold">
-                  {plan === "studio" ? "33%" : "37%"}
+                  {plan === "launch" ? "25%" : plan === "scale" ? "17%" : "23%"}
                 </span>
                 {" — "}
                 <Link href="/pricing" className="underline hover:text-zinc-600">change plan</Link>
@@ -396,18 +408,18 @@ export default function BillingTab({ userId }: BillingTabProps) {
             Next plan
           </p>
           <UpgradeCard from={plan} to={nextPlan} billing={billingCycle} />
-          {nextPlan === "studio" && (
+          {nextPlan === "launch" && (
             <p className="mt-2 text-center">
               <Link href="/pricing" className="text-xs text-zinc-400 hover:text-zinc-600 underline">
-                Or skip to Organization — see all plans
+                Or compare Scale and Business — see all plans
               </Link>
             </p>
           )}
         </motion.div>
       )}
 
-      {/* On Organization — contact for custom */}
-      {plan === "organization" && (
+      {/* On Business — contact for custom */}
+      {plan === "business" && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

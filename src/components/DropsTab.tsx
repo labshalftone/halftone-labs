@@ -4,6 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DropBuilder, { type DropDraft } from "./DropBuilder";
 import LearnLink from "@/components/LearnLink";
+import UpgradeModal from "@/components/UpgradeModal";
+import { UsageBar } from "@/components/PlanGate";
+import { useSubscription } from "@/lib/subscription-context";
+import { UNLIMITED } from "@/lib/plans";
 
 type Design = {
   id: string;
@@ -211,6 +215,10 @@ export default function DropsTab({ userId }: Props) {
   const [editingDrop, setEditingDrop] = useState<Drop | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedWaitlist, setExpandedWaitlist] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const { limit } = useSubscription();
+  const dropLimit = limit("activeDrops");
 
   const fetchDrops = useCallback(async () => {
     setLoading(true);
@@ -259,7 +267,15 @@ export default function DropsTab({ userId }: Props) {
     } catch (e) { console.error(e); }
   };
 
-  const openBuilder = (drop?: Drop) => { setEditingDrop(drop ?? null); setMode("builder"); };
+  const activeDropCount = drops.filter((d) => d.status === "live" || d.status === "scheduled").length;
+  const atDropLimit     = dropLimit !== UNLIMITED && activeDropCount >= dropLimit;
+
+  const openBuilder = (drop?: Drop) => {
+    // For new drops, check the active limit first
+    if (!drop && atDropLimit) { setShowUpgradeModal(true); return; }
+    setEditingDrop(drop ?? null);
+    setMode("builder");
+  };
   const closeBuilder = () => { setEditingDrop(null); setMode("list"); fetchDrops(); };
 
   const dropToInitialDraft = (drop: Drop): Partial<DropDraft> => ({
@@ -275,9 +291,9 @@ export default function DropsTab({ userId }: Props) {
     waitlistEnabled: drop.waitlist_enabled,
   });
 
-  const liveCount = drops.filter((d) => d.status === "live").length;
+  const liveCount      = drops.filter((d) => d.status === "live").length;
   const scheduledCount = drops.filter((d) => d.status === "scheduled").length;
-  const defaultStore = stores[0];
+  const defaultStore   = stores[0];
 
   // ── Builder mode ──────────────────────────────────────────────────────────
   if (mode === "builder") {
@@ -297,11 +313,33 @@ export default function DropsTab({ userId }: Props) {
   return (
     <div className="space-y-5">
 
+      {/* Upgrade modal — shown when drop limit is hit */}
+      <AnimatePresence>
+        {showUpgradeModal && (
+          <UpgradeModal
+            featureLabel={`more than ${dropLimit} active drop${dropLimit !== 1 ? "s" : ""}`}
+            requiredPlan="launch"
+            heading={`This plan includes ${dropLimit} active drop`}
+            body="To run multiple drops at once — live releases, campaigns, or collections — upgrade to Launch."
+            onClose={() => setShowUpgradeModal(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Drops</h2>
-          <p className="text-sm text-ds-body mt-0.5">Limited releases, collections & campaigns</p>
+          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+            <p className="text-sm text-ds-body">Limited releases, collections & campaigns</p>
+            {!loading && dropLimit !== UNLIMITED && (
+              <UsageBar
+                used={activeDropCount}
+                limit={dropLimit}
+                label="active drops"
+              />
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <LearnLink
@@ -311,12 +349,22 @@ export default function DropsTab({ userId }: Props) {
           />
           <button
             onClick={() => openBuilder()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 transition-colors shadow-sm"
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm ${
+              atDropLimit
+                ? "bg-zinc-100 text-ds-body hover:bg-zinc-200"
+                : "bg-ds-dark text-white hover:bg-ds-dark2"
+            }`}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            New Drop
+            {atDropLimit ? (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            )}
+            {atDropLimit ? "Limit reached" : "New Drop"}
           </button>
         </div>
       </div>

@@ -35,9 +35,7 @@ export default function UpgradeModal({
 }: UpgradeModalProps) {
   const plan = PLANS[requiredPlan];
 
-  const defaultHeading = requiredPlan === "studio"
-    ? `${featureLabel} is available on the Studio plan`
-    : `${featureLabel} is available on the Organization plan`;
+  const defaultHeading = `${featureLabel} is available on the ${plan.name} plan`;
 
   const defaultBody = plan.description;
 

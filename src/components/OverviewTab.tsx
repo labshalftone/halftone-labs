@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import LearnLink from "@/components/LearnLink";
+import { useSubscription } from "@/lib/subscription-context";
+import { PLANS, UNLIMITED } from "@/lib/plans";
 
 type DashboardData = {
   totalRevenue: number;
@@ -165,6 +167,12 @@ export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: 
   const [data, setData]       = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+
+  const { plan, limit, loading: subLoading } = useSubscription();
+  const planData    = PLANS[plan];
+  const dropLimit   = limit("activeDrops");
+  const storeLimit  = limit("storefronts");
+  const memberLimit = limit("teamMembers");
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -331,6 +339,79 @@ export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: 
           >
             See orders →
           </button>
+        </motion.div>
+      )}
+
+      {/* ── Plan status strip ─────────────────────────────────────────── */}
+      {!subLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="flex items-center gap-4 bg-white border border-black/[0.06] rounded-2xl px-5 py-3.5 flex-wrap"
+        >
+          {/* Plan badge */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-brand">{planData.name}</span>
+            <span className="text-[10px] text-ds-muted">{planData.tagline}</span>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden sm:block w-px h-4 bg-black/[0.06] flex-shrink-0" />
+
+          {/* Usage indicators */}
+          <div className="flex items-center gap-4 flex-wrap flex-1 min-w-0">
+            {/* Active drops */}
+            <div className="flex items-center gap-1.5 text-xs text-ds-muted">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Active drops</span>
+              <span className={`font-semibold ${dropLimit !== UNLIMITED ? "text-ds-dark" : "text-ds-muted"}`}>
+                {dropLimit === UNLIMITED ? "Unlimited" : `/ ${dropLimit}`}
+              </span>
+            </div>
+            {/* Storefronts */}
+            {storeLimit !== UNLIMITED && (
+              <div className="flex items-center gap-1.5 text-xs text-ds-muted">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>Storefronts</span>
+                <span className="font-semibold text-ds-dark">/ {storeLimit}</span>
+              </div>
+            )}
+            {/* Team members — only show when plan includes it */}
+            {memberLimit !== UNLIMITED && memberLimit > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-ds-muted">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Team</span>
+                <span className="font-semibold text-ds-dark">/ {memberLimit}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Upgrade CTA — only on free plan */}
+          {plan === "free" && (
+            <Link
+              href="/pricing"
+              className="flex-shrink-0 text-[11px] font-semibold text-brand hover:text-brand-dark transition-colors whitespace-nowrap"
+            >
+              Upgrade →
+            </Link>
+          )}
+
+          {/* Manage billing — on paid plans */}
+          {plan !== "free" && (
+            <button
+              onClick={() => onTabChange?.("billing")}
+              className="flex-shrink-0 text-[11px] font-semibold text-ds-muted hover:text-ds-body transition-colors whitespace-nowrap"
+            >
+              Manage billing →
+            </button>
+          )}
         </motion.div>
       )}
 

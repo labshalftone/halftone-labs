@@ -19,6 +19,8 @@ import OrgDashboard from "@/components/OrgDashboard";
 import OrgSettings from "@/components/OrgSettings";
 import DropsTab from "@/components/DropsTab";
 import BillingTab from "@/components/BillingTab";
+import { LockedFeatureCard } from "@/components/PlanGate";
+import { useSubscription } from "@/lib/subscription-context";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -983,6 +985,11 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
 
 // ── Branding Tab ──────────────────────────────────────────────────────────────
 function BrandingTab({ userId, email }: { userId: string | null; email: string | null }) {
+  const { can }   = useSubscription();
+  const canBrand  = can("customBranding");
+  const canDomain = can("customDomain");
+  const canWhiteLabel = can("removeHalftone");
+
   const [darkLabel,  setDarkLabel]  = useState<string | null>(null);
   const [lightLabel, setLightLabel] = useState<string | null>(null);
   const [saving, setSaving]  = useState(false);
@@ -1058,100 +1065,147 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Branding</h2>
-        <p className="text-ds-body text-sm mt-1">Upload your custom neck labels. These will be printed inside your garments via DTF label transfer.</p>
+        <p className="text-ds-body text-sm mt-1">Custom labels, domain, and white-label options.</p>
       </div>
 
-      {/* DTF Neck Labels section */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4 max-w-2xl">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-brand-8 flex items-center justify-center">
-            <svg className="w-4.5 h-4.5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-ds-dark">DTF Neck Labels</h3>
-            <p className="text-xs text-ds-muted">Upload a dark version (for light garments) and a light version (for dark garments)</p>
-          </div>
-        </div>
+      <div className="space-y-4 max-w-2xl">
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {/* Dark label */}
-          <div>
-            <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Dark label <span className="text-ds-muted normal-case font-normal">(for light garments)</span></p>
-            <div
-              onClick={() => darkRef.current?.click()}
-              className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 hover:bg-ds-light-gray transition-all overflow-hidden"
-              style={{ background: "#fafafa" }}>
-              {darkLabel ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={darkLabel} alt="Dark label" className="max-h-32 max-w-full object-contain p-3" />
-              ) : (
-                <>
-                  <svg className="w-8 h-8 text-ds-muted mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="text-xs text-ds-muted font-medium">Click to upload PNG</p>
-                  <p className="text-[10px] text-ds-muted mt-0.5">Transparent background recommended</p>
-                </>
-              )}
-              {darkLabel && (
-                <button onClick={(e) => { e.stopPropagation(); setDarkLabel(null); }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-black/[0.06] flex items-center justify-center text-ds-muted hover:text-red-500 transition-colors text-sm leading-none">
-                  ×
-                </button>
-              )}
+        {/* DTF Neck Labels — locked for free */}
+        {!canBrand ? (
+          <LockedFeatureCard
+            heading="Custom neck labels"
+            body="Add your logo inside every garment. Upload a dark and light version of your label — applied as a DTF transfer during fulfilment."
+            requiredPlan="launch"
+            note="Available on Launch and above."
+          />
+        ) : (
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-brand-8 flex items-center justify-center">
+                <svg className="w-4.5 h-4.5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-ds-dark">DTF Neck Labels</h3>
+                <p className="text-xs text-ds-muted">Upload a dark version (for light garments) and a light version (for dark garments)</p>
+              </div>
             </div>
-            <input ref={darkRef} type="file" accept="image/png,image/webp,image/jpeg" className="hidden" onChange={(e) => handleFile(e, "dark")} />
-          </div>
 
-          {/* Light label */}
-          <div>
-            <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Light label <span className="text-ds-muted normal-case font-normal">(for dark garments)</span></p>
-            <div
-              onClick={() => lightRef.current?.click()}
-              className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-all overflow-hidden"
-              style={{ background: "#1a1a1a" }}>
-              {lightLabel ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={lightLabel} alt="Light label" className="max-h-32 max-w-full object-contain p-3" />
-              ) : (
-                <>
-                  <svg className="w-8 h-8 text-ds-body mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="text-xs text-ds-body font-medium">Click to upload PNG</p>
-                  <p className="text-[10px] text-ds-body mt-0.5">Transparent background recommended</p>
-                </>
-              )}
-              {lightLabel && (
-                <button onClick={(e) => { e.stopPropagation(); setLightLabel(null); }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-zinc-700 border border-zinc-600 flex items-center justify-center text-ds-muted hover:text-red-400 transition-colors text-sm leading-none">
-                  ×
-                </button>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {/* Dark label */}
+              <div>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Dark label <span className="text-ds-muted normal-case font-normal">(for light garments)</span></p>
+                <div
+                  onClick={() => darkRef.current?.click()}
+                  className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 hover:bg-ds-light-gray transition-all overflow-hidden"
+                  style={{ background: "#fafafa" }}>
+                  {darkLabel ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={darkLabel} alt="Dark label" className="max-h-32 max-w-full object-contain p-3" />
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 text-ds-muted mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-xs text-ds-muted font-medium">Click to upload PNG</p>
+                      <p className="text-[10px] text-ds-muted mt-0.5">Transparent background recommended</p>
+                    </>
+                  )}
+                  {darkLabel && (
+                    <button onClick={(e) => { e.stopPropagation(); setDarkLabel(null); }}
+                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-black/[0.06] flex items-center justify-center text-ds-muted hover:text-red-500 transition-colors text-sm leading-none">
+                      ×
+                    </button>
+                  )}
+                </div>
+                <input ref={darkRef} type="file" accept="image/png,image/webp,image/jpeg" className="hidden" onChange={(e) => handleFile(e, "dark")} />
+              </div>
+
+              {/* Light label */}
+              <div>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Light label <span className="text-ds-muted normal-case font-normal">(for dark garments)</span></p>
+                <div
+                  onClick={() => lightRef.current?.click()}
+                  className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-all overflow-hidden"
+                  style={{ background: "#1a1a1a" }}>
+                  {lightLabel ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={lightLabel} alt="Light label" className="max-h-32 max-w-full object-contain p-3" />
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 text-ds-body mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-xs text-ds-body font-medium">Click to upload PNG</p>
+                      <p className="text-[10px] text-ds-body mt-0.5">Transparent background recommended</p>
+                    </>
+                  )}
+                  {lightLabel && (
+                    <button onClick={(e) => { e.stopPropagation(); setLightLabel(null); }}
+                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-zinc-700 border border-zinc-600 flex items-center justify-center text-ds-muted hover:text-red-400 transition-colors text-sm leading-none">
+                      ×
+                    </button>
+                  )}
+                </div>
+                <input ref={lightRef} type="file" accept="image/png,image/webp,image/jpeg" className="hidden" onChange={(e) => handleFile(e, "light")} />
+              </div>
             </div>
-            <input ref={lightRef} type="file" accept="image/png,image/webp,image/jpeg" className="hidden" onChange={(e) => handleFile(e, "light")} />
+
+            <div className="bg-brand-8 border border-orange-100 rounded-xl px-4 py-3 mb-5">
+              <p className="text-xs text-orange-700 font-semibold">Neck label specs</p>
+              <p className="text-xs text-brand-dark mt-0.5">Upload PNG files with transparent backgrounds. Recommended size: 600×600px or larger. Labels are printed on a 2×2 inch DTF transfer and applied inside the collar during fulfilment.</p>
+            </div>
+
+            <button onClick={handleSave} disabled={saving || (!darkLabel && !lightLabel)}
+              className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"} disabled:opacity-40 disabled:cursor-not-allowed`}>
+              {saving ? "Saving…" : saved ? "Saved!" : "Save branding"}
+            </button>
           </div>
+        )}
+
+        {/* Custom domain — locked for free */}
+        {!canDomain ? (
+          <LockedFeatureCard
+            heading="Custom domain"
+            body="Use your own domain for your storefront — yourbrand.com instead of halftonelabs.in/store/yourhandle."
+            requiredPlan="launch"
+            note="Available on Launch and above."
+          />
+        ) : (
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-ds-dark">Custom domain</h3>
+                <p className="text-xs text-ds-muted">Connect your own domain to your storefront</p>
+              </div>
+            </div>
+            <p className="text-sm text-zinc-500 leading-relaxed">Custom domain configuration is set up through your account manager. Contact us at <span className="font-medium text-ds-body">hello@halftonelabs.in</span> to get started.</p>
+          </div>
+        )}
+
+        {/* White-label — locked for free/studio */}
+        {!canWhiteLabel && (
+          <LockedFeatureCard
+            heading="Remove Halftone branding"
+            body="Replace all Halftone references — storefront badges, email footers, packing slips — with your own identity. Your customers see only your brand."
+            requiredPlan="scale"
+            note="Available on Scale and above."
+          />
+        )}
+
+        {/* Coming soon */}
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-6 opacity-60">
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-1">Coming soon</p>
+          <h3 className="font-semibold text-ds-dark mb-1">More branding options</h3>
+          <p className="text-sm text-ds-body">Hang tags, poly mailer branding, and custom tissue paper.</p>
         </div>
 
-        {/* Info note */}
-        <div className="bg-brand-8 border border-orange-100 rounded-xl px-4 py-3 mb-5">
-          <p className="text-xs text-orange-700 font-semibold">💡 Neck label specs</p>
-          <p className="text-xs text-brand-dark mt-0.5">Upload PNG files with transparent backgrounds. Recommended size: 600×600px or larger. Labels are printed on a 2×2 inch DTF transfer and applied inside the collar during fulfilment.</p>
-        </div>
-
-        <button onClick={handleSave} disabled={saving || (!darkLabel && !lightLabel)}
-          className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"} disabled:opacity-40 disabled:cursor-not-allowed`}>
-          {saving ? "Saving…" : saved ? "✓ Saved!" : "Save branding"}
-        </button>
-      </div>
-
-      {/* Coming soon: more branding options */}
-      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-2xl opacity-60">
-        <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-1">Coming soon</p>
-        <h3 className="font-semibold text-ds-dark mb-1">More branding options</h3>
-        <p className="text-sm text-ds-body">Hang tags, poly mailer branding, and custom tissue paper coming later this year.</p>
       </div>
     </div>
   );
@@ -1641,6 +1695,8 @@ function PayoutBanner({ userId }: { userId: string | null }) {
 }
 
 function StoresTab({ userId }: { userId: string | null }) {
+  const { limit: subLimit } = useSubscription();
+  const storefrontLimit = subLimit("storefronts");
   const [store, setStore] = useState<ArtistStore | null>(null);
   const [products, setProducts] = useState<StoreProductRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1786,32 +1842,40 @@ function StoresTab({ userId }: { userId: string | null }) {
     </div>
   );
 
-  // No store yet — launch CTA
+  // No store yet — launch CTA (or locked gate)
   if (!store && !showCreate) return (
     <div>
       <h2 className="text-2xl font-semibold text-ds-dark mb-6" style={{ letterSpacing: "-0.04em" }}>My Store</h2>
-      <div className="bg-ds-dark rounded-3xl p-10 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.05]"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
-        <div className="relative z-10">
-          <div className="text-5xl mb-4">🛍️</div>
-          <h3 className="font-semibold text-white text-xl mb-2" style={{ letterSpacing: "-0.04em" }}>Launch your merch store</h3>
-          <p className="text-ds-muted text-sm max-w-sm mx-auto mb-6">
-            Create a public storefront, add your products with custom pricing, and share the link with your fans. We handle print, pack, and ship.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-            {["No inventory", "On-demand fulfillment", "You keep the margin"].map((f) => (
-              <div key={f} className="flex items-center gap-1.5 text-ds-muted text-xs font-semibold">
-                <span className="text-green-400">✓</span>{f}
-              </div>
-            ))}
+      {storefrontLimit === 0 ? (
+        <LockedFeatureCard
+          heading="Storefront not available on this plan"
+          body="Create a public merch store — add products with your own pricing and share a link with your fans. Upgrade to get your storefront."
+          requiredPlan="launch"
+        />
+      ) : (
+        <div className="bg-ds-dark rounded-3xl p-10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+          <div className="relative z-10">
+            <div className="text-5xl mb-4">🛍️</div>
+            <h3 className="font-semibold text-white text-xl mb-2" style={{ letterSpacing: "-0.04em" }}>Launch your merch store</h3>
+            <p className="text-ds-muted text-sm max-w-sm mx-auto mb-6">
+              Create a public storefront, add your products with custom pricing, and share the link with your fans. We handle print, pack, and ship.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+              {["No inventory", "On-demand fulfillment", "You keep the margin"].map((f) => (
+                <div key={f} className="flex items-center gap-1.5 text-ds-muted text-xs font-semibold">
+                  <span className="text-green-400">✓</span>{f}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowCreate(true)}
+              className="px-8 py-3 rounded-full bg-brand text-white font-semibold text-sm hover:bg-brand-dark transition-colors">
+              Create your store →
+            </button>
           </div>
-          <button onClick={() => setShowCreate(true)}
-            className="px-8 py-3 rounded-full bg-brand text-white font-semibold text-sm hover:bg-brand-dark transition-colors">
-            Create your store →
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 

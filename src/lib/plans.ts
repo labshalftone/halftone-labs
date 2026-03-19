@@ -2,7 +2,7 @@
 // Everything subscription-related in the product derives from this file.
 // Import PLANS or the helper functions — never hardcode plan logic elsewhere.
 
-export type PlanKey = "free" | "studio" | "organization";
+export type PlanKey = "free" | "launch" | "scale" | "business";
 
 export interface PlanEntitlements {
   activeDrops:      number;   // Infinity = unlimited
@@ -38,20 +38,20 @@ export const PLANS: Record<PlanKey, Plan> = {
   free: {
     key:         "free",
     name:        "Free",
-    tagline:     "Launch your first drop",
+    tagline:     "Your first drop",
     description: "Everything you need to start — no credit card required.",
     monthlyInr:  0,
     annualInr:   0,
     entitlements: {
       activeDrops:      1,
-      designs:          10,
+      designs:          5,
       storefronts:      1,
       teamMembers:      0,
       customBranding:   false,
       customDomain:     false,
       removeHalftone:   false,
       shopifySync:      false,
-      analyticsHistory: 30,
+      analyticsHistory: 7,
       csvExport:        false,
       apiAccess:        false,
       allProducts:      false,
@@ -61,15 +61,15 @@ export const PLANS: Record<PlanKey, Plan> = {
     },
   },
 
-  studio: {
-    key:         "studio",
-    name:        "Studio",
-    tagline:     "Run your brand",
-    description: "For creators and brands running multiple drops under their own identity.",
-    monthlyInr:  1499,
-    annualInr:   999,
+  launch: {
+    key:         "launch",
+    name:        "Launch",
+    tagline:     "For solo creators and early brands",
+    description: "Run your brand independently — custom identity, unlimited designs, full analytics.",
+    monthlyInr:  1999,
+    annualInr:   1499,
     entitlements: {
-      activeDrops:      10,
+      activeDrops:      5,
       designs:          UNLIMITED,
       storefronts:      1,
       teamMembers:      0,
@@ -81,24 +81,50 @@ export const PLANS: Record<PlanKey, Plan> = {
       csvExport:        true,
       apiAccess:        false,
       allProducts:      true,
+      prioritySupport:  false,
+      dedicatedManager: false,
+      bulkDiscounts:    false,
+    },
+  },
+
+  scale: {
+    key:         "scale",
+    name:        "Scale",
+    tagline:     "For growing teams and multi-brand creators",
+    description: "Multiple storefronts, team access, white-label — built for creators who are scaling.",
+    monthlyInr:  5999,
+    annualInr:   4999,
+    entitlements: {
+      activeDrops:      20,
+      designs:          UNLIMITED,
+      storefronts:      3,
+      teamMembers:      5,
+      customBranding:   true,
+      customDomain:     true,
+      removeHalftone:   true,
+      shopifySync:      true,
+      analyticsHistory: UNLIMITED,
+      csvExport:        true,
+      apiAccess:        true,
+      allProducts:      true,
       prioritySupport:  true,
       dedicatedManager: false,
       bulkDiscounts:    false,
     },
   },
 
-  organization: {
-    key:         "organization",
-    name:        "Organization",
-    tagline:     "Scale with your team",
-    description: "For agencies, labels, collectives, and events managing multiple brands.",
-    monthlyInr:  3999,
-    annualInr:   2499,
+  business: {
+    key:         "business",
+    name:        "Business",
+    tagline:     "For orgs, agencies, festivals, and labels",
+    description: "Unlimited drops, unlimited storefronts, dedicated manager — for teams that move at scale.",
+    monthlyInr:  12999,
+    annualInr:   9999,
     entitlements: {
       activeDrops:      UNLIMITED,
       designs:          UNLIMITED,
-      storefronts:      3,
-      teamMembers:      10,
+      storefronts:      UNLIMITED,
+      teamMembers:      UNLIMITED,
       customBranding:   true,
       customDomain:     true,
       removeHalftone:   true,
@@ -136,10 +162,10 @@ export function getLimit(plan: PlanKey, feature: keyof PlanEntitlements): number
 
 /** Returns the minimum plan key that unlocks the given feature. */
 export function requiredPlanFor(feature: keyof PlanEntitlements): PlanKey {
-  for (const key of ["free", "studio", "organization"] as PlanKey[]) {
+  for (const key of ["free", "launch", "scale", "business"] as PlanKey[]) {
     if (canAccess(key, feature)) return key;
   }
-  return "organization";
+  return "business";
 }
 
 /** Human-readable limit label, e.g. "10" or "Unlimited". */
@@ -150,8 +176,8 @@ export function limitLabel(plan: PlanKey, feature: keyof PlanEntitlements): stri
   return String(val);
 }
 
-/** Plan ordering for comparison: free < studio < organization. */
-export const PLAN_ORDER: PlanKey[] = ["free", "studio", "organization"];
+/** Plan ordering for comparison: free < launch < scale < business. */
+export const PLAN_ORDER: PlanKey[] = ["free", "launch", "scale", "business"];
 
 export function planRank(plan: PlanKey): number {
   return PLAN_ORDER.indexOf(plan);
