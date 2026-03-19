@@ -2109,8 +2109,19 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-ds-dark">{fmt(inv.total)}</p>
-                  <p className="text-[10px] text-ds-muted">incl. GST {fmt(inv.gst_amount)}</p>
+                  {inv.total === 0 ? (
+                    <>
+                      <p className="font-semibold text-ds-muted">—</p>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-ds-muted bg-black/[0.05] px-1.5 py-0.5 rounded-full">
+                        Test order
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-ds-dark">{fmt(inv.total)}</p>
+                      <p className="text-[10px] text-ds-muted">incl. GST {fmt(inv.gst_amount)}</p>
+                    </>
+                  )}
                 </div>
                 <div className="text-right">
                   <a

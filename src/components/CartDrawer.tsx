@@ -100,6 +100,13 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                         {!item.hasDesign && (
                           <span className="text-[10px] text-ds-muted">Blank — no print</span>
                         )}
+                        <Link
+                          href="/studio"
+                          onClick={onClose}
+                          className="text-[10px] font-semibold text-brand hover:text-brand-dark transition-colors mt-0.5 inline-block"
+                        >
+                          Edit in Studio →
+                        </Link>
                       </div>
 
                       <button onClick={() => removeItem(item.cartId)} className="text-ds-muted hover:text-red-400 transition-colors self-start mt-0.5">

@@ -239,7 +239,7 @@ export default function StorePage({
                 className="font-semibold text-ds-dark text-xl"
                 style={{ letterSpacing: "-0.03em" }}
               >
-                {products.length} {products.length === 1 ? "piece" : "pieces"}
+                {products.length} {products.length === 1 ? "product" : "products"}
               </h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -259,13 +259,32 @@ export default function StorePage({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-black/[0.06] py-6 px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-ds-muted text-xs">
-          <Link href="/track" className="hover:text-ds-body transition-colors">
-            Track your order
-          </Link>
-          <span>·</span>
-          <span>Shipped in 5–7 days</span>
+      <div className="border-t border-black/[0.06] py-8 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-ds-muted text-xs mb-4">
+            <Link href="/track" className="hover:text-ds-body transition-colors">
+              Track your order
+            </Link>
+            <span>·</span>
+            <Link href="/returns" className="hover:text-ds-body transition-colors">
+              Returns &amp; exchanges
+            </Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:text-ds-body transition-colors">
+              Privacy policy
+            </Link>
+            <span>·</span>
+            <Link href="/terms" className="hover:text-ds-body transition-colors">
+              Terms of service
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-ds-muted/60">
+            <span>Powered by</span>
+            <Link href="/" className="font-semibold hover:text-brand transition-colors">
+              Halftone Labs
+            </Link>
+            <span>· Shipped in 5–7 days</span>
+          </div>
         </div>
       </div>
     </div>
