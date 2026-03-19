@@ -22,6 +22,44 @@ export async function POST(req: NextRequest) {
 
     const event = JSON.parse(rawBody);
 
+    const db = createAdminClient();
+
+    // ── Subscription lifecycle events ──────────────────────────────────────
+    if (event.event === "subscription.activated") {
+      const sub = event?.payload?.subscription?.entity ?? {};
+      const { id: subId, plan_id, notes = {} } = sub;
+      await db.from("subscriptions").upsert({
+        razorpay_subscription_id: subId,
+        razorpay_plan_id:         plan_id,
+        user_id:                  notes.userId ?? null,
+        plan:                     notes.plan ?? "unknown",
+        billing:                  notes.billing ?? "monthly",
+        status:                   "active",
+        updated_at:               new Date().toISOString(),
+      }, { onConflict: "razorpay_subscription_id" });
+      return NextResponse.json({ status: "ok" }, { status: 200 });
+    }
+
+    if (event.event === "subscription.charged") {
+      const sub = event?.payload?.subscription?.entity ?? {};
+      const pmt = event?.payload?.payment?.entity ?? {};
+      await db.from("subscriptions").update({
+        status:              "active",
+        razorpay_payment_id: pmt.id ?? null,
+        updated_at:          new Date().toISOString(),
+      }).eq("razorpay_subscription_id", sub.id);
+      return NextResponse.json({ status: "ok" }, { status: 200 });
+    }
+
+    if (event.event === "subscription.cancelled" || event.event === "subscription.completed") {
+      const sub = event?.payload?.subscription?.entity ?? {};
+      await db.from("subscriptions").update({
+        status:     event.event === "subscription.cancelled" ? "cancelled" : "expired",
+        updated_at: new Date().toISOString(),
+      }).eq("razorpay_subscription_id", sub.id);
+      return NextResponse.json({ status: "ok" }, { status: 200 });
+    }
+
     if (event.event !== "payment.captured") {
       return NextResponse.json({ status: "ignored" }, { status: 200 });
     }
@@ -35,8 +73,6 @@ export async function POST(req: NextRequest) {
       contact,
       notes = {},
     } = entity;
-
-    const db = createAdminClient();
 
     // Idempotency check — skip if order already saved
     const { data: existing } = await db
