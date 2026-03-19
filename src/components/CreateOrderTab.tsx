@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PRODUCTS } from "@/lib/products";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -273,8 +274,10 @@ export default function CreateOrderTab({ userId, userEmail }: { userId: string; 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<{ orderRef: string; total: number } | null>(null);
 
-  // Sizes from catalog (fallback)
-  const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
+  // Sizes from catalog for the selected product
+  const productSizes = selectedDesign
+    ? (PRODUCTS.find((p) => p.id === selectedDesign.product_id)?.sizes ?? ["S", "M", "L", "XL", "2XL"])
+    : [];
 
   useEffect(() => {
     fetch(`/api/designs?userId=${userId}`)
@@ -510,7 +513,14 @@ export default function CreateOrderTab({ userId, userEmail }: { userId: string; 
               ) : (
                 <div className="flex flex-col gap-2 max-h-80 overflow-y-auto -mx-1 px-1">
                   {filteredDesigns.map((d) => (
-                    <button key={d.id} onClick={() => setSelectedDesign(selectedDesign?.id === d.id ? null : d)}
+                    <button key={d.id} onClick={() => {
+                      const next = selectedDesign?.id === d.id ? null : d;
+                      setSelectedDesign(next);
+                      if (next) {
+                        const sizes = PRODUCTS.find((p) => p.id === next.product_id)?.sizes ?? ["M"];
+                        setSelectedSize(sizes.includes("M") ? "M" : sizes[0]);
+                      }
+                    }}
                       className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${selectedDesign?.id === d.id ? "border-zinc-900 bg-zinc-50" : "border-black/[0.06] hover:border-zinc-300"}`}>
                       {/* Thumbnail */}
                       <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
@@ -539,7 +549,7 @@ export default function CreateOrderTab({ userId, userEmail }: { userId: string; 
                 className="bg-white rounded-2xl border border-black/[0.06] p-5 mb-4">
                 <h3 className="font-semibold text-ds-dark mb-3 text-sm">Choose size</h3>
                 <div className="flex flex-wrap gap-2">
-                  {SIZES.map((s) => (
+                  {productSizes.map((s) => (
                     <button key={s} onClick={() => setSelectedSize(s)}
                       className={`px-3.5 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${selectedSize === s ? "border-zinc-900 bg-ds-dark text-white" : "border-black/[0.06] text-ds-body hover:border-zinc-400"}`}>
                       {s}
