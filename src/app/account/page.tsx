@@ -2724,23 +2724,35 @@ export default function AccountPage() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
-          {NAV.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${
-                activeTab === item.id ? "bg-ds-dark text-white" : "text-ds-body hover:bg-black/[0.05] hover:text-ds-dark"
-              }`}
-            >
-              {item.icon}
-              <span className="flex-1">{item.label}</span>
-              {item.badge && (
-                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-brand-dark uppercase tracking-wider">
-                  {item.badge}
-                </span>
-              )}
-            </button>
+        <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-0">
+          {([
+            { label: "Overview", ids: ["dashboard"] },
+            { label: "Create",   ids: ["designs", "drops", "branding"] },
+            { label: "Sell",     ids: ["orders", "stores", "shopify"] },
+            { label: "Account",  ids: ["wallet", "invoices", "settings"] },
+          ] as { label: string; ids: ActiveTab[] }[]).map(({ label, ids }) => (
+            <div key={label} className="mb-3">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ds-muted px-3 pt-1 pb-2">{label}</p>
+              <div className="flex flex-col gap-0.5">
+                {NAV.filter((n) => ids.includes(n.id)).map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${
+                      activeTab === item.id ? "bg-ds-dark text-white" : "text-ds-body hover:bg-black/[0.05] hover:text-ds-dark"
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && (
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-brand-dark uppercase tracking-wider">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
@@ -2863,7 +2875,7 @@ export default function AccountPage() {
         <main className="flex-1 p-6 lg:p-8 max-w-5xl w-full mx-auto">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab + (activeOrg?.slug ?? "personal")} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }}>
-              {activeTab === "dashboard" && !activeOrg && <OverviewTab userId={user?.id ?? ""} userName={user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? ""} onTopUp={() => setActiveTab("wallet")} />}
+              {activeTab === "dashboard" && !activeOrg && <OverviewTab userId={user?.id ?? ""} userName={user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? ""} onTopUp={() => setActiveTab("wallet")} onTabChange={(tab) => setActiveTab(tab as ActiveTab)} />}
               {activeTab === "dashboard" && activeOrg && !showOrgSettings && (
                 <OrgDashboard orgSlug={activeOrg.slug} userId={user?.id ?? ""} onManage={() => setShowOrgSettings(true)} />
               )}

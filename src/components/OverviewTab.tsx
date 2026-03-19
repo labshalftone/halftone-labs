@@ -26,14 +26,14 @@ type DashboardData = {
   }[];
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  "Order Placed":     "bg-purple-100 text-purple-700",
-  "Design Confirmed": "bg-purple-100 text-purple-700",
-  "In Production":    "bg-orange-100 text-orange-700",
-  "Quality Check":    "bg-orange-100 text-orange-700",
-  "Shipped":          "bg-blue-100 text-blue-700",
-  "Delivered":        "bg-green-100 text-green-700",
-  "Cancelled":        "bg-zinc-100 text-zinc-500",
+const STATUS_STYLES: Record<string, { pill: string; dot: string }> = {
+  "Order Placed":     { pill: "bg-brand/[0.08] text-brand",          dot: "bg-brand" },
+  "Design Confirmed": { pill: "bg-brand/[0.08] text-brand",          dot: "bg-brand" },
+  "In Production":    { pill: "bg-orange-100 text-orange-700",        dot: "bg-orange-500" },
+  "Quality Check":    { pill: "bg-orange-100 text-orange-700",        dot: "bg-orange-500" },
+  "Shipped":          { pill: "bg-blue-100 text-blue-700",            dot: "bg-blue-500" },
+  "Delivered":        { pill: "bg-green-100 text-green-700",          dot: "bg-green-500" },
+  "Cancelled":        { pill: "bg-black/[0.05] text-ds-muted",        dot: "bg-ds-muted" },
 };
 
 function getGreeting() {
@@ -48,13 +48,53 @@ function formatCurrency(amount: number, currency: string) {
   return `${symbol}${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = now.getTime() - d.getTime();
+  const hours = diff / 3600000;
+  if (hours < 1) return "Just now";
+  if (hours < 24) return `${Math.floor(hours)}h ago`;
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+// ── Skeleton ─────────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="bg-zinc-100 rounded-2xl p-5 animate-pulse">
-      <div className="h-3 w-20 bg-zinc-200 rounded mb-3" />
-      <div className="h-8 w-32 bg-zinc-200 rounded mb-1" />
-      <div className="h-3 w-16 bg-zinc-200 rounded" />
+    <div className="bg-white border border-black/[0.06] rounded-2xl p-5 animate-pulse">
+      <div className="h-2.5 w-20 bg-black/[0.07] rounded-full mb-4" />
+      <div className="h-8 w-28 bg-black/[0.07] rounded-full mb-2" />
+      <div className="h-2.5 w-16 bg-black/[0.05] rounded-full" />
     </div>
+  );
+}
+
+// ── Mini sparkline (static placeholder bars) ──────────────────────────────
+function MiniChart({ value }: { value: number }) {
+  // Fake bars — 7 bars, last one is tallest (current)
+  const bars = [0.3, 0.5, 0.4, 0.6, 0.45, 0.7, value > 0 ? 1 : 0.1];
+  return (
+    <div className="flex items-end gap-0.5 h-6 w-12">
+      {bars.map((h, i) => (
+        <div
+          key={i}
+          className="flex-1 rounded-sm bg-brand/30"
+          style={{ height: `${h * 100}%`, opacity: i === bars.length - 1 ? 1 : 0.6 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Trend badge ────────────────────────────────────────────────────────────
+function TrendUp() {
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+      </svg>
+      Live
+    </span>
   );
 }
 
@@ -62,9 +102,10 @@ type Props = {
   userId: string;
   userName: string;
   onTopUp?: () => void;
+  onTabChange?: (tab: string) => void;
 };
 
-export default function OverviewTab({ userId, userName, onTopUp }: Props) {
+export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: Props) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,8 +116,7 @@ export default function OverviewTab({ userId, userName, onTopUp }: Props) {
     try {
       const res = await fetch(`/api/dashboard?userId=${encodeURIComponent(userId)}`);
       if (!res.ok) throw new Error("Failed to load dashboard");
-      const json = await res.json();
-      setData(json);
+      setData(await res.json());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -86,144 +126,170 @@ export default function OverviewTab({ userId, userName, onTopUp }: Props) {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const currency = data?.walletCurrency ?? "INR";
+  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="space-y-6">
-      {/* Hero greeting */}
+    <div className="space-y-5">
+
+      {/* ── Greeting row ───────────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex flex-col gap-0.5"
+        transition={{ duration: 0.35 }}
+        className="flex items-start justify-between flex-wrap gap-3"
       >
-        <h1 className="text-2xl font-bold text-zinc-900">
-          {getGreeting()}, {userName || "there"} 👋
-        </h1>
-        <p className="text-sm text-zinc-500">{today}</p>
+        <div>
+          <h1 className="text-xl font-bold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
+            {getGreeting()}, {userName || "there"} 👋
+          </h1>
+          <p className="text-xs text-ds-muted mt-0.5">{today}</p>
+        </div>
+
+        {/* Wallet — compact inline chip */}
+        {!loading && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={onTopUp ?? (() => {})}
+            className="flex items-center gap-2 px-3.5 py-2 bg-white border border-black/[0.06] rounded-full hover:border-brand/30 hover:bg-brand/[0.03] transition-all"
+          >
+            <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[11px]">💰</div>
+            <span className="text-xs font-bold text-ds-dark">
+              {formatCurrency(data?.walletBalance ?? 0, currency)}
+            </span>
+            <span className="text-[10px] text-ds-muted">wallet</span>
+            <span className="text-[10px] font-bold text-brand">Top up →</span>
+          </motion.button>
+        )}
       </motion.div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── KPI cards (3 quantitative metrics) ────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {loading ? (
-          <>
-            <SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard />
-          </>
+          <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : (
           <>
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-              className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5">
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Total Revenue</p>
-              <p className="text-2xl font-bold text-zinc-900 leading-tight">
+            {/* Total Revenue */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+              className="bg-white border border-black/[0.06] rounded-2xl p-5 relative overflow-hidden"
+            >
+              <div className="absolute top-4 right-4">
+                <MiniChart value={data?.totalRevenue ?? 0} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted mb-1">Total Revenue</p>
+              <p className="text-2xl font-bold text-ds-dark leading-tight" style={{ letterSpacing: "-0.04em" }}>
                 {formatCurrency(data?.totalRevenue ?? 0, currency)}
               </p>
-              <p className="text-xs text-zinc-400 mt-1">all time</p>
+              <p className="text-[10px] text-ds-muted mt-1.5">all time · all orders</p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5">
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Total Orders</p>
-              <p className="text-2xl font-bold text-zinc-900 leading-tight">
+            {/* Total Orders */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="bg-white border border-black/[0.06] rounded-2xl p-5"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted mb-1">Total Orders</p>
+              <p className="text-2xl font-bold text-ds-dark leading-tight" style={{ letterSpacing: "-0.04em" }}>
                 {data?.totalOrders ?? 0}
               </p>
-              <p className="text-xs text-zinc-400 mt-1">all time</p>
+              <p className="text-[10px] text-ds-muted mt-1.5">all time · click Orders to filter</p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
-              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mb-1">Today&apos;s Sales</p>
-              <p className="text-2xl font-bold text-zinc-900 leading-tight">
+            {/* Today's Sales — alert state when zero */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+              className={`rounded-2xl p-5 border transition-colors ${
+                (data?.todayOrders ?? 0) > 0
+                  ? "bg-brand/[0.05] border-brand/20"
+                  : "bg-white border-black/[0.06]"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Today&apos;s Sales</p>
+                {(data?.todayOrders ?? 0) > 0 && <TrendUp />}
+              </div>
+              <p
+                className={`text-2xl font-bold leading-tight ${(data?.todayOrders ?? 0) > 0 ? "text-brand" : "text-ds-muted"}`}
+                style={{ letterSpacing: "-0.04em" }}
+              >
                 {data?.todayOrders ?? 0}
               </p>
-              <p className="text-xs text-blue-500 mt-1">{formatCurrency(data?.todayRevenue ?? 0, currency)} revenue</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
-              <p className="text-xs font-medium text-amber-600 uppercase tracking-wide mb-1">Best Seller</p>
-              <p className="text-base font-bold text-zinc-900 leading-tight line-clamp-2 mt-1">
-                {data?.bestSeller ? (
-                  <span className="flex items-center gap-1.5">
-                    <span>🏆</span>
-                    <span>{data.bestSeller}</span>
-                  </span>
-                ) : (
-                  <span className="text-zinc-400 text-sm">No orders yet</span>
-                )}
+              <p className={`text-[10px] mt-1.5 ${(data?.todayOrders ?? 0) > 0 ? "text-brand/60" : "text-ds-muted"}`}>
+                {(data?.todayOrders ?? 0) > 0
+                  ? `${formatCurrency(data?.todayRevenue ?? 0, currency)} revenue today`
+                  : "No sales yet today — share your store"}
               </p>
             </motion.div>
           </>
         )}
       </div>
 
-      {/* Wallet banner */}
-      <AnimatePresence>
-        {!loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4"
+      {/* ── Best seller callout (separate from KPIs) ───────────────────── */}
+      {!loading && data?.bestSeller && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3"
+        >
+          <span className="text-xl flex-shrink-0">🏆</span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-0.5">Best Seller</p>
+            <p className="text-sm font-semibold text-ds-dark truncate">{data.bestSeller}</p>
+          </div>
+          <button
+            onClick={() => onTabChange?.("orders")}
+            className="ml-auto flex-shrink-0 text-[10px] font-bold text-amber-600 hover:text-amber-800 transition-colors whitespace-nowrap"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 text-lg">
-                💰
-              </div>
-              <div>
-                <p className="text-xs text-emerald-600 font-medium uppercase tracking-wide">Wallet</p>
-                <p className="text-lg font-bold text-zinc-900">
-                  {formatCurrency(data?.walletBalance ?? 0, currency)} available
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onTopUp ?? (() => {})}
-              className="text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition-colors flex items-center gap-1"
-            >
-              Top up <span>→</span>
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            See orders →
+          </button>
+        </motion.div>
+      )}
 
-      {/* Quick actions */}
+      {/* ── Quick actions ─────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.25 }}
         className="flex flex-wrap gap-2 items-center"
       >
+        {/* Primary CTA */}
         <Link
           href="/studio"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors"
+          className="btn-brand text-sm py-2 px-4"
+          style={{ fontSize: "13px", padding: "8px 16px" }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           New Design
         </Link>
-        <Link
-          href="/studio"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 text-zinc-800 text-sm font-medium hover:bg-zinc-200 transition-colors border border-zinc-200"
+
+        {/* Shopify Orders */}
+        <button
+          onClick={() => onTabChange?.("shopify")}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-black/[0.06] text-ds-body text-xs font-semibold hover:border-black/20 hover:text-ds-dark transition-all"
+        >
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.337 23.979l6.163-1.098-2.256-15.21a.345.345 0 00-.34-.29s-.243.005-.243.005-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098z"/>
+          </svg>
+          Shopify Orders
+        </button>
+
+        {/* Drops */}
+        <button
+          onClick={() => onTabChange?.("drops")}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-black/[0.06] text-ds-body text-xs font-semibold hover:border-black/20 hover:text-ds-dark transition-all"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          Open Studio
-        </Link>
-        <button
-          onClick={() => {
-            const el = document.querySelector('[data-tab="shopify"]') as HTMLElement | null;
-            el?.click();
-          }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 text-zinc-800 text-sm font-medium hover:bg-zinc-200 transition-colors border border-zinc-200"
-        >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15.337 23.979l6.163-1.098-2.256-15.21a.345.345 0 00-.34-.29s-.243.005-.243.005-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
-          </svg>
-          View Shopify Orders
+          My Drops
         </button>
+
+        {/* Academy guide — text link treatment */}
         <LearnLink
           href="/academy/how-to-launch-your-first-merch-drop"
           label="Launch guide"
@@ -231,80 +297,130 @@ export default function OverviewTab({ userId, userName, onTopUp }: Props) {
         />
       </motion.div>
 
-      {/* Recent orders */}
+      {/* ── Recent Orders ─────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-        className="bg-white border border-zinc-200 rounded-2xl overflow-hidden"
+        transition={{ delay: 0.3 }}
+        className="bg-white border border-black/[0.06] rounded-2xl overflow-hidden"
       >
-        <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-800">Recent Orders</h2>
-          <span className="text-xs text-zinc-400">Last 5</span>
+        {/* Table header */}
+        <div className="px-5 py-3.5 border-b border-black/[0.06] flex items-center justify-between">
+          <h2 className="text-sm font-bold text-ds-dark">Recent Orders</h2>
+          <button
+            onClick={() => onTabChange?.("orders")}
+            className="text-xs font-bold text-brand hover:text-brand-dark transition-colors"
+          >
+            View all →
+          </button>
         </div>
+
+        {/* Column labels */}
+        {!loading && (data?.recentOrders?.length ?? 0) > 0 && (
+          <div className="px-5 py-2 border-b border-black/[0.04] bg-ds-light-gray grid grid-cols-[1fr_auto_auto] gap-4 items-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Order / Product</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted hidden sm:block">Status</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted text-right">Amount</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="p-5 space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-10 bg-zinc-100 rounded-xl animate-pulse" />
+              <div key={i} className="h-12 bg-black/[0.04] rounded-xl animate-pulse" />
             ))}
           </div>
         ) : !data?.recentOrders?.length ? (
-          <div className="px-5 py-10 text-center">
-            <p className="text-zinc-400 text-sm">No orders yet</p>
-            <p className="text-zinc-300 text-xs mt-1">Orders will appear here once placed.</p>
+          <div className="px-5 py-12 text-center">
+            <div className="text-3xl mb-3">🎨</div>
+            <p className="text-sm font-semibold text-ds-dark mb-1">No orders yet</p>
+            <p className="text-xs text-ds-muted mb-4">Head to Studio to design and place your first order.</p>
+            <Link href="/studio" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors">
+              Open Studio →
+            </Link>
           </div>
         ) : (
-          <div className="divide-y divide-zinc-50">
-            {data.recentOrders.map((order) => (
-              <div key={order.id} className="px-5 py-3 flex items-center justify-between gap-4 hover:bg-zinc-50 transition-colors">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-zinc-800 truncate">
-                    {order.ref || order.id.slice(0, 8).toUpperCase()}
-                  </p>
-                  <p className="text-xs text-zinc-400 truncate">{order.product_name}</p>
-                </div>
-                <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status] ?? "bg-zinc-100 text-zinc-500"}`}>
-                  {order.status}
-                </span>
-                <p className="shrink-0 text-sm font-semibold text-zinc-800">
-                  {formatCurrency(order.total, currency)}
-                </p>
-              </div>
-            ))}
+          <div className="divide-y divide-black/[0.04]">
+            {data.recentOrders.map((order) => {
+              const sc = STATUS_STYLES[order.status] ?? STATUS_STYLES["Order Placed"];
+              const isZero = order.total === 0;
+              return (
+                <button
+                  key={order.id}
+                  onClick={() => onTabChange?.("orders")}
+                  className="w-full text-left px-5 py-3.5 grid grid-cols-[1fr_auto_auto] gap-4 items-center hover:bg-ds-light-gray transition-colors group"
+                >
+                  {/* Order + product */}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-ds-dark truncate">
+                        {order.ref || order.id.slice(0, 8).toUpperCase()}
+                      </p>
+                      <span className={`flex-shrink-0 sm:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${sc.pill}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                        {order.status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-ds-muted truncate mt-0.5">
+                      {order.product_name}{order.color ? ` · ${order.color}` : ""}
+                      <span className="mx-1.5 text-black/20">·</span>
+                      <span className="text-ds-muted">{formatDate(order.created_at)}</span>
+                    </p>
+                  </div>
+
+                  {/* Status pill — hidden on mobile (shown inline above) */}
+                  <span className={`hidden sm:inline-flex flex-shrink-0 items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${sc.pill}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                    {order.status}
+                  </span>
+
+                  {/* Amount + arrow */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-sm font-semibold ${isZero ? "text-ds-muted" : "text-ds-dark"}`}>
+                      {isZero ? "—" : formatCurrency(order.total, currency)}
+                    </span>
+                    <svg className="w-3.5 h-3.5 text-ds-muted opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </motion.div>
 
-      {/* Shopify connected banner */}
+      {/* ── Shopify connected — compact status line ────────────────────── */}
       <AnimatePresence>
         {!loading && data?.shopifyConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center gap-3 rounded-2xl px-5 py-4 border"
-            style={{ backgroundColor: "#f4f9e8", borderColor: "#d4e6a0" }}
-          >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#96bf48" }}>
-              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.337 23.979l6.163-1.098-2.256-15.21a.345.345 0 00-.34-.29s-.243.005-.243.005-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
-              </svg>
-            </div>
-            <p className="text-sm font-medium" style={{ color: "#5a7a1a" }}>
-              Shopify connected ✓
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Error state */}
-      <AnimatePresence>
-        {error && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-black/[0.06] bg-white"
+          >
+            <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#96bf48" }}>
+              <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.337 23.979l6.163-1.098-2.256-15.21a.345.345 0 00-.34-.29s-.243.005-.243.005-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098z"/>
+              </svg>
+            </div>
+            <p className="text-xs font-semibold text-ds-body">Shopify connected</p>
+            <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">✓ Active</span>
+            <button
+              onClick={() => onTabChange?.("shopify")}
+              className="ml-auto text-[10px] font-bold text-ds-muted hover:text-ds-body transition-colors"
+            >
+              View orders →
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Error state ───────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 text-sm text-red-600 flex items-center gap-3"
           >
             <span>⚠️</span>
