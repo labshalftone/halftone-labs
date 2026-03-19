@@ -13,15 +13,13 @@ import {
   Building2,
   CalendarDays,
   ShoppingBag,
-  Shirt,
-  Package,
-  ScrollText,
-  ImageIcon,
   Store,
   ExternalLink,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type UserType = "artist" | "label" | "festival" | "brand" | null;
 type AcquisitionSource =
@@ -31,7 +29,12 @@ type AcquisitionSource =
   | "community"
   | "other"
   | null;
-type ProductType = "tshirt" | "hoodie" | "tote" | "poster" | null;
+type ProductType =
+  | "regular-tee"
+  | "oversized-tee-sj"
+  | "oversized-tee-ft"
+  | "baby-tee"
+  | null;
 type DropTiming = "now" | "later" | null;
 
 interface OnboardingData {
@@ -46,9 +49,9 @@ interface OnboardingData {
   first_drop_timing: DropTiming;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
 
-const PROGRESS_STEPS = 7; // steps 1–7 show progress
+const PROGRESS_STEPS = 7;
 const SUCCESS_STEP = 8;
 
 const USER_TYPES: {
@@ -57,71 +60,88 @@ const USER_TYPES: {
   sub: string;
   icon: React.FC<{ size?: number; className?: string }>;
 }[] = [
-  { value: "artist", label: "Artist / Band", sub: "Solo or group musician", icon: Music2 },
-  { value: "label", label: "Label / Agency", sub: "Represents multiple artists", icon: Building2 },
-  { value: "festival", label: "Festival / Event", sub: "Live events and tours", icon: CalendarDays },
-  { value: "brand", label: "Brand / Business", sub: "Non-music merchandise", icon: ShoppingBag },
+  { value: "artist",   label: "Artist / Band",     sub: "Solo or group musician",    icon: Music2 },
+  { value: "label",    label: "Label / Agency",     sub: "Represents multiple artists", icon: Building2 },
+  { value: "festival", label: "Festival / Event",   sub: "Live events and tours",     icon: CalendarDays },
+  { value: "brand",    label: "Brand / Business",   sub: "Non-music merchandise",     icon: ShoppingBag },
 ];
 
 const SOURCES: { value: AcquisitionSource; label: string }[] = [
-  { value: "instagram", label: "Instagram" },
-  { value: "google", label: "Google Search" },
-  { value: "friend", label: "A friend or colleague" },
-  { value: "community", label: "Music community" },
-  { value: "other", label: "Other" },
+  { value: "instagram",  label: "Instagram" },
+  { value: "google",     label: "Google Search" },
+  { value: "friend",     label: "A friend or colleague" },
+  { value: "community",  label: "Music community" },
+  { value: "other",      label: "Other" },
 ];
 
+// Actual products from the Halftone Labs catalog
 const PRODUCT_TYPES: {
   value: ProductType;
   label: string;
   sub: string;
-  icon: React.FC<{ size?: number; className?: string }>;
+  detail: string;
 }[] = [
-  { value: "tshirt", label: "T-Shirt", sub: "Starting at ₹249", icon: Shirt },
-  { value: "hoodie", label: "Hoodie", sub: "Starting at ₹449", icon: Package },
-  { value: "tote", label: "Tote Bag", sub: "Starting at ₹149", icon: ShoppingBag },
-  { value: "poster", label: "Poster", sub: "Starting at ₹99", icon: ScrollText },
+  {
+    value: "regular-tee",
+    label: "Regular Tee",
+    sub: "180 GSM · from ₹400",
+    detail: "100% combed ring-spun cotton, regular fit",
+  },
+  {
+    value: "oversized-tee-sj",
+    label: "Oversized Tee",
+    sub: "220 GSM · from ₹500",
+    detail: "Single jersey, drop-shoulder oversized",
+  },
+  {
+    value: "oversized-tee-ft",
+    label: "Oversized Tee",
+    sub: "240 GSM · from ₹600",
+    detail: "French terry, heavyweight premium",
+  },
+  {
+    value: "baby-tee",
+    label: "Baby Tee",
+    sub: "180 GSM · from ₹380",
+    detail: "Cropped fitted, women's silhouette",
+  },
 ];
 
-const brandNameLabel: Record<NonNullable<UserType>, string> = {
-  artist: "What's your artist or band name?",
-  label: "What's your label or agency name?",
+const BRAND_LABEL: Record<NonNullable<UserType>, string> = {
+  artist:   "What's your artist or band name?",
+  label:    "What's your label or agency name?",
   festival: "What's your festival or event name?",
-  brand: "What's your brand name?",
+  brand:    "What's your brand name?",
 };
 
-const brandNamePlaceholder: Record<NonNullable<UserType>, string> = {
-  artist: "e.g. DIVINE, When Chai Met Toast",
-  label: "e.g. Universal Music India",
+const BRAND_PLACEHOLDER: Record<NonNullable<UserType>, string> = {
+  artist:   "e.g. DIVINE, When Chai Met Toast",
+  label:    "e.g. Universal Music India",
   festival: "e.g. Sunburn Festival",
-  brand: "e.g. Rare Rabbit, The Souled Store",
+  brand:    "e.g. Rare Rabbit, The Souled Store",
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const PRODUCT_LABEL: Record<NonNullable<ProductType>, string> = {
+  "regular-tee":      "Regular Tee",
+  "oversized-tee-sj": "Oversized Tee (220 GSM)",
+  "oversized-tee-ft": "Oversized Tee (240 GSM)",
+  "baby-tee":         "Baby Tee",
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const toSlug = (s: string) =>
-  s
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-
-const stepVariants = {
-  enter: { opacity: 0, y: 18 },
-  center: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -18 },
-};
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [userName, setUserName] = useState("");
   const [initialising, setInitialising] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const [launchError, setLaunchError] = useState("");
 
   const [data, setData] = useState<OnboardingData>({
     user_type: null,
@@ -139,14 +159,8 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const init = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.replace("/login"); return; }
 
       setUserName(user.user_metadata?.name?.split(" ")[0] || "");
 
@@ -158,10 +172,7 @@ export default function OnboardingPage() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (profile?.onboarding_completed_at) {
-        router.replace("/account");
-        return;
-      }
+      if (profile?.onboarding_completed_at) { router.replace("/account"); return; }
 
       if (profile) {
         setData((prev) => ({
@@ -176,28 +187,21 @@ export default function OnboardingPage() {
           first_drop_name: profile.first_drop_name || "",
           first_drop_timing: profile.first_drop_timing || null,
         }));
-
         const savedStep = profile.onboarding_step ?? 0;
         if (savedStep > 0) setStep(savedStep);
       }
 
       setInitialising(false);
     };
-
     init();
   }, [router]);
 
-  // ── Supabase save ──────────────────────────────────────────────────────────
+  // ── Save to Supabase ───────────────────────────────────────────────────────
 
-  const saveProgress = async (nextStep: number, overrides?: Partial<OnboardingData>) => {
-    setSaving(true);
+  const saveProgress = async (nextStep: number, payload: OnboardingData, complete = false) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
-      const payload = { ...data, ...overrides };
       await supabase.from("user_profiles").upsert(
         {
           user_id: user.id,
@@ -212,61 +216,107 @@ export default function OnboardingPage() {
           first_drop_name: payload.first_drop_name,
           first_drop_timing: payload.first_drop_timing,
           onboarding_step: nextStep,
-          ...(nextStep >= SUCCESS_STEP
-            ? { onboarding_completed_at: new Date().toISOString() }
-            : {}),
+          ...(complete ? { onboarding_completed_at: new Date().toISOString() } : {}),
         },
         { onConflict: "user_id" }
       );
     } catch (err) {
       console.error("Onboarding save failed:", err);
     }
-    setSaving(false);
   };
 
-  // ── Navigation helpers ─────────────────────────────────────────────────────
+  // ── Navigation ─────────────────────────────────────────────────────────────
 
-  const goTo = async (nextStep: number, overrides?: Partial<OnboardingData>) => {
-    await saveProgress(nextStep, overrides);
+  const goTo = async (nextStep: number, payload = data) => {
+    setTransitioning(true);
+    await saveProgress(nextStep, payload);
     setStep(nextStep);
+    setTransitioning(false);
     window.scrollTo({ top: 0 });
   };
 
-  const next = (overrides?: Partial<OnboardingData>) => goTo(step + 1, overrides);
-  const back = () => { setStep((s) => Math.max(0, s - 1)); window.scrollTo({ top: 0 }); };
+  const next = (overrides?: Partial<OnboardingData>) => {
+    const payload = { ...data, ...overrides };
+    setData(payload);
+    return goTo(step + 1, payload);
+  };
+
+  const back = () => {
+    setStep((s) => Math.max(0, s - 1));
+    window.scrollTo({ top: 0 });
+  };
+
   const skip = () => goTo(step + 1);
-  const finish = () => goTo(SUCCESS_STEP);
+
+  // ── Launch (Step 7 → 8) ────────────────────────────────────────────────────
+
+  const launch = async () => {
+    setLaunchError("");
+    setTransitioning(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.replace("/login"); return; }
+
+      // Create the organisation record
+      const res = await fetch("/api/organizations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          name: data.store_name || data.brand_name,
+          slug: data.store_slug,
+          description: data.user_type ? `${data.brand_name} — ${data.user_type}` : data.brand_name,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        if (res.status === 409) {
+          setLaunchError("That store URL is already taken. Go back and choose a different one.");
+        } else {
+          setLaunchError(err.error || "Something went wrong. Please try again.");
+        }
+        setTransitioning(false);
+        return;
+      }
+
+      // Mark onboarding complete
+      await saveProgress(SUCCESS_STEP, data, true);
+      setStep(SUCCESS_STEP);
+      window.scrollTo({ top: 0 });
+    } catch {
+      setLaunchError("Network error. Check your connection and try again.");
+    }
+
+    setTransitioning(false);
+  };
 
   // ── Progress ───────────────────────────────────────────────────────────────
 
   const showProgress = step >= 1 && step < SUCCESS_STEP;
   const progressPct = showProgress ? ((step - 1) / (PROGRESS_STEPS - 1)) * 100 : 0;
 
-  // ── Loading state ──────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   if (initialising) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-halftone-purple border-t-transparent animate-spin" />
+        <Loader2 size={20} className="text-halftone-purple animate-spin" />
       </div>
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
+
       {/* Nav */}
-      <nav className="h-14 flex items-center justify-between px-6 border-b border-black/[0.04] shrink-0">
-        <Link
-          href="/"
-          className="text-base"
-          style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-        >
+      <nav className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-black/[0.05]">
+        <Link href="/" className="text-sm md:text-base" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>
           Halftone Labs
         </Link>
         {showProgress && (
-          <span className="text-xs text-halftone-muted" style={{ fontWeight: 500 }}>
+          <span className="text-xs text-zinc-400" style={{ fontWeight: 500 }}>
             {step} / {PROGRESS_STEPS}
           </span>
         )}
@@ -274,7 +324,7 @@ export default function OnboardingPage() {
 
       {/* Progress bar */}
       {showProgress && (
-        <div className="h-px bg-black/[0.06] shrink-0">
+        <div className="h-0.5 bg-black/[0.05] shrink-0">
           <motion.div
             className="h-full bg-halftone-purple"
             initial={false}
@@ -284,262 +334,249 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
-        <div className="w-full max-w-[440px]">
-          {/* Back button */}
-          {step > 0 && step < SUCCESS_STEP && (
-            <button
-              onClick={back}
-              className="flex items-center gap-1.5 text-sm text-halftone-muted hover:text-zinc-800 transition-colors mb-10"
-              style={{ fontWeight: 500 }}
-            >
-              <ChevronLeft size={15} strokeWidth={2.5} />
-              Back
-            </button>
-          )}
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center px-5 py-10">
+          <div className="w-full max-w-[420px]">
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.24, ease: "easeOut" }}
-            >
-              {step === 0 && (
-                <Step0Welcome name={userName} onNext={() => next()} />
-              )}
-              {step === 1 && (
-                <Step1UserType
-                  value={data.user_type}
-                  onChange={(v) => setData({ ...data, user_type: v })}
-                  onNext={() => next()}
-                />
-              )}
-              {step === 2 && (
-                <Step2BrandName
-                  userType={data.user_type}
-                  value={data.brand_name}
-                  onChange={(v) =>
-                    setData({
-                      ...data,
-                      brand_name: v,
-                      store_name: data.store_name || v,
-                      store_slug: data.store_slug || toSlug(v),
-                    })
-                  }
-                  onNext={() => next()}
-                />
-              )}
-              {step === 3 && (
-                <Step3Source
-                  value={data.acquisition_source}
-                  otherValue={data.acquisition_source_other}
-                  onChange={(v, other) =>
-                    setData({
-                      ...data,
-                      acquisition_source: v,
-                      acquisition_source_other: other,
-                    })
-                  }
-                  onNext={() => next()}
-                  onSkip={skip}
-                />
-              )}
-              {step === 4 && (
-                <Step4Store
-                  storeName={data.store_name}
-                  storeSlug={data.store_slug}
-                  onChangeName={(v) =>
-                    setData({ ...data, store_name: v, store_slug: toSlug(v) })
-                  }
-                  onChangeSlug={(v) => setData({ ...data, store_slug: v })}
-                  onNext={() => next()}
-                />
-              )}
-              {step === 5 && (
-                <Step5Product
-                  value={data.first_product_type}
-                  onChange={(v) => setData({ ...data, first_product_type: v })}
-                  onNext={() => next()}
-                  onSkip={skip}
-                />
-              )}
-              {step === 6 && (
-                <Step6Drop
-                  brandName={data.brand_name}
-                  dropName={data.first_drop_name}
-                  timing={data.first_drop_timing}
-                  onChangeName={(v) => setData({ ...data, first_drop_name: v })}
-                  onChangeTiming={(v) => setData({ ...data, first_drop_timing: v })}
-                  onNext={() => next()}
-                  onSkip={skip}
-                />
-              )}
-              {step === 7 && (
-                <Step7Review data={data} onFinish={finish} saving={saving} />
-              )}
-              {step === SUCCESS_STEP && (
-                <Step8Success brandName={data.brand_name} storeSlug={data.store_slug} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+            {/* Back button */}
+            {step > 0 && step < SUCCESS_STEP && (
+              <button
+                onClick={back}
+                disabled={transitioning}
+                className="flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-700 transition-colors mb-8 disabled:opacity-50"
+              >
+                <ChevronLeft size={15} strokeWidth={2.5} />
+                Back
+              </button>
+            )}
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+              >
+                {step === 0 && (
+                  <Step0Welcome name={userName} onNext={() => goTo(1)} loading={transitioning} />
+                )}
+                {step === 1 && (
+                  <Step1UserType
+                    value={data.user_type}
+                    onChange={(v) => setData({ ...data, user_type: v })}
+                    onNext={() => next()}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 2 && (
+                  <Step2BrandName
+                    userType={data.user_type}
+                    value={data.brand_name}
+                    onChange={(v) =>
+                      setData({
+                        ...data,
+                        brand_name: v,
+                        store_name: data.store_name || v,
+                        store_slug: data.store_slug || toSlug(v),
+                      })
+                    }
+                    onNext={() => next()}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 3 && (
+                  <Step3Source
+                    value={data.acquisition_source}
+                    otherValue={data.acquisition_source_other}
+                    onChange={(v, other) =>
+                      setData({ ...data, acquisition_source: v, acquisition_source_other: other })
+                    }
+                    onNext={() => next()}
+                    onSkip={skip}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 4 && (
+                  <Step4Store
+                    storeName={data.store_name}
+                    storeSlug={data.store_slug}
+                    onChangeName={(v) =>
+                      setData({ ...data, store_name: v, store_slug: toSlug(v) })
+                    }
+                    onChangeSlug={(v) => setData({ ...data, store_slug: v })}
+                    onNext={() => next()}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 5 && (
+                  <Step5Product
+                    value={data.first_product_type}
+                    onChange={(v) => setData({ ...data, first_product_type: v })}
+                    onNext={() => next()}
+                    onSkip={skip}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 6 && (
+                  <Step6Drop
+                    brandName={data.brand_name}
+                    dropName={data.first_drop_name}
+                    timing={data.first_drop_timing}
+                    onChangeName={(v) => setData({ ...data, first_drop_name: v })}
+                    onChangeTiming={(v) => setData({ ...data, first_drop_timing: v })}
+                    onNext={() => next()}
+                    onSkip={skip}
+                    loading={transitioning}
+                  />
+                )}
+                {step === 7 && (
+                  <Step7Review
+                    data={data}
+                    onBack={() => setStep(6)}
+                    onLaunch={launch}
+                    loading={transitioning}
+                    error={launchError}
+                  />
+                )}
+                {step === SUCCESS_STEP && (
+                  <Step8Success brandName={data.brand_name} storeSlug={data.store_slug} />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Step Components ──────────────────────────────────────────────────────────
+// ─── Step 0: Welcome ──────────────────────────────────────────────────────────
 
-// ── Step 0: Welcome ────────────────────────────────────────────────────────
-
-function Step0Welcome({ name, onNext }: { name: string; onNext: () => void }) {
+function Step0Welcome({
+  name,
+  onNext,
+  loading,
+}: {
+  name: string;
+  onNext: () => void;
+  loading: boolean;
+}) {
   return (
     <div>
-      <div className="w-10 h-10 rounded-xl bg-halftone-purple/10 flex items-center justify-center mb-8">
-        <Store size={20} className="text-halftone-purple" />
+      <div className="w-10 h-10 rounded-xl bg-halftone-purple/10 flex items-center justify-center mb-7">
+        <Store size={18} className="text-halftone-purple" />
       </div>
-      <h1
-        className="text-3xl md:text-4xl mb-4"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
+      <h1 className="text-3xl md:text-[2.2rem] mb-3" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>
         {name ? `Welcome, ${name}.` : "Welcome."}
       </h1>
-      <p className="text-zinc-500 text-[0.95rem] leading-relaxed mb-3" style={{ fontWeight: 300 }}>
-        Let&apos;s set up your store in a few quick steps. You&apos;ll choose your store type, configure your brand, and create your first drop.
+      <p className="text-zinc-500 text-[0.9rem] leading-relaxed mb-2" style={{ fontWeight: 300 }}>
+        Let&apos;s set up your store in a few quick steps — choose your type, configure your brand, and name your first drop.
       </p>
-      <p className="text-zinc-400 text-sm mb-10" style={{ fontWeight: 300 }}>
-        Takes about 3 minutes.
+      <p className="text-zinc-400 text-xs mb-9" style={{ fontWeight: 300 }}>
+        Takes about 2 minutes.
       </p>
-      <button
-        onClick={onNext}
-        className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm transition-opacity hover:opacity-90"
-        style={{ background: "#0f0f0f", fontWeight: 600 }}
-      >
+      <Btn onClick={onNext} loading={loading}>
         Get started
-        <ArrowRight size={16} strokeWidth={2.5} />
-      </button>
+      </Btn>
     </div>
   );
 }
 
-// ── Step 1: User Type ──────────────────────────────────────────────────────
+// ─── Step 1: User Type ────────────────────────────────────────────────────────
 
 function Step1UserType({
   value,
   onChange,
   onNext,
+  loading,
 }: {
   value: UserType;
   onChange: (v: UserType) => void;
   onNext: () => void;
+  loading: boolean;
 }) {
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 1
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        What best describes you?
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        This helps us personalise your experience.
-      </p>
+      <StepLabel>Step 1</StepLabel>
+      <h2 className="step-heading">What best describes you?</h2>
+      <p className="step-sub">This personalises your experience.</p>
 
-      <div className="grid grid-cols-2 gap-3 mb-8">
+      <div className="grid grid-cols-2 gap-2.5 mb-7">
         {USER_TYPES.map(({ value: v, label, sub, icon: Icon }) => (
           <button
-            key={v}
+            key={v!}
             onClick={() => onChange(v)}
-            className={`text-left p-4 rounded-2xl border transition-all ${
+            className={`text-left p-3.5 rounded-xl border transition-colors ${
               value === v
                 ? "border-halftone-purple bg-halftone-purple/[0.04]"
-                : "border-black/[0.08] hover:border-black/20"
+                : "border-black/[0.08] hover:border-black/[0.16]"
             }`}
           >
             <Icon
-              size={20}
-              className={value === v ? "text-halftone-purple mb-3" : "text-zinc-400 mb-3"}
+              size={18}
+              className={`mb-2.5 ${value === v ? "text-halftone-purple" : "text-zinc-300"}`}
             />
-            <p
-              className="text-sm mb-0.5"
-              style={{ fontWeight: 600, letterSpacing: "-0.02em" }}
-            >
+            <p className="text-sm leading-tight mb-0.5" style={{ fontWeight: 600 }}>
               {label}
             </p>
-            <p className="text-[0.72rem] text-zinc-400" style={{ fontWeight: 300 }}>
+            <p className="text-[0.7rem] text-zinc-400 leading-snug" style={{ fontWeight: 300 }}>
               {sub}
             </p>
           </button>
         ))}
       </div>
 
-      <ContinueButton disabled={!value} onClick={onNext} />
+      <Btn disabled={!value} onClick={onNext} loading={loading}>Continue</Btn>
     </div>
   );
 }
 
-// ── Step 2: Brand Name ─────────────────────────────────────────────────────
+// ─── Step 2: Brand Name ───────────────────────────────────────────────────────
 
 function Step2BrandName({
   userType,
   value,
   onChange,
   onNext,
+  loading,
 }: {
   userType: UserType;
   value: string;
   onChange: (v: string) => void;
   onNext: () => void;
+  loading: boolean;
 }) {
-  const heading = userType ? brandNameLabel[userType] : "What's your brand name?";
-  const placeholder = userType
-    ? brandNamePlaceholder[userType]
-    : "Your name or brand";
+  const heading = userType ? BRAND_LABEL[userType] : "What's your brand name?";
+  const placeholder = userType ? BRAND_PLACEHOLDER[userType] : "Your name or brand";
 
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 2
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        {heading}
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        This will appear on your store and products.
-      </p>
+      <StepLabel>Step 2</StepLabel>
+      <h2 className="step-heading">{heading}</h2>
+      <p className="step-sub">Appears on your store and products.</p>
 
-      <div className="mb-8">
-        <label className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 block mb-2">
-          Name
-        </label>
+      <div className="mb-7">
+        <FieldLabel>Name</FieldLabel>
         <input
-          autoFocus
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && value.trim() && onNext()}
-          className="w-full px-4 py-3 rounded-xl border border-black/[0.08] text-sm bg-white focus:outline-none focus:border-halftone-purple transition-colors"
+          onKeyDown={(e) => e.key === "Enter" && value.trim() && !loading && onNext()}
+          className="field"
           style={{ fontWeight: 500 }}
         />
       </div>
 
-      <ContinueButton disabled={!value.trim()} onClick={onNext} />
+      <Btn disabled={!value.trim()} onClick={onNext} loading={loading}>Continue</Btn>
     </div>
   );
 }
 
-// ── Step 3: Source ─────────────────────────────────────────────────────────
+// ─── Step 3: Source ───────────────────────────────────────────────────────────
 
 function Step3Source({
   value,
@@ -547,71 +584,61 @@ function Step3Source({
   onChange,
   onNext,
   onSkip,
+  loading,
 }: {
   value: AcquisitionSource;
   otherValue: string;
   onChange: (v: AcquisitionSource, other: string) => void;
   onNext: () => void;
   onSkip: () => void;
+  loading: boolean;
 }) {
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 3
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        How did you find us?
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        Helps us understand what&apos;s working.
-      </p>
+      <StepLabel>Step 3</StepLabel>
+      <h2 className="step-heading">How did you find us?</h2>
+      <p className="step-sub">Helps us understand what&apos;s working.</p>
 
-      <div className="flex flex-col gap-2 mb-6">
+      <div className="flex flex-col gap-2 mb-5">
         {SOURCES.map(({ value: v, label }) => (
           <button
-            key={v}
+            key={v!}
             onClick={() => onChange(v, v === "other" ? otherValue : "")}
-            className={`flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm text-left transition-all ${
+            className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm text-left transition-colors ${
               value === v
                 ? "border-halftone-purple bg-halftone-purple/[0.04]"
-                : "border-black/[0.08] hover:border-black/20"
+                : "border-black/[0.08] hover:border-black/[0.16]"
             }`}
             style={{ fontWeight: value === v ? 500 : 400 }}
           >
             {label}
-            {value === v && (
-              <Check size={15} className="text-halftone-purple shrink-0" strokeWidth={2.5} />
-            )}
+            {value === v && <Check size={14} className="text-halftone-purple shrink-0" strokeWidth={2.5} />}
           </button>
         ))}
       </div>
 
       {value === "other" && (
-        <div className="mb-6">
+        <div className="mb-5">
           <input
-            autoFocus
             type="text"
             placeholder="Tell us more..."
             value={otherValue}
             onChange={(e) => onChange("other", e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-black/[0.08] text-sm bg-white focus:outline-none focus:border-halftone-purple transition-colors"
+            className="field"
             style={{ fontWeight: 400 }}
           />
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <ContinueButton disabled={!value} onClick={onNext} />
-        <SkipButton onClick={onSkip} />
+      <div className="flex items-center gap-4">
+        <Btn disabled={!value} onClick={onNext} loading={loading}>Continue</Btn>
+        <Skip onClick={onSkip} />
       </div>
     </div>
   );
 }
 
-// ── Step 4: Store Setup ────────────────────────────────────────────────────
+// ─── Step 4: Store Setup ──────────────────────────────────────────────────────
 
 function Step4Store({
   storeName,
@@ -619,54 +646,39 @@ function Step4Store({
   onChangeName,
   onChangeSlug,
   onNext,
+  loading,
 }: {
   storeName: string;
   storeSlug: string;
   onChangeName: (v: string) => void;
   onChangeSlug: (v: string) => void;
   onNext: () => void;
+  loading: boolean;
 }) {
-  const inp =
-    "w-full px-4 py-3 rounded-xl border border-black/[0.08] text-sm bg-white focus:outline-none focus:border-halftone-purple transition-colors";
-
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 4
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        Set up your store
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        This is where fans will buy your merch.
-      </p>
+      <StepLabel>Step 4</StepLabel>
+      <h2 className="step-heading">Set up your store</h2>
+      <p className="step-sub">This is where fans buy your merch.</p>
 
-      <div className="flex flex-col gap-5 mb-8">
+      <div className="flex flex-col gap-4 mb-7">
         <div>
-          <label className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 block mb-2">
-            Store name
-          </label>
+          <FieldLabel>Store name</FieldLabel>
           <input
-            autoFocus
             type="text"
             placeholder="Your store name"
             value={storeName}
             onChange={(e) => onChangeName(e.target.value)}
-            className={inp}
+            className="field"
             style={{ fontWeight: 500 }}
           />
         </div>
 
         <div>
-          <label className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 block mb-2">
-            Store URL
-          </label>
-          <div className="flex items-center gap-0 border border-black/[0.08] rounded-xl overflow-hidden focus-within:border-halftone-purple transition-colors">
+          <FieldLabel>Store URL</FieldLabel>
+          <div className="flex items-stretch border border-black/[0.08] rounded-xl overflow-hidden focus-within:border-halftone-purple transition-colors">
             <span
-              className="pl-4 pr-2 py-3 text-sm text-zinc-400 shrink-0 bg-zinc-50"
+              className="flex items-center pl-3.5 pr-2 bg-zinc-50 text-zinc-400 text-xs whitespace-nowrap border-r border-black/[0.06]"
               style={{ fontWeight: 400 }}
             >
               halftonelabs.in/
@@ -677,91 +689,91 @@ function Step4Store({
               value={storeSlug}
               onChange={(e) =>
                 onChangeSlug(
-                  e.target.value
-                    .toLowerCase()
-                    .replace(/[^a-z0-9-]/g, "")
-                    .replace(/--+/g, "-")
+                  e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/--+/g, "-")
                 )
               }
-              className="flex-1 pr-4 py-3 text-sm bg-white focus:outline-none"
+              className="flex-1 px-3 py-3 text-sm bg-white focus:outline-none min-w-0"
               style={{ fontWeight: 500 }}
             />
           </div>
           {storeSlug && (
-            <p className="text-[0.72rem] text-zinc-400 mt-2" style={{ fontWeight: 300 }}>
+            <p className="text-[0.68rem] text-zinc-400 mt-1.5 truncate" style={{ fontWeight: 300 }}>
               halftonelabs.in/{storeSlug}
             </p>
           )}
         </div>
       </div>
 
-      <ContinueButton disabled={!storeName.trim() || !storeSlug.trim()} onClick={onNext} />
+      <Btn disabled={!storeName.trim() || !storeSlug.trim()} onClick={onNext} loading={loading}>
+        Continue
+      </Btn>
     </div>
   );
 }
 
-// ── Step 5: First Product ──────────────────────────────────────────────────
+// ─── Step 5: First Product ────────────────────────────────────────────────────
 
 function Step5Product({
   value,
   onChange,
   onNext,
   onSkip,
+  loading,
 }: {
   value: ProductType;
   onChange: (v: ProductType) => void;
   onNext: () => void;
   onSkip: () => void;
+  loading: boolean;
 }) {
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 5
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        What will you sell first?
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        You can add more products later.
-      </p>
+      <StepLabel>Step 5</StepLabel>
+      <h2 className="step-heading">What will you sell first?</h2>
+      <p className="step-sub">You can add more products later.</p>
 
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        {PRODUCT_TYPES.map(({ value: v, label, sub, icon: Icon }) => (
+      <div className="flex flex-col gap-2 mb-7">
+        {PRODUCT_TYPES.map(({ value: v, label, sub, detail }) => (
           <button
-            key={v}
+            key={v!}
             onClick={() => onChange(v)}
-            className={`text-left p-4 rounded-2xl border transition-all ${
+            className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors ${
               value === v
                 ? "border-halftone-purple bg-halftone-purple/[0.04]"
-                : "border-black/[0.08] hover:border-black/20"
+                : "border-black/[0.08] hover:border-black/[0.16]"
             }`}
           >
-            <Icon
-              size={20}
-              className={value === v ? "text-halftone-purple mb-3" : "text-zinc-400 mb-3"}
+            <div
+              className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                value === v ? "bg-halftone-purple" : "bg-zinc-200"
+              }`}
             />
-            <p className="text-sm mb-0.5" style={{ fontWeight: 600, letterSpacing: "-0.02em" }}>
-              {label}
-            </p>
-            <p className="text-[0.72rem] text-zinc-400" style={{ fontWeight: 300 }}>
-              {sub}
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-sm" style={{ fontWeight: 600 }}>
+                  {label}
+                </span>
+                <span className="text-xs text-halftone-purple" style={{ fontWeight: 500 }}>
+                  {sub}
+                </span>
+              </div>
+              <p className="text-[0.72rem] text-zinc-400 mt-0.5" style={{ fontWeight: 300 }}>
+                {detail}
+              </p>
+            </div>
           </button>
         ))}
       </div>
 
-      <div className="flex items-center gap-3">
-        <ContinueButton disabled={!value} onClick={onNext} />
-        <SkipButton onClick={onSkip} />
+      <div className="flex items-center gap-4">
+        <Btn disabled={!value} onClick={onNext} loading={loading}>Continue</Btn>
+        <Skip onClick={onSkip} />
       </div>
     </div>
   );
 }
 
-// ── Step 6: First Drop ─────────────────────────────────────────────────────
+// ─── Step 6: First Drop ───────────────────────────────────────────────────────
 
 function Step6Drop({
   brandName,
@@ -771,6 +783,7 @@ function Step6Drop({
   onChangeTiming,
   onNext,
   onSkip,
+  loading,
 }: {
   brandName: string;
   dropName: string;
@@ -779,143 +792,135 @@ function Step6Drop({
   onChangeTiming: (v: DropTiming) => void;
   onNext: () => void;
   onSkip: () => void;
+  loading: boolean;
 }) {
-  const defaultName = brandName ? `${brandName} Drop 001` : "Drop 001";
+  const placeholder = brandName ? `${brandName} Drop 001` : "Drop 001";
 
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 6
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        Name your first drop
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        A drop is a limited-time merch release. You can always rename it.
-      </p>
+      <StepLabel>Step 6</StepLabel>
+      <h2 className="step-heading">Name your first drop</h2>
+      <p className="step-sub">A drop is a limited-time merch release.</p>
 
-      <div className="flex flex-col gap-5 mb-8">
+      <div className="flex flex-col gap-4 mb-7">
         <div>
-          <label className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 block mb-2">
-            Drop name
-          </label>
+          <FieldLabel>Drop name</FieldLabel>
           <input
-            autoFocus
             type="text"
-            placeholder={defaultName}
+            placeholder={placeholder}
             value={dropName}
             onChange={(e) => onChangeName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-black/[0.08] text-sm bg-white focus:outline-none focus:border-halftone-purple transition-colors"
+            className="field"
             style={{ fontWeight: 500 }}
           />
         </div>
 
         <div>
-          <label className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 block mb-3">
-            When to launch
-          </label>
-          <div className="grid grid-cols-2 gap-3">
+          <FieldLabel>Launch timing</FieldLabel>
+          <div className="grid grid-cols-2 gap-2">
             {(["now", "later"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => onChangeTiming(t)}
-                className={`px-4 py-3 rounded-xl border text-sm transition-all ${
+                className={`py-3 rounded-xl border text-sm transition-colors ${
                   timing === t
                     ? "border-halftone-purple bg-halftone-purple/[0.04]"
-                    : "border-black/[0.08] hover:border-black/20"
+                    : "border-black/[0.08] hover:border-black/[0.16]"
                 }`}
                 style={{ fontWeight: timing === t ? 500 : 400 }}
               >
-                {t === "now" ? "Launch right away" : "Schedule later"}
+                {t === "now" ? "Right away" : "Schedule later"}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <ContinueButton disabled={!dropName.trim() || !timing} onClick={onNext} />
-        <SkipButton onClick={onSkip} />
+      <div className="flex items-center gap-4">
+        <Btn disabled={!dropName.trim() || !timing} onClick={onNext} loading={loading}>
+          Continue
+        </Btn>
+        <Skip onClick={onSkip} />
       </div>
     </div>
   );
 }
 
-// ── Step 7: Review ─────────────────────────────────────────────────────────
+// ─── Step 7: Review & Launch ──────────────────────────────────────────────────
 
 function Step7Review({
   data,
-  onFinish,
-  saving,
+  onBack,
+  onLaunch,
+  loading,
+  error,
 }: {
   data: OnboardingData;
-  onFinish: () => void;
-  saving: boolean;
+  onBack: () => void;
+  onLaunch: () => void;
+  loading: boolean;
+  error: string;
 }) {
-  const userTypeLabel = USER_TYPES.find((u) => u.value === data.user_type)?.label || "";
-  const productLabel = PRODUCT_TYPES.find((p) => p.value === data.first_product_type)?.label || "";
+  const typeLabel = USER_TYPES.find((u) => u.value === data.user_type)?.label || "";
+  const productLabel = data.first_product_type ? PRODUCT_LABEL[data.first_product_type] : "";
 
-  const rows: { label: string; value: string }[] = [
-    { label: "Account type", value: userTypeLabel },
-    { label: "Brand", value: data.brand_name },
-    { label: "Store URL", value: data.store_slug ? `halftonelabs.in/${data.store_slug}` : "" },
-    ...(productLabel ? [{ label: "First product", value: productLabel }] : []),
-    ...(data.first_drop_name ? [{ label: "First drop", value: data.first_drop_name }] : []),
+  const rows = [
+    { label: "Type",        value: typeLabel },
+    { label: "Brand",       value: data.brand_name },
+    { label: "Store URL",   value: data.store_slug ? `halftonelabs.in/${data.store_slug}` : "" },
+    { label: "Product",     value: productLabel },
+    { label: "Drop",        value: data.first_drop_name },
   ].filter((r) => r.value);
 
   return (
     <div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-halftone-purple mb-3">
-        Step 7
-      </p>
-      <h2
-        className="text-2xl md:text-3xl mb-2"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
-        Ready to launch?
-      </h2>
-      <p className="text-zinc-500 text-sm mb-8" style={{ fontWeight: 300 }}>
-        Here&apos;s what you&apos;ve set up. You can change everything later.
-      </p>
+      <StepLabel>Step 7</StepLabel>
+      <h2 className="step-heading">Ready to launch?</h2>
+      <p className="step-sub">Here&apos;s what you&apos;ve set up. Everything can be changed later.</p>
 
-      <div className="border border-black/[0.06] rounded-2xl overflow-hidden mb-8">
+      <div className="border border-black/[0.06] rounded-2xl overflow-hidden mb-6">
         {rows.map((row, i) => (
           <div
             key={row.label}
-            className={`flex items-start justify-between gap-4 px-5 py-4 ${
+            className={`flex items-start justify-between gap-3 px-4 py-3.5 ${
               i < rows.length - 1 ? "border-b border-black/[0.04]" : ""
             }`}
           >
-            <span className="text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-400">
+            <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-zinc-400 shrink-0 pt-0.5">
               {row.label}
             </span>
-            <span
-              className="text-sm text-zinc-800 text-right"
-              style={{ fontWeight: 500 }}
-            >
+            <span className="text-sm text-zinc-800 text-right break-all" style={{ fontWeight: 500 }}>
               {row.value}
             </span>
           </div>
         ))}
       </div>
 
-      <button
-        onClick={onFinish}
-        disabled={saving}
-        className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-        style={{ background: "#9e6c9e", fontWeight: 600 }}
-      >
-        {saving ? "Launching..." : "Launch my store"}
-        {!saving && <ArrowRight size={16} strokeWidth={2.5} />}
-      </button>
+      {error && (
+        <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-100 rounded-xl mb-5">
+          <AlertCircle size={15} className="text-red-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-red-600" style={{ fontWeight: 400 }}>
+            {error}
+            {error.includes("already taken") && (
+              <>
+                {" "}
+                <button onClick={onBack} className="underline underline-offset-2 font-medium">
+                  Edit store URL
+                </button>
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
+      <Btn onClick={onLaunch} loading={loading} style={{ background: "#9e6c9e" }}>
+        Launch my store
+      </Btn>
     </div>
   );
 }
 
-// ── Step 8: Success ────────────────────────────────────────────────────────
+// ─── Step 8: Success ──────────────────────────────────────────────────────────
 
 function Step8Success({
   brandName,
@@ -926,37 +931,34 @@ function Step8Success({
 }) {
   return (
     <div>
-      <div className="w-10 h-10 rounded-full bg-halftone-purple flex items-center justify-center mb-8">
-        <Check size={20} className="text-white" strokeWidth={2.5} />
+      <div className="w-10 h-10 rounded-full bg-halftone-purple flex items-center justify-center mb-7">
+        <Check size={18} className="text-white" strokeWidth={2.5} />
       </div>
-      <h2
-        className="text-2xl md:text-3xl mb-3"
-        style={{ fontWeight: 600, letterSpacing: "-0.05em" }}
-      >
+      <h2 className="text-2xl md:text-3xl mb-3" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>
         {brandName ? `${brandName} is live.` : "Your store is live."}
       </h2>
-      <p className="text-zinc-500 text-[0.95rem] leading-relaxed mb-10" style={{ fontWeight: 300 }}>
-        Your store is set up and ready for drops. Head to your dashboard to upload designs, configure products, and launch your first release.
+      <p className="text-zinc-500 text-[0.9rem] leading-relaxed mb-8" style={{ fontWeight: 300 }}>
+        Your store and organisation are created. Head to your dashboard to upload designs, configure products, and launch your first release.
       </p>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         <Link
           href="/account"
-          className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm hover:opacity-90 transition-opacity"
+          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white text-sm hover:opacity-90 transition-opacity"
           style={{ background: "#0f0f0f", fontWeight: 600 }}
         >
           Go to dashboard
-          <ArrowRight size={16} strokeWidth={2.5} />
+          <ArrowRight size={15} strokeWidth={2.5} />
         </Link>
         {storeSlug && (
           <a
             href={`/store/${storeSlug}`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm border border-black/[0.08] hover:border-black/20 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm border border-black/[0.08] hover:border-black/[0.2] transition-colors"
             style={{ fontWeight: 500 }}
           >
-            <ExternalLink size={14} strokeWidth={2} />
+            <ExternalLink size={13} strokeWidth={2} />
             Preview your store
           </a>
         )}
@@ -965,31 +967,57 @@ function Step8Success({
   );
 }
 
-// ─── Shared UI Primitives ─────────────────────────────────────────────────────
+// ─── Shared primitives ────────────────────────────────────────────────────────
 
-function ContinueButton({
+function StepLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-halftone-purple mb-2.5">
+      {children}
+    </p>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="block text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">
+      {children}
+    </label>
+  );
+}
+
+function Btn({
   onClick,
   disabled,
-  label = "Continue",
+  loading,
+  children,
+  style,
 }: {
   onClick: () => void;
   disabled?: boolean;
-  label?: string;
+  loading?: boolean;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
 }) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
-      className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
-      style={{ background: "#0f0f0f", fontWeight: 600 }}
+      disabled={disabled || loading}
+      className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+      style={{ background: "#0f0f0f", fontWeight: 600, ...style }}
     >
-      {label}
-      <ArrowRight size={16} strokeWidth={2.5} />
+      {loading ? (
+        <Loader2 size={15} className="animate-spin" />
+      ) : (
+        <>
+          {children}
+          <ArrowRight size={15} strokeWidth={2.5} />
+        </>
+      )}
     </button>
   );
 }
 
-function SkipButton({ onClick }: { onClick: () => void }) {
+function Skip({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
