@@ -168,11 +168,6 @@ export async function POST(req: NextRequest) {
       country: country ?? "IN",
       status: "Order Placed",
       user_id: userId,
-      design_id: designId ?? null,
-      is_manual: true,
-      print_technique: printTechnique ?? "DTG",
-      shipping_option: shippingOption ?? null,
-      note: note ?? null,
     }).select("id").single();
 
     if (orderError) {
