@@ -151,6 +151,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
+const PLAN_INTENT_KEY = "ht_plan_intent";
+
 export default function PricingPage() {
   const { currency } = useCurrency();
   const [billing, setBilling] = useState<BillingCycle>("monthly");
@@ -159,16 +161,45 @@ export default function PricingPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user?.id ?? null);
-      setUserEmail(session?.user?.email ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const uid   = session?.user?.id ?? null;
+      const email = session?.user?.email ?? null;
+      setUserId(uid);
+      setUserEmail(email);
+
+      // Auto-trigger checkout if user just returned after login/signup
+      if (uid && email) {
+        const raw = localStorage.getItem(PLAN_INTENT_KEY);
+        if (raw) {
+          try {
+            const { plan, billing: savedBilling } = JSON.parse(raw) as {
+              plan: "launch" | "scale" | "business";
+              billing: BillingCycle;
+            };
+            localStorage.removeItem(PLAN_INTENT_KEY);
+            setBilling(savedBilling);
+            // Small delay so state settles
+            setTimeout(() => {
+              openSubscriptionCheckout({ plan, billing: savedBilling, currency, userId: uid, userEmail: email })
+                .catch(console.error);
+            }, 300);
+          } catch {
+            localStorage.removeItem(PLAN_INTENT_KEY);
+          }
+        }
+      }
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fmt = (inr: number) => fmtPrice(inr, currency);
 
   async function handleSubscribe(plan: "launch" | "scale" | "business") {
-    if (!userId || !userEmail) { window.location.href = "/login?redirect=/pricing"; return; }
+    if (!userId || !userEmail) {
+      // Store intent so we can auto-trigger after login/signup
+      localStorage.setItem(PLAN_INTENT_KEY, JSON.stringify({ plan, billing }));
+      window.location.href = "/login?redirect=/pricing";
+      return;
+    }
     setLoading(plan);
     try {
       await openSubscriptionCheckout({ plan, billing, currency, userId, userEmail });

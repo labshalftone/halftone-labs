@@ -4,11 +4,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") ?? "/account";
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,9 +40,12 @@ export default function LoginPage() {
           .eq("user_id", signInData.user.id)
           .maybeSingle();
         if (!profile || !profile.onboarding_completed_at) {
+          // Onboarding not done — must complete it first;
+          // the redirect will be picked up by the onboarding completion handler
           router.push("/onboarding");
         } else {
-          router.push("/account");
+          // Return user to wherever they came from (e.g. /pricing to auto-trigger checkout)
+          router.push(redirect);
         }
       }
     } catch {
@@ -126,7 +132,10 @@ export default function LoginPage() {
           <div className="mt-6 flex flex-col gap-2 text-center">
             <p className="text-sm text-ds-body">
               No account?{" "}
-              <Link href="/signup" className="text-brand font-semibold hover:text-brand-dark transition-colors">
+              <Link
+                href={`/signup${redirect !== "/account" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+                className="text-brand font-semibold hover:text-brand-dark transition-colors"
+              >
                 Create one
               </Link>
             </p>

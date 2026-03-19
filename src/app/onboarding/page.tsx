@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import {
   ArrowRight,
@@ -157,6 +157,10 @@ const toSlug = (s: string) =>
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // If user came from a plan CTA, redirect back there after onboarding so
+  // the localStorage plan intent can auto-trigger Razorpay
+  const afterOnboarding = searchParams.get("after") ?? "/account";
   const [step, setStep] = useState(0);
   const [userName, setUserName] = useState("");
   const [initialising, setInitialising] = useState(true);
@@ -461,7 +465,7 @@ export default function OnboardingPage() {
                   />
                 )}
                 {step === SUCCESS_STEP && (
-                  <Step8Success brandName={data.brand_name} storeSlug={data.store_slug} />
+                  <Step8Success brandName={data.brand_name} storeSlug={data.store_slug} dashboardHref={afterOnboarding} />
                 )}
               </motion.div>
             </AnimatePresence>
@@ -977,10 +981,13 @@ function Step7Review({
 function Step8Success({
   brandName,
   storeSlug,
+  dashboardHref = "/account",
 }: {
   brandName: string;
   storeSlug: string;
+  dashboardHref?: string;
 }) {
+  const hasPlanIntent = typeof window !== "undefined" && !!localStorage.getItem("ht_plan_intent");
   return (
     <div>
       <div className="w-10 h-10 rounded-full bg-halftone-purple flex items-center justify-center mb-7">
@@ -996,17 +1003,20 @@ function Step8Success({
       <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-zinc-50 border border-black/[0.06] mb-6">
         <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
         <p className="text-xs text-zinc-500 flex-1" style={{ fontWeight: 400 }}>
-          You&apos;re on the <span className="font-semibold text-zinc-700">Free plan</span>. Upgrade anytime to unlock more drops, premium products, and branding tools.
+          {hasPlanIntent
+            ? <>You&apos;re almost there — <span className="font-semibold text-zinc-700">complete your subscription</span> on the next screen.</>
+            : <>You&apos;re on the <span className="font-semibold text-zinc-700">Free plan</span>. Upgrade anytime to unlock more drops, premium products, and branding tools.</>
+          }
         </p>
       </div>
 
       <div className="flex flex-col gap-2.5">
         <Link
-          href="/account"
+          href={dashboardHref}
           className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-white text-sm hover:opacity-90 transition-opacity"
           style={{ background: "#0f0f0f", fontWeight: 600 }}
         >
-          Go to dashboard
+          {hasPlanIntent ? "Complete subscription" : "Go to dashboard"}
           <ArrowRight size={15} strokeWidth={2.5} />
         </Link>
         {storeSlug && (

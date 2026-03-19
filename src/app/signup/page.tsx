@@ -4,11 +4,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") ?? "/account";
+
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -26,12 +29,17 @@ export default function SignupPage() {
     }
     try {
       const origin = typeof window !== "undefined" ? window.location.origin : "";
+      // Embed the post-onboarding redirect in the email confirmation URL
+      // so the plan intent (stored in localStorage) can be honoured after onboarding
+      const onboardingUrl = redirect !== "/account"
+        ? `${origin}/onboarding?after=${encodeURIComponent(redirect)}`
+        : `${origin}/onboarding`;
       const { error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
           data: { name: form.name },
-          emailRedirectTo: `${origin}/onboarding`,
+          emailRedirectTo: onboardingUrl,
         },
       });
       if (error) setError(error.message);
@@ -156,7 +164,10 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-ds-body mt-6">
                 Already have an account?{" "}
-                <Link href="/login" className="text-brand font-semibold hover:text-brand-dark transition-colors">
+                <Link
+                  href={`/login${redirect !== "/account" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+                  className="text-brand font-semibold hover:text-brand-dark transition-colors"
+                >
                   Sign in
                 </Link>
               </p>
