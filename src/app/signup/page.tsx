@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { Loader2, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -41,52 +42,123 @@ export default function SignupPage() {
     setLoading(false);
   };
 
-  const inp = "w-full px-4 py-3 rounded-xl border border-black/[0.08] text-sm font-bold bg-white focus:outline-none focus:border-halftone-purple transition-colors";
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <nav className="h-14 flex items-center px-6 border-b border-black/[0.04]">
-        <Link href="/" className="text-base" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Halftone Labs</Link>
+      {/* Minimal nav */}
+      <nav className="h-14 flex items-center px-6 border-b border-black/[0.05]">
+        <Link
+          href="/"
+          className="text-base text-ds-dark"
+          style={{ fontWeight: 700, letterSpacing: "-0.05em" }}
+        >
+          Halftone Labs
+        </Link>
       </nav>
 
       <div className="flex-1 flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-sm"
+        >
           {sent ? (
+            /* ── Success state ── */
             <div className="text-center">
-              <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl" style={{ background: "#9e6c9e15" }}>✓</div>
-              <h1 className="text-2xl mb-2" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Check your email</h1>
-              <p className="text-halftone-muted text-sm font-bold mb-6">We&apos;ve sent a confirmation link to <strong>{form.email}</strong>. Click it to activate your account and set up your store.</p>
-              <Link href="/login" className="text-halftone-purple font-bold underline underline-offset-2 text-sm">Back to Sign In</Link>
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 mx-auto mb-5 flex items-center justify-center">
+                <CheckCircle size={26} className="text-emerald-500" />
+              </div>
+              <h1
+                className="text-2xl text-ds-dark mb-2"
+                style={{ fontWeight: 700, letterSpacing: "-0.05em" }}
+              >
+                Check your email
+              </h1>
+              <p className="text-ds-body text-sm mb-6 leading-relaxed">
+                We&apos;ve sent a confirmation link to{" "}
+                <strong className="text-ds-dark">{form.email}</strong>. Click it to
+                activate your account and set up your store.
+              </p>
+              <Link
+                href="/login"
+                className="text-brand font-semibold text-sm hover:text-brand-dark transition-colors"
+              >
+                Back to Sign In
+              </Link>
             </div>
           ) : (
+            /* ── Sign-up form ── */
             <>
-              <h1 className="text-3xl mb-1" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Create account</h1>
-              <p className="text-halftone-muted text-sm font-bold mb-8">Track all your orders in one place.</p>
+              <div className="mb-8">
+                <h1
+                  className="text-3xl text-ds-dark mb-1"
+                  style={{ fontWeight: 700, letterSpacing: "-0.05em" }}
+                >
+                  Create account
+                </h1>
+                <p className="text-ds-body text-sm">
+                  Track all your orders in one place.
+                </p>
+              </div>
 
               <form onSubmit={handleSignup} className="flex flex-col gap-4">
                 <div>
-                  <label className="text-[0.62rem] font-bold uppercase tracking-widest text-halftone-muted block mb-1.5">Name</label>
-                  <input required type="text" placeholder="Your name" className={inp} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                  <label className="ds-label mb-1.5 block">Name</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Your name"
+                    className="field"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
                 </div>
                 <div>
-                  <label className="text-[0.62rem] font-bold uppercase tracking-widest text-halftone-muted block mb-1.5">Email</label>
-                  <input required type="email" placeholder="you@brand.com" className={inp} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  <label className="ds-label mb-1.5 block">Email</label>
+                  <input
+                    required
+                    type="email"
+                    placeholder="you@brand.com"
+                    className="field"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
                 </div>
                 <div>
-                  <label className="text-[0.62rem] font-bold uppercase tracking-widest text-halftone-muted block mb-1.5">Password</label>
-                  <input required type="password" placeholder="Min 8 characters" minLength={8} className={inp} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                  <label className="ds-label mb-1.5 block">Password</label>
+                  <input
+                    required
+                    type="password"
+                    placeholder="Min 8 characters"
+                    minLength={8}
+                    className="field"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  />
                 </div>
 
-                {error && <p className="text-sm font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>}
+                {error && (
+                  <p className="text-sm text-red-600 bg-red-50 px-3 py-2.5 rounded-xl border border-red-100">
+                    {error}
+                  </p>
+                )}
 
-                <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-all" style={{ background: "#9e6c9e", fontWeight: 600 }}>
-                  {loading ? "Creating account…" : "Create Account →"}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-brand w-full justify-center py-3 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <><Loader2 size={15} className="animate-spin" /> Creating account…</>
+                  ) : "Create Account"}
                 </button>
               </form>
 
-              <p className="text-center text-sm font-bold text-halftone-muted mt-6">
+              <p className="text-center text-sm text-ds-body mt-6">
                 Already have an account?{" "}
-                <Link href="/login" className="text-halftone-purple underline underline-offset-2">Sign in</Link>
+                <Link href="/login" className="text-brand font-semibold hover:text-brand-dark transition-colors">
+                  Sign in
+                </Link>
               </p>
             </>
           )}

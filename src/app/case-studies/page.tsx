@@ -82,20 +82,22 @@ export default function CaseStudiesPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen" style={{ background: "#f8f7f5" }}>
+      <main className="min-h-screen bg-white">
 
         {/* Hero */}
-        <section className="relative overflow-hidden border-b border-zinc-200/60 pt-28 pb-20 px-6">
-          <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        <section className="relative overflow-hidden border-b border-black/[0.06] pt-32 pb-20 px-6">
+          <div className="halftone-divider" />
           <div className="max-w-5xl mx-auto relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-5">[ Case Studies ]</p>
-              <h1 className="text-[clamp(2.8rem,7vw,5.5rem)] font-black text-zinc-900 leading-[0.9] mb-6" style={{ letterSpacing: "-0.05em" }}>
-                The proof is<br />
-                <span style={{ WebkitTextStroke: "2px #111", color: "transparent" }}>in the product.</span>
+              <span className="ds-label ds-label-brand mb-5 block">Case Studies</span>
+              <h1
+                className="text-[clamp(2.8rem,7vw,5.5rem)] text-ds-dark leading-[0.9] mb-6"
+                style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
+              >
+                <span className="h-fade">The proof is </span>
+                <span className="h-bold">in the product.</span>
               </h1>
-              <p className="text-zinc-500 text-lg max-w-xl leading-relaxed">
+              <p className="text-ds-body text-lg max-w-xl leading-relaxed">
                 Real drops. Real artists. Real results. Here's how we work — and what it looks like when it comes together.
               </p>
             </motion.div>
@@ -111,7 +113,7 @@ export default function CaseStudiesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.55, delay: i * 0.08 }}
-              className="rounded-3xl overflow-hidden border border-zinc-200 bg-white"
+              className="rounded-3xl overflow-hidden border border-black/[0.06] bg-white"
             >
               {/* Header band */}
               <div className="p-8 md:p-10 relative overflow-hidden" style={{ background: cs.colorBg }}>
@@ -122,9 +124,9 @@ export default function CaseStudiesPage() {
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-[0.6rem] font-mono uppercase tracking-widest" style={{ color: cs.colorAccent }}>{cs.tag}</span>
                       <span className="text-white/20">·</span>
-                      <span className="text-[0.6rem] font-mono uppercase tracking-widest text-white/30">{cs.year}</span>
+                      <span className="ds-label text-white/30">{cs.year}</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-black leading-tight mb-2" style={{ color: cs.colorText, letterSpacing: "-0.04em" }}>
+                    <h2 className="text-3xl md:text-4xl font-semibold leading-tight mb-2" style={{ color: cs.colorText, letterSpacing: "-0.04em" }}>
                       {cs.client}
                     </h2>
                     <p className="font-medium" style={{ color: cs.colorAccent }}>{cs.project}</p>
@@ -133,7 +135,7 @@ export default function CaseStudiesPage() {
                   <div className="flex gap-6">
                     {cs.stats.map((s) => (
                       <div key={s.label} className="text-center">
-                        <p className="text-2xl font-black" style={{ color: cs.colorAccent, letterSpacing: "-0.04em" }}>{s.value}</p>
+                        <p className="text-2xl font-semibold" style={{ color: cs.colorAccent, letterSpacing: "-0.04em" }}>{s.value}</p>
                         <p className="text-[0.6rem] uppercase tracking-widest text-white/40 mt-0.5">{s.label}</p>
                       </div>
                     ))}
@@ -144,26 +146,26 @@ export default function CaseStudiesPage() {
               {/* Body */}
               <div className="p-8 md:p-10">
                 {/* Quote */}
-                <blockquote className="border-l-4 border-zinc-200 pl-5 mb-8">
-                  <p className="text-zinc-600 italic leading-relaxed">"{cs.quote}"</p>
-                  <cite className="text-xs text-zinc-400 not-italic mt-2 block">— {cs.client}</cite>
+                <blockquote className="border-l-4 border-brand/30 pl-5 mb-8">
+                  <p className="text-ds-body italic leading-relaxed">"{cs.quote}"</p>
+                  <cite className="text-xs text-ds-muted not-italic mt-2 block">— {cs.client}</cite>
                 </blockquote>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div>
-                    <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">The Brief</p>
-                    <p className="text-zinc-700 text-sm leading-relaxed">{cs.intro}</p>
+                    <p className="ds-label text-ds-muted mb-2">The Brief</p>
+                    <p className="text-ds-body text-sm leading-relaxed">{cs.intro}</p>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">The Challenge</p>
-                    <p className="text-zinc-700 text-sm leading-relaxed">{cs.challenge}</p>
+                    <p className="ds-label text-ds-muted mb-2">The Challenge</p>
+                    <p className="text-ds-body text-sm leading-relaxed">{cs.challenge}</p>
                   </div>
                   <div>
-                    <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">What We Made</p>
-                    <p className="text-zinc-700 text-sm leading-relaxed mb-4">{cs.solution}</p>
+                    <p className="ds-label text-ds-muted mb-2">What We Made</p>
+                    <p className="text-ds-body text-sm leading-relaxed mb-4">{cs.solution}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {cs.products.map((p) => (
-                        <span key={p} className="text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500">
+                        <span key={p} className="pill-dark">
                           {p}
                         </span>
                       ))}
@@ -172,9 +174,9 @@ export default function CaseStudiesPage() {
                 </div>
 
                 {/* Result */}
-                <div className="mt-8 pt-8 border-t border-zinc-100 bg-zinc-50 -mx-8 md:-mx-10 -mb-8 md:-mb-10 px-8 md:px-10 pb-8 md:pb-10 rounded-b-3xl">
-                  <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">The Result</p>
-                  <p className="text-zinc-800 font-medium leading-relaxed">{cs.result}</p>
+                <div className="mt-8 pt-8 border-t border-black/[0.04] bg-ds-light-gray -mx-8 md:-mx-10 -mb-8 md:-mb-10 px-8 md:px-10 pb-8 md:pb-10 rounded-b-3xl">
+                  <p className="ds-label text-ds-muted mb-2">The Result</p>
+                  <p className="text-ds-dark font-medium leading-relaxed">{cs.result}</p>
                 </div>
               </div>
             </motion.article>
@@ -182,17 +184,17 @@ export default function CaseStudiesPage() {
         </section>
 
         {/* All clients ticker */}
-        <section className="border-t border-zinc-200 py-14 overflow-hidden">
+        <section className="border-t border-black/[0.06] py-14 overflow-hidden">
           <div className="max-w-5xl mx-auto px-6 mb-8">
-            <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400">60+ artists & events trust Halftone Labs</p>
+            <p className="ds-label text-ds-muted">60+ artists & events trust Halftone Labs</p>
           </div>
           <div className="relative">
             <div className="flex gap-0 overflow-hidden">
               <div className="flex gap-8 items-center animate-marquee whitespace-nowrap">
                 {[...ALL_CLIENTS, ...ALL_CLIENTS].map((name, i) => (
-                  <span key={i} className="text-sm font-black uppercase tracking-tight text-zinc-300 flex-shrink-0 flex items-center gap-8">
+                  <span key={i} className="text-sm font-semibold uppercase tracking-tight text-ds-muted flex-shrink-0 flex items-center gap-8">
                     {name}
-                    <span className="text-zinc-200">✦</span>
+                    <span className="text-brand/30">✦</span>
                   </span>
                 ))}
               </div>
@@ -201,25 +203,29 @@ export default function CaseStudiesPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-6 py-20 border-t border-zinc-200">
+        <section className="px-6 py-20 border-t border-black/[0.06]">
           <div className="max-w-3xl mx-auto">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="bg-zinc-900 rounded-3xl p-12 text-center relative overflow-hidden">
+              className="bg-ds-dark rounded-3xl p-12 text-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-[0.06]"
                 style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
               <div className="relative z-10">
-                <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-500 mb-4">Your drop next</p>
-                <h2 className="text-4xl font-black text-white mb-4" style={{ letterSpacing: "-0.05em" }}>
-                  Ready to make something real?
+                <span className="ds-label text-white/30 mb-4 block">Your drop next</span>
+                <h2
+                  className="text-4xl text-white mb-4"
+                  style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
+                >
+                  <span className="h-fade-dark">Ready to make </span>
+                  <span className="h-bold-dark">something real?</span>
                 </h2>
-                <p className="text-zinc-400 mb-8 max-w-md mx-auto text-sm leading-relaxed">
+                <p className="text-white/50 mb-10 max-w-md mx-auto text-sm leading-relaxed">
                   Whether it's your first tee or a 10,000-piece festival run — we've done it before, and we'd love to do it with you.
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
-                  <Link href="/studio" className="px-6 py-3.5 rounded-xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-400 transition-colors">
+                  <Link href="/studio" className="btn-brand">
                     Open Studio →
                   </Link>
-                  <a href="mailto:hello@halftonelabs.in" className="px-6 py-3.5 rounded-xl border border-zinc-700 text-zinc-300 font-semibold text-sm hover:border-zinc-500 hover:text-white transition-colors">
+                  <a href="mailto:hello@halftonelabs.in" className="btn-outline-ds border-white/20 text-white/60 hover:border-white/50 hover:text-white">
                     Discuss your project
                   </a>
                 </div>
