@@ -465,6 +465,13 @@ export default function DropsTab({ userId }: Props) {
                             </button>
                           )}
 
+                          {/* Ended drop stats */}
+                          {drop.status === "ended" && (drop.waitlist_count ?? 0) > 0 && (
+                            <span className="text-[10px] font-semibold text-ds-muted bg-black/[0.05] px-1.5 py-0.5 rounded-full">
+                              {drop.waitlist_count} signups
+                            </span>
+                          )}
+
                           {/* Store path */}
                           {store && (
                             <span className="text-[10px] text-ds-muted font-mono hidden sm:inline">/store/{store.handle}</span>
