@@ -10,10 +10,11 @@ export async function GET(req: NextRequest) {
 
   const db = createAdminClient();
 
-  // Today's UTC date range
+  // Date ranges
   const now = new Date();
-  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const todayEnd   = new Date(todayStart.getTime() + 86400000);
+  const todayStart   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const todayEnd     = new Date(todayStart.getTime() + 86400000);
+  const sevenDaysAgo = new Date(todayStart.getTime() - 6 * 86400000);
 
   // Run all queries in parallel
   const [
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
     walletRes,
     shopifyRes,
     recentOrdersRes,
+    weeklyOrdersRes,
   ] = await Promise.all([
     db.from("orders")
       .select("id, total, status, product_name")
@@ -44,10 +46,16 @@ export async function GET(req: NextRequest) {
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(5),
+    db.from("orders")
+      .select("created_at, total, status")
+      .eq("user_id", userId)
+      .gte("created_at", sevenDaysAgo.toISOString())
+      .lt("created_at", todayEnd.toISOString()),
   ]);
 
-  const allOrders = allOrdersRes.data ?? [];
-  const todayOrders = todayOrdersRes.data ?? [];
+  const allOrders    = allOrdersRes.data ?? [];
+  const todayOrders  = todayOrdersRes.data ?? [];
+  const weeklyOrders = weeklyOrdersRes.data ?? [];
 
   // Total revenue (exclude Cancelled)
   const totalRevenue = allOrders
@@ -62,6 +70,11 @@ export async function GET(req: NextRequest) {
     .filter((o) => o.status !== "Cancelled")
     .reduce((sum, o) => sum + Number(o.total ?? 0), 0);
 
+  // Pending orders (awaiting fulfillment)
+  const pendingOrders = allOrders.filter(
+    (o) => ["Order Placed", "Design Confirmed"].includes(o.status)
+  ).length;
+
   // Best seller: group by product_name
   const productCounts: Record<string, number> = {};
   for (const o of allOrders) {
@@ -72,15 +85,30 @@ export async function GET(req: NextRequest) {
   const bestSeller = Object.entries(productCounts)
     .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
+  // Weekly revenue — bucket into 7 daily slots (index 0 = 6 days ago, index 6 = today)
+  const weeklyRevenue: number[] = Array(7).fill(0);
+  for (const o of weeklyOrders) {
+    if (o.status === "Cancelled") continue;
+    const orderDate = new Date(o.created_at);
+    const dayIndex = Math.floor(
+      (orderDate.getTime() - sevenDaysAgo.getTime()) / 86400000
+    );
+    if (dayIndex >= 0 && dayIndex < 7) {
+      weeklyRevenue[dayIndex] += Number(o.total ?? 0);
+    }
+  }
+
   return NextResponse.json({
     totalRevenue,
     totalOrders,
     todayOrders: todayOrderCount,
     todayRevenue,
+    pendingOrders,
     bestSeller,
-    walletBalance: walletRes.data?.balance ?? 0,
-    walletCurrency: walletRes.data?.currency ?? "INR",
+    walletBalance:    walletRes.data?.balance ?? 0,
+    walletCurrency:   walletRes.data?.currency ?? "INR",
     shopifyConnected: !!shopifyRes.data,
-    recentOrders: recentOrdersRes.data ?? [],
+    recentOrders:     recentOrdersRes.data ?? [],
+    weeklyRevenue,
   });
 }
