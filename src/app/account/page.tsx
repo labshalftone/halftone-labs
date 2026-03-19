@@ -304,25 +304,42 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                           {/* Timeline */}
                           <div className="flex-1">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted mb-4">Order Timeline</p>
-                            {order.milestones.length === 0 ? (
-                              <p className="text-xs text-ds-muted">No updates yet — we&apos;ll email you when your order moves.</p>
-                            ) : (
-                              order.milestones.map((m, i) => (
-                                <div key={m.id} className="flex gap-3">
-                                  <div className="flex flex-col items-center">
-                                    <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: sc.dot }} />
-                                    {i < order.milestones.length - 1 && <div className="w-px flex-1 my-1 bg-zinc-200" style={{ minHeight: 16 }} />}
-                                  </div>
-                                  <div className="pb-3">
-                                    <p className="text-sm font-bold text-ds-dark">{m.title}</p>
-                                    {!!m.description && <p className="text-xs text-ds-body">{String(m.description)}</p>}
-                                    <p className="text-[10px] text-ds-muted mt-0.5">
-                                      {new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                                    </p>
-                                  </div>
+                            {(() => {
+                              const PIPELINE = ["Order Placed", "Design Confirmed", "In Production", "Quality Check", "Shipped", "Delivered"];
+                              const completedTitles = new Set(order.milestones.map((m) => m.title));
+                              const lastCompletedIdx = PIPELINE.reduce((acc, title, idx) => completedTitles.has(title) ? idx : acc, -1);
+                              return (
+                                <div>
+                                  {PIPELINE.map((step, idx) => {
+                                    const milestone = order.milestones.find((m) => m.title === step);
+                                    const isComplete = !!milestone;
+                                    const isCurrent = !isComplete && idx === lastCompletedIdx + 1;
+                                    const isFuture = !isComplete && !isCurrent;
+                                    const isLast = idx === PIPELINE.length - 1;
+                                    return (
+                                      <div key={step} className="flex gap-3">
+                                        <div className="flex flex-col items-center">
+                                          <div className={`w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0 ${
+                                            isComplete ? "bg-brand" : isCurrent ? "border-2 border-brand bg-white" : "bg-zinc-200"
+                                          }`} />
+                                          {!isLast && <div className={`w-px flex-1 my-1 ${isComplete ? "bg-brand/30" : "bg-zinc-100"}`} style={{ minHeight: 16 }} />}
+                                        </div>
+                                        <div className="pb-3">
+                                          <p className={`text-sm font-semibold ${isComplete ? "text-ds-dark" : isCurrent ? "text-brand" : "text-zinc-300"}`}>{step}</p>
+                                          {milestone?.description && <p className="text-xs text-ds-body">{String(milestone.description)}</p>}
+                                          {milestone && (
+                                            <p className="text-[10px] text-ds-muted mt-0.5">
+                                              {new Date(milestone.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                                            </p>
+                                          )}
+                                          {isCurrent && <p className="text-[10px] text-brand mt-0.5">In progress</p>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              ))
-                            )}
+                              );
+                            })()}
                           </div>
 
                           {/* Actions */}
@@ -663,6 +680,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
   const [cartDesign,  setCartDesign]  = useState<Design | null>(null);
   const [pushDesign,  setPushDesign]  = useState<Design | null>(null);
   const [hasShopify,  setHasShopify]  = useState<boolean | null>(null);
+  const [openMenuId,  setOpenMenuId]  = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -690,12 +708,38 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
     setDeleting(null);
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredDesigns = designs.filter((d) =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.color_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Designs</h2>
         <Link href="/studio" className="px-4 py-2 rounded-full bg-brand text-white text-xs font-bold hover:bg-orange-600 transition-colors">+ New Design</Link>
       </div>
+      {designs.length > 3 && (
+        <div className="relative mb-5">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ds-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search designs…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-black/[0.06] text-sm text-ds-dark placeholder:text-ds-muted focus:outline-none focus:border-zinc-400 transition-colors bg-white max-w-xs"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-ds-muted hover:text-ds-body">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
@@ -713,9 +757,14 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
             Open Studio →
           </Link>
         </div>
+      ) : filteredDesigns.length === 0 && searchQuery ? (
+        <div className="bg-white border border-black/[0.06] rounded-2xl p-10 text-center">
+          <p className="font-semibold text-ds-dark mb-1">No designs match &quot;{searchQuery}&quot;</p>
+          <p className="text-sm text-ds-muted">Try a different name, product, or colour.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {designs.map((d) => (
+          {filteredDesigns.map((d) => (
             <motion.div key={d.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden hover:border-black/[0.06] hover:shadow-sm transition-all">
               {/* Thumbnail */}
@@ -797,35 +846,48 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     </svg>
                     Add to Cart
                   </button>
-                  {d.thumbnail && (
+                  {/* Three-dot menu */}
+                  <div className="relative">
                     <button
-                      onClick={() => downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup")}
+                      onClick={() => setOpenMenuId(openMenuId === d.id ? null : d.id)}
                       className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-zinc-400 hover:text-ds-body transition-colors"
-                      title={d.back_thumbnail ? "Download front mockup" : "Download mockup"}>
+                      title="More options"
+                    >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                       </svg>
                     </button>
-                  )}
-                  {d.back_thumbnail && (
-                    <button
-                      onClick={() => downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup")}
-                      className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-zinc-400 hover:text-ds-body transition-colors"
-                      title="Download back mockup">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                      </svg>
-                    </button>
-                  )}
-                  <button onClick={() => handleDelete(d.id)} disabled={deleting === d.id}
-                    className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-red-200 hover:text-red-500 transition-colors disabled:opacity-40"
-                    title="Delete design">
-                    {deleting === d.id ? (
-                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    ) : (
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    {openMenuId === d.id && (
+                      <div className="absolute right-0 bottom-full mb-1.5 w-44 bg-white rounded-xl border border-black/[0.06] shadow-lg overflow-hidden z-20 py-1">
+                        {d.thumbnail && (
+                          <button
+                            onClick={() => { downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup"); setOpenMenuId(null); }}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-ds-body hover:bg-ds-light-gray transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            {d.back_thumbnail ? "Front mockup" : "Download mockup"}
+                          </button>
+                        )}
+                        {d.back_thumbnail && (
+                          <button
+                            onClick={() => { downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup"); setOpenMenuId(null); }}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-ds-body hover:bg-ds-light-gray transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            Back mockup
+                          </button>
+                        )}
+                        <button
+                          onClick={() => { handleDelete(d.id); setOpenMenuId(null); }}
+                          disabled={deleting === d.id}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          Delete design
+                        </button>
+                      </div>
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1980,12 +2042,26 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
 
   const fmt = (n: number) => `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const [yearFilter, setYearFilter] = useState<string>("All");
+  const availableYears = ["All", ...Array.from(new Set(invoices.map((inv) => new Date(inv.issued_at).getFullYear().toString()))).sort((a, b) => Number(b) - Number(a))];
+  const filteredInvoices = yearFilter === "All" ? invoices : invoices.filter((inv) => new Date(inv.issued_at).getFullYear().toString() === yearFilter);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Invoices</h2>
         <p className="text-xs text-ds-muted">GST tax invoices auto-generated for every order</p>
       </div>
+      {invoices.length > 0 && availableYears.length > 2 && (
+        <div className="flex gap-2 mb-5 flex-wrap">
+          {availableYears.map((yr) => (
+            <button key={yr} onClick={() => setYearFilter(yr)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors ${yearFilter === yr ? "bg-ds-dark text-white" : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"}`}>
+              {yr}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-ds-muted py-12 justify-center">
@@ -2012,7 +2088,7 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
             <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted text-right">Actions</span>
           </div>
           <div className="divide-y divide-zinc-100">
-            {invoices.map((inv) => (
+            {filteredInvoices.map((inv) => (
               <div key={inv.id} className="grid sm:grid-cols-5 grid-cols-2 gap-4 px-6 py-4 hover:bg-ds-light-gray transition-colors items-center">
                 <div>
                   <p className="font-bold text-ds-dark text-sm">{inv.invoice_number}</p>
@@ -2070,6 +2146,40 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Password Reset Row ─────────────────────────────────────────────────────────
+function PasswordResetRow({ email }: { email: string }) {
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleReset = async () => {
+    setSending(true);
+    try {
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setSent(true);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (sent) {
+    return (
+      <p className="text-sm text-green-600 font-semibold">✓ Reset link sent to {email}</p>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleReset}
+      disabled={sending || !email}
+      className="text-sm font-semibold text-brand hover:underline disabled:opacity-40 transition-colors"
+    >
+      {sending ? "Sending…" : "Send password reset email →"}
+    </button>
   );
 }
 
@@ -2241,7 +2351,7 @@ function SettingsTab({
         </div>
         <div className="px-6 py-5">
           <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-2">Password</p>
-          <p className="text-sm text-ds-body">To reset your password, sign out and use &quot;Forgot password&quot; on the login page.</p>
+          <PasswordResetRow email={user?.email ?? ""} />
         </div>
         <div className="px-6 py-5">
           <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-3">Support</p>
