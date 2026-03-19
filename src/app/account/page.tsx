@@ -11,6 +11,8 @@ import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-contex
 import { PRODUCTS } from "@/lib/products";
 import ShopifyTab from "@/components/ShopifyTab";
 import WalletTab from "@/components/WalletTab";
+import CreateOrderTab from "@/components/CreateOrderTab";
+import CustomersTab from "@/components/CustomersTab";
 import OverviewTab from "@/components/OverviewTab";
 import OrgDashboard from "@/components/OrgDashboard";
 import OrgSettings from "@/components/OrgSettings";
@@ -33,7 +35,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings";
+type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -69,6 +71,16 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "shopify", label: "Shopify Orders", icon: (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
+    </svg>
+  )},
+  { id: "create-order", label: "Create Order", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  )},
+  { id: "customers", label: "Customers", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   )},
   { id: "wallet", label: "Wallet", icon: (
@@ -681,6 +693,22 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
   const [pushDesign,  setPushDesign]  = useState<Design | null>(null);
   const [hasShopify,  setHasShopify]  = useState<boolean | null>(null);
   const [openMenuId,  setOpenMenuId]  = useState<string | null>(null);
+  const [renamingId,  setRenamingId]  = useState<string | null>(null);
+  const [renameVal,   setRenameVal]   = useState("");
+
+  const startRename = (d: Design) => { setRenamingId(d.id); setRenameVal(d.name); setOpenMenuId(null); };
+
+  const commitRename = async (id: string) => {
+    const trimmed = renameVal.trim();
+    if (!trimmed) { setRenamingId(null); return; }
+    await fetch("/api/designs", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, userId, name: trimmed }),
+    });
+    setDesigns((prev) => prev.map((d) => d.id === id ? { ...d, name: trimmed } : d));
+    setRenamingId(null);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -805,7 +833,26 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
 
               {/* Info */}
               <div className="px-4 py-4">
-                <p className="font-semibold text-sm text-ds-dark truncate">{d.name}</p>
+                {renamingId === d.id ? (
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <input
+                      autoFocus
+                      value={renameVal}
+                      onChange={(e) => setRenameVal(e.target.value)}
+                      onBlur={() => commitRename(d.id)}
+                      onKeyDown={(e) => { if (e.key === "Enter") commitRename(d.id); if (e.key === "Escape") setRenamingId(null); }}
+                      className="flex-1 min-w-0 text-sm font-semibold text-ds-dark bg-transparent border-b-2 border-zinc-900 outline-none px-0 py-0.5"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 group/name mb-0.5">
+                    <p className="font-semibold text-sm text-ds-dark truncate flex-1">{d.name}</p>
+                    <button onClick={() => startRename(d)} title="Rename"
+                      className="opacity-0 group-hover/name:opacity-100 transition-opacity p-0.5 rounded text-ds-muted hover:text-ds-dark">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                  </div>
+                )}
                 <p className="text-xs text-ds-body mt-0.5">{d.product_name} · {d.color_name}</p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/[0.05] text-ds-body">Size {d.size}</span>
@@ -859,6 +906,13 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     </button>
                     {openMenuId === d.id && (
                       <div className="absolute right-0 bottom-full mb-1.5 w-44 bg-white rounded-xl border border-black/[0.06] shadow-lg overflow-hidden z-20 py-1">
+                        <button
+                          onClick={() => startRename(d)}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-ds-body hover:bg-ds-light-gray transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          Rename design
+                        </button>
                         {d.thumbnail && (
                           <button
                             onClick={() => { downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup"); setOpenMenuId(null); }}
@@ -2697,7 +2751,7 @@ export default function AccountPage() {
     const params = new URLSearchParams(window.location.search);
     const tab    = params.get("tab") as ActiveTab | null;
     const shopify = params.get("shopify");
-    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","wallet","invoices","settings"].includes(tab)) {
+    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","create-order","customers","wallet","invoices","settings"].includes(tab)) {
       setActiveTab(tab);
     }
     if (shopify === "connected" || shopify === "error") {
@@ -2867,7 +2921,7 @@ export default function AccountPage() {
           {([
             { label: "Overview", ids: ["dashboard"] },
             { label: "Create",   ids: ["designs", "drops", "branding"] },
-            { label: "Sell",     ids: ["orders", "stores", "shopify"] },
+            { label: "Sell",     ids: ["orders", "stores", "shopify", "create-order", "customers"] },
             { label: "Account",  ids: ["wallet", "invoices", "settings"] },
           ] as { label: string; ids: ActiveTab[] }[]).map(({ label, ids }) => (
             <div key={label} className="mb-3">
@@ -2928,7 +2982,7 @@ export default function AccountPage() {
                   {activeOrg.name}
                 </span>
               ) : (
-                activeTab === "dashboard" ? "Dashboard" : NAV.find((n) => n.id === activeTab)?.label
+                activeTab === "dashboard" ? "Dashboard" : activeTab === "create-order" ? "Create Order" : activeTab === "customers" ? "Customers" : NAV.find((n) => n.id === activeTab)?.label
               )}
             </h1>
           </div>
@@ -3026,8 +3080,10 @@ export default function AccountPage() {
               {activeTab === "drops"     && <DropsTab userId={user?.id ?? ""} />}
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
-              {activeTab === "shopify"   && <ShopifyTab userId={user?.id ?? ""} />}
-              {activeTab === "wallet"    && <WalletTab userId={user?.id ?? ""} />}
+              {activeTab === "shopify"       && <ShopifyTab userId={user?.id ?? ""} />}
+              {activeTab === "create-order"  && <CreateOrderTab userId={user?.id ?? ""} userEmail={user?.email ?? ""} />}
+              {activeTab === "customers"     && <CustomersTab userId={user?.id ?? ""} />}
+              {activeTab === "wallet"        && <WalletTab userId={user?.id ?? ""} />}
               {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>
