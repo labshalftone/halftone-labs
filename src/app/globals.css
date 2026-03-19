@@ -5,23 +5,23 @@
    ============================================================ */
 
 @theme {
-  /* Brand */
-  --color-brand: #9E6C9E;
-  --color-brand-dark: #7D527D;
-  --color-brand-light: #B88AB8;
-  /* Brand opacity variants — avoid Tailwind v4 CSS-var opacity-modifier bug */
-  --color-brand-2:  rgba(158, 108, 158, 0.02);
-  --color-brand-3:  rgba(158, 108, 158, 0.03);
-  --color-brand-5:  rgba(158, 108, 158, 0.05);
-  --color-brand-8:  rgba(158, 108, 158, 0.08);
-  --color-brand-10: rgba(158, 108, 158, 0.10);
-  --color-brand-12: rgba(158, 108, 158, 0.12);
-  --color-brand-15: rgba(158, 108, 158, 0.15);
-  --color-brand-20: rgba(158, 108, 158, 0.20);
-  --color-brand-25: rgba(158, 108, 158, 0.25);
-  --color-brand-30: rgba(158, 108, 158, 0.30);
-  --color-brand-40: rgba(158, 108, 158, 0.40);
-  --color-brand-60: rgba(158, 108, 158, 0.60);
+  /* Brand — use oklch so Tailwind v4 can compute opacity variants natively */
+  --color-brand:       oklch(62.3% 0.088 327);
+  --color-brand-dark:  oklch(50.8% 0.088 327);
+  --color-brand-light: oklch(72.6% 0.079 327);
+  /* Explicit opacity tokens (for components that need a specific alpha) */
+  --color-brand-2:  oklch(62.3% 0.088 327 / 0.02);
+  --color-brand-3:  oklch(62.3% 0.088 327 / 0.03);
+  --color-brand-5:  oklch(62.3% 0.088 327 / 0.05);
+  --color-brand-8:  oklch(62.3% 0.088 327 / 0.08);
+  --color-brand-10: oklch(62.3% 0.088 327 / 0.10);
+  --color-brand-12: oklch(62.3% 0.088 327 / 0.12);
+  --color-brand-15: oklch(62.3% 0.088 327 / 0.15);
+  --color-brand-20: oklch(62.3% 0.088 327 / 0.20);
+  --color-brand-25: oklch(62.3% 0.088 327 / 0.25);
+  --color-brand-30: oklch(62.3% 0.088 327 / 0.30);
+  --color-brand-40: oklch(62.3% 0.088 327 / 0.40);
+  --color-brand-60: oklch(62.3% 0.088 327 / 0.60);
 
   /* Dark palette */
   --color-ds-dark: rgb(25, 27, 36);
@@ -40,9 +40,9 @@
   --color-ds-light-gray: rgb(244, 244, 245);
 
   /* Legacy halftone (keep for Studio/Account/etc. compatibility) */
-  --color-halftone-purple: #9e6c9e;
-  --color-halftone-purple-dark: #7a4d7a;
-  --color-halftone-purple-light: #c49ec4;
+  --color-halftone-purple: oklch(62.3% 0.088 327);
+  --color-halftone-purple-dark: oklch(50.8% 0.088 327);
+  --color-halftone-purple-light: oklch(72.6% 0.079 327);
   --color-halftone-orange: #f15533;
   --color-halftone-orange-light: #ffa587;
   --color-halftone-dark: #0f0f0f;
@@ -92,7 +92,7 @@
   p { font-weight: 400; }
 
   ::selection {
-    background: #9E6C9E;
+    background: oklch(62.3% 0.088 327);
     color: white;
   }
 }
