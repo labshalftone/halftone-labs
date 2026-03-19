@@ -6,8 +6,10 @@ const ROW_1 = [
   "QUADECA",
   "Tidal Rave",
   "Kevin Abstract",
+  "DSCVRD Music",
   "Galactica",
   "BLUSH",
+  "Nashville Mayor",
   "Lowlands",
   "C2C",
 ];
