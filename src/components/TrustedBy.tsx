@@ -17,9 +17,11 @@ const ROW_1 = [
 const ROW_2 = [
   "WearADHD",
   "RESTRICTED",
+  "Kid At The Corner",
   "Illusion Hills",
   "NovaRock",
   "RAUN",
+  "Globo Cons",
   "Felicia Lu",
   "We Met At The Bar",
   "Vanisher",
