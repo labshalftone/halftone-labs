@@ -43,8 +43,8 @@ export default function GetStarted() {
         }}
       />
       {/* Purple bloom */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-brand/[0.12] rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand/[0.06] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-brand-12 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-8 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-[1200px] mx-auto" ref={ref}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

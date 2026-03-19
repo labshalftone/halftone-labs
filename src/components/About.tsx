@@ -17,7 +17,7 @@ export default function About() {
   return (
     <section id="about" className="relative py-28 bg-white overflow-hidden">
       {/* Accent stripe */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-brand/30 to-transparent" />
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-brand-30 to-transparent" />
 
       <div className="max-w-[1200px] mx-auto px-6 relative z-10" ref={ref}>
 

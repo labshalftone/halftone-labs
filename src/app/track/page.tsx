@@ -218,7 +218,7 @@ function TrackContent() {
                       <div className="flex flex-col items-center">
                         <div className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5 bg-brand" />
                         {i < (order.milestones as unknown[]).length - 1 && (
-                          <div className="w-[1.5px] flex-1 my-1 bg-brand/20" style={{ minHeight: 24 }} />
+                          <div className="w-[1.5px] flex-1 my-1 bg-brand-20" style={{ minHeight: 24 }} />
                         )}
                       </div>
                       <div className="pb-5">

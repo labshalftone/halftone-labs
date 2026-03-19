@@ -355,7 +355,7 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     </div>
                   ))}
                   {selected.neck_label && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand/8 border border-orange-200">
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-8 border border-orange-200">
                       <span className="text-xs">🏷️</span>
                       <span className="text-xs font-semibold text-orange-700">DTF Neck Label (+₹7/pc)</span>
                     </div>
@@ -1687,7 +1687,7 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
                             <span className="text-sm font-semibold text-ds-dark">#{o.ref}</span>
                             <StatusBadge status={o.status} />
                             {o.neck_label && (
-                              <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full bg-brand/8 border border-orange-200 text-orange-700">🏷️</span>
+                              <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full bg-brand-8 border border-orange-200 text-orange-700">🏷️</span>
                             )}
                           </div>
                           <p className="text-xs text-ds-body mt-0.5 truncate">{o.product_name}</p>

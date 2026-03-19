@@ -177,7 +177,7 @@ export default function ContactPage() {
               href="mailto:hello@halftonelabs.in"
               className="flex items-center gap-3 text-sm text-ds-body hover:text-brand transition-colors group"
             >
-              <span className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center flex-shrink-0 group-hover:bg-brand/12 transition-colors">
+              <span className="w-9 h-9 rounded-xl bg-brand-8 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-12 transition-colors">
                 <Mail size={16} className="text-brand" />
               </span>
               hello@halftonelabs.in

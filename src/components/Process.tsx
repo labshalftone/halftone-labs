@@ -91,7 +91,7 @@ export default function Process() {
 
               {/* Connector (non-last) */}
               {i < 2 && (
-                <div className="hidden md:block absolute top-1/2 -right-3 w-5 h-px bg-brand/20 z-10" />
+                <div className="hidden md:block absolute top-1/2 -right-3 w-5 h-px bg-brand-20 z-10" />
               )}
             </motion.div>
           ))}

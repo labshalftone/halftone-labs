@@ -732,7 +732,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
               key={order.id}
               layout
               className={`bg-white rounded-2xl border overflow-hidden transition-colors ${
-                isSelected ? "border-brand/40 ring-1 ring-brand/20" : "border-black/[0.06]"
+                isSelected ? "border-brand-40 ring-1 ring-brand-20" : "border-black/[0.06]"
               }`}
             >
               {/* Main row */}
@@ -879,7 +879,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                     {/* Edit (pending only) */}
                     {isPending && (
                       <button onClick={() => startEdit(order)} title="Edit shipping details"
-                        className={`p-1.5 rounded-lg transition-colors ${isEditing ? "bg-brand/10 text-brand" : "text-ds-muted hover:text-ds-body hover:bg-black/[0.05]"}`}>
+                        className={`p-1.5 rounded-lg transition-colors ${isEditing ? "bg-brand-10 text-brand" : "text-ds-muted hover:text-ds-body hover:bg-black/[0.05]"}`}>
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
@@ -895,7 +895,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                   </div>
                   {/* Draft badge */}
                   {draft && isPending && (
-                    <span className="text-[9px] font-bold text-brand bg-brand/[0.08] px-1.5 py-0.5 rounded-full">Edited</span>
+                    <span className="text-[9px] font-bold text-brand bg-brand-8 px-1.5 py-0.5 rounded-full">Edited</span>
                   )}
                 </div>
               </div>

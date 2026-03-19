@@ -95,7 +95,7 @@ export default function Services() {
               >
                 {/* Icon + number row */}
                 <div className="flex items-start justify-between mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-brand/[0.08] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-brand-8 flex items-center justify-center">
                     <Icon size={18} className="text-brand" />
                   </div>
                   <span className="mono-tag">{svc.num}</span>

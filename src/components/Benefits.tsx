@@ -91,7 +91,7 @@ export default function Benefits() {
                     transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
                     className="ds-card !p-5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-brand/[0.08] flex items-center justify-center mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-brand-8 flex items-center justify-center mb-3">
                       <Icon size={15} className="text-brand" />
                     </div>
                     <p className="text-sm text-ds-dark mb-1" style={{ fontWeight: 600, letterSpacing: "-0.015em" }}>

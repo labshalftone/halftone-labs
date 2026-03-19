@@ -29,8 +29,8 @@ type DashboardData = {
 };
 
 const STATUS_STYLES: Record<string, { pill: string; dot: string }> = {
-  "Order Placed":     { pill: "bg-brand/[0.08] text-brand",       dot: "bg-brand" },
-  "Design Confirmed": { pill: "bg-brand/[0.08] text-brand",       dot: "bg-brand" },
+  "Order Placed":     { pill: "bg-brand-8 text-brand",       dot: "bg-brand" },
+  "Design Confirmed": { pill: "bg-brand-8 text-brand",       dot: "bg-brand" },
   "In Production":    { pill: "bg-orange-100 text-orange-700",     dot: "bg-orange-500" },
   "Quality Check":    { pill: "bg-orange-100 text-orange-700",     dot: "bg-orange-500" },
   "Shipped":          { pill: "bg-blue-100 text-blue-700",         dot: "bg-blue-500" },
@@ -206,7 +206,7 @@ export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             onClick={onTopUp ?? (() => {})}
-            className="flex items-center gap-2 px-3.5 py-2 bg-white border border-black/[0.06] rounded-full hover:border-brand/30 hover:bg-brand/[0.03] transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 bg-white border border-black/[0.06] rounded-full hover:border-brand-30 hover:bg-brand-3 transition-all"
           >
             <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[11px]">💰</div>
             <span className="text-xs font-bold text-ds-dark">{formatCurrency(data?.walletBalance ?? 0, currency)}</span>
@@ -288,7 +288,7 @@ export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: 
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
               className={`rounded-2xl p-5 border transition-colors ${
                 (data?.todayOrders ?? 0) > 0
-                  ? "bg-brand/[0.05] border-brand/20"
+                  ? "bg-brand-5 border-brand-20"
                   : "bg-white border-black/[0.06]"
               }`}
             >
@@ -302,7 +302,7 @@ export default function OverviewTab({ userId, userName, onTopUp, onTabChange }: 
               >
                 {data?.todayOrders ?? 0}
               </p>
-              <p className={`text-[10px] mt-1.5 ${(data?.todayOrders ?? 0) > 0 ? "text-brand/60" : "text-ds-muted"}`}>
+              <p className={`text-[10px] mt-1.5 ${(data?.todayOrders ?? 0) > 0 ? "text-brand-60" : "text-ds-muted"}`}>
                 {(data?.todayOrders ?? 0) > 0
                   ? `${formatCurrency(data?.todayRevenue ?? 0, currency)} revenue today`
                   : "No sales yet today — share your store"}

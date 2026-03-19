@@ -9,6 +9,19 @@
   --color-brand: #9E6C9E;
   --color-brand-dark: #7D527D;
   --color-brand-light: #B88AB8;
+  /* Brand opacity variants — avoid Tailwind v4 CSS-var opacity-modifier bug */
+  --color-brand-2:  rgba(158, 108, 158, 0.02);
+  --color-brand-3:  rgba(158, 108, 158, 0.03);
+  --color-brand-5:  rgba(158, 108, 158, 0.05);
+  --color-brand-8:  rgba(158, 108, 158, 0.08);
+  --color-brand-10: rgba(158, 108, 158, 0.10);
+  --color-brand-12: rgba(158, 108, 158, 0.12);
+  --color-brand-15: rgba(158, 108, 158, 0.15);
+  --color-brand-20: rgba(158, 108, 158, 0.20);
+  --color-brand-25: rgba(158, 108, 158, 0.25);
+  --color-brand-30: rgba(158, 108, 158, 0.30);
+  --color-brand-40: rgba(158, 108, 158, 0.40);
+  --color-brand-60: rgba(158, 108, 158, 0.60);
 
   /* Dark palette */
   --color-ds-dark: rgb(25, 27, 36);

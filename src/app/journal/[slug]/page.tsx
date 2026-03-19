@@ -10,7 +10,7 @@ import { posts, getPostBySlug } from "@/lib/journal";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Print Tech":   "bg-blue-50 text-blue-600 border-blue-100",
-  "Artist Guide": "bg-brand/8 text-brand-dark border-orange-100",
+  "Artist Guide": "bg-brand-8 text-brand-dark border-orange-100",
   "Industry":     "bg-purple-50 text-purple-600 border-purple-100",
 };
 

@@ -13,6 +13,7 @@ import ShopifyTab from "@/components/ShopifyTab";
 import WalletTab from "@/components/WalletTab";
 import CreateOrderTab from "@/components/CreateOrderTab";
 import CustomersTab from "@/components/CustomersTab";
+import DesignerTab from "@/components/DesignerTab";
 import OverviewTab from "@/components/OverviewTab";
 import OrgDashboard from "@/components/OrgDashboard";
 import OrgSettings from "@/components/OrgSettings";
@@ -35,7 +36,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers";
+type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers" | "designer";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -71,6 +72,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "shopify", label: "Shopify Orders", icon: (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
+    </svg>
+  )},
+  { id: "designer", label: "Design Studio", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
     </svg>
   )},
   { id: "create-order", label: "Create Order", icon: (
@@ -334,7 +340,7 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                                           <div className={`w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0 ${
                                             isComplete ? "bg-brand" : isCurrent ? "border-2 border-brand bg-white" : "bg-zinc-200"
                                           }`} />
-                                          {!isLast && <div className={`w-px flex-1 my-1 ${isComplete ? "bg-brand/30" : "bg-zinc-100"}`} style={{ minHeight: 16 }} />}
+                                          {!isLast && <div className={`w-px flex-1 my-1 ${isComplete ? "bg-brand-30" : "bg-zinc-100"}`} style={{ minHeight: 16 }} />}
                                         </div>
                                         <div className="pb-3">
                                           <p className={`text-sm font-semibold ${isComplete ? "text-ds-dark" : isCurrent ? "text-brand" : "text-zinc-300"}`}>{step}</p>
@@ -494,7 +500,7 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
 
         {/* Print summary — read-only, no side picker */}
         {design.has_design && (
-          <div className="flex items-center justify-between bg-brand/8 border border-orange-100 rounded-xl px-4 py-3 mb-5 text-sm">
+          <div className="flex items-center justify-between bg-brand-8 border border-orange-100 rounded-xl px-4 py-3 mb-5 text-sm">
             <span className="text-ds-body text-xs">Print · {design.print_tier ?? "Custom"}</span>
             <span className="font-semibold text-brand-dark">+₹{design.print_price.toLocaleString("en-IN")}</span>
           </div>
@@ -856,7 +862,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                 <p className="text-xs text-ds-body mt-0.5">{d.product_name} · {d.color_name}</p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/[0.05] text-ds-body">Size {d.size}</span>
-                  {d.print_tier && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/8 text-brand">{d.print_tier}</span>}
+                  {d.print_tier && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-8 text-brand">{d.print_tier}</span>}
                   {d.has_design && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">DTG Print</span>}
                   {d.shopify_product_id && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f0f7e6] text-[#5a8a1a]">On Shopify</span>}
                 </div>
@@ -1052,7 +1058,7 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
       {/* DTF Neck Labels section */}
       <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4 max-w-2xl">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-brand-8 flex items-center justify-center">
             <svg className="w-4.5 h-4.5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
             </svg>
@@ -1124,7 +1130,7 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
         </div>
 
         {/* Info note */}
-        <div className="bg-brand/8 border border-orange-100 rounded-xl px-4 py-3 mb-5">
+        <div className="bg-brand-8 border border-orange-100 rounded-xl px-4 py-3 mb-5">
           <p className="text-xs text-orange-700 font-semibold">💡 Neck label specs</p>
           <p className="text-xs text-brand-dark mt-0.5">Upload PNG files with transparent backgrounds. Recommended size: 600×600px or larger. Labels are printed on a 2×2 inch DTF transfer and applied inside the collar during fulfilment.</p>
         </div>
@@ -1415,7 +1421,7 @@ function PushDesignModal({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {designs.map((d) => (
                   <button key={d.id} onClick={() => pickDesign(d)}
-                    className="text-left rounded-2xl border-2 border-black/[0.06] hover:border-orange-300 hover:bg-brand/8 transition-all overflow-hidden group">
+                    className="text-left rounded-2xl border-2 border-black/[0.06] hover:border-orange-300 hover:bg-brand-8 transition-all overflow-hidden group">
                     <div className="aspect-square flex items-center justify-center relative overflow-hidden"
                       style={{ background: d.color_hex + "22" }}>
                       {d.thumbnail ? (
@@ -1481,7 +1487,7 @@ function PushDesignModal({
               {/* Product photo */}
               <div>
                 <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Product photo <span className="text-ds-muted font-normal normal-case">(optional — overrides design thumbnail)</span></p>
-                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imageFile ? "border-zinc-300 bg-ds-light-gray" : "border-black/[0.06] hover:border-orange-300 hover:bg-brand/8"}`}>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imageFile ? "border-zinc-300 bg-ds-light-gray" : "border-black/[0.06] hover:border-orange-300 hover:bg-brand-8"}`}>
                   <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
@@ -2166,7 +2172,7 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                     inv.type === "monthly"
                       ? "bg-purple-50 text-purple-700"
-                      : "bg-brand/8 text-orange-700"
+                      : "bg-brand-8 text-orange-700"
                   }`}>
                     {inv.type === "monthly" ? "Monthly" : "Per order"}
                   </span>
@@ -2436,7 +2442,7 @@ function SettingsTab({
       {/* Currency preference */}
       <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-brand-8 flex items-center justify-center">
             <svg className="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -2751,7 +2757,7 @@ export default function AccountPage() {
     const params = new URLSearchParams(window.location.search);
     const tab    = params.get("tab") as ActiveTab | null;
     const shopify = params.get("shopify");
-    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","create-order","customers","wallet","invoices","settings"].includes(tab)) {
+    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","create-order","customers","designer","wallet","invoices","settings"].includes(tab)) {
       setActiveTab(tab);
     }
     if (shopify === "connected" || shopify === "error") {
@@ -2920,7 +2926,7 @@ export default function AccountPage() {
         <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-0">
           {([
             { label: "Overview", ids: ["dashboard"] },
-            { label: "Create",   ids: ["designs", "drops", "branding"] },
+            { label: "Create",   ids: ["designer", "designs", "drops", "branding"] },
             { label: "Sell",     ids: ["orders", "stores", "shopify", "create-order", "customers"] },
             { label: "Account",  ids: ["wallet", "invoices", "settings"] },
           ] as { label: string; ids: ActiveTab[] }[]).map(({ label, ids }) => (
@@ -2982,7 +2988,7 @@ export default function AccountPage() {
                   {activeOrg.name}
                 </span>
               ) : (
-                activeTab === "dashboard" ? "Dashboard" : activeTab === "create-order" ? "Create Order" : activeTab === "customers" ? "Customers" : NAV.find((n) => n.id === activeTab)?.label
+                activeTab === "dashboard" ? "Dashboard" : activeTab === "create-order" ? "Create Order" : activeTab === "customers" ? "Customers" : activeTab === "designer" ? "Design Studio" : NAV.find((n) => n.id === activeTab)?.label
               )}
             </h1>
           </div>
@@ -3081,6 +3087,7 @@ export default function AccountPage() {
               {activeTab === "branding"  && <BrandingTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "stores"    && <StoresTab userId={user?.id ?? null} />}
               {activeTab === "shopify"       && <ShopifyTab userId={user?.id ?? ""} />}
+              {activeTab === "designer"      && <DesignerTab userId={user?.id ?? ""} />}
               {activeTab === "create-order"  && <CreateOrderTab userId={user?.id ?? ""} userEmail={user?.email ?? ""} />}
               {activeTab === "customers"     && <CustomersTab userId={user?.id ?? ""} />}
               {activeTab === "wallet"        && <WalletTab userId={user?.id ?? ""} />}

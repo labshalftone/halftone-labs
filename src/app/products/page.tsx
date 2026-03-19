@@ -37,7 +37,7 @@ export default function ProductsPage() {
               const firstColor = product.colors[0];
               return (
                 <Link key={product.id} href={`/products/${product.id}`} className="group">
-                  <div className="rounded-3xl overflow-hidden bg-white border border-black/[0.06] hover:border-brand/20 hover:shadow-xl transition-all duration-300">
+                  <div className="rounded-3xl overflow-hidden bg-white border border-black/[0.06] hover:border-brand-20 hover:shadow-xl transition-all duration-300">
                     {/* Product image */}
                     <div
                       className="aspect-[3/4] relative overflow-hidden"

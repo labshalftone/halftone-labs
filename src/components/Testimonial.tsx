@@ -74,12 +74,12 @@ export default function Testimonial() {
               transition={{ delay: 0.15 + i * 0.1, duration: 0.5 }}
               className="testimonial-card flex flex-col"
             >
-              <Quote size={18} className="text-brand/30 mb-4" />
+              <Quote size={18} className="text-brand-30 mb-4" />
               <p className="text-sm leading-relaxed mb-6 text-ds-body flex-1">
                 {t.quote}
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand/[0.1] flex items-center justify-center text-xs text-brand font-semibold">
+                <div className="w-9 h-9 rounded-full bg-brand-10 flex items-center justify-center text-xs text-brand font-semibold">
                   {t.initials}
                 </div>
                 <div>

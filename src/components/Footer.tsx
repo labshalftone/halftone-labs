@@ -19,7 +19,7 @@ export default function Footer() {
         }}
       />
       {/* Bloom */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand/[0.08] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-8 rounded-full blur-[120px] pointer-events-none" />
 
       {/* CTA Section */}
       <div className="py-28 relative z-10" ref={ref}>
@@ -67,7 +67,7 @@ export default function Footer() {
               key={i}
               className="text-[0.6rem] font-mono uppercase tracking-[0.2em] text-white/[0.08] flex items-center gap-3 flex-shrink-0"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-brand/25" />
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-25" />
               halftone labs
             </span>
           ))}

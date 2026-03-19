@@ -191,9 +191,9 @@ export default function AcademyPage() {
             return (
               <div
                 key={cat.id}
-                className="flex items-start gap-4 p-4 rounded-2xl border border-black/[0.06] bg-white hover:border-brand/20 hover:bg-brand/[0.02] transition-colors"
+                className="flex items-start gap-4 p-4 rounded-2xl border border-black/[0.06] bg-white hover:border-brand-20 hover:bg-brand-2 transition-colors"
               >
-                <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-brand-10 flex items-center justify-center text-xl flex-shrink-0">
                   {cat.icon}
                 </div>
                 <div>
@@ -223,7 +223,7 @@ export default function AcademyPage() {
               <Link
                 key={article.slug}
                 href={`/academy/${article.slug}`}
-                className="group flex items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-black/[0.06] hover:border-brand/20 hover:shadow-sm transition-all"
+                className="group flex items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-black/[0.06] hover:border-brand-20 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <span className="text-2xl flex-shrink-0">{article.heroEmoji}</span>

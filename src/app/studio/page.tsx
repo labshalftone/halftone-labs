@@ -901,7 +901,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                 {activeTab === "front" && (
                   <div>
                     {!frontDesignSrc ? (
-                      <label className="block w-full border-2 border-dashed border-black/[0.06] rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-brand/8/20 transition-all mb-4 group">
+                      <label className="block w-full border-2 border-dashed border-black/[0.06] rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-brand-8/20 transition-all mb-4 group">
                         <div className="w-12 h-12 rounded-2xl bg-black/[0.05] group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
                           {uploadingFront
                             ? <svg className="w-5 h-5 text-brand animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -921,7 +921,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             onPositionChange={(p) => setFrontPos(p)}
                             onPriceChange={(p, t, d) => { setFrontPrintPrice(p); setFrontPrintTier(t); setFrontPrintDims(d); }} />
                         </div>
-                        <div className="flex items-center justify-between p-4 bg-brand/8 border border-orange-100 rounded-xl mb-3">
+                        <div className="flex items-center justify-between p-4 bg-brand-8 border border-orange-100 rounded-xl mb-3">
                           <div>
                             <p className="text-[0.65rem] text-ds-body font-medium">Front print</p>
                             <p className="font-bold text-ds-dark">{frontPrintTier} <span className="text-ds-muted font-normal">({frontPrintDims})</span></p>
@@ -947,7 +947,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                 {activeTab === "back" && (
                   <div>
                     {!backDesignSrc ? (
-                      <label className="block w-full border-2 border-dashed border-black/[0.06] rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-brand/8/20 transition-all mb-4 group">
+                      <label className="block w-full border-2 border-dashed border-black/[0.06] rounded-2xl p-10 text-center cursor-pointer hover:border-orange-400 hover:bg-brand-8/20 transition-all mb-4 group">
                         <div className="w-12 h-12 rounded-2xl bg-black/[0.05] group-hover:bg-orange-100 transition-colors flex items-center justify-center mx-auto mb-3">
                           {uploadingBack
                             ? <svg className="w-5 h-5 text-brand animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -967,7 +967,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                             onPositionChange={(p) => setBackPos(p)}
                             onPriceChange={(p, t, _d) => { setBackPrintPrice(p); setBackPrintTier(t); }} />
                         </div>
-                        <div className="flex items-center justify-between p-4 bg-brand/8 border border-orange-100 rounded-xl mb-3">
+                        <div className="flex items-center justify-between p-4 bg-brand-8 border border-orange-100 rounded-xl mb-3">
                           <div>
                             <p className="text-[0.65rem] text-ds-body font-medium">Back print</p>
                             <p className="font-bold text-ds-dark">{backPrintTier}</p>
@@ -1028,7 +1028,7 @@ function OnDemandConfigurator({ product, onClose }: { product: typeof PRODUCTS[0
                     onClick={() => setNeckLabel((v) => !v)}
                     className={`w-full flex items-center justify-between mt-2 px-3 py-2.5 rounded-xl border transition-all ${
                       neckLabel
-                        ? "border-orange-300 bg-brand/8"
+                        ? "border-orange-300 bg-brand-8"
                         : "border-black/[0.06] bg-white hover:border-zinc-300"
                     }`}
                   >

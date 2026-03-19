@@ -146,7 +146,7 @@ export default function CaseStudiesPage() {
               {/* Body */}
               <div className="p-8 md:p-10">
                 {/* Quote */}
-                <blockquote className="border-l-4 border-brand/30 pl-5 mb-8">
+                <blockquote className="border-l-4 border-brand-30 pl-5 mb-8">
                   <p className="text-ds-body italic leading-relaxed">"{cs.quote}"</p>
                   <cite className="text-xs text-ds-muted not-italic mt-2 block">— {cs.client}</cite>
                 </blockquote>
@@ -194,7 +194,7 @@ export default function CaseStudiesPage() {
                 {[...ALL_CLIENTS, ...ALL_CLIENTS].map((name, i) => (
                   <span key={i} className="text-sm font-semibold uppercase tracking-tight text-ds-muted flex-shrink-0 flex items-center gap-8">
                     {name}
-                    <span className="text-brand/30">✦</span>
+                    <span className="text-brand-30">✦</span>
                   </span>
                 ))}
               </div>

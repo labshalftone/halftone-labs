@@ -10,7 +10,7 @@ const ACCENT_COLORS = ["bg-brand", "bg-ds-dark", "bg-ds-dark2"];
 
 const CATEGORY_STYLES: Record<string, string> = {
   "Print Tech":   "bg-blue-50 text-blue-600 border-blue-100",
-  "Artist Guide": "bg-brand/8 text-brand border-brand/15",
+  "Artist Guide": "bg-brand-8 text-brand border-brand-15",
   "Industry":     "bg-purple-50 text-purple-600 border-purple-100",
 };
 
