@@ -36,7 +36,7 @@ export default function LoginPage() {
           .select("onboarding_completed_at")
           .eq("user_id", signInData.user.id)
           .maybeSingle();
-        if (profile && !profile.onboarding_completed_at) {
+        if (!profile || !profile.onboarding_completed_at) {
           router.push("/onboarding");
         } else {
           router.push("/account");
