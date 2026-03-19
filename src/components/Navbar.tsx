@@ -215,31 +215,50 @@ export default function Navbar() {
                 </div>
               </div>
               {/* Footer */}
-              <div className="border-t border-black/[0.06] px-6 py-4 flex items-center justify-between">
-                <Link
-                  href="/studio"
-                  onClick={() => setMenuOpen(false)}
-                  className="btn-brand text-[0.82rem] px-4 py-2"
-                >
-                  Open Studio
-                </Link>
-                {userEmail ? (
+              <div className="border-t border-black/[0.06] px-6 py-4 space-y-3">
+                <div className="flex items-center justify-between">
                   <Link
-                    href="/account"
+                    href="/studio"
                     onClick={() => setMenuOpen(false)}
-                    className="text-sm text-ds-body font-medium"
+                    className="btn-brand text-[0.82rem] px-4 py-2"
                   >
-                    Account
+                    Open Studio
                   </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-sm text-ds-body font-medium"
-                  >
-                    Login
-                  </Link>
-                )}
+                  {userEmail ? (
+                    <Link
+                      href="/account"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-sm text-ds-body font-medium"
+                    >
+                      Account
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-sm text-ds-body font-medium"
+                    >
+                      Login
+                    </Link>
+                  )}
+                </div>
+                {/* Currency switcher */}
+                <div className="flex items-center gap-2">
+                  {CURRENCIES.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => { setCurrency(c); setMenuOpen(false); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                        currency === c
+                          ? "bg-ds-dark text-white"
+                          : "bg-zinc-100 text-ds-body hover:bg-zinc-200"
+                      }`}
+                    >
+                      <span>{CURRENCY_META[c].flag}</span>
+                      <span>{CURRENCY_META[c].label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </motion.div>
           </motion.div>

@@ -55,10 +55,11 @@ function UsageMeter({
 // ─── Plan badge ───────────────────────────────────────────────────────────────
 function PlanBadge({ plan, status }: { plan: PlanKey; status: string }) {
   const colors: Record<PlanKey, string> = {
-    free:     "bg-zinc-100 text-zinc-600",
-    launch:   "bg-brand-8 text-brand",
-    scale:    "bg-violet-100 text-violet-700",
-    business: "bg-zinc-900 text-white",
+    free:       "bg-zinc-100 text-zinc-600",
+    launch:     "bg-brand-8 text-brand",
+    scale:      "bg-violet-100 text-violet-700",
+    business:   "bg-zinc-900 text-white",
+    enterprise: "bg-zinc-950 text-zinc-300",
   };
   return (
     <span className={`inline-block text-[0.68rem] font-bold tracking-[0.1em] uppercase px-2.5 py-1 rounded-lg ${colors[plan]}`}>
@@ -126,35 +127,33 @@ function UpgradeCard({
   const plan = PLANS[to];
   const price = billing === "annual" ? plan.annualInr : plan.monthlyInr;
 
-  const highlights: Record<PlanKey, string[]> = {
+  const highlights: Partial<Record<PlanKey, string[]>> = {
     free: [],
     launch: [
-      "Up to 5 active drops",
+      "5 active drops",
       "Unlimited designs",
-      "Custom branding on your storefront",
-      "Custom domain",
+      "Custom branding + custom domain",
       "Shopify integration",
       "Full analytics + CSV export",
     ],
     scale: [
-      "Up to 20 active drops",
-      "3 storefronts",
+      "Unlimited active drops",
+      "Premium product access (hoodies, waffle tees)",
+      "Neck labels + premium packaging unlocked",
       "Up to 5 team members",
-      "White-label — remove Halftone branding",
-      "API access",
-      "Priority support",
+      "API access + priority support",
     ],
     business: [
-      "Unlimited drops",
       "Unlimited storefronts",
+      "White-label — remove Halftone branding",
       "Unlimited team members",
       "Dedicated account manager",
-      "Bulk discounts",
-      "Custom billing",
+      "Bulk order discounts",
     ],
+    enterprise: [],
   };
 
-  const isDark = to === "business";
+  const isDark = to === "business" || to === "enterprise";
 
   return (
     <div className={`rounded-xl border p-5 ${isDark ? "bg-zinc-950 border-zinc-800" : "bg-white border-zinc-200"}`}>
@@ -178,7 +177,7 @@ function UpgradeCard({
       </div>
 
       <ul className="space-y-2 mb-5">
-        {highlights[to].map((item) => (
+        {(highlights[to] ?? []).map((item) => (
           <li key={item} className="flex items-center gap-2 text-xs">
             <Check className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-brand"}`} />
             <span className={isDark ? "text-zinc-300" : "text-zinc-600"}>{item}</span>
@@ -245,6 +244,7 @@ export default function BillingTab({ userId }: BillingTabProps) {
     plan === "launch" ? "scale"    :
     plan === "scale"  ? "business" :
     null;
+  // Note: business users see a contact sales card instead of UpgradeCard
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -285,11 +285,11 @@ export default function BillingTab({ userId }: BillingTabProps) {
               <p className="text-[0.7rem] text-zinc-400 mb-0.5">Billing cycle</p>
               <p className="text-sm font-medium text-zinc-700 capitalize">{billingCycle}</p>
             </div>
-            {billingCycle === "monthly" && (
+            {billingCycle === "monthly" && plan !== "enterprise" && (
               <div className="text-xs text-zinc-400">
                 Switch to annual to save{" "}
                 <span className="text-emerald-600 font-semibold">
-                  {plan === "launch" ? "25%" : plan === "scale" ? "17%" : "23%"}
+                  {plan === "launch" ? "25%" : plan === "scale" ? "20%" : "17%"}
                 </span>
                 {" — "}
                 <Link href="/pricing" className="underline hover:text-zinc-600">change plan</Link>

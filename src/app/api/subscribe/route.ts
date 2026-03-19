@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 //   USD effective rate: 41.5 INR/USD  (market ~83, so 2×)
 //   EUR effective rate: 45 INR/EUR    (market ~90, so 2×)
 const PLAN_AMOUNTS_INR = {
-  launch:   { monthly: 199900, annual:  149900 * 12 },  // ₹1,999/mo | ₹1,499×12=₹17,988/yr
-  scale:    { monthly: 599900, annual:  499900 * 12 },  // ₹5,999/mo | ₹4,999×12=₹59,988/yr
-  business: { monthly: 1299900, annual: 999900 * 12 },  // ₹12,999/mo | ₹9,999×12=₹119,988/yr
+  launch:   { monthly: 199900,  annual:  149900 * 12  },  // ₹1,999/mo | ₹1,499×12/yr
+  scale:    { monthly: 749900,  annual:  599900 * 12  },  // ₹7,499/mo | ₹5,999×12/yr
+  business: { monthly: 2999900, annual:  2499900 * 12 },  // ₹29,999/mo | ₹24,999×12/yr
 } as const;
 
 // International amounts — derived from 2× markup rates

@@ -2825,6 +2825,7 @@ type UserOrg = {
 export default function AccountPage() {
   const router = useRouter();
   const { count } = useCart();
+  const { plan } = useSubscription();
   const [user,        setUser]        = useState<{ id: string; email: string; user_metadata: { name?: string } } | null>(null);
   const [orders,      setOrders]      = useState<Order[]>([]);
   const [loading,     setLoading]     = useState(true);
@@ -3047,8 +3048,22 @@ export default function AccountPage() {
           ))}
         </nav>
 
+        {/* Billing nav item */}
+        <div className="px-3 pb-2">
+          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ds-muted px-3 pt-1 pb-2">Plan</p>
+          <Link
+            href="/account/billing"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-ds-body hover:bg-black/[0.05] hover:text-ds-dark transition-colors"
+          >
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Billing & Plan
+          </Link>
+        </div>
+
         {/* User card */}
-        <div className="px-4 py-4 border-t border-black/[0.06] space-y-3">
+        <div className="px-4 py-4 border-t border-black/[0.06]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
               {initials}
@@ -3058,15 +3073,6 @@ export default function AccountPage() {
               <p className="text-[10px] text-ds-muted truncate">{user?.email}</p>
             </div>
           </div>
-          <Link
-            href="/account/billing"
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 transition-colors text-xs font-semibold text-zinc-700"
-          >
-            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            Billing & Plan
-          </Link>
         </div>
       </aside>
 
@@ -3095,6 +3101,17 @@ export default function AccountPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {(plan === "free" || plan === "launch") && (
+              <Link
+                href="/account/billing"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.08] text-xs font-semibold text-zinc-600 hover:border-zinc-400 hover:text-zinc-900 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+                Upgrade plan
+              </Link>
+            )}
             <Link href="/studio"
               className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand text-white text-xs font-bold hover:bg-orange-600 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

@@ -148,12 +148,12 @@ export default function Hero() {
             className="hidden lg:flex items-center justify-center"
           >
             {/* Card composition */}
-            <div className="relative w-full max-w-[420px] aspect-[4/5]">
-              {/* Background card */}
-              <div className="absolute inset-0 -bottom-6 -right-6 ds-card opacity-60" />
+            <div className="relative w-full max-w-[400px]">
+              {/* Background card (depth shadow) */}
+              <div className="absolute inset-0 translate-x-3 translate-y-3 ds-card opacity-50 rounded-3xl" />
 
               {/* Main card */}
-              <div className="ds-card relative z-10 h-full flex flex-col gap-6 p-8">
+              <div className="ds-card relative z-10 flex flex-col gap-5 p-8">
                 {/* Mini label */}
                 <div className="ds-label">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -161,14 +161,36 @@ export default function Hero() {
                 </div>
 
                 {/* Big stat */}
-                <div className="flex-1 flex flex-col justify-center">
+                <div>
                   <p
-                    className="text-[5rem] leading-none text-ds-dark mb-2"
+                    className="text-[4.5rem] leading-none text-ds-dark mb-1.5"
                     style={{ fontWeight: 700, letterSpacing: "-0.06em" }}
                   >
                     100K+
                   </p>
-                  <p className="text-ds-body text-sm">units shipped across India & globally</p>
+                  <p className="text-ds-body text-sm">units shipped across India &amp; globally</p>
+                </div>
+
+                {/* Mini bar chart — sell-through rates */}
+                <div className="space-y-2.5">
+                  {[
+                    { label: "Drops sold out",     pct: 87 },
+                    { label: "Avg sell-through",   pct: 73 },
+                    { label: "Repeat creators",    pct: 64 },
+                  ].map((bar) => (
+                    <div key={bar.label}>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-[0.65rem] text-ds-muted font-medium">{bar.label}</span>
+                        <span className="text-[0.65rem] text-ds-dark font-semibold">{bar.pct}%</span>
+                      </div>
+                      <div className="h-1 bg-black/[0.06] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#9E6C9E] to-[#7D527D]"
+                          style={{ width: `${bar.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Divider */}
