@@ -104,16 +104,19 @@ export default function Footer() {
             {/* Sitemap */}
             <div>
               <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
-                Sitemap
+                Pages
               </p>
               <div className="flex flex-col gap-2">
                 {[
-                  { label: "About", href: "#about" },
-                  { label: "Services", href: "#services" },
-                  { label: "Process", href: "#process" },
+                  { label: "Products", href: "/products" },
                   { label: "Studio", href: "/studio" },
+                  { label: "How It Works", href: "/how-it-works" },
+                  { label: "Case Studies", href: "/case-studies" },
+                  { label: "Journal", href: "/journal" },
+                  { label: "Academy", href: "/academy" },
                   { label: "Track Order", href: "/track" },
-                  { label: "Contact", href: "#contact" },
+                  { label: "Contact", href: "/contact" },
+                  { label: "Help", href: "/help" },
                 ].map((link) => (
                   <a
                     key={link.label}

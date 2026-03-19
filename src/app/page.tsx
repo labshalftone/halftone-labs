@@ -110,11 +110,11 @@ function AcademyStrip() {
 
         <div className="flex items-end justify-between mb-14 flex-wrap gap-6">
           <Reveal>
-            <span className="ds-label text-white/30 mb-4 block">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">
               Halftone Academy
-            </span>
+            </p>
             <h2
-              className="text-3xl md:text-5xl leading-[0.92]"
+              className="text-3xl md:text-5xl text-white leading-[0.92]"
               style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
             >
               Learn how to drop right.
@@ -186,11 +186,11 @@ function RunsWithStack() {
         <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
 
           <Reveal>
-            <span className="ds-label text-white/30 mb-4 block">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-white/30 mb-4">
               Integrations
-            </span>
+            </p>
             <h2
-              className="text-2xl md:text-3xl leading-tight mb-4"
+              className="text-2xl md:text-3xl text-white leading-tight mb-4"
               style={{ fontWeight: 700, letterSpacing: "-0.04em" }}
             >
               Runs with

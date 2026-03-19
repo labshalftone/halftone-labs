@@ -48,7 +48,7 @@ function InfoTooltip({ text }: { text: string }) {
         onMouseLeave={() => setShow(false)}
         onFocus={() => setShow(true)}
         onBlur={() => setShow(false)}
-        className="ml-1 w-4 h-4 rounded-full bg-zinc-200 text-zinc-500 text-[9px] font-bold flex items-center justify-center hover:bg-zinc-300 transition-colors leading-none"
+        className="ml-1 w-4 h-4 rounded-full bg-zinc-200 text-ds-body text-[9px] font-bold flex items-center justify-center hover:bg-zinc-300 transition-colors leading-none"
         aria-label="More info"
       >
         i
@@ -60,7 +60,7 @@ function InfoTooltip({ text }: { text: string }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.12 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 bg-zinc-900 text-white text-[11px] leading-relaxed rounded-xl px-3 py-2.5 shadow-xl pointer-events-none"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 bg-ds-dark text-white text-[11px] leading-relaxed rounded-xl px-3 py-2.5 shadow-xl pointer-events-none"
           >
             {text}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900" />
@@ -372,15 +372,15 @@ export default function CheckoutPage() {
     const backHref = checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/studio";
     const backLabel = checkoutOrigin.type === "store" ? `← Back to ${checkoutOrigin.name || "Store"}` : "← Back to Studio";
     return (
-      <div className="min-h-screen bg-[#f8f7f5] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
         <div className="text-center">
           <div className="text-6xl mb-4">🛒</div>
-          <h1 className="text-2xl font-black mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
-          <p className="text-zinc-500 mb-6">
+          <h1 className="text-2xl font-semibold mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
+          <p className="text-ds-body mb-6">
             {checkoutOrigin.type === "store" ? "Browse products and add them to your cart." : "Add some products from the Studio first."}
           </p>
           <Link href={backHref}>
-            <button className="px-6 py-3 rounded-full bg-zinc-900 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors">
+            <button className="px-6 py-3 rounded-full bg-ds-dark text-white font-semibold text-sm hover:bg-ds-dark2 transition-colors">
               {backLabel}
             </button>
           </Link>
@@ -423,11 +423,11 @@ export default function CheckoutPage() {
     };
 
     return (
-      <div className="min-h-screen bg-[#f8f7f5]">
+      <div className="min-h-screen bg-white">
         {/* Top bar */}
-        <div className="sticky top-0 z-20 bg-[#f8f7f5]/95 backdrop-blur-sm border-b border-zinc-100 px-5 py-4 flex items-center justify-between">
-          <span className="text-lg font-black tracking-tight" style={{ letterSpacing: "-0.04em" }}>Halftone Labs</span>
-          <span className="text-xs font-mono text-zinc-400">#{orderSuccess.ref}</span>
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-black/[0.06] px-5 py-4 flex items-center justify-between">
+          <span className="text-lg font-semibold tracking-tight" style={{ letterSpacing: "-0.04em" }}>Halftone Labs</span>
+          <span className="text-xs font-mono text-ds-muted">#{orderSuccess.ref}</span>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 pb-36 pt-8">
@@ -470,10 +470,10 @@ export default function CheckoutPage() {
 
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
                 <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-2">Order Confirmed</p>
-                <h1 className="text-3xl md:text-4xl font-black text-white mb-3 leading-tight" style={{ letterSpacing: "-0.04em" }}>
+                <h1 className="text-3xl md:text-4xl font-semibold text-white mb-3 leading-tight" style={{ letterSpacing: "-0.04em" }}>
                   Thank you,<br />{orderSuccess.name.split(" ")[0]}! 🎉
                 </h1>
-                <p className="text-zinc-400 text-sm mb-5 leading-relaxed max-w-sm">
+                <p className="text-ds-muted text-sm mb-5 leading-relaxed max-w-sm">
                   Your custom tee is in our queue. We&apos;ll get it printed and shipped within 5–7 business days.
                 </p>
 
@@ -482,9 +482,9 @@ export default function CheckoutPage() {
                   <span className="text-xs font-mono font-semibold tracking-widest">#{orderSuccess.ref}</span>
                   {refCopied
                     ? <svg className="w-3.5 h-3.5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    : <svg className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="9" y="9" width="13" height="13" rx="2"/><path strokeLinecap="round" strokeLinejoin="round" d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    : <svg className="w-3.5 h-3.5 text-ds-muted group-hover:text-white flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="9" y="9" width="13" height="13" rx="2"/><path strokeLinecap="round" strokeLinejoin="round" d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                   }
-                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors">{refCopied ? "Copied!" : "Copy"}</span>
+                  <span className="text-[10px] text-ds-body group-hover:text-ds-muted transition-colors">{refCopied ? "Copied!" : "Copy"}</span>
                 </button>
               </motion.div>
             </div>
@@ -516,9 +516,9 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 mb-6"
+            className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-6 mb-6"
           >
-            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-5">Your order journey</p>
+            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-5">Your order journey</p>
             <div className="grid grid-cols-4 gap-2">
               {steps.map((step, idx) => (
                 <div key={step.label} className="flex flex-col items-center text-center relative">
@@ -531,14 +531,14 @@ export default function CheckoutPage() {
                     step.done
                       ? "bg-green-500 border-green-500 text-white"
                       : idx === 1
-                      ? "bg-orange-100 border-orange-300 text-orange-500"
-                      : "bg-zinc-100 border-zinc-200 text-zinc-400"
+                      ? "bg-orange-100 border-orange-300 text-brand"
+                      : "bg-black/[0.05] border-black/[0.06] text-ds-muted"
                   }`}>
                     {step.icon}
                   </div>
-                  <p className={`text-[11px] font-bold leading-tight ${step.done ? "text-zinc-900" : "text-zinc-400"}`}>{step.label}</p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5 leading-tight hidden md:block">{step.sub}</p>
-                  <span className={`text-[10px] font-semibold mt-1 px-1.5 py-0.5 rounded-full ${step.done ? "bg-green-50 text-green-600" : "bg-zinc-100 text-zinc-400"}`}>
+                  <p className={`text-[11px] font-bold leading-tight ${step.done ? "text-ds-dark" : "text-ds-muted"}`}>{step.label}</p>
+                  <p className="text-[10px] text-ds-muted mt-0.5 leading-tight hidden md:block">{step.sub}</p>
+                  <span className={`text-[10px] font-semibold mt-1 px-1.5 py-0.5 rounded-full ${step.done ? "bg-green-50 text-green-600" : "bg-black/[0.05] text-ds-muted"}`}>
                     {step.date}
                   </span>
                 </div>
@@ -557,10 +557,10 @@ export default function CheckoutPage() {
             <div className="md:col-span-3 flex flex-col gap-6">
 
               {/* Items */}
-              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-                  <p className="font-black text-sm" style={{ letterSpacing: "-0.03em" }}>Items ordered</p>
-                  <span className="text-xs text-zinc-400">{successItems.reduce((s, i) => s + i.qty, 0)} item{successItems.reduce((s, i) => s + i.qty, 0) !== 1 ? "s" : ""}</span>
+              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-black/[0.06] flex items-center justify-between">
+                  <p className="font-semibold text-sm" style={{ letterSpacing: "-0.03em" }}>Items ordered</p>
+                  <span className="text-xs text-ds-muted">{successItems.reduce((s, i) => s + i.qty, 0)} item{successItems.reduce((s, i) => s + i.qty, 0) !== 1 ? "s" : ""}</span>
                 </div>
                 <div className="divide-y divide-zinc-50">
                   {successItems.map((item) => {
@@ -577,24 +577,24 @@ export default function CheckoutPage() {
                           }
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-zinc-900 truncate">{item.productName}{item.qty > 1 ? ` ×${item.qty}` : ""}</p>
+                          <p className="font-bold text-sm text-ds-dark truncate">{item.productName}{item.qty > 1 ? ` ×${item.qty}` : ""}</p>
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <span className="flex items-center gap-1 text-xs text-zinc-500">
+                            <span className="flex items-center gap-1 text-xs text-ds-body">
                               <span className="w-3 h-3 rounded-full inline-block flex-shrink-0" style={{ background: item.colorHex }} />
                               {item.color}
                             </span>
-                            <span className="text-zinc-300 text-xs">·</span>
-                            <span className="text-xs font-semibold text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-full">{item.size}</span>
+                            <span className="text-ds-muted text-xs">·</span>
+                            <span className="text-xs font-semibold text-ds-body bg-black/[0.05] px-2 py-0.5 rounded-full">{item.size}</span>
                             {item.side !== "none" && (
                               <>
-                                <span className="text-zinc-300 text-xs">·</span>
-                                <span className="text-xs text-zinc-500">{item.side === "both" ? "Front + Back" : `${item.side} print`}</span>
+                                <span className="text-ds-muted text-xs">·</span>
+                                <span className="text-xs text-ds-body">{item.side === "both" ? "Front + Back" : `${item.side} print`}</span>
                               </>
                             )}
                           </div>
                           <div className="flex gap-2 mt-1.5 flex-wrap">
                             {item.printTier && (
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-100">
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-brand-dark border border-orange-100">
                                 {item.printTechnique} · {item.printTier}
                               </span>
                             )}
@@ -606,8 +606,8 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-bold text-sm text-zinc-900">₹{((item.blankPrice + item.printPrice) * item.qty).toLocaleString("en-IN")}</p>
-                          {item.qty > 1 && <p className="text-[10px] text-zinc-400">₹{(item.blankPrice + item.printPrice).toLocaleString("en-IN")} each</p>}
+                          <p className="font-bold text-sm text-ds-dark">₹{((item.blankPrice + item.printPrice) * item.qty).toLocaleString("en-IN")}</p>
+                          {item.qty > 1 && <p className="text-[10px] text-ds-muted">₹{(item.blankPrice + item.printPrice).toLocaleString("en-IN")} each</p>}
                         </div>
                       </div>
                     );
@@ -615,17 +615,17 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Receipt breakdown */}
-                <div className="px-6 py-4 bg-zinc-50/70 border-t border-zinc-100 flex flex-col gap-2">
-                  <div className="flex justify-between text-sm text-zinc-500">
+                <div className="px-6 py-4 bg-ds-light-gray/70 border-t border-black/[0.06] flex flex-col gap-2">
+                  <div className="flex justify-between text-sm text-ds-body">
                     <span>Products</span><span>₹{blankSub.toLocaleString("en-IN")}</span>
                   </div>
                   {printSub > 0 && (
-                    <div className="flex justify-between text-sm text-zinc-500">
+                    <div className="flex justify-between text-sm text-ds-body">
                       <span>Customization</span><span>₹{printSub.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   {neckSub > 0 && (
-                    <div className="flex justify-between text-sm text-zinc-500">
+                    <div className="flex justify-between text-sm text-ds-body">
                       <span>Neck labels</span><span>₹{neckSub.toLocaleString("en-IN")}</span>
                     </div>
                   )}
@@ -635,18 +635,18 @@ export default function CheckoutPage() {
                       <span>−₹{orderSuccess.discount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-sm text-zinc-500">
+                  <div className="flex justify-between text-sm text-ds-body">
                     <span>{orderSuccess.shippingLabel || "Shipping"}</span>
                     <span>{orderSuccess.shipping === 0 ? <span className="text-green-600 font-semibold">Free</span> : `₹${orderSuccess.shipping.toLocaleString("en-IN")}`}</span>
                   </div>
                   {isINR && gstAmount > 0 && (
-                    <div className="flex justify-between text-sm text-zinc-500">
+                    <div className="flex justify-between text-sm text-ds-body">
                       <span>GST (5%)</span><span>₹{gstAmount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-black text-base pt-3 mt-1 border-t border-zinc-200">
+                  <div className="flex justify-between font-semibold text-base pt-3 mt-1 border-t border-black/[0.06]">
                     <span>Total paid</span>
-                    <span className="text-orange-600">₹{successTotal.toLocaleString("en-IN")}</span>
+                    <span className="text-brand-dark">₹{successTotal.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>
@@ -658,10 +658,10 @@ export default function CheckoutPage() {
                   { icon: "✅", title: "Quality check", body: "Inspected before it ships to you" },
                   { icon: "📦", title: "Tracked delivery", body: "End-to-end courier tracking" },
                 ].map(({ icon, title, body }) => (
-                  <div key={title} className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-4 text-center">
+                  <div key={title} className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-4 text-center">
                     <p className="text-2xl mb-1.5">{icon}</p>
-                    <p className="text-xs font-black text-zinc-900 mb-1">{title}</p>
-                    <p className="text-[10px] text-zinc-400 leading-relaxed">{body}</p>
+                    <p className="text-xs font-semibold text-ds-dark mb-1">{title}</p>
+                    <p className="text-[10px] text-ds-muted leading-relaxed">{body}</p>
                   </div>
                 ))}
               </div>
@@ -671,47 +671,47 @@ export default function CheckoutPage() {
             <div className="md:col-span-2 flex flex-col gap-4">
 
               {/* Email confirmation */}
-              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <svg className="w-4.5 h-4.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Confirmation sent</p>
+                  <p className="font-semibold text-sm" style={{ letterSpacing: "-0.02em" }}>Confirmation sent</p>
                 </div>
-                <p className="text-xs font-semibold text-zinc-900 bg-zinc-100 px-3 py-2 rounded-xl mb-2 truncate">{orderSuccess.email}</p>
-                <p className="text-xs text-zinc-400 leading-relaxed">Check your inbox (and spam) for a full order confirmation with tracking details.</p>
+                <p className="text-xs font-semibold text-ds-dark bg-black/[0.05] px-3 py-2 rounded-xl mb-2 truncate">{orderSuccess.email}</p>
+                <p className="text-xs text-ds-muted leading-relaxed">Check your inbox (and spam) for a full order confirmation with tracking details.</p>
               </div>
 
               {/* Delivery info */}
-              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4.5 h-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4.5 h-4.5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
-                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Delivering to</p>
+                  <p className="font-semibold text-sm" style={{ letterSpacing: "-0.02em" }}>Delivering to</p>
                 </div>
-                <p className="text-sm font-semibold text-zinc-900 mb-0.5">{orderSuccess.name}</p>
-                <p className="text-xs text-zinc-500 leading-relaxed">{form.address}</p>
-                <p className="text-xs text-zinc-500">{form.city}{form.pin ? ` — ${form.pin}` : ""}{form.state ? `, ${form.state}` : ""}</p>
+                <p className="text-sm font-semibold text-ds-dark mb-0.5">{orderSuccess.name}</p>
+                <p className="text-xs text-ds-body leading-relaxed">{form.address}</p>
+                <p className="text-xs text-ds-body">{form.city}{form.pin ? ` — ${form.pin}` : ""}{form.state ? `, ${form.state}` : ""}</p>
                 <div className="mt-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-                  <span className="text-xs font-semibold text-orange-600">Est. delivery by {addDays(7)}</span>
+                  <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+                  <span className="text-xs font-semibold text-brand-dark">Est. delivery by {addDays(7)}</span>
                 </div>
               </div>
 
               {/* Need help */}
-              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5">
+              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center flex-shrink-0 text-base">💬</div>
-                  <p className="font-black text-sm" style={{ letterSpacing: "-0.02em" }}>Need help?</p>
+                  <div className="w-9 h-9 rounded-xl bg-black/[0.05] flex items-center justify-center flex-shrink-0 text-base">💬</div>
+                  <p className="font-semibold text-sm" style={{ letterSpacing: "-0.02em" }}>Need help?</p>
                 </div>
-                <a href="mailto:hello@halftonelabs.in" className="block text-sm font-bold text-orange-500 hover:underline mb-1">hello@halftonelabs.in</a>
-                <p className="text-xs text-zinc-400 leading-relaxed">We respond within 24 hours. Reference your order number <span className="font-mono font-semibold text-zinc-600">#{orderSuccess.ref}</span> when writing in.</p>
+                <a href="mailto:hello@halftonelabs.in" className="block text-sm font-bold text-brand hover:underline mb-1">hello@halftonelabs.in</a>
+                <p className="text-xs text-ds-muted leading-relaxed">We respond within 24 hours. Reference your order number <span className="font-mono font-semibold text-ds-body">#{orderSuccess.ref}</span> when writing in.</p>
               </div>
 
               {/* All sales final */}
@@ -739,7 +739,7 @@ export default function CheckoutPage() {
           >
             <div className="flex items-center justify-between px-7 py-5">
               <div>
-                <p className="text-white font-black text-base mb-0.5">Tag us when it arrives! 🤙</p>
+                <p className="text-white font-semibold text-base mb-0.5">Tag us when it arrives! 🤙</p>
                 <p className="text-orange-100 text-sm">Share a photo <strong>@halftonelabs</strong> for a surprise gift 🎁</p>
               </div>
               <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -752,16 +752,16 @@ export default function CheckoutPage() {
         </div>
 
         {/* ── FIXED BOTTOM BAR ───────────────────────────────────────────── */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-zinc-100 px-4 py-3 z-10 shadow-xl">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-black/[0.06] px-4 py-3 z-10 shadow-xl">
           <div className="max-w-4xl mx-auto flex gap-3">
             <Link href={`/track?ref=${orderSuccess.ref}&email=${encodeURIComponent(orderSuccess.email)}`} className="flex-1">
-              <button className="w-full py-3.5 rounded-2xl bg-zinc-900 text-white font-black text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full py-3.5 rounded-2xl bg-ds-dark text-white font-semibold text-sm hover:bg-ds-dark2 transition-colors flex items-center justify-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
                 Track order
               </button>
             </Link>
             <Link href={checkoutOrigin.type === "store" ? `/store/${checkoutOrigin.handle}` : "/products"} className="flex-1">
-              <button className="w-full py-3.5 rounded-2xl border-2 border-zinc-200 text-zinc-700 font-bold text-sm hover:bg-zinc-50 transition-colors">
+              <button className="w-full py-3.5 rounded-2xl border-2 border-black/[0.06] text-ds-body font-bold text-sm hover:bg-ds-light-gray transition-colors">
                 Continue shopping →
               </button>
             </Link>
@@ -772,19 +772,19 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f5] pt-20">
+    <div className="min-h-screen bg-white pt-20">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-zinc-400 mb-6">
-          <Link href="/" className="hover:text-zinc-700 transition-colors">Home</Link>
+        <nav className="flex items-center gap-2 text-sm text-ds-muted mb-6">
+          <Link href="/" className="hover:text-ds-body transition-colors">Home</Link>
           <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-          <Link href="/cart" className="hover:text-zinc-700 transition-colors">Cart</Link>
+          <Link href="/cart" className="hover:text-ds-body transition-colors">Cart</Link>
           <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-          <span className="text-zinc-800 font-semibold">Checkout</span>
+          <span className="text-ds-dark font-semibold">Checkout</span>
         </nav>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-black" style={{ letterSpacing: "-0.04em" }}>Checkout</h1>
+          <h1 className="text-3xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Checkout</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -792,46 +792,46 @@ export default function CheckoutPage() {
           <div className="lg:col-span-3 flex flex-col gap-6">
 
             {/* Contact */}
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Contact</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Contact</h2>
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Full name</label>
+                  <label className="block text-xs font-semibold text-ds-muted uppercase tracking-widest mb-1.5">Full name</label>
                   <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Your full name" />
+                    className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Your full name" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Email</label>
+                    <label className="block text-xs font-semibold text-ds-muted uppercase tracking-widest mb-1.5">Email</label>
                     <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="you@email.com" />
+                      className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="you@email.com" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Phone</label>
+                    <label className="block text-xs font-semibold text-ds-muted uppercase tracking-widest mb-1.5">Phone</label>
                     <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="+91 98765 43210" />
+                      className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="+91 98765 43210" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Shipping address */}
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping address</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping address</h2>
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Country</label>
+                  <label className="block text-xs font-semibold text-ds-muted uppercase tracking-widest mb-1.5">Country</label>
                   <select value={country} onChange={(e) => setCountry(e.target.value)}
-                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+                    className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
                     {COUNTRY_LIST.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
                 </div>
                 <input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                   placeholder="Street address, apartment…" />
                 <div className="grid grid-cols-2 gap-3">
                   <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-                    className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
+                    className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
                   <div className="relative">
                     <input
                       value={form.pin}
@@ -845,14 +845,14 @@ export default function CheckoutPage() {
                           fetchShipping(country, val, totalQty);
                         }
                       }}
-                      className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 pr-9"
+                      className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 pr-9"
                       placeholder={country === "IN" ? "PIN code" : "Postal code"}
                       inputMode={country === "IN" ? "numeric" : "text"}
                       maxLength={country === "IN" ? 6 : undefined}
                     />
                     {pinLookupLoading && (
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg className="w-4 h-4 animate-spin text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-4 h-4 animate-spin text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                       </span>
@@ -860,33 +860,33 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 <input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
-                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                   placeholder={country === "IN" ? "State" : "State / Province / Region"} />
               </div>
 
               {/* Billing toggle */}
-              <div className="mt-5 pt-5 border-t border-zinc-100">
+              <div className="mt-5 pt-5 border-t border-black/[0.06]">
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <div onClick={() => setForm((f) => ({ ...f, sameAsBilling: !f.sameAsBilling }))}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${form.sameAsBilling ? "bg-zinc-900 border-zinc-900" : "border-zinc-300"}`}>
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 ${form.sameAsBilling ? "bg-ds-dark border-zinc-900" : "border-zinc-300"}`}>
                     {form.sameAsBilling && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                   </div>
-                  <span className="text-sm text-zinc-700">Billing address same as shipping</span>
+                  <span className="text-sm text-ds-body">Billing address same as shipping</span>
                 </label>
                 <AnimatePresence>
                   {!form.sameAsBilling && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden mt-4 flex flex-col gap-3">
-                      <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Billing address</p>
+                      <p className="text-xs font-semibold text-ds-muted uppercase tracking-widest">Billing address</p>
                       <input value={form.billingName} onChange={(e) => setForm((f) => ({ ...f, billingName: e.target.value }))}
-                        className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Name on billing" />
+                        className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Name on billing" />
                       <input value={form.billingAddress} onChange={(e) => setForm((f) => ({ ...f, billingAddress: e.target.value }))}
-                        className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Billing address" />
+                        className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="Billing address" />
                       <div className="grid grid-cols-2 gap-3">
                         <input value={form.billingCity} onChange={(e) => setForm((f) => ({ ...f, billingCity: e.target.value }))}
-                          className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
+                          className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="City" />
                         <input value={form.billingPin} onChange={(e) => setForm((f) => ({ ...f, billingPin: e.target.value }))}
-                          className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="PIN / Postal code" />
+                          className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" placeholder="PIN / Postal code" />
                       </div>
                     </motion.div>
                   )}
@@ -895,26 +895,26 @@ export default function CheckoutPage() {
             </div>
 
             {/* Shipping method */}
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping method</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Shipping method</h2>
               {loadingShipping ? (
-                <div className="flex items-center gap-2 text-sm text-zinc-400 py-2">
+                <div className="flex items-center gap-2 text-sm text-ds-muted py-2">
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                   Calculating rates…
                 </div>
               ) : shippingOptions.length === 0 ? (
-                <div className="text-sm text-zinc-400">
+                <div className="text-sm text-ds-muted">
                   Enter your address to see shipping options.{" "}
-                  <button onClick={() => fetchShipping(country, form.pin, totalQty)} className="text-orange-500 underline">Refresh</button>
+                  <button onClick={() => fetchShipping(country, form.pin, totalQty)} className="text-brand underline">Refresh</button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {shippingOptions.map((opt) => (
                     <button key={opt.id} onClick={() => setSelectedShipping(opt)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all ${selectedShipping?.id === opt.id ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:border-zinc-300"}`}>
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm transition-all ${selectedShipping?.id === opt.id ? "border-zinc-900 bg-ds-light-gray" : "border-black/[0.06] hover:border-zinc-300"}`}>
                       <div className="text-left">
-                        <p className="font-semibold text-zinc-800">{opt.label}</p>
-                        <p className="text-xs text-zinc-400">{opt.carrier} · {opt.days}</p>
+                        <p className="font-semibold text-ds-dark">{opt.label}</p>
+                        <p className="text-xs text-ds-muted">{opt.carrier} · {opt.days}</p>
                       </div>
                       <p className="font-bold">{fmt(opt.rate)}</p>
                     </button>
@@ -924,18 +924,18 @@ export default function CheckoutPage() {
 
               {/* Fulfilled from India note */}
               <div className="mt-4 flex items-center gap-2">
-                <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 font-semibold border border-orange-100">
+                <span className="text-xs px-2.5 py-1 rounded-full bg-orange-50 text-brand-dark font-semibold border border-orange-100">
                   🇮🇳 Fulfilled from India
                 </span>
                 {country !== "IN" && (
-                  <span className="text-xs text-zinc-400 italic">International delivery · Est. 10–20 business days</span>
+                  <span className="text-xs text-ds-muted italic">International delivery · Est. 10–20 business days</span>
                 )}
               </div>
             </div>
 
             {/* Coupon code */}
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Coupon code</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Coupon code</h2>
               {appliedCoupon ? (
                 <div className="flex items-center justify-between px-4 py-3 bg-green-50 border border-green-200 rounded-xl">
                   <div>
@@ -957,10 +957,10 @@ export default function CheckoutPage() {
                     onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
                     placeholder="Enter coupon code"
-                    className="flex-1 border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 uppercase placeholder:normal-case placeholder:text-zinc-400"
+                    className="flex-1 border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 uppercase placeholder:normal-case placeholder:text-ds-muted"
                   />
                   <button onClick={handleApplyCoupon} disabled={couponLoading || !couponInput.trim()}
-                    className="px-5 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors whitespace-nowrap">
+                    className="px-5 py-3 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors whitespace-nowrap">
                     {couponLoading ? "…" : "Apply"}
                   </button>
                 </div>
@@ -973,8 +973,8 @@ export default function CheckoutPage() {
 
           {/* Right: Order summary */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6 sticky top-24">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Order summary</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sticky top-24">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Order summary</h2>
 
               {/* Cart items */}
               <div className="flex flex-col gap-3 mb-4">
@@ -990,8 +990,8 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{item.productName} {item.qty > 1 ? `×${item.qty}` : ""}</p>
-                      <p className="text-xs text-zinc-400">{item.color} · {item.size} · {item.side === "both" ? "Front + Back" : item.side === "none" ? "No print" : `${item.side} print`}</p>
-                      {item.printTier && <p className="text-xs text-orange-500">DTG {item.printTier}</p>}
+                      <p className="text-xs text-ds-muted">{item.color} · {item.size} · {item.side === "both" ? "Front + Back" : item.side === "none" ? "No print" : `${item.side} print`}</p>
+                      {item.printTier && <p className="text-xs text-brand">DTG {item.printTier}</p>}
                     </div>
                     <p className="font-semibold text-sm">{fmt((item.blankPrice + item.printPrice) * item.qty)}</p>
                   </div>
@@ -999,20 +999,20 @@ export default function CheckoutPage() {
               </div>
 
               {/* Breakdown */}
-              <div className="border-t border-zinc-100 pt-4 flex flex-col gap-2">
+              <div className="border-t border-black/[0.06] pt-4 flex flex-col gap-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Product</span>
+                  <span className="text-ds-body">Product</span>
                   <span>{fmt(itemsSubtotal)}</span>
                 </div>
                 {printSubtotal > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-500">Customization</span>
+                    <span className="text-ds-body">Customization</span>
                     <span>{fmt(printSubtotal)}</span>
                   </div>
                 )}
                 {neckLabelSubtotal > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-500">Neck label</span>
+                    <span className="text-ds-body">Neck label</span>
                     <span>{fmt(neckLabelSubtotal)}</span>
                   </div>
                 )}
@@ -1023,7 +1023,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500 flex items-center">
+                  <span className="text-ds-body flex items-center">
                     Shipping
                     {country !== "IN" && (
                       <InfoTooltip text="Shipping fees DO NOT include customs duties and handling charges for international orders." />
@@ -1035,11 +1035,11 @@ export default function CheckoutPage() {
                 </div>
                 {isINR && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-500">GST (5%)</span>
+                    <span className="text-ds-body">GST (5%)</span>
                     <span>{fmt(totalGst)}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-black text-lg mt-2 pt-2 border-t border-zinc-100">
+                <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t border-black/[0.06]">
                   <span>Total</span>
                   <span>{fmt(grandTotalINR)}</span>
                 </div>
@@ -1053,8 +1053,8 @@ export default function CheckoutPage() {
                     onClick={() => { setUseWallet(!useWallet); setPayError(""); }}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border-2 transition-all text-sm ${
                       useWallet
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                        ? "border-zinc-900 bg-ds-dark text-white"
+                        : "border-black/[0.06] bg-white text-ds-body hover:border-zinc-400"
                     }`}
                   >
                     <span className="flex items-center gap-2.5 font-bold">
@@ -1063,7 +1063,7 @@ export default function CheckoutPage() {
                       </svg>
                       Pay from Wallet
                     </span>
-                    <span className={`text-xs font-black ${useWallet ? "text-zinc-300" : walletBalance >= grandTotalINR ? "text-emerald-600" : "text-zinc-400"}`}>
+                    <span className={`text-xs font-semibold ${useWallet ? "text-ds-muted" : walletBalance >= grandTotalINR ? "text-emerald-600" : "text-ds-muted"}`}>
                       Balance: ₹{walletBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                     </span>
                   </button>
@@ -1083,8 +1083,8 @@ export default function CheckoutPage() {
               <button
                 onClick={handlePay}
                 disabled={paying || !form.name || !form.email || !form.address || !form.city || !selectedShipping || (useWallet && walletBalance !== null && walletBalance < grandTotalINR)}
-                className={`w-full mt-5 py-4 rounded-2xl font-black text-base disabled:opacity-40 transition-colors flex items-center justify-center gap-2 text-white ${
-                  useWallet ? "bg-zinc-900 hover:bg-zinc-700" : "bg-orange-500 hover:bg-orange-600"
+                className={`w-full mt-5 py-4 rounded-2xl font-semibold text-base disabled:opacity-40 transition-colors flex items-center justify-center gap-2 text-white ${
+                  useWallet ? "bg-ds-dark hover:bg-ds-dark2" : "bg-brand hover:bg-orange-600"
                 }`}>
                 {paying ? (
                   <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Processing…</>
@@ -1098,15 +1098,15 @@ export default function CheckoutPage() {
                 ) : <>Pay {fmt(grandTotalINR)} →</>}
               </button>
 
-              <p className="text-xs text-zinc-400 text-center mt-3">
+              <p className="text-xs text-ds-muted text-center mt-3">
                 {useWallet ? "Instant payment from your Halftone wallet" : "Secured by Razorpay"} · <a href="mailto:hello@halftonelabs.in" className="underline">hello@halftonelabs.in</a>
               </p>
-              <div className="mt-3 flex items-start gap-2 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3">
-                <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="mt-3 flex items-start gap-2 bg-ds-light-gray border border-black/[0.06] rounded-xl px-4 py-3">
+                <svg className="w-3.5 h-3.5 text-ds-muted flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-[11px] text-zinc-500 leading-relaxed">
-                  <strong className="text-zinc-700">All sales are final.</strong> No exchanges or returns — every product is custom made to order just for you.
+                <p className="text-[11px] text-ds-body leading-relaxed">
+                  <strong className="text-ds-body">All sales are final.</strong> No exchanges or returns — every product is custom made to order just for you.
                 </p>
               </div>
             </div>

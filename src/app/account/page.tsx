@@ -107,30 +107,30 @@ function DashboardTab({ orders, user, onTab }: {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
           👋 Welcome, {user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? "there"}
         </h2>
-        <p className="text-zinc-500 text-sm mt-1">Here&apos;s a quick look at your Halftone Labs account.</p>
+        <p className="text-ds-body text-sm mt-1">Here&apos;s a quick look at your Halftone Labs account.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {STEPS.map((step, i) => (
           <motion.div key={step.n} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-            className={`rounded-2xl border p-5 relative overflow-hidden ${step.done ? "border-green-200 bg-green-50" : "border-zinc-200 bg-white"}`}>
+            className={`rounded-2xl border p-5 relative overflow-hidden ${step.done ? "border-green-200 bg-green-50" : "border-black/[0.06] bg-white"}`}>
             {step.done && (
               <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
               </div>
             )}
-            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Step {step.n}</p>
-            <h3 className="font-black text-zinc-900 text-sm mb-1">{step.title}</h3>
-            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">{step.desc}</p>
+            <p className="text-xs font-bold text-ds-muted uppercase tracking-widest mb-2">Step {step.n}</p>
+            <h3 className="font-semibold text-ds-dark text-sm mb-1">{step.title}</h3>
+            <p className="text-xs text-ds-body mb-4 leading-relaxed">{step.desc}</p>
             {step.href === "#shopify" ? (
-              <button onClick={() => onTab("shopify")} className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors">{step.cta}</button>
+              <button onClick={() => onTab("shopify")} className="text-xs font-bold text-brand hover:text-brand-dark transition-colors">{step.cta}</button>
             ) : step.href === "#" ? (
-              <span className="text-xs font-semibold text-zinc-400">{step.cta}</span>
+              <span className="text-xs font-semibold text-ds-muted">{step.cta}</span>
             ) : (
-              <Link href={step.href} className="text-xs font-bold text-orange-500 hover:text-orange-600 transition-colors">{step.cta}</Link>
+              <Link href={step.href} className="text-xs font-bold text-brand hover:text-brand-dark transition-colors">{step.cta}</Link>
             )}
           </motion.div>
         ))}
@@ -142,9 +142,9 @@ function DashboardTab({ orders, user, onTab }: {
           { label: "Active",       val: active.length },
           { label: "Delivered",    val: delivered.length },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl border border-zinc-100 px-5 py-4">
-            <p className="text-3xl font-black text-zinc-900">{s.val}</p>
-            <p className="text-xs text-zinc-400 mt-1">{s.label}</p>
+          <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] px-5 py-4">
+            <p className="text-3xl font-semibold text-ds-dark">{s.val}</p>
+            <p className="text-xs text-ds-muted mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -152,24 +152,24 @@ function DashboardTab({ orders, user, onTab }: {
       {orders.length > 0 ? (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-zinc-900">Recent orders</h3>
-            <button onClick={() => onTab("orders")} className="text-xs font-bold text-orange-500 hover:text-orange-600">View all →</button>
+            <h3 className="font-semibold text-ds-dark">Recent orders</h3>
+            <button onClick={() => onTab("orders")} className="text-xs font-bold text-brand hover:text-brand-dark">View all →</button>
           </div>
           <div className="flex flex-col gap-3">
             {orders.slice(0, 3).map((o) => {
               const sc = STATUS_COLORS[o.status] ?? STATUS_COLORS["Order Placed"];
               return (
-                <div key={o.id} className="bg-white rounded-2xl border border-zinc-100 flex items-center justify-between px-5 py-4">
+                <div key={o.id} className="bg-white rounded-2xl border border-black/[0.06] flex items-center justify-between px-5 py-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-lg">👕</div>
+                    <div className="w-10 h-10 rounded-xl bg-black/[0.05] flex items-center justify-center text-lg">👕</div>
                     <div>
-                      <p className="font-black text-sm text-zinc-900">#{o.ref}</p>
-                      <p className="text-xs text-zinc-400">{o.product_name} · {o.color} · {o.size}</p>
+                      <p className="font-semibold text-sm text-ds-dark">#{o.ref}</p>
+                      <p className="text-xs text-ds-muted">{o.product_name} · {o.color} · {o.size}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: sc.bg, color: sc.text }}>{o.status}</span>
-                    <p className="font-black text-sm">₹{o.total}</p>
+                    <p className="font-semibold text-sm">₹{o.total}</p>
                   </div>
                 </div>
               );
@@ -177,11 +177,11 @@ function DashboardTab({ orders, user, onTab }: {
           </div>
         </div>
       ) : (
-        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-2xl p-12 text-center">
+        <div className="bg-white border-2 border-dashed border-black/[0.06] rounded-2xl p-12 text-center">
           <div className="text-5xl mb-4">🎨</div>
-          <h3 className="font-black text-zinc-900 mb-2">No orders yet</h3>
-          <p className="text-zinc-500 text-sm mb-6">Head to Studio to design and order your first custom tee.</p>
-          <Link href="/studio" className="px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+          <h3 className="font-semibold text-ds-dark mb-2">No orders yet</h3>
+          <p className="text-ds-body text-sm mb-6">Head to Studio to design and order your first custom tee.</p>
+          <Link href="/studio" className="px-6 py-3 rounded-full bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors">
             Open Studio →
           </Link>
         </div>
@@ -224,22 +224,22 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Orders</h2>
-        <Link href="/studio" className="px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition-colors">+ New Order</Link>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Orders</h2>
+        <Link href="/studio" className="px-4 py-2 rounded-full bg-brand text-white text-xs font-bold hover:bg-orange-600 transition-colors">+ New Order</Link>
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {statuses.map((s) => (
           <button key={s} onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${filter === s ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${filter === s ? "bg-ds-dark text-white" : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"}`}>
             {s}
           </button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-zinc-200 rounded-2xl">
-          <p className="text-zinc-400 font-bold">No orders {filter !== "All" ? `with status "${filter}"` : "yet"}</p>
+        <div className="text-center py-16 border-2 border-dashed border-black/[0.06] rounded-2xl">
+          <p className="text-ds-muted font-bold">No orders {filter !== "All" ? `with status "${filter}"` : "yet"}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -247,25 +247,25 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
             const sc     = STATUS_COLORS[order.status] ?? STATUS_COLORS["Order Placed"];
             const isOpen = selected?.id === order.id;
             return (
-              <motion.div key={order.id} layout className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-                <button className="w-full text-left px-5 py-4 hover:bg-zinc-50 transition-colors" onClick={() => setSelected(isOpen ? null : order)}>
+              <motion.div key={order.id} layout className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+                <button className="w-full text-left px-5 py-4 hover:bg-ds-light-gray transition-colors" onClick={() => setSelected(isOpen ? null : order)}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-lg">👕</div>
+                      <div className="w-10 h-10 rounded-xl bg-black/[0.05] flex items-center justify-center text-lg">👕</div>
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-black text-sm text-zinc-900">#{order.ref}</p>
+                          <p className="font-semibold text-sm text-ds-dark">#{order.ref}</p>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: sc.bg, color: sc.text }}>{order.status}</span>
                         </div>
-                        <p className="text-xs text-zinc-400">{order.product_name} · {order.color} · Size {order.size}</p>
-                        <p className="text-[10px] text-zinc-300 mt-0.5">
+                        <p className="text-xs text-ds-muted">{order.product_name} · {order.color} · Size {order.size}</p>
+                        <p className="text-[10px] text-ds-muted mt-0.5">
                           {new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="font-black text-sm">₹{order.total.toLocaleString("en-IN")}</p>
-                      <svg className={`w-4 h-4 text-zinc-400 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <p className="font-semibold text-sm">₹{order.total.toLocaleString("en-IN")}</p>
+                      <svg className={`w-4 h-4 text-ds-muted transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>
@@ -275,7 +275,7 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden border-t border-zinc-100">
+                      className="overflow-hidden border-t border-black/[0.06]">
                       <div className="px-5 py-5 flex flex-col gap-5">
                         {/* Shipping / tracking card — shown when AWB is available */}
                         {order.courier && order.tracking_number && (
@@ -288,7 +288,7 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                               </div>
                               <div>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-0.5">Shipped via {order.courier}</p>
-                                <p className="text-sm font-black text-blue-900 tracking-wider">{order.tracking_number}</p>
+                                <p className="text-sm font-semibold text-blue-900 tracking-wider">{order.tracking_number}</p>
                               </div>
                             </div>
                             <button
@@ -303,9 +303,9 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                         <div className="flex flex-col sm:flex-row gap-6">
                           {/* Timeline */}
                           <div className="flex-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-4">Order Timeline</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted mb-4">Order Timeline</p>
                             {order.milestones.length === 0 ? (
-                              <p className="text-xs text-zinc-400">No updates yet — we&apos;ll email you when your order moves.</p>
+                              <p className="text-xs text-ds-muted">No updates yet — we&apos;ll email you when your order moves.</p>
                             ) : (
                               order.milestones.map((m, i) => (
                                 <div key={m.id} className="flex gap-3">
@@ -314,9 +314,9 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                                     {i < order.milestones.length - 1 && <div className="w-px flex-1 my-1 bg-zinc-200" style={{ minHeight: 16 }} />}
                                   </div>
                                   <div className="pb-3">
-                                    <p className="text-sm font-bold text-zinc-800">{m.title}</p>
-                                    {!!m.description && <p className="text-xs text-zinc-500">{String(m.description)}</p>}
-                                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                                    <p className="text-sm font-bold text-ds-dark">{m.title}</p>
+                                    {!!m.description && <p className="text-xs text-ds-body">{String(m.description)}</p>}
+                                    <p className="text-[10px] text-ds-muted mt-0.5">
                                       {new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                                     </p>
                                   </div>
@@ -328,11 +328,11 @@ function OrdersTab({ orders, user }: { orders: Order[]; user: { id: string; emai
                           {/* Actions */}
                           <div className="flex flex-col gap-2 sm:w-36">
                             <Link href="/studio"
-                              className="text-center px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+                              className="text-center px-4 py-2.5 rounded-xl bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors">
                               + New order
                             </Link>
                             <button onClick={() => handleReorder(order)}
-                              className="text-center px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-bold hover:bg-zinc-50 transition-colors">
+                              className="text-center px-4 py-2.5 rounded-xl border border-black/[0.06] text-ds-body text-xs font-bold hover:bg-ds-light-gray transition-colors">
                               Reorder ↻
                             </button>
                           </div>
@@ -429,19 +429,19 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
         className="relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md p-6 shadow-2xl z-10">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>Add to Cart</h3>
-            <p className="text-sm text-zinc-400">{design.name} · {design.product_name} · {design.color_name}</p>
+            <h3 className="font-semibold text-ds-dark text-lg" style={{ letterSpacing: "-0.03em" }}>Add to Cart</h3>
+            <p className="text-sm text-ds-muted">{design.name} · {design.product_name} · {design.color_name}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-500 text-lg leading-none">&times;</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/[0.05] hover:bg-zinc-200 transition-colors text-ds-body text-lg leading-none">&times;</button>
         </div>
 
         {/* Size picker — uses actual product sizes */}
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Size</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-2.5">Size</p>
           <div className="flex flex-wrap gap-2">
             {sizeList.map((s) => (
               <button key={s} onClick={() => setSize(s)}
-                className={`px-3.5 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${validSize === s ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                className={`px-3.5 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${validSize === s ? "border-zinc-900 bg-ds-dark text-white" : "border-black/[0.06] text-ds-body hover:border-zinc-400"}`}>
                 {s}
               </button>
             ))}
@@ -450,29 +450,29 @@ function AddToCartModal({ design, onClose }: { design: Design; onClose: () => vo
 
         {/* Quantity */}
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2.5">Quantity</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-2.5">Quantity</p>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <button onClick={() => setQty(Math.max(1, qty - 1))}
-                className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-700 hover:border-zinc-400 transition-colors font-bold text-lg leading-none">−</button>
-              <span className="text-xl font-black w-8 text-center">{qty}</span>
+                className="w-9 h-9 rounded-full border-2 border-black/[0.06] flex items-center justify-center text-ds-body hover:border-zinc-400 transition-colors font-bold text-lg leading-none">−</button>
+              <span className="text-xl font-semibold w-8 text-center">{qty}</span>
               <button onClick={() => setQty(qty + 1)}
-                className="w-9 h-9 rounded-full border-2 border-zinc-200 flex items-center justify-center text-zinc-700 hover:border-zinc-400 transition-colors font-bold text-lg leading-none">+</button>
+                className="w-9 h-9 rounded-full border-2 border-black/[0.06] flex items-center justify-center text-ds-body hover:border-zinc-400 transition-colors font-bold text-lg leading-none">+</button>
             </div>
-            <p className="text-sm text-zinc-500">₹{(unitPrice * qty).toLocaleString("en-IN")} total</p>
+            <p className="text-sm text-ds-body">₹{(unitPrice * qty).toLocaleString("en-IN")} total</p>
           </div>
         </div>
 
         {/* Print summary — read-only, no side picker */}
         {design.has_design && (
-          <div className="flex items-center justify-between bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 mb-5 text-sm">
-            <span className="text-zinc-500 text-xs">Print · {design.print_tier ?? "Custom"}</span>
-            <span className="font-black text-orange-600">+₹{design.print_price.toLocaleString("en-IN")}</span>
+          <div className="flex items-center justify-between bg-brand/8 border border-orange-100 rounded-xl px-4 py-3 mb-5 text-sm">
+            <span className="text-ds-body text-xs">Print · {design.print_tier ?? "Custom"}</span>
+            <span className="font-semibold text-brand-dark">+₹{design.print_price.toLocaleString("en-IN")}</span>
           </div>
         )}
 
         <button onClick={handleAdd}
-          className={`w-full py-3.5 rounded-2xl font-black text-sm transition-all ${added ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
+          className={`w-full py-3.5 rounded-2xl font-semibold text-sm transition-all ${added ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"}`}>
           {added ? "✓ Added to cart!" : `Add ${qty} × ${validSize} to cart — ₹${(unitPrice * qty).toLocaleString("en-IN")} →`}
         </button>
       </motion.div>
@@ -540,32 +540,32 @@ function PushToShopifyModal({
               <svg className="w-5 h-5 text-[#96bf48]" viewBox="0 0 109.5 124.5" fill="currentColor">
                 <path d="M74.7 14.8s-1.4-.4-3.6-.8c-.2-1.2-.9-2.3-1.9-3.3-2.9-3-7.1-4.6-12.6-4.6-.1 0-1.2-5.6-4-5.6H28.2c-2.8 0-2.8 3.7-2.8 3.7L24 18.9c-4.5.7-8.7 2-10.4 2.4C7.5 22.8 7 23.2 6.3 29L.3 78.7C-.3 82.9 2.8 87 7.1 87h95.4c4.3 0 7.4-4.1 6.8-8.3L100.1 22C99.4 16.1 98.9 15.7 93 14.3c-2.1-.5-9.8-1.9-18.3 0zM68.6 16c-5.5 1.3-11.5 1.7-17.5 1.6L52 8.9c4.2.1 7.4 1.3 9.5 3.4.9 1 1.6 2.3 2 3.7h5.1zm-22.1.1L47.3 8.9c4.1 0 7.3 1.3 9.4 3.4.9 1 1.5 2.2 1.9 3.7-6 .1-12-.5-12.1-.9z"/>
               </svg>
-              <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>
+              <h3 className="font-semibold text-ds-dark text-lg" style={{ letterSpacing: "-0.03em" }}>
                 {isUpdate ? "Update Shopify Product" : "Push to Shopify"}
               </h3>
             </div>
-            <p className="text-sm text-zinc-400">{design.name} · {design.product_name}</p>
+            <p className="text-sm text-ds-muted">{design.name} · {design.product_name}</p>
             {design.sku && (
-              <p className="text-xs font-mono text-zinc-400 mt-0.5">SKU: {design.sku}</p>
+              <p className="text-xs font-mono text-ds-muted mt-0.5">SKU: {design.sku}</p>
             )}
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-500 text-lg leading-none">&times;</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/[0.05] hover:bg-zinc-200 transition-colors text-ds-body text-lg leading-none">&times;</button>
         </div>
 
         {done ? (
           <div className="text-center py-4">
             <div className="text-4xl mb-3">🎉</div>
-            <p className="font-black text-zinc-900 mb-1">
+            <p className="font-semibold text-ds-dark mb-1">
               {isUpdate ? "Product updated!" : "Product pushed!"}
             </p>
-            <p className="text-sm text-zinc-500 mb-5">Your design is now live in your Shopify store.</p>
+            <p className="text-sm text-ds-body mb-5">Your design is now live in your Shopify store.</p>
             <div className="flex gap-3">
               <a href={done} target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-3 rounded-2xl bg-zinc-900 text-white font-black text-sm text-center hover:bg-zinc-700 transition-colors">
+                className="flex-1 py-3 rounded-2xl bg-ds-dark text-white font-semibold text-sm text-center hover:bg-ds-dark2 transition-colors">
                 View in Shopify →
               </a>
               <button onClick={onClose}
-                className="flex-1 py-3 rounded-2xl border border-zinc-200 text-zinc-600 font-bold text-sm hover:border-zinc-400 transition-colors">
+                className="flex-1 py-3 rounded-2xl border border-black/[0.06] text-ds-body font-bold text-sm hover:border-zinc-400 transition-colors">
                 Close
               </button>
             </div>
@@ -573,31 +573,31 @@ function PushToShopifyModal({
         ) : (
           <>
             {/* What gets pushed */}
-            <div className="bg-zinc-50 rounded-2xl p-4 mb-5 text-sm space-y-1.5">
-              <p className="font-bold text-zinc-700 mb-2 text-xs uppercase tracking-wider">What will be pushed</p>
-              <div className="flex items-center gap-2 text-zinc-600">
+            <div className="bg-ds-light-gray rounded-2xl p-4 mb-5 text-sm space-y-1.5">
+              <p className="font-bold text-ds-body mb-2 text-xs uppercase tracking-wider">What will be pushed</p>
+              <div className="flex items-center gap-2 text-ds-body">
                 <span className="text-green-500">✓</span> Product listing with title &amp; description
               </div>
-              <div className="flex items-center gap-2 text-zinc-600">
+              <div className="flex items-center gap-2 text-ds-body">
                 <span className="text-green-500">✓</span> Sizes XS → 3XL as variants
               </div>
               {(design.thumbnail || design.back_thumbnail) && (
-                <div className="flex items-center gap-2 text-zinc-600">
+                <div className="flex items-center gap-2 text-ds-body">
                   <span className="text-green-500">✓</span> Mockup image{design.back_thumbnail ? "s (front + back)" : ""}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-zinc-600">
+              <div className="flex items-center gap-2 text-ds-body">
                 <span className="text-green-500">✓</span> SKU per variant: <span className="font-mono text-xs">{design.sku || "HLD-…"}-S/M/…</span>
               </div>
             </div>
 
             {/* Retail price input */}
             <div className="mb-5">
-              <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 block mb-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-ds-muted block mb-2">
                 Retail Price (₹)
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">₹</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ds-muted font-bold">₹</span>
                 <input
                   type="number"
                   min="1"
@@ -605,11 +605,11 @@ function PushToShopifyModal({
                   placeholder="e.g. 699"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 rounded-2xl border-2 border-zinc-200 focus:border-zinc-900 outline-none font-black text-zinc-900 text-lg transition-colors"
+                  className="w-full pl-8 pr-4 py-3 rounded-2xl border-2 border-black/[0.06] focus:border-zinc-900 outline-none font-semibold text-ds-dark text-lg transition-colors"
                 />
               </div>
               {price && Number(price) > 0 && (
-                <p className="text-xs text-zinc-400 mt-1.5 ml-1">
+                <p className="text-xs text-ds-muted mt-1.5 ml-1">
                   Your cost: ₹{(design.blank_price + design.print_price).toLocaleString("en-IN")} ·
                   Margin: ₹{(Number(price) - design.blank_price - design.print_price).toLocaleString("en-IN")}
                 </p>
@@ -622,7 +622,7 @@ function PushToShopifyModal({
                 <p className="text-amber-700 mb-3">Your store connection needs the &ldquo;write products&rdquo; permission. Click below — Shopify will ask you to approve it, then you&rsquo;re done.</p>
                 <a
                   href={`/api/shopify/auth?shop=${reauthShop}&userId=${userId}`}
-                  className="inline-block w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm text-center transition-colors"
+                  className="inline-block w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm text-center transition-colors"
                 >
                   Re-authorize Store (5 sec) →
                 </a>
@@ -634,7 +634,7 @@ function PushToShopifyModal({
             )}
 
             <button onClick={handlePush} disabled={loading || !!reauthShop}
-              className="w-full py-3.5 rounded-2xl font-black text-sm transition-all bg-[#96bf48] hover:bg-[#85ad3d] text-white disabled:opacity-60 flex items-center justify-center gap-2">
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all bg-[#96bf48] hover:bg-[#85ad3d] text-white disabled:opacity-60 flex items-center justify-center gap-2">
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Pushing…</>
               ) : (
@@ -693,23 +693,23 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Designs</h2>
-        <Link href="/studio" className="px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition-colors">+ New Design</Link>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Designs</h2>
+        <Link href="/studio" className="px-4 py-2 rounded-full bg-brand text-white text-xs font-bold hover:bg-orange-600 transition-colors">+ New Design</Link>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+        <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
           <div className="w-4 h-4 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
           Loading designs…
         </div>
       ) : designs.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-2xl p-14 text-center">
+        <div className="bg-white border-2 border-dashed border-black/[0.06] rounded-2xl p-14 text-center">
           <div className="text-5xl mb-4">🎨</div>
-          <h3 className="font-black text-zinc-900 mb-2">No saved designs yet</h3>
-          <p className="text-zinc-500 text-sm mb-6 max-w-xs mx-auto">
+          <h3 className="font-semibold text-ds-dark mb-2">No saved designs yet</h3>
+          <p className="text-ds-body text-sm mb-6 max-w-xs mx-auto">
             When you configure a product in Studio, hit <strong>&quot;Save design to account&quot;</strong> — it&apos;ll appear here.
           </p>
-          <Link href="/studio" className="px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+          <Link href="/studio" className="px-6 py-3 rounded-full bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors">
             Open Studio →
           </Link>
         </div>
@@ -717,7 +717,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {designs.map((d) => (
             <motion.div key={d.id} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 hover:shadow-sm transition-all">
+              className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden hover:border-black/[0.06] hover:shadow-sm transition-all">
               {/* Thumbnail */}
               <div className="h-40 flex items-center justify-center relative overflow-hidden group/thumb" style={{ background: d.thumbnail ? "#ffffff" : (d.color_hex || "#f4f4f5") }}>
                 {d.thumbnail ? (
@@ -727,7 +727,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   <div className="text-4xl opacity-40">👕</div>
                 )}
                 {d.has_design && (
-                  <span className="absolute top-2 right-2 text-[9px] font-black px-2 py-0.5 rounded-full bg-white/80 text-zinc-600 backdrop-blur-sm">
+                  <span className="absolute top-2 right-2 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/80 text-ds-body backdrop-blur-sm">
                     Custom print
                   </span>
                 )}
@@ -738,14 +738,14 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   >
                     {d.thumbnail && (
                       <button onClick={() => downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-zinc-800 text-[10px] font-bold transition-colors shadow">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-ds-dark text-[10px] font-bold transition-colors shadow">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         {d.back_thumbnail ? "Front mockup" : "Download mockup"}
                       </button>
                     )}
                     {d.back_thumbnail && (
                       <button onClick={() => downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-zinc-800 text-[10px] font-bold transition-colors shadow">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-ds-dark text-[10px] font-bold transition-colors shadow">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         Back mockup
                       </button>
@@ -756,18 +756,18 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
 
               {/* Info */}
               <div className="px-4 py-4">
-                <p className="font-black text-sm text-zinc-900 truncate">{d.name}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">{d.product_name} · {d.color_name}</p>
+                <p className="font-semibold text-sm text-ds-dark truncate">{d.name}</p>
+                <p className="text-xs text-ds-body mt-0.5">{d.product_name} · {d.color_name}</p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">Size {d.size}</span>
-                  {d.print_tier && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-500">{d.print_tier}</span>}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/[0.05] text-ds-body">Size {d.size}</span>
+                  {d.print_tier && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/8 text-brand">{d.print_tier}</span>}
                   {d.has_design && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">DTG Print</span>}
                   {d.shopify_product_id && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f0f7e6] text-[#5a8a1a]">On Shopify</span>}
                 </div>
-                <p className="text-xs font-bold text-zinc-900 mt-2">₹{(d.blank_price + d.print_price).toLocaleString("en-IN")} /unit</p>
+                <p className="text-xs font-bold text-ds-dark mt-2">₹{(d.blank_price + d.print_price).toLocaleString("en-IN")} /unit</p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  {d.sku && <p className="text-[10px] font-mono text-zinc-400">{d.sku}</p>}
-                  <p className="text-[10px] text-zinc-300">
+                  {d.sku && <p className="text-[10px] font-mono text-ds-muted">{d.sku}</p>}
+                  <p className="text-[10px] text-ds-muted">
                     Saved {new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </div>
@@ -791,7 +791,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                 {/* Actions */}
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => setCartDesign(d)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -800,7 +800,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   {d.thumbnail && (
                     <button
                       onClick={() => downloadThumbnail(d.thumbnail!, d.name, d.back_thumbnail ? "front-mockup" : "mockup")}
-                      className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+                      className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-zinc-400 hover:text-ds-body transition-colors"
                       title={d.back_thumbnail ? "Download front mockup" : "Download mockup"}>
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -810,7 +810,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                   {d.back_thumbnail && (
                     <button
                       onClick={() => downloadThumbnail(d.back_thumbnail!, d.name, "back-mockup")}
-                      className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+                      className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-zinc-400 hover:text-ds-body transition-colors"
                       title="Download back mockup">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
@@ -818,7 +818,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     </button>
                   )}
                   <button onClick={() => handleDelete(d.id)} disabled={deleting === d.id}
-                    className="px-3 py-2 rounded-xl border border-zinc-200 text-zinc-400 hover:border-red-200 hover:text-red-500 transition-colors disabled:opacity-40"
+                    className="px-3 py-2 rounded-xl border border-black/[0.06] text-ds-muted hover:border-red-200 hover:text-red-500 transition-colors disabled:opacity-40"
                     title="Delete design">
                     {deleting === d.id ? (
                       <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -919,7 +919,7 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+      <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
         <div className="w-4 h-4 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
         Loading branding…
       </div>
@@ -929,47 +929,47 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Branding</h2>
-        <p className="text-zinc-500 text-sm mt-1">Upload your custom neck labels. These will be printed inside your garments via DTF label transfer.</p>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Branding</h2>
+        <p className="text-ds-body text-sm mt-1">Upload your custom neck labels. These will be printed inside your garments via DTF label transfer.</p>
       </div>
 
       {/* DTF Neck Labels section */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 mb-4 max-w-2xl">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4 max-w-2xl">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
-            <svg className="w-4.5 h-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center">
+            <svg className="w-4.5 h-4.5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">DTF Neck Labels</h3>
-            <p className="text-xs text-zinc-400">Upload a dark version (for light garments) and a light version (for dark garments)</p>
+            <h3 className="font-semibold text-ds-dark">DTF Neck Labels</h3>
+            <p className="text-xs text-ds-muted">Upload a dark version (for light garments) and a light version (for dark garments)</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {/* Dark label */}
           <div>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Dark label <span className="text-zinc-300 normal-case font-normal">(for light garments)</span></p>
+            <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Dark label <span className="text-ds-muted normal-case font-normal">(for light garments)</span></p>
             <div
               onClick={() => darkRef.current?.click()}
-              className="relative border-2 border-dashed border-zinc-200 rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 hover:bg-zinc-50 transition-all overflow-hidden"
+              className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 hover:bg-ds-light-gray transition-all overflow-hidden"
               style={{ background: "#fafafa" }}>
               {darkLabel ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={darkLabel} alt="Dark label" className="max-h-32 max-w-full object-contain p-3" />
               ) : (
                 <>
-                  <svg className="w-8 h-8 text-zinc-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-8 h-8 text-ds-muted mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-xs text-zinc-400 font-medium">Click to upload PNG</p>
-                  <p className="text-[10px] text-zinc-300 mt-0.5">Transparent background recommended</p>
+                  <p className="text-xs text-ds-muted font-medium">Click to upload PNG</p>
+                  <p className="text-[10px] text-ds-muted mt-0.5">Transparent background recommended</p>
                 </>
               )}
               {darkLabel && (
                 <button onClick={(e) => { e.stopPropagation(); setDarkLabel(null); }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-red-500 transition-colors text-sm leading-none">
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-black/[0.06] flex items-center justify-center text-ds-muted hover:text-red-500 transition-colors text-sm leading-none">
                   ×
                 </button>
               )}
@@ -979,26 +979,26 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
 
           {/* Light label */}
           <div>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Light label <span className="text-zinc-300 normal-case font-normal">(for dark garments)</span></p>
+            <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Light label <span className="text-ds-muted normal-case font-normal">(for dark garments)</span></p>
             <div
               onClick={() => lightRef.current?.click()}
-              className="relative border-2 border-dashed border-zinc-200 rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-all overflow-hidden"
+              className="relative border-2 border-dashed border-black/[0.06] rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-all overflow-hidden"
               style={{ background: "#1a1a1a" }}>
               {lightLabel ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={lightLabel} alt="Light label" className="max-h-32 max-w-full object-contain p-3" />
               ) : (
                 <>
-                  <svg className="w-8 h-8 text-zinc-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-8 h-8 text-ds-body mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-xs text-zinc-500 font-medium">Click to upload PNG</p>
-                  <p className="text-[10px] text-zinc-600 mt-0.5">Transparent background recommended</p>
+                  <p className="text-xs text-ds-body font-medium">Click to upload PNG</p>
+                  <p className="text-[10px] text-ds-body mt-0.5">Transparent background recommended</p>
                 </>
               )}
               {lightLabel && (
                 <button onClick={(e) => { e.stopPropagation(); setLightLabel(null); }}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-zinc-700 border border-zinc-600 flex items-center justify-center text-zinc-300 hover:text-red-400 transition-colors text-sm leading-none">
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-zinc-700 border border-zinc-600 flex items-center justify-center text-ds-muted hover:text-red-400 transition-colors text-sm leading-none">
                   ×
                 </button>
               )}
@@ -1008,22 +1008,22 @@ function BrandingTab({ userId, email }: { userId: string | null; email: string |
         </div>
 
         {/* Info note */}
-        <div className="bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 mb-5">
+        <div className="bg-brand/8 border border-orange-100 rounded-xl px-4 py-3 mb-5">
           <p className="text-xs text-orange-700 font-semibold">💡 Neck label specs</p>
-          <p className="text-xs text-orange-600 mt-0.5">Upload PNG files with transparent backgrounds. Recommended size: 600×600px or larger. Labels are printed on a 2×2 inch DTF transfer and applied inside the collar during fulfilment.</p>
+          <p className="text-xs text-brand-dark mt-0.5">Upload PNG files with transparent backgrounds. Recommended size: 600×600px or larger. Labels are printed on a 2×2 inch DTF transfer and applied inside the collar during fulfilment.</p>
         </div>
 
         <button onClick={handleSave} disabled={saving || (!darkLabel && !lightLabel)}
-          className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"} disabled:opacity-40 disabled:cursor-not-allowed`}>
+          className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"} disabled:opacity-40 disabled:cursor-not-allowed`}>
           {saving ? "Saving…" : saved ? "✓ Saved!" : "Save branding"}
         </button>
       </div>
 
       {/* Coming soon: more branding options */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-2xl opacity-60">
-        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Coming soon</p>
-        <h3 className="font-black text-zinc-900 mb-1">More branding options</h3>
-        <p className="text-sm text-zinc-500">Hang tags, poly mailer branding, and custom tissue paper coming later this year.</p>
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-2xl opacity-60">
+        <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-1">Coming soon</p>
+        <h3 className="font-semibold text-ds-dark mb-1">More branding options</h3>
+        <p className="text-sm text-ds-body">Hang tags, poly mailer branding, and custom tissue paper coming later this year.</p>
       </div>
     </div>
   );
@@ -1267,16 +1267,16 @@ function PushDesignModal({
         className="bg-white w-full md:rounded-3xl md:max-w-3xl max-h-[96vh] overflow-y-auto shadow-2xl flex flex-col"
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-black/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-3">
             {selected && (
-              <button onClick={() => setSelected(null)} className="text-zinc-400 hover:text-zinc-700 text-sm transition-colors">← Back</button>
+              <button onClick={() => setSelected(null)} className="text-ds-muted hover:text-ds-body text-sm transition-colors">← Back</button>
             )}
-            <h3 className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.03em" }}>
+            <h3 className="font-semibold text-ds-dark text-base" style={{ letterSpacing: "-0.03em" }}>
               {selected ? `Push to store · ${selected.product_name}` : "Choose a design"}
             </h3>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors">✕</button>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-black/[0.05] flex items-center justify-center text-ds-body hover:bg-zinc-200 transition-colors">✕</button>
         </div>
 
         {/* Design picker */}
@@ -1289,9 +1289,9 @@ function PushDesignModal({
             ) : designs.length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-4xl mb-3">🎨</div>
-                <p className="font-bold text-zinc-900 mb-1">No designs saved yet</p>
-                <p className="text-zinc-500 text-sm mb-4">Go to Studio, configure a product and save your design — it&apos;ll appear here.</p>
-                <a href="/studio" className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors inline-block">
+                <p className="font-bold text-ds-dark mb-1">No designs saved yet</p>
+                <p className="text-ds-body text-sm mb-4">Go to Studio, configure a product and save your design — it&apos;ll appear here.</p>
+                <a href="/studio" className="px-5 py-2.5 rounded-full bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors inline-block">
                   Open Studio →
                 </a>
               </div>
@@ -1299,7 +1299,7 @@ function PushDesignModal({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {designs.map((d) => (
                   <button key={d.id} onClick={() => pickDesign(d)}
-                    className="text-left rounded-2xl border-2 border-zinc-100 hover:border-orange-300 hover:bg-orange-50 transition-all overflow-hidden group">
+                    className="text-left rounded-2xl border-2 border-black/[0.06] hover:border-orange-300 hover:bg-brand/8 transition-all overflow-hidden group">
                     <div className="aspect-square flex items-center justify-center relative overflow-hidden"
                       style={{ background: d.color_hex + "22" }}>
                       {d.thumbnail ? (
@@ -1310,9 +1310,9 @@ function PushDesignModal({
                       )}
                     </div>
                     <div className="p-3">
-                      <p className="font-bold text-zinc-900 text-xs group-hover:text-orange-600 transition-colors truncate">{d.product_name}</p>
-                      <p className="text-[10px] text-zinc-400 mt-0.5">{d.color_name} · {d.gsm}</p>
-                      <p className="text-[10px] text-zinc-500 font-bold mt-0.5">Cost ₹{d.blank_price + (d.print_price ?? 0)}</p>
+                      <p className="font-bold text-ds-dark text-xs group-hover:text-brand-dark transition-colors truncate">{d.product_name}</p>
+                      <p className="text-[10px] text-ds-muted mt-0.5">{d.color_name} · {d.gsm}</p>
+                      <p className="text-[10px] text-ds-body font-bold mt-0.5">Cost ₹{d.blank_price + (d.print_price ?? 0)}</p>
                     </div>
                   </button>
                 ))}
@@ -1325,7 +1325,7 @@ function PushDesignModal({
         {selected && (
           <div className="flex flex-col md:flex-row flex-1">
             {/* Left: preview */}
-            <div className="md:w-64 flex-shrink-0 bg-zinc-50 flex flex-col items-center justify-center p-6 gap-4">
+            <div className="md:w-64 flex-shrink-0 bg-ds-light-gray flex flex-col items-center justify-center p-6 gap-4">
               <div className="w-full max-w-[200px]">
                 {imagePreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -1338,8 +1338,8 @@ function PushDesignModal({
                 )}
               </div>
               <div className="text-center">
-                <p className="font-bold text-zinc-900 text-sm">{selected.product_name}</p>
-                <p className="text-xs text-zinc-400">{selected.color_name}</p>
+                <p className="font-bold text-ds-dark text-sm">{selected.product_name}</p>
+                <p className="text-xs text-ds-muted">{selected.color_name}</p>
               </div>
             </div>
 
@@ -1347,32 +1347,32 @@ function PushDesignModal({
             <div className="flex-1 p-6 space-y-5">
               {/* Sizes */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sizes to offer</p>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-2">Sizes to offer</p>
                 {catalog ? (
                   <div className="flex gap-1.5 flex-wrap">
                     {catalog.sizes.map((s) => (
                       <button key={s} onClick={() => toggleSize(s)}
-                        className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                        className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${sizes.includes(s) ? "bg-ds-dark text-white" : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"}`}>
                         {s}
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-zinc-400">Product type not found in catalog</p>
+                  <p className="text-xs text-ds-muted">Product type not found in catalog</p>
                 )}
               </div>
 
               {/* Product photo */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Product photo <span className="text-zinc-400 font-normal normal-case">(optional — overrides design thumbnail)</span></p>
-                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imageFile ? "border-zinc-300 bg-zinc-50" : "border-zinc-200 hover:border-orange-300 hover:bg-orange-50"}`}>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Product photo <span className="text-ds-muted font-normal normal-case">(optional — overrides design thumbnail)</span></p>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${imageFile ? "border-zinc-300 bg-ds-light-gray" : "border-black/[0.06] hover:border-orange-300 hover:bg-brand/8"}`}>
                   <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); }
                     e.target.value = "";
                   }} />
-                  <svg className="w-5 h-5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                  <span className="text-xs text-zinc-500">
+                  <svg className="w-5 h-5 text-ds-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                  <span className="text-xs text-ds-body">
                     {imageFile ? imageFile.name : "Upload a lifestyle or product photo"}
                   </span>
                 </label>
@@ -1380,33 +1380,33 @@ function PushDesignModal({
 
               {/* Description */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Description</p>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Description</p>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)}
                   placeholder="Tell fans about this piece — the story, the collab, the vibe…"
-                  rows={3} className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+                  rows={3} className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
               </div>
 
               {/* Price */}
               <div>
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Retail price (₹)</p>
-                <div className="flex items-center gap-2 mb-2 text-xs text-zinc-400">
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest mb-1">Retail price (₹)</p>
+                <div className="flex items-center gap-2 mb-2 text-xs text-ds-muted">
                   <span>Cost ₹{totalCost} + ₹50 fulfillment</span>
                   <span className="text-zinc-200">·</span>
-                  <span className={`font-black ${margin >= 0 ? "text-green-600" : "text-red-500"}`}>
+                  <span className={`font-semibold ${margin >= 0 ? "text-green-600" : "text-red-500"}`}>
                     {margin >= 0 ? `You keep ₹${margin}/unit` : "Below minimum"}
                   </span>
                 </div>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm">₹</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ds-body font-bold text-sm">₹</span>
                   <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min={totalCost + 50}
-                    className="w-full pl-7 pr-4 py-3 rounded-xl border border-zinc-200 text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
+                    className="w-full pl-7 pr-4 py-3 rounded-xl border border-black/[0.06] text-sm font-bold outline-none focus:border-zinc-900 transition-colors" />
                 </div>
               </div>
 
               {err && <p className="text-red-500 text-xs font-bold">{err}</p>}
 
               <button onClick={handleSubmit} disabled={saving}
-                className="w-full py-4 rounded-2xl bg-zinc-900 text-white font-black text-sm hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                className="w-full py-4 rounded-2xl bg-ds-dark text-white font-semibold text-sm hover:bg-ds-dark2 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                 {saving ? (
                   <><div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" /> Publishing…</>
                 ) : "Publish to store →"}
@@ -1473,19 +1473,19 @@ function PayoutBanner({ userId }: { userId: string | null }) {
 
       <div className="grid grid-cols-3 gap-px bg-emerald-100 mx-5 mb-5 mt-3 rounded-xl overflow-hidden">
         <div className="bg-white px-4 py-3 rounded-l-xl">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Total Earned</p>
-          <p className="text-xl font-black text-zinc-900">{fmt(stats?.totalEarned ?? 0)}</p>
-          <p className="text-[10px] text-zinc-400 mt-0.5">all time</p>
+          <p className="text-[10px] font-bold text-ds-muted uppercase tracking-wider mb-1">Total Earned</p>
+          <p className="text-xl font-semibold text-ds-dark">{fmt(stats?.totalEarned ?? 0)}</p>
+          <p className="text-[10px] text-ds-muted mt-0.5">all time</p>
         </div>
         <div className="bg-white px-4 py-3">
           <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Pending Payout</p>
-          <p className="text-xl font-black text-amber-600">{fmt(stats?.pendingPayout ?? 0)}</p>
-          <p className="text-[10px] text-zinc-400 mt-0.5">will be transferred</p>
+          <p className="text-xl font-semibold text-amber-600">{fmt(stats?.pendingPayout ?? 0)}</p>
+          <p className="text-[10px] text-ds-muted mt-0.5">will be transferred</p>
         </div>
         <div className="bg-white px-4 py-3 rounded-r-xl">
           <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Next Payout</p>
-          <p className="text-base font-black text-emerald-700">{fmtDate(stats?.nextPayoutDate ?? null)}</p>
-          <p className="text-[10px] text-zinc-400 mt-0.5">direct to bank</p>
+          <p className="text-base font-semibold text-emerald-700">{fmtDate(stats?.nextPayoutDate ?? null)}</p>
+          <p className="text-[10px] text-ds-muted mt-0.5">direct to bank</p>
         </div>
       </div>
 
@@ -1661,25 +1661,25 @@ function StoresTab({ userId }: { userId: string | null }) {
   // No store yet — launch CTA
   if (!store && !showCreate) return (
     <div>
-      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>My Store</h2>
-      <div className="bg-zinc-900 rounded-3xl p-10 text-center relative overflow-hidden">
+      <h2 className="text-2xl font-semibold text-ds-dark mb-6" style={{ letterSpacing: "-0.04em" }}>My Store</h2>
+      <div className="bg-ds-dark rounded-3xl p-10 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
         <div className="relative z-10">
           <div className="text-5xl mb-4">🛍️</div>
-          <h3 className="font-black text-white text-xl mb-2" style={{ letterSpacing: "-0.04em" }}>Launch your merch store</h3>
-          <p className="text-zinc-400 text-sm max-w-sm mx-auto mb-6">
+          <h3 className="font-semibold text-white text-xl mb-2" style={{ letterSpacing: "-0.04em" }}>Launch your merch store</h3>
+          <p className="text-ds-muted text-sm max-w-sm mx-auto mb-6">
             Create a public storefront, add your products with custom pricing, and share the link with your fans. We handle print, pack, and ship.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
             {["No inventory", "On-demand fulfillment", "You keep the margin"].map((f) => (
-              <div key={f} className="flex items-center gap-1.5 text-zinc-400 text-xs font-semibold">
+              <div key={f} className="flex items-center gap-1.5 text-ds-muted text-xs font-semibold">
                 <span className="text-green-400">✓</span>{f}
               </div>
             ))}
           </div>
           <button onClick={() => setShowCreate(true)}
-            className="px-8 py-3 rounded-full bg-orange-500 text-white font-black text-sm hover:bg-orange-400 transition-colors">
+            className="px-8 py-3 rounded-full bg-brand text-white font-semibold text-sm hover:bg-brand-dark transition-colors">
             Create your store →
           </button>
         </div>
@@ -1691,42 +1691,42 @@ function StoresTab({ userId }: { userId: string | null }) {
   if (showCreate) return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => setShowCreate(false)} className="text-zinc-400 hover:text-zinc-700 text-sm">← Back</button>
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Create Store</h2>
+        <button onClick={() => setShowCreate(false)} className="text-ds-muted hover:text-ds-body text-sm">← Back</button>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Create Store</h2>
       </div>
       <div className="max-w-md">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Store handle *</label>
-            <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
-              <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50 font-mono">halftone.in/store/</span>
+            <label className="block text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Store handle *</label>
+            <div className="flex items-center border border-black/[0.06] rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+              <span className="px-3 py-2.5 text-ds-muted text-sm border-r border-black/[0.06] bg-ds-light-gray font-mono">halftone.in/store/</span>
               <input value={handle} onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 placeholder="your-name" required pattern="[a-z0-9-]+"
                 className="flex-1 px-3 py-2.5 text-sm font-mono outline-none" />
             </div>
-            <p className="text-xs text-zinc-400 mt-1">Lowercase letters, numbers, hyphens only</p>
+            <p className="text-xs text-ds-muted mt-1">Lowercase letters, numbers, hyphens only</p>
           </div>
           <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Display name *</label>
+            <label className="block text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Display name *</label>
             <input value={artistName} onChange={(e) => setArtistName(e.target.value)} placeholder="Kevin Abstract" required
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors" />
+              className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Bio / description</label>
+            <label className="block text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Bio / description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell your fans what this store is about…" rows={3}
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+              className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Instagram handle</label>
-            <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
-              <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50">@</span>
+            <label className="block text-xs font-bold text-ds-body uppercase tracking-widest mb-1.5">Instagram handle</label>
+            <div className="flex items-center border border-black/[0.06] rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+              <span className="px-3 py-2.5 text-ds-muted text-sm border-r border-black/[0.06] bg-ds-light-gray">@</span>
               <input value={instagram} onChange={(e) => setInstagram(e.target.value.replace("@", ""))} placeholder="yourhandle"
                 className="flex-1 px-3 py-2.5 text-sm outline-none" />
             </div>
           </div>
           {createErr && <p className="text-red-500 text-xs font-bold">{createErr}</p>}
           <button type="submit" disabled={creating}
-            className="w-full py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+            className="w-full py-3 rounded-xl bg-ds-dark text-white font-bold text-sm hover:bg-ds-dark2 disabled:opacity-40 transition-colors">
             {creating ? "Creating…" : "Launch store →"}
           </button>
         </form>
@@ -1750,38 +1750,38 @@ function StoresTab({ userId }: { userId: string | null }) {
       {/* Store header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>{store!.artist_name}</h2>
+          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>{store!.artist_name}</h2>
           <div className="flex items-center gap-2 mt-1">
             <a href={storeUrl} target="_blank" rel="noopener noreferrer"
-              className="text-xs text-orange-500 font-bold hover:underline font-mono">
+              className="text-xs text-brand font-bold hover:underline font-mono">
               /store/{store!.handle} ↗
             </a>
             <button onClick={() => { navigator.clipboard.writeText(storeUrl); }}
-              className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">Copy link</button>
+              className="text-xs text-ds-muted hover:text-ds-body transition-colors">Copy link</button>
           </div>
         </div>
         <button onClick={startEdit}
-          className="px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">
+          className="px-4 py-2 rounded-xl border border-black/[0.06] text-sm font-bold hover:bg-ds-light-gray transition-colors">
           Edit store
         </button>
       </div>
 
       {/* Edit store inline form */}
       {editingStore && (
-        <form onSubmit={handleSaveStore} className="bg-zinc-50 rounded-2xl p-5 mb-6 space-y-3">
-          <h3 className="font-bold text-zinc-900 text-sm">Edit store info</h3>
+        <form onSubmit={handleSaveStore} className="bg-ds-light-gray rounded-2xl p-5 mb-6 space-y-3">
+          <h3 className="font-bold text-ds-dark text-sm">Edit store info</h3>
           <input value={editArtistName} onChange={(e) => setEditArtistName(e.target.value)} placeholder="Display name" required
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors" />
+            className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors" />
           <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Bio / description" rows={2}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
-          <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors bg-white">
-            <span className="px-3 py-2.5 text-zinc-400 text-sm border-r border-zinc-200 bg-zinc-50">@</span>
+            className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors resize-none" />
+          <div className="flex items-center border border-black/[0.06] rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors bg-white">
+            <span className="px-3 py-2.5 text-ds-muted text-sm border-r border-black/[0.06] bg-ds-light-gray">@</span>
             <input value={editInstagram} onChange={(e) => setEditInstagram(e.target.value.replace("@", ""))} placeholder="Instagram handle"
               className="flex-1 px-3 py-2.5 text-sm outline-none" />
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setEditingStore(false)} className="px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold hover:bg-zinc-50 transition-colors">Cancel</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+            <button type="button" onClick={() => setEditingStore(false)} className="px-4 py-2 rounded-xl border border-black/[0.06] text-sm font-bold hover:bg-ds-light-gray transition-colors">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors">
               {saving ? "Saving…" : "Save changes"}
             </button>
           </div>
@@ -1790,22 +1790,22 @@ function StoresTab({ userId }: { userId: string | null }) {
 
       {/* Products section */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-black text-zinc-900" style={{ letterSpacing: "-0.03em" }}>
-          Products <span className="text-zinc-400 font-normal text-sm ml-1">{products.length}</span>
+        <h3 className="font-semibold text-ds-dark" style={{ letterSpacing: "-0.03em" }}>
+          Products <span className="text-ds-muted font-normal text-sm ml-1">{products.length}</span>
         </h3>
         <button onClick={() => setShowAddProduct(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors">
           <span className="text-base leading-none">+</span> Push to store
         </button>
       </div>
 
       {products.length === 0 ? (
-        <div className="border-2 border-dashed border-zinc-200 rounded-2xl p-12 text-center">
+        <div className="border-2 border-dashed border-black/[0.06] rounded-2xl p-12 text-center">
           <div className="text-4xl mb-3">👕</div>
-          <p className="text-zinc-500 text-sm font-semibold mb-1">No products yet</p>
-          <p className="text-zinc-400 text-xs mb-4">Add your first product to start selling</p>
+          <p className="text-ds-body text-sm font-semibold mb-1">No products yet</p>
+          <p className="text-ds-muted text-xs mb-4">Add your first product to start selling</p>
           <button onClick={() => setShowAddProduct(true)}
-            className="px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">
+            className="px-5 py-2.5 rounded-full bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors">
             Push your first design →
           </button>
         </div>
@@ -1818,7 +1818,7 @@ function StoresTab({ userId }: { userId: string | null }) {
             const catalogEntry = STORE_CATALOG.find((c) => c.id === p.product_id);
 
             return (
-              <div key={p.id} className="bg-white rounded-2xl border border-zinc-100 overflow-hidden hover:border-zinc-200 transition-all group flex flex-col">
+              <div key={p.id} className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden hover:border-black/[0.06] transition-all group flex flex-col">
                 {/* Image */}
                 <div className="aspect-square flex items-center justify-center relative overflow-hidden" style={{ background: p.color_hex + "22" }}>
                   <div className="absolute inset-0 opacity-[0.04]"
@@ -1833,11 +1833,11 @@ function StoresTab({ userId }: { userId: string | null }) {
                   {/* Actions overlay */}
                   <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                     <button onClick={() => isEditing ? setEditingProductId(null) : startEditProduct(p)}
-                      className="w-7 h-7 rounded-full bg-white/90 text-zinc-500 hover:text-zinc-900 text-xs flex items-center justify-center shadow-sm transition-colors">
+                      className="w-7 h-7 rounded-full bg-white/90 text-ds-body hover:text-ds-dark text-xs flex items-center justify-center shadow-sm transition-colors">
                       {isEditing ? "✕" : "✏️"}
                     </button>
                     <button onClick={() => removeProduct(p.id)}
-                      className="w-7 h-7 rounded-full bg-white/90 text-zinc-400 hover:text-red-500 hover:bg-white text-xs flex items-center justify-center shadow-sm transition-colors">
+                      className="w-7 h-7 rounded-full bg-white/90 text-ds-muted hover:text-red-500 hover:bg-white text-xs flex items-center justify-center shadow-sm transition-colors">
                       🗑
                     </button>
                   </div>
@@ -1846,28 +1846,28 @@ function StoresTab({ userId }: { userId: string | null }) {
                 {/* Card body */}
                 {isEditing ? (
                   <div className="p-4 space-y-3 flex-1">
-                    <p className="text-xs font-bold text-zinc-900">{p.product_name} · {p.color_name}</p>
+                    <p className="text-xs font-bold text-ds-dark">{p.product_name} · {p.color_name}</p>
 
                     {/* Price */}
                     <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Price (₹)</label>
+                      <label className="block text-[10px] font-bold text-ds-muted uppercase tracking-widest mb-1">Price (₹)</label>
                       <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-xs">₹</span>
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ds-muted text-xs">₹</span>
                         <input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)}
                           min={p.cost_price_inr + 50}
-                          className="w-full pl-6 pr-3 py-2 rounded-lg border border-zinc-200 text-xs font-bold outline-none focus:border-zinc-900 transition-colors" />
+                          className="w-full pl-6 pr-3 py-2 rounded-lg border border-black/[0.06] text-xs font-bold outline-none focus:border-zinc-900 transition-colors" />
                       </div>
-                      <p className="text-[10px] text-zinc-400 mt-0.5">Min ₹{p.cost_price_inr + 50}</p>
+                      <p className="text-[10px] text-ds-muted mt-0.5">Min ₹{p.cost_price_inr + 50}</p>
                     </div>
 
                     {/* Sizes */}
                     {catalogEntry && (
                       <div>
-                        <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Sizes</label>
+                        <label className="block text-[10px] font-bold text-ds-muted uppercase tracking-widest mb-1">Sizes</label>
                         <div className="flex gap-1 flex-wrap">
                           {catalogEntry.sizes.map((s) => (
                             <button key={s} onClick={() => toggleEditSize(s)}
-                              className={`w-8 h-8 rounded-lg text-[10px] font-bold transition-all ${editSizes.includes(s) ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                              className={`w-8 h-8 rounded-lg text-[10px] font-bold transition-all ${editSizes.includes(s) ? "bg-ds-dark text-white" : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"}`}>
                               {s}
                             </button>
                           ))}
@@ -1877,27 +1877,27 @@ function StoresTab({ userId }: { userId: string | null }) {
 
                     {/* Description */}
                     <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Description</label>
+                      <label className="block text-[10px] font-bold text-ds-muted uppercase tracking-widest mb-1">Description</label>
                       <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={2}
                         placeholder="Short product description…"
-                        className="w-full px-2.5 py-2 rounded-lg border border-zinc-200 text-xs outline-none focus:border-zinc-900 transition-colors resize-none" />
+                        className="w-full px-2.5 py-2 rounded-lg border border-black/[0.06] text-xs outline-none focus:border-zinc-900 transition-colors resize-none" />
                     </div>
 
                     {/* Image upload */}
-                    <label className="flex items-center gap-2 p-2 rounded-lg border border-dashed border-zinc-200 hover:border-orange-300 cursor-pointer transition-colors">
+                    <label className="flex items-center gap-2 p-2 rounded-lg border border-dashed border-black/[0.06] hover:border-orange-300 cursor-pointer transition-colors">
                       <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
                         const f = e.target.files?.[0];
                         if (f) { setEditImageFile(f); setEditImagePreview(URL.createObjectURL(f)); }
                         e.target.value = "";
                       }} />
-                      <svg className="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                      <span className="text-[10px] text-zinc-400">
+                      <svg className="w-4 h-4 text-ds-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                      <span className="text-[10px] text-ds-muted">
                         {editImageFile ? `${editImageFile.name}` : "Change product photo"}
                       </span>
                     </label>
 
                     <button onClick={() => saveEditProduct(p.id, p.cost_price_inr, catalogEntry?.sizes ?? p.sizes)} disabled={editSaving}
-                      className="w-full py-2 rounded-xl bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors">
+                      className="w-full py-2 rounded-xl bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors">
                       {editSaving ? "Saving…" : "Save changes"}
                     </button>
                   </div>
@@ -1905,22 +1905,22 @@ function StoresTab({ userId }: { userId: string | null }) {
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex-1 min-w-0 pr-2">
-                        <p className="font-bold text-zinc-900 text-sm truncate">{p.product_name}</p>
-                        <p className="text-xs text-zinc-400">{p.color_name} · {p.print_technique}</p>
+                        <p className="font-bold text-ds-dark text-sm truncate">{p.product_name}</p>
+                        <p className="text-xs text-ds-muted">{p.color_name} · {p.print_technique}</p>
                       </div>
-                      <p className="font-black text-zinc-900 text-sm whitespace-nowrap">₹{p.retail_price_inr}</p>
+                      <p className="font-semibold text-ds-dark text-sm whitespace-nowrap">₹{p.retail_price_inr}</p>
                     </div>
                     {p.description && (
-                      <p className="text-xs text-zinc-500 mt-1 line-clamp-2 leading-relaxed">{p.description}</p>
+                      <p className="text-xs text-ds-body mt-1 line-clamp-2 leading-relaxed">{p.description}</p>
                     )}
                     <div className="flex gap-1 flex-wrap mt-2">
                       {p.sizes.map((s) => (
-                        <span key={s} className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded">{s}</span>
+                        <span key={s} className="text-[10px] font-bold bg-black/[0.05] text-ds-body px-1.5 py-0.5 rounded">{s}</span>
                       ))}
                     </div>
-                    <div className="mt-auto pt-3 border-t border-zinc-100 flex items-center justify-between mt-3">
-                      <span className="text-xs text-zinc-400">Your margin</span>
-                      <span className={`text-xs font-black ${margin > 0 ? "text-green-600" : "text-red-500"}`}>₹{margin} / unit</span>
+                    <div className="mt-auto pt-3 border-t border-black/[0.06] flex items-center justify-between mt-3">
+                      <span className="text-xs text-ds-muted">Your margin</span>
+                      <span className={`text-xs font-semibold ${margin > 0 ? "text-green-600" : "text-red-500"}`}>₹{margin} / unit</span>
                     </div>
                   </div>
                 )}
@@ -1932,13 +1932,13 @@ function StoresTab({ userId }: { userId: string | null }) {
 
       {/* Store link card */}
       {products.length > 0 && (
-        <div className="mt-8 bg-zinc-900 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mt-8 bg-ds-dark rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="text-white font-bold text-sm">Your store is live 🎉</p>
-            <p className="text-zinc-400 text-xs mt-0.5 font-mono">{storeUrl}</p>
+            <p className="text-ds-muted text-xs mt-0.5 font-mono">{storeUrl}</p>
           </div>
           <a href={storeUrl} target="_blank" rel="noopener noreferrer"
-            className="px-5 py-2.5 rounded-full bg-orange-500 text-white text-sm font-bold hover:bg-orange-400 transition-colors whitespace-nowrap">
+            className="px-5 py-2.5 rounded-full bg-brand text-white text-sm font-bold hover:bg-brand-dark transition-colors whitespace-nowrap">
             View store ↗
           </a>
         </div>
@@ -1983,43 +1983,43 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Invoices</h2>
-        <p className="text-xs text-zinc-400">GST tax invoices auto-generated for every order</p>
+        <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Invoices</h2>
+        <p className="text-xs text-ds-muted">GST tax invoices auto-generated for every order</p>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-zinc-400 py-12 justify-center">
+        <div className="flex items-center gap-2 text-sm text-ds-muted py-12 justify-center">
           <div className="w-5 h-5 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
           Loading invoices…
         </div>
       ) : invoices.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-zinc-100 p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-50 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-12 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-ds-light-gray flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="font-bold text-zinc-700 mb-1">No invoices yet</p>
-          <p className="text-sm text-zinc-400">Invoices are generated automatically for every order you place.</p>
+          <p className="font-bold text-ds-body mb-1">No invoices yet</p>
+          <p className="text-sm text-ds-muted">Invoices are generated automatically for every order you place.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-          <div className="hidden sm:grid grid-cols-5 gap-4 px-6 py-3 bg-zinc-50 border-b border-zinc-100">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Invoice #</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Date</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Type</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">Total</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 text-right">Actions</span>
+        <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+          <div className="hidden sm:grid grid-cols-5 gap-4 px-6 py-3 bg-ds-light-gray border-b border-black/[0.06]">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Invoice #</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Date</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Type</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted text-right">Total</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-muted text-right">Actions</span>
           </div>
           <div className="divide-y divide-zinc-100">
             {invoices.map((inv) => (
-              <div key={inv.id} className="grid sm:grid-cols-5 grid-cols-2 gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors items-center">
+              <div key={inv.id} className="grid sm:grid-cols-5 grid-cols-2 gap-4 px-6 py-4 hover:bg-ds-light-gray transition-colors items-center">
                 <div>
-                  <p className="font-bold text-zinc-900 text-sm">{inv.invoice_number}</p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">GST Invoice</p>
+                  <p className="font-bold text-ds-dark text-sm">{inv.invoice_number}</p>
+                  <p className="text-[10px] text-ds-muted mt-0.5">GST Invoice</p>
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-700">
+                  <p className="text-sm text-ds-body">
                     {new Date(inv.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                   </p>
                 </div>
@@ -2027,21 +2027,21 @@ function InvoicesTab({ userId, email }: { userId: string | null; email: string |
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                     inv.type === "monthly"
                       ? "bg-purple-50 text-purple-700"
-                      : "bg-orange-50 text-orange-700"
+                      : "bg-brand/8 text-orange-700"
                   }`}>
                     {inv.type === "monthly" ? "Monthly" : "Per order"}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-zinc-900">{fmt(inv.total)}</p>
-                  <p className="text-[10px] text-zinc-400">incl. GST {fmt(inv.gst_amount)}</p>
+                  <p className="font-semibold text-ds-dark">{fmt(inv.total)}</p>
+                  <p className="text-[10px] text-ds-muted">incl. GST {fmt(inv.gst_amount)}</p>
                 </div>
                 <div className="text-right">
                   <a
                     href={`/invoice/${encodeURIComponent(inv.invoice_number)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -2223,29 +2223,29 @@ function SettingsTab({
     }
   };
 
-  const inputCls = "w-full px-4 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-zinc-400 transition-colors";
+  const inputCls = "w-full px-4 py-2.5 rounded-xl border border-black/[0.06] text-sm text-ds-dark placeholder:text-ds-muted focus:outline-none focus:border-zinc-400 transition-colors";
 
   return (
     <div>
-      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>Account Settings</h2>
+      <h2 className="text-2xl font-semibold text-ds-dark mb-6" style={{ letterSpacing: "-0.04em" }}>Account Settings</h2>
 
       {/* Account info */}
-      <div className="bg-white rounded-2xl border border-zinc-100 divide-y divide-zinc-100 max-w-lg mb-6">
+      <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-zinc-100 max-w-lg mb-6">
         <div className="px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Name</p>
-          <p className="font-bold text-zinc-900">{user?.user_metadata?.name ?? "—"}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-1">Name</p>
+          <p className="font-bold text-ds-dark">{user?.user_metadata?.name ?? "—"}</p>
         </div>
         <div className="px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">Email</p>
-          <p className="font-bold text-zinc-900">{user?.email}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-1">Email</p>
+          <p className="font-bold text-ds-dark">{user?.email}</p>
         </div>
         <div className="px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Password</p>
-          <p className="text-sm text-zinc-500">To reset your password, sign out and use &quot;Forgot password&quot; on the login page.</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-2">Password</p>
+          <p className="text-sm text-ds-body">To reset your password, sign out and use &quot;Forgot password&quot; on the login page.</p>
         </div>
         <div className="px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Support</p>
-          <a href="mailto:hello@halftonelabs.in" className="text-sm font-bold text-orange-500 hover:underline">hello@halftonelabs.in</a>
+          <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-3">Support</p>
+          <a href="mailto:hello@halftonelabs.in" className="text-sm font-bold text-brand hover:underline">hello@halftonelabs.in</a>
         </div>
         <div className="px-6 py-5">
           <button onClick={onSignOut} className="px-5 py-2.5 rounded-full border-2 border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors">
@@ -2255,16 +2255,16 @@ function SettingsTab({
       </div>
 
       {/* Currency preference */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
-            <svg className="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-9 h-9 rounded-xl bg-brand/8 flex items-center justify-center">
+            <svg className="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">Display Currency</h3>
-            <p className="text-xs text-zinc-400">Prices shown site-wide and at checkout</p>
+            <h3 className="font-semibold text-ds-dark">Display Currency</h3>
+            <p className="text-xs text-ds-muted">Prices shown site-wide and at checkout</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -2274,8 +2274,8 @@ function SettingsTab({
               onClick={() => setCurrency(c)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
                 currency === c
-                  ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-zinc-200 text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
+                  ? "border-zinc-900 bg-ds-dark text-white"
+                  : "border-black/[0.06] text-ds-body hover:border-zinc-400 hover:text-ds-dark"
               }`}
             >
               <span>{CURRENCY_META[c].flag}</span>
@@ -2284,14 +2284,14 @@ function SettingsTab({
           ))}
         </div>
         {currency !== "INR" && (
-          <p className="text-xs text-zinc-400 mt-3">
+          <p className="text-xs text-ds-muted mt-3">
             International prices include a 2× margin. GST is not applied at checkout for non-INR orders.
           </p>
         )}
       </div>
 
       {/* Referral Program */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
             <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -2299,33 +2299,33 @@ function SettingsTab({
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">Referral Program</h3>
-            <p className="text-xs text-zinc-400">Share your code — earn 5% store credit on every referral</p>
+            <h3 className="font-semibold text-ds-dark">Referral Program</h3>
+            <p className="text-xs text-ds-muted">Share your code — earn 5% store credit on every referral</p>
           </div>
         </div>
-        <p className="text-sm text-zinc-500 mb-4 leading-relaxed">
-          Share your link with other artists. They get <strong className="text-zinc-800">5% off</strong> their first order — you earn <strong className="text-zinc-800">5% store credit</strong> automatically.
+        <p className="text-sm text-ds-body mb-4 leading-relaxed">
+          Share your link with other artists. They get <strong className="text-ds-dark">5% off</strong> their first order — you earn <strong className="text-ds-dark">5% store credit</strong> automatically.
         </p>
         {referralCode ? (
           <div className="flex gap-2">
-            <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 font-mono text-sm text-zinc-700 truncate">
+            <div className="flex-1 bg-ds-light-gray border border-black/[0.06] rounded-xl px-4 py-2.5 font-mono text-sm text-ds-body truncate">
               halftonelabs.in/studio?ref={referralCode}
             </div>
             <button onClick={copyReferral}
-              className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${referralCopied ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
+              className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${referralCopied ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"}`}>
               {referralCopied ? "Copied!" : "Copy"}
             </button>
           </div>
         ) : (
-          <div className="bg-zinc-50 rounded-xl px-4 py-3 text-sm text-zinc-400">
+          <div className="bg-ds-light-gray rounded-xl px-4 py-3 text-sm text-ds-muted">
             {userId ? "Generating your code…" : "Log in to get your referral code"}
           </div>
         )}
-        <p className="text-xs text-zinc-400 mt-3">Credits are applied automatically after the referred order ships.</p>
+        <p className="text-xs text-ds-muted mt-3">Credits are applied automatically after the referred order ships.</p>
       </div>
 
       {/* GST / Billing Info */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
             <svg className="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -2333,27 +2333,27 @@ function SettingsTab({
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">GST / Billing Details</h3>
-            <p className="text-xs text-zinc-400">Added to all your GST tax invoices</p>
+            <h3 className="font-semibold text-ds-dark">GST / Billing Details</h3>
+            <p className="text-xs text-ds-muted">Added to all your GST tax invoices</p>
           </div>
         </div>
         <div className="flex flex-col gap-3">
           <div>
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Company / Business name <span className="text-zinc-300 normal-case">(optional)</span></label>
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Company / Business name <span className="text-ds-muted normal-case">(optional)</span></label>
             <input className={inputCls} placeholder="e.g. Acme Designs Pvt. Ltd." value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
           </div>
           <div>
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">GSTIN <span className="text-zinc-300 normal-case">(optional — 15 char GST number)</span></label>
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">GSTIN <span className="text-ds-muted normal-case">(optional — 15 char GST number)</span></label>
             <input className={inputCls} placeholder="e.g. 27XXXXX" value={gstNumber} onChange={(e) => setGstNumber(e.target.value.toUpperCase())} maxLength={15} />
           </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            If you have a GST number, it will appear on your invoices. Invoices are auto-generated for every order and available in the <strong className="text-zinc-600">Invoices</strong> tab.
+          <p className="text-xs text-ds-muted leading-relaxed">
+            If you have a GST number, it will appear on your invoices. Invoices are auto-generated for every order and available in the <strong className="text-ds-body">Invoices</strong> tab.
           </p>
         </div>
       </div>
 
       {/* Bank Account for Payouts */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg mb-6">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
             <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -2361,8 +2361,8 @@ function SettingsTab({
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">Bank Account for Payouts</h3>
-            <p className="text-xs text-zinc-400">Store sale earnings are transferred here every 2 weeks</p>
+            <h3 className="font-semibold text-ds-dark">Bank Account for Payouts</h3>
+            <p className="text-xs text-ds-muted">Store sale earnings are transferred here every 2 weeks</p>
           </div>
         </div>
 
@@ -2379,51 +2379,51 @@ function SettingsTab({
         )}
 
         {loadingBank ? (
-          <div className="flex items-center gap-2 text-sm text-zinc-400 py-4">
+          <div className="flex items-center gap-2 text-sm text-ds-muted py-4">
             <div className="w-4 h-4 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
             Loading bank details…
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             <div>
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Holder Name *</label>
+              <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Account Holder Name *</label>
               <input className={inputCls} placeholder="As per bank records" value={bankAccount.accountHolderName}
                 onChange={(e) => setBankAccount({ ...bankAccount, accountHolderName: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Number *</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Account Number *</label>
                 <input className={inputCls} type="password" placeholder="Enter account number" value={bankAccount.accountNumber}
                   onChange={(e) => setBankAccount({ ...bankAccount, accountNumber: e.target.value })} autoComplete="off" />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Confirm Account No. *</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Confirm Account No. *</label>
                 <input className={inputCls} placeholder="Re-enter account number" value={bankAccount.confirmAccountNumber}
                   onChange={(e) => setBankAccount({ ...bankAccount, confirmAccountNumber: e.target.value })} autoComplete="off" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">IFSC Code *</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">IFSC Code *</label>
                 <input className={inputCls} placeholder="e.g. HDFC0001234" value={bankAccount.ifscCode}
                   onChange={(e) => setBankAccount({ ...bankAccount, ifscCode: e.target.value.toUpperCase() })} maxLength={11} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Bank Name *</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Bank Name *</label>
                 <input className={inputCls} placeholder="e.g. HDFC Bank" value={bankAccount.bankName}
                   onChange={(e) => setBankAccount({ ...bankAccount, bankName: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Account Type</label>
+              <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Account Type</label>
               <div className="flex gap-2">
                 {["savings", "current"].map((t) => (
                   <button key={t} type="button"
                     onClick={() => setBankAccount({ ...bankAccount, accountType: t })}
                     className={`px-4 py-2 rounded-xl border text-sm font-bold capitalize transition-all ${
                       bankAccount.accountType === t
-                        ? "border-zinc-900 bg-zinc-900 text-white"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-400"
+                        ? "border-zinc-900 bg-ds-dark text-white"
+                        : "border-black/[0.06] text-ds-body hover:border-zinc-400"
                     }`}>
                     {t}
                   </button>
@@ -2433,11 +2433,11 @@ function SettingsTab({
             {bankError && <p className="text-red-500 text-xs font-semibold">{bankError}</p>}
             <button onClick={handleSaveBank} disabled={bankSaving}
               className={`mt-1 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
-                bankSaved ? "bg-emerald-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"
+                bankSaved ? "bg-emerald-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"
               } disabled:opacity-50`}>
               {bankSaving ? "Saving…" : bankSaved ? "✓ Bank account saved!" : bankMasked ? "Update bank account" : "Save bank account"}
             </button>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-ds-muted leading-relaxed">
               Your bank details are stored securely and used only for transferring your store earnings. We never share this information.
             </p>
           </div>
@@ -2445,7 +2445,7 @@ function SettingsTab({
       </div>
 
       {/* Default shipping address */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 max-w-lg">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
             <svg className="w-4.5 h-4.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -2454,13 +2454,13 @@ function SettingsTab({
             </svg>
           </div>
           <div>
-            <h3 className="font-black text-zinc-900">Default Shipping Address</h3>
-            <p className="text-xs text-zinc-400">Pre-filled at checkout for faster ordering</p>
+            <h3 className="font-semibold text-ds-dark">Default Shipping Address</h3>
+            <p className="text-xs text-ds-muted">Pre-filled at checkout for faster ordering</p>
           </div>
         </div>
 
         {loadingAddr ? (
-          <div className="flex items-center gap-2 text-sm text-zinc-400 py-4">
+          <div className="flex items-center gap-2 text-sm text-ds-muted py-4">
             <div className="w-4 h-4 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
             Loading address…
           </div>
@@ -2468,38 +2468,38 @@ function SettingsTab({
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Full name</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Full name</label>
                 <input className={inputCls} placeholder="Your name" value={addr.name} onChange={(e) => setAddr({ ...addr, name: e.target.value })} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Phone</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Phone</label>
                 <input className={inputCls} placeholder="+91 98765 43210" value={addr.phone} onChange={(e) => setAddr({ ...addr, phone: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Address line 1</label>
+              <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Address line 1</label>
               <input className={inputCls} placeholder="Flat / House no, Building" value={addr.address_line1} onChange={(e) => setAddr({ ...addr, address_line1: e.target.value })} />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Address line 2 <span className="text-zinc-300 normal-case">(optional)</span></label>
+              <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Address line 2 <span className="text-ds-muted normal-case">(optional)</span></label>
               <input className={inputCls} placeholder="Street, Area, Landmark" value={addr.address_line2} onChange={(e) => setAddr({ ...addr, address_line2: e.target.value })} />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">City</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">City</label>
                 <input className={inputCls} placeholder="Mumbai" value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">State</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">State</label>
                 <input className={inputCls} placeholder="Maharashtra" value={addr.state} onChange={(e) => setAddr({ ...addr, state: e.target.value })} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">PIN</label>
+                <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">PIN</label>
                 <input className={inputCls} placeholder="400001" value={addr.pin} onChange={(e) => setAddr({ ...addr, pin: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Country</label>
+              <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Country</label>
               <select className={inputCls} value={addr.country} onChange={(e) => setAddr({ ...addr, country: e.target.value })}>
                 <option value="IN">India</option>
                 <option value="US">United States</option>
@@ -2510,7 +2510,7 @@ function SettingsTab({
               </select>
             </div>
             <button onClick={handleSaveAddr} disabled={saving}
-              className={`mt-1 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"} disabled:opacity-50`}>
+              className={`mt-1 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${saved ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"} disabled:opacity-50`}>
               {saving ? "Saving…" : saved ? "✓ Address saved!" : "Save default address"}
             </button>
           </div>
@@ -2617,10 +2617,10 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+      <div className="min-h-screen flex items-center justify-center bg-ds-light-gray">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-          <p className="text-sm text-zinc-400 font-medium">Loading your account…</p>
+          <p className="text-sm text-ds-muted font-medium">Loading your account…</p>
         </div>
       </div>
     );
@@ -2629,44 +2629,44 @@ export default function AccountPage() {
   const initials = (user?.user_metadata?.name ?? user?.email ?? "?").slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex">
+    <div className="min-h-screen bg-ds-light-gray flex">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full z-40 w-64 bg-white border-r border-zinc-100 flex flex-col transition-transform duration-300
+      <aside className={`fixed top-0 left-0 h-full z-40 w-64 bg-white border-r border-black/[0.06] flex flex-col transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:flex`}>
 
         {/* Logo */}
-        <div className="px-6 h-16 flex items-center border-b border-zinc-100">
-          <Link href="/" className="text-base font-black text-zinc-900" style={{ letterSpacing: "-0.05em" }}>
+        <div className="px-6 h-16 flex items-center border-b border-black/[0.06]">
+          <Link href="/" className="text-base font-semibold text-ds-dark" style={{ letterSpacing: "-0.05em" }}>
             Halftone Labs
           </Link>
         </div>
 
         {/* Org / context switcher */}
-        <div className="px-3 py-2 border-b border-zinc-100 relative">
+        <div className="px-3 py-2 border-b border-black/[0.06] relative">
           <button
             onClick={() => setShowOrgSwitcher((v) => !v)}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-zinc-50 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-ds-light-gray transition-colors"
           >
             {activeOrg ? (
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[10px] font-semibold flex-shrink-0">
                 {activeOrg.name.slice(0, 2).toUpperCase()}
               </div>
             ) : (
-              <div className="w-6 h-6 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 flex-shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-black/[0.05] flex items-center justify-center text-ds-muted flex-shrink-0">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
             )}
-            <span className="flex-1 text-left text-xs font-bold text-zinc-700 truncate">
+            <span className="flex-1 text-left text-xs font-bold text-ds-body truncate">
               {activeOrg ? activeOrg.name : "Personal"}
             </span>
-            <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5 text-ds-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
             </svg>
           </button>
@@ -2679,42 +2679,42 @@ export default function AccountPage() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -4 }}
                 transition={{ duration: 0.12 }}
-                className="absolute left-3 right-3 top-full mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 overflow-hidden"
+                className="absolute left-3 right-3 top-full mt-1 bg-white border border-black/[0.06] rounded-xl shadow-lg z-50 overflow-hidden"
               >
                 {/* Personal */}
                 <button
                   onClick={() => { setActiveOrg(null); setShowOrgSwitcher(false); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-zinc-50 ${!activeOrg ? "bg-zinc-50 text-zinc-900" : "text-zinc-600"}`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-ds-light-gray ${!activeOrg ? "bg-ds-light-gray text-ds-dark" : "text-ds-body"}`}
                 >
                   <div className="w-5 h-5 rounded-md bg-zinc-200 flex items-center justify-center">
-                    <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3 h-3 text-ds-body" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   Personal
-                  {!activeOrg && <span className="ml-auto text-[10px] text-zinc-400">active</span>}
+                  {!activeOrg && <span className="ml-auto text-[10px] text-ds-muted">active</span>}
                 </button>
                 {/* Orgs */}
                 {userOrgs.map((org) => (
                   <button key={org.id}
                     onClick={() => { setActiveOrg(org); setShowOrgSwitcher(false); setActiveTab("dashboard"); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-zinc-50 ${activeOrg?.id === org.id ? "bg-zinc-50 text-zinc-900" : "text-zinc-600"}`}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold transition-colors hover:bg-ds-light-gray ${activeOrg?.id === org.id ? "bg-ds-light-gray text-ds-dark" : "text-ds-body"}`}
                   >
-                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-[9px] font-black">
+                    <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-[9px] font-semibold">
                       {org.name.slice(0, 2).toUpperCase()}
                     </div>
                     <span className="flex-1 truncate text-left">{org.name}</span>
-                    <span className="text-[10px] font-normal text-zinc-400 capitalize">{org.role}</span>
-                    {activeOrg?.id === org.id && <span className="text-[10px] text-zinc-400">active</span>}
+                    <span className="text-[10px] font-normal text-ds-muted capitalize">{org.role}</span>
+                    {activeOrg?.id === org.id && <span className="text-[10px] text-ds-muted">active</span>}
                   </button>
                 ))}
                 {/* Create new org */}
-                <div className="border-t border-zinc-100">
+                <div className="border-t border-black/[0.06]">
                   <button
                     onClick={() => { setShowCreateOrg(true); setShowOrgSwitcher(false); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-violet-600 hover:bg-violet-50 transition-colors"
                   >
-                    <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center text-violet-500 text-xs font-black">+</div>
+                    <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center text-violet-500 text-xs font-semibold">+</div>
                     New organization
                   </button>
                 </div>
@@ -2730,13 +2730,13 @@ export default function AccountPage() {
               key={item.id}
               onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-colors ${
-                activeTab === item.id ? "bg-zinc-900 text-white" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                activeTab === item.id ? "bg-ds-dark text-white" : "text-ds-body hover:bg-black/[0.05] hover:text-ds-dark"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.badge && (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600 uppercase tracking-wider">
+                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-brand-dark uppercase tracking-wider">
                   {item.badge}
                 </span>
               )}
@@ -2745,14 +2745,14 @@ export default function AccountPage() {
         </nav>
 
         {/* User card */}
-        <div className="px-4 py-4 border-t border-zinc-100">
+        <div className="px-4 py-4 border-t border-black/[0.06]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-sm font-black flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-zinc-900 truncate">{user?.user_metadata?.name ?? "Account"}</p>
-              <p className="text-[10px] text-zinc-400 truncate">{user?.email}</p>
+              <p className="text-xs font-bold text-ds-dark truncate">{user?.user_metadata?.name ?? "Account"}</p>
+              <p className="text-[10px] text-ds-muted truncate">{user?.email}</p>
             </div>
           </div>
         </div>
@@ -2761,17 +2761,17 @@ export default function AccountPage() {
       {/* Main content */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="h-16 bg-white border-b border-zinc-100 px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-16 bg-white border-b border-black/[0.06] px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
-              <svg className="w-5 h-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden p-1.5 rounded-lg hover:bg-black/[0.05] transition-colors">
+              <svg className="w-5 h-5 text-ds-body" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="font-black text-zinc-900 capitalize flex items-center gap-2">
+            <h1 className="font-semibold text-ds-dark capitalize flex items-center gap-2">
               {activeTab === "dashboard" && activeOrg ? (
                 <span className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[9px] font-black">
+                  <span className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-[9px] font-semibold">
                     {activeOrg.name.slice(0, 2).toUpperCase()}
                   </span>
                   {activeOrg.name}
@@ -2784,7 +2784,7 @@ export default function AccountPage() {
 
           <div className="flex items-center gap-3">
             <Link href="/studio"
-              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition-colors">
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand text-white text-xs font-bold hover:bg-orange-600 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
@@ -2793,18 +2793,18 @@ export default function AccountPage() {
 
             {/* Cart icon */}
             <button onClick={() => setCartOpen(true)}
-              className="relative p-2 rounded-full hover:bg-zinc-100 transition-colors">
-              <svg className="w-5 h-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              className="relative p-2 rounded-full hover:bg-black/[0.05] transition-colors">
+              <svg className="w-5 h-5 text-ds-body" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-orange-500 text-white text-[10px] font-black flex items-center justify-center px-1 leading-none">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center px-1 leading-none">
                   {count}
                 </span>
               )}
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-black">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold">
               {initials}
             </div>
           </div>
@@ -2818,34 +2818,34 @@ export default function AccountPage() {
               onClick={(e) => { if (e.target === e.currentTarget) setShowCreateOrg(false); }}>
               <motion.div initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
                 className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-                <h3 className="text-lg font-black text-zinc-900 mb-1" style={{ letterSpacing: "-0.04em" }}>Create Organization</h3>
-                <p className="text-xs text-zinc-400 mb-5">For labels, agencies, festivals — manage multiple stores from one dashboard.</p>
+                <h3 className="text-lg font-semibold text-ds-dark mb-1" style={{ letterSpacing: "-0.04em" }}>Create Organization</h3>
+                <p className="text-xs text-ds-muted mb-5">For labels, agencies, festivals — manage multiple stores from one dashboard.</p>
                 <form onSubmit={handleCreateOrg} className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Organization name *</label>
-                    <input className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors"
+                    <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Organization name *</label>
+                    <input className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors"
                       placeholder="Gully Gang" value={newOrgName} required
                       onChange={(e) => { setNewOrgName(e.target.value); setNewOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-")); }} />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">URL handle *</label>
-                    <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
-                      <span className="px-3 py-2.5 text-zinc-400 text-xs border-r border-zinc-200 bg-zinc-50 font-mono whitespace-nowrap">halftonelabs.in/org/</span>
+                    <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">URL handle *</label>
+                    <div className="flex items-center border border-black/[0.06] rounded-xl overflow-hidden focus-within:border-zinc-900 transition-colors">
+                      <span className="px-3 py-2.5 text-ds-muted text-xs border-r border-black/[0.06] bg-ds-light-gray font-mono whitespace-nowrap">halftonelabs.in/org/</span>
                       <input className="flex-1 px-3 py-2.5 text-sm font-mono outline-none"
                         placeholder="gully-gang" value={newOrgSlug} required
                         onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} />
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Description</label>
-                    <textarea className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors resize-none"
+                    <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Description</label>
+                    <textarea className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors resize-none"
                       rows={2} placeholder="India's premier hip-hop label" value={newOrgDesc}
                       onChange={(e) => setNewOrgDesc(e.target.value)} />
                   </div>
                   {createOrgError && <p className="text-xs text-red-500 font-semibold">{createOrgError}</p>}
                   <div className="flex gap-2 pt-1">
                     <button type="button" onClick={() => setShowCreateOrg(false)}
-                      className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
+                      className="flex-1 py-2.5 rounded-xl border border-black/[0.06] text-sm font-bold text-ds-body hover:bg-ds-light-gray transition-colors">
                       Cancel
                     </button>
                     <button type="submit" disabled={creatingOrg}

@@ -10,16 +10,16 @@ import { useCurrency } from "@/lib/currency-context";
 // ── Breadcrumb ──────────────────────────────────────────────────────────────
 function Breadcrumb() {
   return (
-    <nav className="flex items-center gap-2 text-sm text-zinc-400 mb-8">
-      <Link href="/" className="hover:text-zinc-700 transition-colors">Home</Link>
+    <nav className="flex items-center gap-2 text-sm text-ds-muted mb-8">
+      <Link href="/" className="hover:text-ds-body transition-colors">Home</Link>
       <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
       </svg>
-      <Link href="/products" className="hover:text-zinc-700 transition-colors">Products</Link>
+      <Link href="/products" className="hover:text-ds-body transition-colors">Products</Link>
       <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
       </svg>
-      <span className="text-zinc-800 font-semibold">Cart</span>
+      <span className="text-ds-dark font-semibold">Cart</span>
     </nav>
   );
 }
@@ -27,16 +27,16 @@ function Breadcrumb() {
 // ── Qty stepper ─────────────────────────────────────────────────────────────
 function QtyStepper({ qty, onChange }: { qty: number; onChange: (q: number) => void }) {
   return (
-    <div className="flex items-center gap-1 bg-zinc-100 rounded-xl p-1">
+    <div className="flex items-center gap-1 bg-black/[0.05] rounded-xl p-1">
       <button
         onClick={() => onChange(qty - 1)}
         disabled={qty <= 1}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-white hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-bold"
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-ds-body hover:bg-white hover:text-ds-dark disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-bold"
       >−</button>
-      <span className="w-6 text-center text-sm font-bold text-zinc-800">{qty}</span>
+      <span className="w-6 text-center text-sm font-bold text-ds-dark">{qty}</span>
       <button
         onClick={() => onChange(qty + 1)}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-white hover:text-zinc-900 transition-all text-sm font-bold"
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-ds-body hover:bg-white hover:text-ds-dark transition-all text-sm font-bold"
       >+</button>
     </div>
   );
@@ -61,22 +61,22 @@ export default function CartPage() {
   // ── Empty state ─────────────────────────────────────────────────────────
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f8f7f5] flex flex-col items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 bg-zinc-100 rounded-3xl flex items-center justify-center mb-6">
-          <svg className="w-9 h-9 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-20 h-20 bg-black/[0.05] rounded-3xl flex items-center justify-center mb-6">
+          <svg className="w-9 h-9 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-black mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
-        <p className="text-zinc-400 text-sm mb-8 max-w-xs">Head to the studio to design your merch, or browse products to get started.</p>
+        <h1 className="text-2xl font-semibold mb-2" style={{ letterSpacing: "-0.04em" }}>Your cart is empty</h1>
+        <p className="text-ds-muted text-sm mb-8 max-w-xs">Head to the studio to design your merch, or browse products to get started.</p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Link href="/studio">
-            <button className="px-6 py-3 rounded-2xl bg-orange-500 text-white font-black text-sm hover:bg-orange-600 transition-colors">
+            <button className="px-6 py-3 rounded-2xl bg-brand text-white font-semibold text-sm hover:bg-orange-600 transition-colors">
               Open Studio →
             </button>
           </Link>
           <Link href="/products">
-            <button className="px-6 py-3 rounded-2xl border-2 border-zinc-200 text-zinc-700 font-bold text-sm hover:bg-white transition-colors">
+            <button className="px-6 py-3 rounded-2xl border-2 border-black/[0.06] text-ds-body font-bold text-sm hover:bg-white transition-colors">
               Browse products
             </button>
           </Link>
@@ -86,14 +86,14 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f5] pt-20">
+    <div className="min-h-screen bg-white pt-20">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <Breadcrumb />
 
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-black" style={{ letterSpacing: "-0.04em" }}>
+          <h1 className="text-3xl font-semibold" style={{ letterSpacing: "-0.04em" }}>
             Your cart
-            <span className="ml-3 text-lg font-semibold text-zinc-400">
+            <span className="ml-3 text-lg font-semibold text-ds-muted">
               ({items.reduce((s, i) => s + i.qty, 0)} {items.reduce((s, i) => s + i.qty, 0) === 1 ? "item" : "items"})
             </span>
           </h1>
@@ -117,7 +117,7 @@ export default function CartPage() {
                     animate={{ opacity: removingId === item.cartId ? 0 : 1, y: 0, scale: removingId === item.cartId ? 0.96 : 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.97 }}
                     transition={{ duration: 0.25 }}
-                    className="bg-white rounded-2xl border border-zinc-100 p-5"
+                    className="bg-white rounded-2xl border border-black/[0.06] p-5"
                   >
                     <div className="flex gap-4">
                       {/* Mockup thumbnails */}
@@ -129,7 +129,7 @@ export default function CartPage() {
                           {item.thumbnail
                             // eslint-disable-next-line @next/next/no-img-element
                             ? <img src={item.thumbnail} alt="Front" className="w-full h-full object-contain" />
-                            : <span className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wide">Front</span>
+                            : <span className="text-[9px] font-semibold text-ds-muted uppercase tracking-wide">Front</span>
                           }
                         </div>
                         {hasBoth && (
@@ -147,20 +147,20 @@ export default function CartPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="font-black text-base leading-tight" style={{ letterSpacing: "-0.02em" }}>
+                            <p className="font-semibold text-base leading-tight" style={{ letterSpacing: "-0.02em" }}>
                               {item.productName}
                             </p>
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
                               {/* Color swatch + name */}
-                              <span className="flex items-center gap-1 text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                              <span className="flex items-center gap-1 text-xs text-ds-body bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                                 <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: item.colorHex }} />
                                 {item.color}
                               </span>
-                              <span className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                              <span className="text-xs text-ds-body bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                                 Size {item.size}
                               </span>
                               {item.gsm && (
-                                <span className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                                <span className="text-xs text-ds-body bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                                   {item.gsm} GSM
                                 </span>
                               )}
@@ -169,7 +169,7 @@ export default function CartPage() {
                           {/* Remove */}
                           <button
                             onClick={() => handleRemove(item.cartId)}
-                            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-zinc-300 hover:text-red-400 hover:bg-red-50 transition-colors"
+                            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-ds-muted hover:text-red-400 hover:bg-red-50 transition-colors"
                             aria-label="Remove item"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -181,23 +181,23 @@ export default function CartPage() {
                         {/* Print info */}
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {item.side !== "none" && (
-                            <span className="text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 rounded-full px-2 py-0.5">
+                            <span className="text-xs font-semibold text-brand-dark bg-orange-50 border border-orange-100 rounded-full px-2 py-0.5">
                               {item.printTechnique} ·{" "}
                               {item.side === "both" ? "Front + Back" : item.side === "front" ? "Front" : "Back"}
                             </span>
                           )}
                           {item.printTier && (
-                            <span className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                            <span className="text-xs text-ds-body bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                               {item.printTier}
                             </span>
                           )}
                           {item.neckLabel && (
-                            <span className="text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                            <span className="text-xs text-ds-body bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                               Neck label
                             </span>
                           )}
                           {item.side === "none" && (
-                            <span className="text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-full px-2 py-0.5">
+                            <span className="text-xs text-ds-muted bg-ds-light-gray border border-black/[0.06] rounded-full px-2 py-0.5">
                               Blank (no print)
                             </span>
                           )}
@@ -207,9 +207,9 @@ export default function CartPage() {
                         <div className="mt-3 flex items-center justify-between">
                           <QtyStepper qty={item.qty} onChange={(q) => updateQty(item.cartId, q)} />
                           <div className="text-right">
-                            <p className="font-black text-base">{fmt(lineTotal)}</p>
+                            <p className="font-semibold text-base">{fmt(lineTotal)}</p>
                             {item.qty > 1 && (
-                              <p className="text-xs text-zinc-400">{fmt((item.blankPrice + item.printPrice))} each</p>
+                              <p className="text-xs text-ds-muted">{fmt((item.blankPrice + item.printPrice))} each</p>
                             )}
                           </div>
                         </div>
@@ -222,7 +222,7 @@ export default function CartPage() {
 
             {/* Continue shopping */}
             <Link href="/products" className="self-start">
-              <button className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-700 transition-colors mt-1">
+              <button className="flex items-center gap-1.5 text-sm text-ds-muted hover:text-ds-body transition-colors mt-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -233,61 +233,61 @@ export default function CartPage() {
 
           {/* ── Right: Summary ───────────────────────────────────────────── */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-zinc-100 p-6 sticky top-24">
-              <h2 className="font-black text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Order summary</h2>
+            <div className="bg-white rounded-2xl border border-black/[0.06] p-6 sticky top-24">
+              <h2 className="font-semibold text-lg mb-5" style={{ letterSpacing: "-0.03em" }}>Order summary</h2>
 
               <div className="flex flex-col gap-2.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Products</span>
+                  <span className="text-ds-body">Products</span>
                   <span>{fmt(itemsSubtotal)}</span>
                 </div>
                 {printSubtotal > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Customization</span>
+                    <span className="text-ds-body">Customization</span>
                     <span>{fmt(printSubtotal)}</span>
                   </div>
                 )}
                 {neckLabelSubtotal > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Neck labels</span>
+                    <span className="text-ds-body">Neck labels</span>
                     <span>{fmt(neckLabelSubtotal)}</span>
                   </div>
                 )}
                 {isINR && (
-                  <div className="flex justify-between text-zinc-400">
+                  <div className="flex justify-between text-ds-muted">
                     <span>GST (5%)</span>
                     <span>{fmt(gst)}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-black text-lg pt-3 mt-1 border-t border-zinc-100">
+                <div className="flex justify-between font-semibold text-lg pt-3 mt-1 border-t border-black/[0.06]">
                   <span>Subtotal</span>
                   <span>{fmt(grandTotal)}</span>
                 </div>
-                <p className="text-xs text-zinc-400 -mt-1">Shipping calculated at checkout</p>
+                <p className="text-xs text-ds-muted -mt-1">Shipping calculated at checkout</p>
               </div>
 
               <button
                 onClick={() => router.push("/checkout")}
-                className="w-full mt-6 py-4 rounded-2xl bg-orange-500 text-white font-black text-base hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-6 py-4 rounded-2xl bg-brand text-white font-semibold text-base hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
               >
                 Proceed to Checkout →
               </button>
 
               {/* Trust signals */}
               <div className="mt-4 flex flex-col gap-2.5">
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <div className="flex items-center gap-2 text-xs text-ds-muted">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   Secured by Razorpay
                 </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <div className="flex items-center gap-2 text-xs text-ds-muted">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Every item made to order — MOQ 1
                 </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <div className="flex items-center gap-2 text-xs text-ds-muted">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
