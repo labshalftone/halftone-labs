@@ -2,6 +2,7 @@
 // No "use client" — plain data module usable in server and client components.
 
 import type { ProductKey } from "@/components/SizeGuide";
+import type { PlanKey } from "@/lib/plans";
 
 export const PRINT_TIERS = [
   { label: '5×5"',     sqin: 25,    price: 120 },
@@ -61,6 +62,7 @@ export const PRODUCTS = [
     description:
       "A clean, versatile tee engineered for everyday wear and bold graphics. The 180 GSM combed ring-spun cotton delivers a crisp, premium hand-feel that holds our DTG prints with exceptional clarity. Slightly tapered for a flattering silhouette without sacrificing comfort.",
     sizeGuideKey: "regular" as ProductKey,
+    planRequired: undefined as PlanKey | undefined,
   },
   {
     id: "oversized-tee-sj",
@@ -91,6 +93,7 @@ export const PRODUCTS = [
     description:
       "A heavier, relaxed silhouette with the structure to carry statement graphics. The 220 GSM single jersey construction gives it the body you want without the stiffness — perfect for oversized fits that actually look intentional.",
     sizeGuideKey: "oversized-sj" as ProductKey,
+    planRequired: undefined as PlanKey | undefined,
   },
   {
     id: "oversized-tee-ft",
@@ -126,6 +129,7 @@ export const PRODUCTS = [
     description:
       "The premium heavyweight in our lineup. 240 GSM french terry gives you a looped interior for warmth, breathability, and a supple drape that gets better with every wash. Drop-shoulder cut with a relaxed boxy fall.",
     sizeGuideKey: "oversized-ft" as ProductKey,
+    planRequired: undefined as PlanKey | undefined,
   },
   {
     id: "baby-tee",
@@ -161,6 +165,79 @@ export const PRODUCTS = [
     description:
       "Cut short and fitted through the body — designed specifically for a women's silhouette. The 180 GSM combed cotton keeps it lightweight and breathable while the snug fit makes it a canvas for bold, expressive prints.",
     sizeGuideKey: "baby" as ProductKey,
+    planRequired: undefined as PlanKey | undefined,
+  },
+  {
+    id: "hoodie",
+    name: "Hoodie",
+    gsm: "320 GSM",
+    spec: "80% cotton, 20% polyester, fleece lined",
+    fit: "Relaxed unisex fit, kangaroo pocket, adjustable drawstring",
+    blankPrice: 900,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    colors: [
+      {
+        name: "Black", hex: "#111111",
+        mockupFront: "/mockups/hoodie/Mannequin_Image1.png",
+        mockupBack:  "/mockups/hoodie/Mannequin_Image2.png",
+      },
+      {
+        name: "White", hex: "#FFFFFF", border: true,
+        mockupFront: "/mockups/hoodie/Mannequin_Image3.png",
+        mockupBack:  "/mockups/hoodie/Mannequin_Image4.png",
+      },
+      {
+        name: "Navy", hex: "#1B2A4A",
+        mockupFront: "/mockups/hoodie/Mannequin_Image5.png",
+        mockupBack:  "/mockups/hoodie/Mannequin_Image6.png",
+      },
+    ],
+    bulkTiers: [
+      { qty: "50–99",   priceInr: 799 },
+      { qty: "100–249", priceInr: 699 },
+      { qty: "250+",    priceInr: 599 },
+    ],
+    tag: "Scale+" as string | null,
+    description:
+      "A premium 320 GSM fleece hoodie built for streetwear drops and cold-season releases. The heavy cotton-poly blend gives it the weight and structure that makes a hoodie feel like an investment piece.",
+    sizeGuideKey: "regular" as ProductKey,
+    planRequired: "scale" as PlanKey | undefined,
+  },
+  {
+    id: "waffle-tee",
+    name: "Waffle Tee",
+    gsm: "200 GSM",
+    spec: "100% combed cotton, waffle-knit texture",
+    fit: "Relaxed fit, textured surface",
+    blankPrice: 550,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    colors: [
+      {
+        name: "Ecru", hex: "#F5F0E8", border: true,
+        mockupFront: "/mockups/waffle-tee/Mannequin_Image1.png",
+        mockupBack:  "/mockups/waffle-tee/Mannequin_Image2.png",
+      },
+      {
+        name: "Black", hex: "#111111",
+        mockupFront: "/mockups/waffle-tee/Mannequin_Image3.png",
+        mockupBack:  "/mockups/waffle-tee/Mannequin_Image4.png",
+      },
+      {
+        name: "Slate", hex: "#64748B",
+        mockupFront: "/mockups/waffle-tee/Mannequin_Image5.png",
+        mockupBack:  "/mockups/waffle-tee/Mannequin_Image6.png",
+      },
+    ],
+    bulkTiers: [
+      { qty: "50–99",   priceInr: 499 },
+      { qty: "100–249", priceInr: 449 },
+      { qty: "250+",    priceInr: 399 },
+    ],
+    tag: "Scale+" as string | null,
+    description:
+      "A distinctive textured tee with a waffle-knit surface that gives prints a unique, tactile feel. Perfect for elevated basics collections and brands that want something beyond standard jersey.",
+    sizeGuideKey: "regular" as ProductKey,
+    planRequired: "scale" as PlanKey | undefined,
   },
 ];
 

@@ -9,6 +9,7 @@ import {
   ArrowRight,
   ChevronLeft,
   Check,
+  Lock,
   Music2,
   Building2,
   CalendarDays,
@@ -34,6 +35,8 @@ type ProductType =
   | "oversized-tee-sj"
   | "oversized-tee-ft"
   | "baby-tee"
+  | "hoodie"
+  | "waffle-tee"
   | null;
 type DropTiming = "now" | "later" | null;
 
@@ -80,6 +83,7 @@ const PRODUCT_TYPES: {
   label: string;
   sub: string;
   detail: string;
+  lockedPlan?: string;
 }[] = [
   {
     value: "regular-tee",
@@ -105,6 +109,20 @@ const PRODUCT_TYPES: {
     sub: "180 GSM · from ₹380",
     detail: "Cropped fitted, women's silhouette",
   },
+  {
+    value: "hoodie",
+    label: "Hoodie",
+    sub: "320 GSM · from ₹900",
+    detail: "Fleece-lined, kangaroo pocket",
+    lockedPlan: "Scale",
+  },
+  {
+    value: "waffle-tee",
+    label: "Waffle Tee",
+    sub: "200 GSM · from ₹550",
+    detail: "Waffle-knit texture, elevated basics",
+    lockedPlan: "Scale",
+  },
 ];
 
 const BRAND_LABEL: Record<NonNullable<UserType>, string> = {
@@ -126,6 +144,8 @@ const PRODUCT_LABEL: Record<NonNullable<ProductType>, string> = {
   "oversized-tee-sj": "Oversized Tee (220 GSM)",
   "oversized-tee-ft": "Oversized Tee (240 GSM)",
   "baby-tee":         "Baby Tee",
+  "hoodie":           "Hoodie",
+  "waffle-tee":       "Waffle Tee",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -475,8 +495,12 @@ function Step0Welcome({
       <p className="text-zinc-500 text-[0.9rem] leading-relaxed mb-2" style={{ fontWeight: 300 }}>
         Let&apos;s set up your store in a few quick steps — choose your type, configure your brand, and name your first drop.
       </p>
-      <p className="text-zinc-400 text-xs mb-9" style={{ fontWeight: 300 }}>
+      <p className="text-zinc-400 text-xs mb-6" style={{ fontWeight: 300 }}>
         Takes about 2 minutes.
+      </p>
+      <p className="text-zinc-400 text-xs mb-9 flex items-center gap-1.5" style={{ fontWeight: 400 }}>
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block shrink-0" />
+        Start free. Upgrade when you&apos;re ready to scale.
       </p>
       <Btn onClick={onNext} loading={loading}>
         Get started
@@ -726,6 +750,8 @@ function Step5Product({
   onSkip: () => void;
   loading: boolean;
 }) {
+  const [showUpgradeHint, setShowUpgradeHint] = useState<string | null>(null);
+
   return (
     <div>
       <StepLabel>Step 5</StepLabel>
@@ -733,37 +759,63 @@ function Step5Product({
       <p className="step-sub">You can add more products later.</p>
 
       <div className="flex flex-col gap-2 mb-7">
-        {PRODUCT_TYPES.map(({ value: v, label, sub, detail }) => (
-          <button
-            key={v!}
-            onClick={() => onChange(v)}
-            className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors ${
-              value === v
-                ? "border-halftone-purple bg-halftone-purple/[0.04]"
-                : "border-black/[0.08] hover:border-black/[0.16]"
-            }`}
-          >
-            <div
-              className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                value === v ? "bg-halftone-purple" : "bg-zinc-200"
+        {PRODUCT_TYPES.map(({ value: v, label, sub, detail, lockedPlan }) => {
+          const isLocked = !!lockedPlan;
+          return (
+            <button
+              key={v!}
+              onClick={() => {
+                if (isLocked) { setShowUpgradeHint(v!); return; }
+                onChange(v);
+                setShowUpgradeHint(null);
+              }}
+              className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors relative ${
+                isLocked
+                  ? "border-black/[0.06] opacity-60 cursor-default"
+                  : value === v
+                    ? "border-halftone-purple bg-halftone-purple/[0.04]"
+                    : "border-black/[0.08] hover:border-black/[0.16]"
               }`}
-            />
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-sm" style={{ fontWeight: 600 }}>
-                  {label}
-                </span>
-                <span className="text-xs text-halftone-purple" style={{ fontWeight: 500 }}>
-                  {sub}
-                </span>
+            >
+              {isLocked ? (
+                <Lock size={12} className="text-zinc-300 mt-1.5 shrink-0" />
+              ) : (
+                <div
+                  className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                    value === v ? "bg-halftone-purple" : "bg-zinc-200"
+                  }`}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-sm" style={{ fontWeight: 600 }}>
+                    {label}
+                  </span>
+                  <span className={`text-xs ${isLocked ? "text-zinc-400" : "text-halftone-purple"}`} style={{ fontWeight: 500 }}>
+                    {sub}
+                  </span>
+                </div>
+                <p className="text-[0.72rem] text-zinc-400 mt-0.5" style={{ fontWeight: 300 }}>
+                  {detail}
+                </p>
               </div>
-              <p className="text-[0.72rem] text-zinc-400 mt-0.5" style={{ fontWeight: 300 }}>
-                {detail}
-              </p>
-            </div>
-          </button>
-        ))}
+              {isLocked && (
+                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-zinc-100 text-zinc-400 shrink-0 self-center">
+                  {lockedPlan}+
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
+
+      {showUpgradeHint && (
+        <div className="mb-5 px-3.5 py-3 rounded-xl bg-zinc-50 border border-black/[0.06]">
+          <p className="text-xs text-zinc-500" style={{ fontWeight: 400 }}>
+            This product is available on the Scale plan. You can start with any free product now and unlock premium products after your first drop.
+          </p>
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <Btn disabled={!value} onClick={onNext} loading={loading}>Continue</Btn>
@@ -937,9 +989,16 @@ function Step8Success({
       <h2 className="text-2xl md:text-3xl mb-3" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>
         {brandName ? `${brandName} is live.` : "Your store is live."}
       </h2>
-      <p className="text-zinc-500 text-[0.9rem] leading-relaxed mb-8" style={{ fontWeight: 300 }}>
+      <p className="text-zinc-500 text-[0.9rem] leading-relaxed mb-6" style={{ fontWeight: 300 }}>
         Your store and organisation are created. Head to your dashboard to upload designs, configure products, and launch your first release.
       </p>
+
+      <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-zinc-50 border border-black/[0.06] mb-6">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+        <p className="text-xs text-zinc-500 flex-1" style={{ fontWeight: 400 }}>
+          You&apos;re on the <span className="font-semibold text-zinc-700">Free plan</span>. Upgrade anytime to unlock more drops, premium products, and branding tools.
+        </p>
+      </div>
 
       <div className="flex flex-col gap-2.5">
         <Link
@@ -962,6 +1021,13 @@ function Step8Success({
             Preview your store
           </a>
         )}
+        <Link
+          href="/pricing"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+          style={{ fontWeight: 500 }}
+        >
+          View plans &amp; pricing
+        </Link>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PRODUCTS } from "@/lib/products";
+import { PLAN_ORDER, type PlanKey } from "@/lib/plans";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -2049,7 +2050,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets";
+type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets" | "plan-gates";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -2108,6 +2109,11 @@ export default function AdminPage() {
       label: "Wallets",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>,
     },
+    {
+      id: "plan-gates",
+      label: "Plan Gates",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>,
+    },
   ];
 
   return (
@@ -2148,8 +2154,112 @@ export default function AdminPage() {
           {tab === "analytics" && <AnalyticsPanel orders={orders} />}
           {tab === "studio"    && <StudioPanel    secret={secret} />}
           {tab === "users"     && <UsersPanel     secret={secret} />}
-          {tab === "wallets"   && <WalletsPanel   secret={secret} />}
+          {tab === "wallets"    && <WalletsPanel    secret={secret} />}
+          {tab === "plan-gates" && <PlanGatesPanel  secret={secret} />}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Plan Gates Panel ───────────────────────────────────────────────────────────
+
+type ProductGate = { product_id: string; required_plan: PlanKey | null };
+
+function PlanGatesPanel({ secret }: { secret: string }) {
+  const [gates, setGates] = useState<ProductGate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/product-gates", { headers: { "x-admin-secret": secret } })
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d)) setGates(d); })
+      .finally(() => setLoading(false));
+  }, [secret]);
+
+  const updateGate = async (productId: string, plan: PlanKey | null) => {
+    setSaving(productId);
+    try {
+      await fetch("/api/admin/product-gates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+        body: JSON.stringify({ product_id: productId, required_plan: plan }),
+      });
+      setGates((prev) => {
+        const existing = prev.find((g) => g.product_id === productId);
+        if (existing) return prev.map((g) => g.product_id === productId ? { ...g, required_plan: plan } : g);
+        return [...prev, { product_id: productId, required_plan: plan }];
+      });
+      setSaved(productId);
+      setTimeout(() => setSaved(null), 1800);
+    } catch { /* ignore */ }
+    setSaving(null);
+  };
+
+  const planOptions: { value: PlanKey | null; label: string }[] = [
+    { value: null, label: "All plans (free)" },
+    ...PLAN_ORDER.filter((p) => p !== "free").map((p) => ({ value: p as PlanKey, label: `${p.charAt(0).toUpperCase() + p.slice(1)}+` })),
+  ];
+
+  const getGateForProduct = (id: string): PlanKey | null =>
+    gates.find((g) => g.product_id === id)?.required_plan ??
+    (PRODUCTS.find((p) => p.id === id)?.planRequired ?? null);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.03em" }}>Product Plan Gates</h2>
+          <p className="text-sm text-ds-muted mt-1">Control which plan is required to access each product. Overrides the code default — changes take effect immediately.</p>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+          {PRODUCTS.map((p, i) => {
+            const current = getGateForProduct(p.id);
+            const isSaving = saving === p.id;
+            const isSaved = saved === p.id;
+            return (
+              <div key={p.id} className={`flex items-center gap-4 px-5 py-4 ${i < PRODUCTS.length - 1 ? "border-b border-black/[0.04]" : ""}`}>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-ds-dark">{p.name}</p>
+                  <p className="text-xs text-ds-muted">{p.gsm} · {p.id}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={current ?? ""}
+                    disabled={isSaving}
+                    onChange={(e) => updateGate(p.id, (e.target.value || null) as PlanKey | null)}
+                    className="text-xs font-semibold border border-black/[0.08] rounded-lg px-2.5 py-1.5 bg-white text-ds-body focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:opacity-50"
+                  >
+                    {planOptions.map((o) => (
+                      <option key={String(o.value)} value={o.value ?? ""}>{o.label}</option>
+                    ))}
+                  </select>
+                  {isSaving && <div className="w-4 h-4 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" />}
+                  {isSaved && (
+                    <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-xs text-ds-muted mt-4">
+          Changes saved here override the default <code className="font-mono bg-zinc-100 px-1 rounded">planRequired</code> in code. Stored in the <code className="font-mono bg-zinc-100 px-1 rounded">product_plan_gates</code> Supabase table.
+        </p>
       </div>
     </div>
   );

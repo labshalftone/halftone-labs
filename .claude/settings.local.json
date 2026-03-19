@@ -64,7 +64,31 @@
       "Bash(taskkill /F /IM node.exe /T)",
       "Bash(ls \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\api\\\\stores\\\\payout-stats\"\" 2>/dev/null && ls \"C:UsersronitfRAMERsrcappapiprofilebank-account\"\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\academy\\\\[slug]\")",
-      "Bash(mkdir -p \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\help\\\\[slug]\")"
+      "Bash(mkdir -p \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\\\\help\\\\[slug]\")",
+      "Bash(xargs sed:*)",
+      "Bash(find /c/Users/ronit/fRAMER -name *.sql -type f)",
+      "Bash(xargs wc:*)",
+      "Bash(git diff:*)",
+      "Bash(grep -l \"organizations\\\\|shops\\\\|stores\" /c/Users/ronit/fRAMER/src/app/api/*/*.ts)",
+      "Bash(del \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git\\\\index.lock\")",
+      "Bash(cmd /c \"if exist \"\"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git\\\\index.lock\"\" \\(del \"\"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git\\\\index.lock\"\" && echo deleted\\) else \\(echo not found\\)\")",
+      "Bash(cmd /c \"dir \"\"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git\\\\index*\"\"\")",
+      "Bash(cmd /c \"dir \"\"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git\"\"\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\ronit\\\\fRAMER\\\\.git'' | Where-Object { $_Name -like ''index*'' } | Select-Object Name, Length\")",
+      "Bash(dir /B \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\src\\\\app\")",
+      "Bash(timeout 15 node ./node_modules/next/dist/bin/next dev --port 3001)",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000/how-it-works -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000/ -o /dev/null -w \"%{http_code}\")",
+      "Bash(findstr :3000)",
+      "Bash(grep -rn \"export.*PRODUCTS\\\\|const PRODUCTS\" C:UsersronitfRAMERsrc --include=*.ts --include=*.tsx)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\ronit\\\\fRAMER\\\\.next-preview\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Host \"cleared\")",
+      "Bash(grep -rn brand/[0-9[] src/)",
+      "Bash(grep -rn brand/ src/ --include=*.tsx --include=*.ts --include=*.css)",
+      "Bash(grep -v \"//.*brand/\")",
+      "Bash(grep -rn --include=*.tsx --include=*.ts --include=*.css --include=*.js brand/ src/)",
+      "Bash(powershell -Command \"Remove-Item -Force .git/index.lock\")"
     ]
   }
 }

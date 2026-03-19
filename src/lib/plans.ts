@@ -17,6 +17,8 @@ export interface PlanEntitlements {
   csvExport:        boolean;
   apiAccess:        boolean;
   allProducts:      boolean;
+  neckLabels:       boolean;  // DTF neck label printing
+  premiumPackaging: boolean;  // premium zipper packaging
   prioritySupport:  boolean;
   dedicatedManager: boolean;
   bulkDiscounts:    boolean;
@@ -55,6 +57,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       csvExport:        false,
       apiAccess:        false,
       allProducts:      false,
+      neckLabels:       false,
+      premiumPackaging: false,
       prioritySupport:  false,
       dedicatedManager: false,
       bulkDiscounts:    false,
@@ -81,6 +85,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       csvExport:        true,
       apiAccess:        false,
       allProducts:      true,
+      neckLabels:       true,
+      premiumPackaging: false,
       prioritySupport:  false,
       dedicatedManager: false,
       bulkDiscounts:    false,
@@ -107,6 +113,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       csvExport:        true,
       apiAccess:        true,
       allProducts:      true,
+      neckLabels:       true,
+      premiumPackaging: true,
       prioritySupport:  true,
       dedicatedManager: false,
       bulkDiscounts:    false,
@@ -133,6 +141,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       csvExport:        true,
       apiAccess:        true,
       allProducts:      true,
+      neckLabels:       true,
+      premiumPackaging: true,
       prioritySupport:  true,
       dedicatedManager: true,
       bulkDiscounts:    true,

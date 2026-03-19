@@ -1219,6 +1219,7 @@ export default function StudioPage() {
           colors: p.colors ?? [],
           bulkTiers: [] as typeof PRODUCTS[0]["bulkTiers"],
           tag: null as string | null,
+          planRequired: undefined as typeof PRODUCTS[0]["planRequired"],
         }));
         setAllProducts([...PRODUCTS, ...mapped]);
       })

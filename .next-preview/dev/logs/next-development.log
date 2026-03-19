@@ -1,0 +1,28 @@
+[00:00:02.288] Server  LOG     ✓ Ready in 1643ms
+[00:00:03.768] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:04.126] Browser WARN    Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly.
+[00:00:07.221] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:04:28.818] Server  LOG     ✓ Compiled in 1621ms
+[00:05:16.725] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/lib/plans.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:05:17.012] Server  LOG     ✓ Compiled in 477ms
+[00:05:17.138] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:34.151] Server  LOG     ✓ Compiled in 602ms
+[00:11:08.533] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:42.127] Server  LOG     ✓ Compiled in 581ms
+[00:19:16.234] Server  LOG     ✓ Compiled in 587ms
+[00:22:57.984] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/lib/plans.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:22:58.282] Server  LOG     ✓ Compiled in 519ms
+[00:22:58.409] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:23:04.028] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/lib/plans.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:23:04.293] Server  LOG     ✓ Compiled in 567ms
+[00:23:04.382] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:23:08.934] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/lib/plans.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:23:09.190] Server  LOG     ✓ Compiled in 515ms
+[00:23:09.298] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:23:13.649] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/lib/plans.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:23:13.908] Server  LOG     ✓ Compiled in 489ms
+[00:23:14.005] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:25:40.415] Server  LOG     ✓ Compiled in 596ms
+[00:25:59.223] Server  LOG     ✓ Compiled in 608ms
+[00:27:18.781] Server  LOG     ✓ Compiled in 866ms
+[00:31:13.580] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

@@ -3,6 +3,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PRODUCTS, getTier } from "@/lib/products";
+import { useSubscription } from "@/lib/subscription-context";
+import UpgradeModal from "@/components/UpgradeModal";
+import { planRank } from "@/lib/plans";
 
 // ─── THUMBNAIL HELPER ─────────────────────────────────────────────────────────
 
@@ -182,6 +185,9 @@ function DesignPlacer({
 // ─── MAIN TAB ─────────────────────────────────────────────────────────────────
 
 export default function DesignerTab({ userId }: { userId: string }) {
+  const { plan } = useSubscription();
+  const [upgradeRequiredPlan, setUpgradeRequiredPlan] = useState<"launch" | "scale" | "business" | null>(null);
+
   // Studio settings (print zones)
   const [photoZone, setPhotoZone] = useState(DEFAULT_ZONES);
   useEffect(() => {
@@ -363,17 +369,35 @@ export default function DesignerTab({ userId }: { userId: string }) {
               <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted">Product</p>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              {PRODUCTS.map((p) => (
-                <button key={p.id} onClick={() => handleProductChange(p)}
-                  className={`text-left px-3 py-2.5 rounded-xl border-2 transition-all ${
-                    product.id === p.id ? "border-zinc-900 bg-ds-dark" : "border-black/[0.06] hover:border-zinc-200"
-                  }`}>
-                  <p className={`text-[13px] font-semibold leading-tight ${product.id === p.id ? "text-white" : "text-ds-dark"}`}
-                    style={{ letterSpacing: "-0.02em" }}>{p.name}</p>
-                  <p className={`text-[10px] mt-0.5 ${product.id === p.id ? "text-zinc-400" : "text-ds-muted"}`}>{p.gsm}</p>
-                </button>
-              ))}
+              {PRODUCTS.map((p) => {
+                const locked = !!p.planRequired && planRank(plan) < planRank(p.planRequired);
+                return locked ? (
+                  <button key={p.id}
+                    onClick={() => setUpgradeRequiredPlan(p.planRequired as "launch" | "scale" | "business")}
+                    className="relative text-left px-3 py-2.5 rounded-xl border-2 border-black/[0.06] opacity-60 hover:opacity-80 transition-all overflow-hidden">
+                    <p className="text-[13px] font-semibold leading-tight text-ds-dark" style={{ letterSpacing: "-0.02em" }}>{p.name}</p>
+                    <p className="text-[10px] mt-0.5 text-ds-muted">{p.gsm}</p>
+                    <span className="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-zinc-100 text-zinc-500 capitalize">{p.planRequired}+</span>
+                  </button>
+                ) : (
+                  <button key={p.id} onClick={() => handleProductChange(p)}
+                    className={`text-left px-3 py-2.5 rounded-xl border-2 transition-all ${
+                      product.id === p.id ? "border-zinc-900 bg-ds-dark" : "border-black/[0.06] hover:border-zinc-200"
+                    }`}>
+                    <p className={`text-[13px] font-semibold leading-tight ${product.id === p.id ? "text-white" : "text-ds-dark"}`}
+                      style={{ letterSpacing: "-0.02em" }}>{p.name}</p>
+                    <p className={`text-[10px] mt-0.5 ${product.id === p.id ? "text-zinc-400" : "text-ds-muted"}`}>{p.gsm}</p>
+                  </button>
+                );
+              })}
             </div>
+            {upgradeRequiredPlan && (
+              <UpgradeModal
+                onClose={() => setUpgradeRequiredPlan(null)}
+                requiredPlan={upgradeRequiredPlan}
+                featureLabel="This product"
+              />
+            )}
 
             {/* Colour */}
             <div className="px-4 pb-3">
