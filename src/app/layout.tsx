@@ -3,6 +3,7 @@ import { Inter, Rubik } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </CartProvider>
         </CurrencyProvider>
+        <Analytics />
       </body>
     </html>
   );
