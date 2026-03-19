@@ -272,9 +272,6 @@ export default function PricingPage() {
             </button>
           </motion.div>
 
-          <p className="mt-3 text-xs text-zinc-400">
-            Prices shown in {currency} · 2× international margin applied for USD &amp; EUR
-          </p>
         </section>
 
         {/* ── Plan cards ── */}
