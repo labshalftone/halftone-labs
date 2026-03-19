@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 const CLIENTS = [
   {
@@ -35,7 +36,7 @@ const FEATURES = [
   {
     icon: "🎨",
     title: "Artwork you can trust",
-    desc: "DTG and DTF printing preserves every detail of your artwork — full colour, photographic gradients, crisp type. Your vision, uncompromised.",
+    desc: "DTG and DTF printing preserves every detail of your artwork: full colour, photographic gradients, crisp type. Your vision, uncompromised.",
   },
   {
     icon: "📦",
@@ -60,53 +61,49 @@ const FEATURES = [
 ];
 
 export default function Enterprise() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
   return (
-    <section className="bg-white py-28 px-6 border-t border-zinc-100">
-      <div className="max-w-[1100px] mx-auto">
+    <section className="bg-ds-light-gray py-28 px-6 border-t border-black/[0.05]">
+      <div className="max-w-[1200px] mx-auto" ref={ref}>
 
         {/* Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end mb-16">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55 }}
           >
-            <span className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-4 block">
+            <span className="ds-label ds-label-brand mb-4 block">
               For creators, labels &amp; events
             </span>
             <h2
-              className="text-4xl md:text-5xl font-black text-zinc-900 leading-[0.92]"
+              className="text-4xl md:text-5xl leading-[0.92]"
               style={{ letterSpacing: "-0.055em" }}
             >
-              The merch
-              <br />
-              infrastructure
-              <br />
-              <span className="text-orange-500">behind the drop</span>
+              <span className="h-fade">The merch infrastructure </span>
+              <span className="h-bold">behind the drop</span>
             </h2>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, delay: 0.1 }}
           >
-            <p className="text-zinc-500 leading-relaxed text-[0.95rem] mb-6">
+            <p className="text-ds-body leading-relaxed text-sm mb-6">
               From a bedroom artist&apos;s first tee drop to a 5,000-person festival
-              uniform run — Halftone Labs handles production so you can focus on
+              uniform run. Halftone Labs handles production so you can focus on
               the music. No account managers. No minimum orders. No nonsense.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/studio">
-                <button className="px-5 py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 transition-colors">
-                  Start a drop →
-                </button>
+              <Link href="/studio" className="btn-brand">
+                Start a drop
               </Link>
               <a
                 href="mailto:hello@halftonelabs.in?subject=Enterprise%20enquiry"
-                className="px-5 py-3 rounded-xl border border-zinc-200 text-zinc-700 font-semibold text-sm hover:border-zinc-400 hover:text-zinc-900 transition-colors"
+                className="btn-outline-ds"
               >
                 Talk to the team
               </a>
@@ -115,24 +112,26 @@ export default function Enterprise() {
         </div>
 
         {/* Who it's for */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {CLIENTS.map((c, i) => (
             <motion.div
               key={c.category}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: i * 0.07 }}
-              className="bg-zinc-50 rounded-2xl p-5 border border-zinc-100"
+              className="ds-card"
             >
               <span className="text-2xl block mb-3">{c.icon}</span>
-              <h3 className="font-black text-zinc-900 text-sm mb-2" style={{ letterSpacing: "-0.02em" }}>
+              <h3
+                className="text-ds-dark text-sm mb-2"
+                style={{ fontWeight: 600, letterSpacing: "-0.02em" }}
+              >
                 {c.category}
               </h3>
               <ul className="space-y-1">
                 {c.examples.map((ex) => (
-                  <li key={ex} className="text-[0.7rem] text-zinc-400 flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-orange-400 flex-shrink-0" />
+                  <li key={ex} className="text-[0.7rem] text-ds-body flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-brand flex-shrink-0" />
                     {ex}
                   </li>
                 ))}
@@ -142,25 +141,25 @@ export default function Enterprise() {
         </div>
 
         {/* Feature grid */}
-        <div className="mb-16">
-          <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-8 text-center">
-            Why labels choose Halftone
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="mb-10">
+          <p className="ds-label justify-center mb-8 block text-center">Why labels choose Halftone</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="bg-white rounded-2xl p-6 border border-zinc-100 hover:border-zinc-200 hover:shadow-sm transition-all"
+                className="ds-card hover:shadow-md transition-shadow"
               >
                 <span className="text-2xl block mb-3">{f.icon}</span>
-                <h3 className="font-black text-zinc-900 text-sm mb-1.5" style={{ letterSpacing: "-0.02em" }}>
+                <h3
+                  className="text-ds-dark text-sm mb-1.5"
+                  style={{ fontWeight: 600, letterSpacing: "-0.02em" }}
+                >
                   {f.title}
                 </h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ds-body leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -169,31 +168,29 @@ export default function Enterprise() {
         {/* Social proof strip */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="bg-zinc-900 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+          className="ds-card-dark rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
         >
           <div>
-            <p className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-2">
-              Already trusted by
-            </p>
-            <p className="text-white font-black text-xl md:text-2xl leading-tight" style={{ letterSpacing: "-0.04em" }}>
+            <span className="ds-label text-white/40 mb-3 block">Already trusted by</span>
+            <p
+              className="text-white text-xl md:text-2xl leading-tight"
+              style={{ fontWeight: 700, letterSpacing: "-0.04em" }}
+            >
               Sunburn Festival · Teletech
               <br />
               Time Music · Galactica
               <br />
               Kevin Abstract
             </p>
-            <p className="text-zinc-400 text-sm mt-2">
+            <p className="text-white/40 text-sm mt-2">
               ...and 60+ independent artists across the globe
             </p>
           </div>
-          <div className="flex-shrink-0">
-            <Link href="/studio">
-              <button className="px-6 py-4 rounded-xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-400 transition-colors whitespace-nowrap">
-                Start your drop →
-              </button>
+          <div className="shrink-0">
+            <Link href="/studio" className="btn-brand">
+              Start your drop
             </Link>
           </div>
         </motion.div>

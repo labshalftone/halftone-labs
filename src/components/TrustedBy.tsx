@@ -30,36 +30,34 @@ const ROW_2 = [
 const TRACK_1 = [...ROW_1, ...ROW_1, ...ROW_1];
 const TRACK_2 = [...ROW_2, ...ROW_2, ...ROW_2];
 
-function Separator() {
+function Dot() {
   return (
-    <span className="mx-5 text-zinc-300 select-none font-light text-xl leading-none flex-shrink-0">
-      ✦
-    </span>
+    <span className="mx-5 select-none flex-shrink-0 text-ds-muted-heading">·</span>
   );
 }
 
 export default function TrustedBy() {
   return (
-    <section className="bg-zinc-50 py-16 border-t border-zinc-200/60 overflow-hidden">
+    <section className="bg-white py-12 border-y border-black/[0.05] overflow-hidden">
       {/* Header */}
-      <div className="text-center mb-10 px-6">
-        <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-zinc-400">
+      <div className="text-center mb-8 px-6">
+        <p className="ds-label justify-center">
           Trusted by artists &amp; events worldwide
         </p>
       </div>
 
       {/* Row 1 — scrolls left */}
-      <div className="relative mb-3 overflow-hidden">
+      <div className="relative mb-2 overflow-hidden">
         <div className="flex items-center whitespace-nowrap animate-marquee-left">
           {TRACK_1.map((brand, i) => (
             <span key={i} className="inline-flex items-center flex-shrink-0">
               <span
-                className="text-[1.05rem] font-semibold uppercase text-zinc-800 tracking-tight select-none hover:text-orange-500 transition-colors duration-200 cursor-default"
+                className="text-[1rem] font-semibold text-ds-dark tracking-tight select-none cursor-default hover:text-brand transition-colors duration-200"
                 style={{ letterSpacing: "-0.03em" }}
               >
                 {brand}
               </span>
-              <Separator />
+              <Dot />
             </span>
           ))}
         </div>
@@ -71,12 +69,12 @@ export default function TrustedBy() {
           {TRACK_2.map((brand, i) => (
             <span key={i} className="inline-flex items-center flex-shrink-0">
               <span
-                className="text-[1.05rem] font-semibold uppercase text-zinc-400 tracking-tight select-none hover:text-zinc-800 transition-colors duration-200 cursor-default"
+                className="text-[1rem] font-semibold text-ds-muted-heading tracking-tight select-none cursor-default hover:text-ds-dark transition-colors duration-200"
                 style={{ letterSpacing: "-0.03em" }}
               >
                 {brand}
               </span>
-              <Separator />
+              <Dot />
             </span>
           ))}
         </div>
@@ -92,11 +90,11 @@ export default function TrustedBy() {
           100% { transform: translateX(0); }
         }
         .animate-marquee-left {
-          animation: marquee-left 32s linear infinite;
+          animation: marquee-left 36s linear infinite;
           will-change: transform;
         }
         .animate-marquee-right {
-          animation: marquee-right 28s linear infinite;
+          animation: marquee-right 30s linear infinite;
           will-change: transform;
         }
       `}</style>

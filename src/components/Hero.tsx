@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
-import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
+import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   const ref = useRef(null);
@@ -13,117 +13,208 @@ export default function Hero() {
   });
 
   const titleY = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, -30]);
-  const opacityFade = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const opacityFade = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+  const blobScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
   return (
     <section
       ref={ref}
       className="relative min-h-screen bg-white flex flex-col justify-center overflow-hidden"
     >
-      {/* Subtle halftone dot fields */}
-      <HalftoneField color="purple" side="right" density={18} />
-      <HalftoneField color="orange" side="left" density={10} />
-      <HalftoneCircle size={500} position="top-right" color="purple" />
-      <HalftoneCircle size={260} position="bottom-left" color="orange" />
+      {/* Subtle grid texture */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(158,108,158,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(158,108,158,0.04) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
-      {/* Faint grid texture */}
-      <div className="absolute inset-0 grid-bg pointer-events-none z-0 opacity-50" />
-
-      <div className="max-w-[1200px] mx-auto px-6 pt-32 pb-24 relative z-10">
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          style={{ opacity: opacityFade }}
-          className="mono-tag mb-10 !text-zinc-400"
-        >
-          [ drop commerce platform ]
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-          style={{ y: titleY, opacity: opacityFade }}
-          className="mb-3"
-        >
-          <h1
-            className="text-[clamp(3.2rem,10vw,8.5rem)] leading-[0.88] text-zinc-900"
-            style={{ letterSpacing: "-0.055em" }}
-          >
-            drop your
-            <br />
-            <span className="gradient-text">merch.</span>
-          </h1>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          style={{ y: titleY, opacity: opacityFade }}
-          className="mb-10"
-        >
-          <h2
-            className="text-[clamp(1.6rem,4vw,3.8rem)] leading-[0.95] text-zinc-300"
-            style={{ letterSpacing: "-0.05em" }}
-          >
-            keep your audience.
-          </h2>
-        </motion.div>
-
-        {/* Halftone dot underline */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="h-2 w-48 mb-10 origin-left"
+      {/* Purple blob — right side */}
+      <motion.div
+        style={{ scale: blobScale, opacity: opacityFade }}
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-[55vw] max-w-[680px] aspect-square pointer-events-none z-0"
+      >
+        {/* Outer glow */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#B88AB8]/15 via-[#9E6C9E]/10 to-transparent blur-[80px]" />
+        {/* Inner shape */}
+        <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-[#9E6C9E]/12 to-[#7D527D]/6 blur-[40px]" />
+        {/* Dot grid overlay */}
+        <div
+          className="absolute inset-[25%] rounded-full opacity-[0.12]"
           style={{
-            opacity: opacityFade,
-            backgroundImage: "radial-gradient(circle, rgba(158,108,158,0.25) 2px, transparent 2px)",
-            backgroundSize: "8px 8px",
+            backgroundImage: "radial-gradient(circle, #9E6C9E 1.5px, transparent 1.5px)",
+            backgroundSize: "18px 18px",
           }}
         />
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          style={{ y: subtitleY, opacity: opacityFade }}
-          className="max-w-md mb-12"
-        >
-          <p
-            className="text-base md:text-lg leading-relaxed text-zinc-500"
-            style={{ letterSpacing: "-0.02em" }}
+      <div className="max-w-[1200px] mx-auto px-6 pt-36 pb-24 relative z-10 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+          {/* ── Left: copy ── */}
+          <motion.div style={{ y: titleY, opacity: opacityFade }}>
+
+            {/* Status badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="inline-flex items-center gap-2 bg-zinc-50 border border-black/[0.07] rounded-full px-3.5 py-1.5 mb-10"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span
+                className="text-[0.72rem] text-ds-body"
+                style={{ fontWeight: 600, letterSpacing: "0.02em" }}
+              >
+                Drop commerce platform · India
+              </span>
+            </motion.div>
+
+            {/* Heading */}
+            <motion.h1
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[clamp(3rem,8vw,6.5rem)] leading-[0.9] mb-4"
+              style={{ letterSpacing: "-0.055em" }}
+            >
+              <span className="h-fade">drop your </span>
+              <span className="h-bold">merch.</span>
+              <br />
+              <span className="h-fade">keep your </span>
+              <span className="h-bold">audience.</span>
+            </motion.h1>
+
+            {/* Divider dots */}
+            <motion.div
+              initial={{ scaleX: 0, opacity: 0 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="h-1.5 w-32 mb-8 origin-left"
+              style={{
+                backgroundImage: "radial-gradient(circle, rgba(158,108,158,0.3) 1.5px, transparent 1.5px)",
+                backgroundSize: "8px 6px",
+              }}
+            />
+
+            {/* Body */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-base md:text-lg leading-relaxed text-ds-body max-w-[380px] mb-10"
+              style={{ letterSpacing: "-0.015em" }}
+            >
+              Artists, labels, and festivals launch merch drops on Halftone.
+              No upfront inventory. No production headaches.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="flex flex-wrap items-center gap-3"
+            >
+              <Link href="/signup" className="btn-brand">
+                Launch your first drop
+                <ArrowRight size={15} />
+              </Link>
+              <Link href="/studio" className="btn-outline-ds">
+                Open Studio
+              </Link>
+            </motion.div>
+
+            {/* Social proof line */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-8 text-[0.76rem] text-ds-muted"
+              style={{ letterSpacing: "-0.01em" }}
+            >
+              Trusted by Sunburn Festival · Kevin Abstract · Galactica · 60+ artists
+            </motion.p>
+          </motion.div>
+
+          {/* ── Right: abstract visual ── */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ opacity: opacityFade }}
+            className="hidden lg:flex items-center justify-center"
           >
-            Artists, labels, and festivals launch merch drops on Halftone. No upfront inventory. No production headaches.
-          </p>
-        </motion.div>
+            {/* Card composition */}
+            <div className="relative w-full max-w-[420px] aspect-[4/5]">
+              {/* Background card */}
+              <div className="absolute inset-0 -bottom-6 -right-6 ds-card opacity-60" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          style={{ opacity: opacityFade }}
-          className="flex flex-wrap items-center gap-4"
-        >
-          <Link href="/signup" className="btn-primary">
-            Launch your first drop
-          </Link>
-        </motion.div>
+              {/* Main card */}
+              <div className="ds-card relative z-10 h-full flex flex-col gap-6 p-8">
+                {/* Mini label */}
+                <div className="ds-label">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Live drop
+                </div>
 
+                {/* Big stat */}
+                <div className="flex-1 flex flex-col justify-center">
+                  <p
+                    className="text-[5rem] leading-none text-ds-dark mb-2"
+                    style={{ fontWeight: 700, letterSpacing: "-0.06em" }}
+                  >
+                    100K+
+                  </p>
+                  <p className="text-ds-body text-sm">units shipped across India & globally</p>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-black/[0.06]" />
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { v: "60+", l: "Artists" },
+                    { v: "5–7d", l: "Turnaround" },
+                    { v: "MOQ 1", l: "No minimums" },
+                  ].map((s) => (
+                    <div key={s.l}>
+                      <p className="text-xl font-bold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
+                        {s.v}
+                      </p>
+                      <p className="text-[0.68rem] text-ds-muted mt-0.5" style={{ fontWeight: 500 }}>
+                        {s.l}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pill tags */}
+                <div className="flex flex-wrap gap-2">
+                  {["DTG Printing", "White-label", "India-made"].map((tag) => (
+                    <span key={tag} className="pill-dark text-[0.68rem]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Floating accent */}
+              <div className="absolute -top-4 -right-4 ds-card-purple rounded-2xl p-4 shadow-lg z-20">
+                <p className="text-[0.65rem] text-white/70 mb-1" style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Revenue FY24</p>
+                <p className="text-2xl text-white font-bold" style={{ letterSpacing: "-0.04em" }}>₹25Cr+</p>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
       </div>
 
-      {/* Dot cluster */}
-      <div className="absolute bottom-16 right-16 dot-cluster hidden lg:grid z-0">
-        {Array.from({ length: 25 }).map((_, i) => (
-          <span key={i} className="!bg-zinc-200 !opacity-100" />
-        ))}
-      </div>
-
-      <div className="absolute bottom-0 left-0 w-full halftone-divider" />
+      {/* Bottom divider */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/[0.08] to-transparent" />
     </section>
   );
 }

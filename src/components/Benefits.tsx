@@ -1,18 +1,11 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import {
-  Zap,
-  Shield,
-  Sparkles,
-  Clock,
-  Heart,
-  Layers,
-  Target,
-  Lightbulb,
+  Zap, Shield, Sparkles, Clock, Heart, Layers, Target, Lightbulb,
 } from "lucide-react";
-import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
+import Link from "next/link";
 
 const benefits = [
   { icon: Layers, text: "MOQ of 1", sub: "Order a single unit or ten thousand. No leftover stock, no dead inventory." },
@@ -28,27 +21,18 @@ const benefits = [
 export default function Benefits() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const scrollRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: scrollRef,
-    offset: ["start end", "end start"],
-  });
-
-  const leftY = useTransform(scrollYProgress, [0, 1], [40, -20]);
-  const rightY = useTransform(scrollYProgress, [0, 1], [60, -30]);
 
   return (
-    <section className="relative py-32 bg-zinc-50 overflow-hidden" ref={scrollRef}>
-      <HalftoneField color="purple" side="left" density={10} />
-      <HalftoneCircle size={300} position="bottom-right" color="orange" />
-
-      <div className="max-w-[1200px] mx-auto px-6 relative z-10" ref={ref}>
+    <section className="relative py-28 bg-white overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-6" ref={ref}>
         <div className="flex flex-col lg:flex-row gap-16 lg:items-center">
-          <motion.div className="lg:w-1/2" style={{ y: leftY }}>
+
+          {/* Left — copy */}
+          <div className="lg:w-5/12">
             <motion.span
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              className="section-label mb-4 block"
+              className="ds-label ds-label-brand mb-4 block"
             >
               What We Bring
             </motion.span>
@@ -56,17 +40,17 @@ export default function Benefits() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-4xl mb-6"
+              className="text-3xl md:text-4xl mb-6 leading-[0.95]"
               style={{ letterSpacing: "-0.05em" }}
             >
-              From merch to marketing, we help
-              artists build brands that scale.
+              <span className="h-fade">From merch to marketing, </span>
+              <span className="h-bold">we help artists build brands that scale.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.2 }}
-              className="text-halftone-muted leading-relaxed mb-8"
+              className="text-ds-body leading-relaxed mb-8 text-sm"
             >
               Long-term brand building, not just one-off drops. Simple, clear
               processes with full-service creative from concept to delivery.
@@ -76,9 +60,13 @@ export default function Benefits() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 }}
+              className="flex flex-wrap gap-3"
             >
-              <a href="#contact" className="btn-primary">
+              <Link href="/signup" className="btn-brand">
                 Get Started
+              </Link>
+              <a href="mailto:hello@halftonelabs.in" className="btn-outline-ds">
+                Talk to us
               </a>
             </motion.div>
 
@@ -88,9 +76,10 @@ export default function Benefits() {
                 <span key={i} />
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div className="lg:w-1/2" style={{ y: rightY }}>
+          {/* Right — benefit grid */}
+          <div className="lg:w-7/12">
             <div className="grid grid-cols-2 gap-3">
               {benefits.map((b, i) => {
                 const Icon = b.icon;
@@ -100,17 +89,23 @@ export default function Benefits() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
-                    className="service-card !p-4 flex items-center gap-3 halftone-card-hover"
+                    className="ds-card !p-5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-halftone-purple/[0.08] flex items-center justify-center shrink-0">
-                      <Icon size={15} className="text-halftone-purple" />
+                    <div className="w-8 h-8 rounded-lg bg-brand/[0.08] flex items-center justify-center mb-3">
+                      <Icon size={15} className="text-brand" />
                     </div>
-                    <span className="text-sm">{b.text}</span>
+                    <p className="text-sm text-ds-dark mb-1" style={{ fontWeight: 600, letterSpacing: "-0.015em" }}>
+                      {b.text}
+                    </p>
+                    <p className="text-[0.72rem] text-ds-body leading-relaxed">
+                      {b.sub}
+                    </p>
                   </motion.div>
                 );
               })}
             </div>
-          </motion.div>
+          </div>
+
         </div>
       </div>
     </section>

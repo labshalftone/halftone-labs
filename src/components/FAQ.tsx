@@ -1,9 +1,8 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
+import { Plus } from "lucide-react";
 
 const faqs = [
   {
@@ -63,17 +62,24 @@ function FAQItem({ q, a }: { q: string; a: string }) {
     <div className="border-b border-black/[0.06] last:border-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left group"
+        className="w-full flex items-start justify-between py-5 text-left group gap-4"
       >
-        <span className="text-sm group-hover:text-halftone-purple transition-colors pr-4">
+        <span
+          className="text-sm text-ds-dark group-hover:text-brand transition-colors"
+          style={{ fontWeight: 500, letterSpacing: "-0.01em" }}
+        >
           {q}
         </span>
-        <ChevronDown
-          size={16}
-          className={`shrink-0 text-halftone-muted/50 transition-transform ${
-            open ? "rotate-180" : ""
+        <div
+          className={`w-5 h-5 rounded-full border border-black/[0.12] flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200 ${
+            open ? "bg-brand border-brand" : "group-hover:border-black/30"
           }`}
-        />
+        >
+          <Plus
+            size={11}
+            className={`transition-transform duration-200 ${open ? "rotate-45 text-white" : "text-ds-body"}`}
+          />
+        </div>
       </button>
       <AnimatePresence>
         {open && (
@@ -81,10 +87,10 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <p className="text-sm text-halftone-muted leading-relaxed pb-5">
+            <p className="text-sm text-ds-body leading-relaxed pb-5 max-w-2xl">
               {a}
             </p>
           </motion.div>
@@ -97,26 +103,18 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export default function FAQ() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const scrollRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: scrollRef,
-    offset: ["start end", "end start"],
-  });
-
-  const contentY = useTransform(scrollYProgress, [0, 1], [30, -15]);
 
   return (
-    <section className="relative py-32 bg-zinc-50 overflow-hidden" ref={scrollRef}>
-      <HalftoneField color="purple" side="right" density={10} />
-      <HalftoneCircle size={300} position="bottom-left" color="purple" />
-
-      <div className="max-w-[1200px] mx-auto px-6 relative z-10" ref={ref}>
+    <section className="relative py-28 bg-white overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-6" ref={ref}>
         <div className="flex flex-col lg:flex-row gap-16">
-          <div className="lg:w-1/3">
+
+          {/* Left — sticky header */}
+          <div className="lg:w-1/3 lg:sticky lg:top-32 lg:self-start">
             <motion.span
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              className="section-label mb-4 block"
+              className="ds-label ds-label-brand mb-4 block"
             >
               FAQ
             </motion.span>
@@ -124,20 +122,42 @@ export default function FAQ() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-4xl mb-4"
-              style={{ letterSpacing: "-0.05em" }}
+              className="text-3xl md:text-4xl mb-4 leading-[0.92]"
+              style={{ letterSpacing: "-0.055em" }}
             >
-              Got Questions?
+              <span className="h-fade">Got </span>
+              <span className="h-bold">Questions?</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.2 }}
-              className="text-halftone-muted text-sm"
+              className="text-ds-body text-sm leading-relaxed mb-8"
             >
               Straightforward insights into how we build, launch, and scale
               artist-led brands.
             </motion.p>
+
+            {/* Contact prompt */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.3 }}
+              className="ds-card !p-5"
+            >
+              <p className="text-sm text-ds-dark mb-1" style={{ fontWeight: 600 }}>
+                Still have questions?
+              </p>
+              <p className="text-xs text-ds-body mb-3">
+                Our team replies within 24 hours.
+              </p>
+              <a
+                href="mailto:hello@halftonelabs.in"
+                className="text-xs text-brand font-semibold hover:text-brand-dark transition-colors"
+              >
+                hello@halftonelabs.in →
+              </a>
+            </motion.div>
 
             {/* Dot cluster */}
             <div className="dot-cluster mt-8 hidden lg:grid">
@@ -147,17 +167,18 @@ export default function FAQ() {
             </div>
           </div>
 
+          {/* Right — accordion */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.3 }}
-            style={{ y: contentY }}
-            className="lg:w-2/3 service-card !p-0 !px-6 corner-brackets"
+            transition={{ delay: 0.25 }}
+            className="lg:w-2/3 ds-card !p-0 !px-6"
           >
             {faqs.map((faq, i) => (
               <FAQItem key={i} q={faq.q} a={faq.a} />
             ))}
           </motion.div>
+
         </div>
       </div>
     </section>
