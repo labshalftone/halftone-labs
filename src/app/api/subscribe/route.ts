@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 //   USD effective rate: 41.5 INR/USD  (market ~83, so 2×)
 //   EUR effective rate: 45 INR/EUR    (market ~90, so 2×)
 const PLAN_AMOUNTS_INR = {
-  artist: { monthly: 149900, annual: 119900 * 12 },  // ₹1,499/mo | ₹999×12=₹11,988/yr
-  label:  { monthly: 399900, annual: 249900 * 12 },  // ₹3,999/mo | ₹2,499×12=₹29,988/yr
+  studio:       { monthly: 149900, annual:  99900 * 12 },  // ₹1,499/mo | ₹999×12=₹11,988/yr
+  organization: { monthly: 399900, annual: 249900 * 12 },  // ₹3,999/mo | ₹2,499×12=₹29,988/yr
 } as const;
 
 // International amounts — derived from 2× markup rates

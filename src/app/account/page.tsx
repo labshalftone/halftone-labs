@@ -18,6 +18,7 @@ import OverviewTab from "@/components/OverviewTab";
 import OrgDashboard from "@/components/OrgDashboard";
 import OrgSettings from "@/components/OrgSettings";
 import DropsTab from "@/components/DropsTab";
+import BillingTab from "@/components/BillingTab";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   "Order Placed":     { bg: "#f3f0ff", text: "#7c3aed", dot: "#7c3aed" },
@@ -36,7 +37,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers" | "designer";
+type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers" | "designer" | "billing";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -97,6 +98,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
   { id: "invoices", label: "Invoices", icon: (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  )},
+  { id: "billing", label: "Billing & Plan", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
     </svg>
   )},
   { id: "settings", label: "Account Settings", icon: (
@@ -2757,7 +2763,7 @@ export default function AccountPage() {
     const params = new URLSearchParams(window.location.search);
     const tab    = params.get("tab") as ActiveTab | null;
     const shopify = params.get("shopify");
-    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","create-order","customers","designer","wallet","invoices","settings"].includes(tab)) {
+    if (tab && ["dashboard","orders","designs","drops","branding","stores","shopify","create-order","customers","designer","wallet","invoices","settings","billing"].includes(tab)) {
       setActiveTab(tab);
     }
     if (shopify === "connected" || shopify === "error") {
@@ -3092,6 +3098,7 @@ export default function AccountPage() {
               {activeTab === "customers"     && <CustomersTab userId={user?.id ?? ""} />}
               {activeTab === "wallet"        && <WalletTab userId={user?.id ?? ""} />}
               {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
+              {activeTab === "billing"   && <BillingTab userId={user?.id ?? ""} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
             </motion.div>
           </AnimatePresence>

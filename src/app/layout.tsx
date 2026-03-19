@@ -3,6 +3,7 @@ import { Inter, Rubik } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { SubscriptionProvider } from "@/lib/subscription-context";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,9 +56,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${rubik.variable}`}>
       <body>
         <CurrencyProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
+          <SubscriptionProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </SubscriptionProvider>
         </CurrencyProvider>
       </body>
     </html>

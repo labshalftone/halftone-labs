@@ -14,8 +14,8 @@ import { supabase } from "@/lib/supabase";
 //   USD: 1 USD = 41.5 INR effective  (market ≈83, so 2× margin)
 //   EUR: 1 EUR = 45 INR effective    (market ≈90, so 2× margin)
 const PRICES = {
-  artist: { monthly: 1499, annual: 999 },   // annual = per-month price, billed ₹11,988/yr
-  label:  { monthly: 3999, annual: 2499 },  // annual = per-month price, billed ₹29,988/yr
+  studio:       { monthly: 1499, annual: 999  },  // annual = per-month price, billed ₹11,988/yr
+  organization: { monthly: 3999, annual: 2499 },  // annual = per-month price, billed ₹29,988/yr
 };
 
 // Razorpay plan IDs — set these env vars after creating plans in Razorpay dashboard
@@ -28,8 +28,8 @@ type FeatureVal = boolean | string;
 interface Feature {
   label: string;
   free: FeatureVal;
-  artist: FeatureVal;
-  label_: FeatureVal;
+  studio: FeatureVal;
+  organization: FeatureVal;
 }
 interface FeatureCategory { name: string; features: Feature[] }
 
@@ -37,47 +37,47 @@ const FEATURE_TABLE: FeatureCategory[] = [
   {
     name: "Drops & Designs",
     features: [
-      { label: "Active drops",           free: "1",          artist: "10",          label_: "Unlimited"    },
-      { label: "Design library",         free: "10 designs", artist: "Unlimited",   label_: "Unlimited"    },
-      { label: "Products per drop",      free: "1",          artist: "Unlimited",   label_: "Unlimited"    },
-      { label: "Artist sub-accounts",    free: false,        artist: false,         label_: "Up to 10"     },
-      { label: "Bulk order discounts",   free: false,        artist: false,         label_: true           },
+      { label: "Active drops",         free: "1",          studio: "10",          organization: "Unlimited"  },
+      { label: "Design library",       free: "10 designs", studio: "Unlimited",   organization: "Unlimited"  },
+      { label: "Products per drop",    free: "1",          studio: "Unlimited",   organization: "Unlimited"  },
+      { label: "Team members",         free: false,        studio: false,         organization: "Up to 10"   },
+      { label: "Bulk order discounts", free: false,        studio: false,         organization: true         },
     ],
   },
   {
     name: "Branding & Storefront",
     features: [
-      { label: "Storefront",                     free: "Halftone-branded", artist: "Custom branding", label_: "White-label"        },
-      { label: "Custom domain",                  free: false,              artist: true,              label_: true                 },
-      { label: "Remove 'Powered by Halftone'",   free: false,              artist: false,             label_: true                 },
-      { label: "Stores",                         free: "1",                artist: "1",               label_: "3"                  },
+      { label: "Storefront",                   free: "Halftone-branded", studio: "Custom branding", organization: "White-label"   },
+      { label: "Custom domain",                free: false,              studio: true,              organization: true            },
+      { label: "Remove 'Powered by Halftone'", free: false,              studio: false,             organization: true            },
+      { label: "Storefronts",                  free: "1",                studio: "1",               organization: "3"             },
     ],
   },
   {
     name: "Integrations",
     features: [
-      { label: "Shopify sync",    free: false, artist: true,  label_: true  },
-      { label: "All product types", free: false, artist: true, label_: true },
-      { label: "API access",      free: false, artist: false, label_: true  },
-      { label: "Webhook support", free: false, artist: false, label_: true  },
+      { label: "Shopify sync",      free: false, studio: true,  organization: true  },
+      { label: "All product types", free: false, studio: true,  organization: true  },
+      { label: "API access",        free: false, studio: false, organization: true  },
+      { label: "Webhook support",   free: false, studio: false, organization: true  },
     ],
   },
   {
     name: "Analytics",
     features: [
-      { label: "Sales analytics",      free: "30-day basic",   artist: "Full history",       label_: "Real-time + advanced"  },
-      { label: "CSV export",           free: false,            artist: true,                 label_: true                    },
-      { label: "Customer insights",    free: false,            artist: false,                label_: true                    },
-      { label: "Revenue forecasting",  free: false,            artist: false,                label_: true                    },
+      { label: "Sales analytics",     free: "30-day basic", studio: "Full history",       organization: "Real-time + advanced" },
+      { label: "CSV export",          free: false,          studio: true,                 organization: true                   },
+      { label: "Customer insights",   free: false,          studio: false,                organization: true                   },
+      { label: "Revenue forecasting", free: false,          studio: false,                organization: true                   },
     ],
   },
   {
     name: "Support",
     features: [
-      { label: "Support channel",  free: "Community forum",  artist: "Priority email",  label_: "Dedicated manager"  },
-      { label: "Response time",    free: "Best effort",      artist: "< 24 hours",      label_: "< 4 hours"          },
-      { label: "Onboarding call",  free: false,              artist: false,             label_: true                 },
-      { label: "Early access",     free: false,              artist: false,             label_: true                 },
+      { label: "Support channel", free: "Community forum", studio: "Priority email", organization: "Dedicated manager" },
+      { label: "Response time",   free: "Best effort",     studio: "< 24 hours",     organization: "< 4 hours"         },
+      { label: "Onboarding call", free: false,             studio: false,            organization: true                },
+      { label: "Early access",    free: false,             studio: false,            organization: true                },
     ],
   },
 ];
@@ -96,8 +96,8 @@ const FAQS = [
     a: "No platform fee from us — you keep all the margin between your retail price and our production cost. Your payment gateway (Razorpay) charges their standard processing fee.",
   },
   {
-    q: "What's included in white-labelling on the Label plan?",
-    a: "All 'Powered by Halftone' badges, email footers, and packing slip references are replaced with your own branding. Your fans see only your name.",
+    q: "What's included in white-labelling on the Organization plan?",
+    a: "All 'Powered by Halftone' badges, email footers, and packing slip references are replaced with your own branding. Your customers and fans see only your name.",
   },
   {
     q: "Is there a contract or minimum commitment?",
@@ -133,7 +133,7 @@ declare global {
 }
 
 async function openSubscriptionCheckout(opts: {
-  plan: "artist" | "label";
+  plan: "studio" | "organization";
   billing: BillingCycle;
   currency: Currency;
   userId: string;
@@ -165,12 +165,11 @@ async function openSubscriptionCheckout(opts: {
     prefill:         { email: opts.userEmail },
     theme:           { color: "#9E6C9E" },
     handler:         (response: Record<string, string>) => {
-      // Verify on the server
       fetch("/api/subscribe/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...response, userId: opts.userId, plan: opts.plan, billing: opts.billing }),
-      }).then(() => window.location.href = "/account?tab=dashboard&plan=activated");
+      }).then(() => window.location.href = "/account?tab=billing&plan=activated");
     },
   });
   rzp.open();
@@ -181,7 +180,7 @@ export default function PricingPage() {
   const { currency } = useCurrency();
   const [billing, setBilling]   = useState<BillingCycle>("monthly");
   const [loading, setLoading]   = useState<string | null>(null);
-  const [userId, setUserId]     = useState<string | null>(null);
+  const [userId, setUserId]       = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -193,13 +192,12 @@ export default function PricingPage() {
 
   const fmt = (inr: number) => fmtPrice(inr, currency);
 
-  // Annual yearly total (for "billed as" label)
   const annualTotal = (planInrMonthly: number) => {
     const inrYear = planInrMonthly * 12;
     return fmtPrice(inrYear, currency);
   };
 
-  async function handleSubscribe(plan: "artist" | "label") {
+  async function handleSubscribe(plan: "studio" | "organization") {
     if (!userId || !userEmail) {
       window.location.href = "/login?redirect=/pricing";
       return;
@@ -215,10 +213,10 @@ export default function PricingPage() {
     }
   }
 
-  const artistPrice = fmt(PRICES.artist[billing]);
-  const labelPrice  = fmt(PRICES.label[billing]);
-  const artistSave  = billing === "annual" ? Math.round(((PRICES.artist.monthly - PRICES.artist.annual) / PRICES.artist.monthly) * 100) : 0;
-  const labelSave   = billing === "annual" ? Math.round(((PRICES.label.monthly  - PRICES.label.annual)  / PRICES.label.monthly)  * 100) : 0;
+  const studioPrice = fmt(PRICES.studio[billing]);
+  const orgPrice    = fmt(PRICES.organization[billing]);
+  const studioSave  = billing === "annual" ? Math.round(((PRICES.studio.monthly - PRICES.studio.annual) / PRICES.studio.monthly) * 100) : 0;
+  const orgSave     = billing === "annual" ? Math.round(((PRICES.organization.monthly - PRICES.organization.annual) / PRICES.organization.monthly) * 100) : 0;
 
   return (
     <>
@@ -318,7 +316,7 @@ export default function PricingPage() {
               </ul>
             </motion.div>
 
-            {/* ARTIST — highlighted */}
+            {/* STUDIO — highlighted */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -334,23 +332,23 @@ export default function PricingPage() {
                 <div className="w-8 h-8 rounded-lg bg-brand-8 flex items-center justify-center">
                   <Zap className="w-4 h-4 text-brand" />
                 </div>
-                <span className="font-semibold text-zinc-900">Artist</span>
+                <span className="font-semibold text-zinc-900">Studio</span>
               </div>
               <div className="mb-1">
-                <span className="text-4xl font-bold text-zinc-900 tracking-tight">{artistPrice}</span>
+                <span className="text-4xl font-bold text-zinc-900 tracking-tight">{studioPrice}</span>
                 <span className="text-zinc-400 text-sm ml-1">/ month</span>
               </div>
               <p className="text-xs text-zinc-400 mb-6 min-h-[2rem]">
                 {billing === "annual"
-                  ? `Billed ${annualTotal(PRICES.artist.annual)} / year · saves ${artistSave}%`
+                  ? `Billed ${annualTotal(PRICES.studio.annual)} / year · saves ${studioSave}%`
                   : "Switch to annual and save 33%"}
               </p>
               <button
-                onClick={() => handleSubscribe("artist")}
-                disabled={loading === "artist"}
+                onClick={() => handleSubscribe("studio")}
+                disabled={loading === "studio"}
                 className="block w-full text-center py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition-colors disabled:opacity-60"
               >
-                {loading === "artist" ? "Loading…" : userId ? "Subscribe — Artist" : "Get started"}
+                {loading === "studio" ? "Loading…" : userId ? "Subscribe — Studio" : "Get started"}
               </button>
               <ul className="mt-7 space-y-3">
                 {[
@@ -371,7 +369,7 @@ export default function PricingPage() {
               </ul>
             </motion.div>
 
-            {/* LABEL */}
+            {/* ORGANIZATION */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -382,30 +380,30 @@ export default function PricingPage() {
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-semibold text-white">Label</span>
+                <span className="font-semibold text-white">Organization</span>
               </div>
               <div className="mb-1">
-                <span className="text-4xl font-bold text-white tracking-tight">{labelPrice}</span>
+                <span className="text-4xl font-bold text-white tracking-tight">{orgPrice}</span>
                 <span className="text-zinc-400 text-sm ml-1">/ month</span>
               </div>
               <p className="text-xs text-zinc-500 mb-6 min-h-[2rem]">
                 {billing === "annual"
-                  ? `Billed ${annualTotal(PRICES.label.annual)} / year · saves ${labelSave}%`
+                  ? `Billed ${annualTotal(PRICES.organization.annual)} / year · saves ${orgSave}%`
                   : "Switch to annual and save 37%"}
               </p>
               <button
-                onClick={() => handleSubscribe("label")}
-                disabled={loading === "label"}
+                onClick={() => handleSubscribe("organization")}
+                disabled={loading === "organization"}
                 className="block w-full text-center py-2.5 rounded-xl bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition-colors disabled:opacity-60"
               >
-                {loading === "label" ? "Loading…" : userId ? "Subscribe — Label" : "Get started"}
+                {loading === "organization" ? "Loading…" : userId ? "Subscribe — Organization" : "Get started"}
               </button>
               <ul className="mt-7 space-y-3">
                 {[
                   "Unlimited drops",
                   "Unlimited designs",
                   "White-label (remove Halftone)",
-                  "Up to 10 artist sub-accounts",
+                  "Up to 10 team members",
                   "Real-time advanced analytics",
                   "All integrations + API",
                   "3 storefronts",
@@ -435,8 +433,8 @@ export default function PricingPage() {
                 <tr>
                   <th className="text-left pb-4 pr-6 text-zinc-400 font-normal w-[40%]">Feature</th>
                   <th className="text-center pb-4 px-4 font-semibold text-zinc-900">Free</th>
-                  <th className="text-center pb-4 px-4 font-semibold text-brand">Artist</th>
-                  <th className="text-center pb-4 px-4 font-semibold text-zinc-900">Label</th>
+                  <th className="text-center pb-4 px-4 font-semibold text-brand">Studio</th>
+                  <th className="text-center pb-4 px-4 font-semibold text-zinc-900">Organization</th>
                 </tr>
               </thead>
               <tbody>
@@ -456,8 +454,8 @@ export default function PricingPage() {
                     >
                       <td className="py-3 pr-6 text-zinc-600">{feat.label}</td>
                       <td className="py-3 px-4 text-center"><FeatureCell val={feat.free} /></td>
-                      <td className="py-3 px-4 text-center"><FeatureCell val={feat.artist} /></td>
-                      <td className="py-3 px-4 text-center"><FeatureCell val={feat.label_} /></td>
+                      <td className="py-3 px-4 text-center"><FeatureCell val={feat.studio} /></td>
+                      <td className="py-3 px-4 text-center"><FeatureCell val={feat.organization} /></td>
                     </tr>
                   )),
                 ])}
