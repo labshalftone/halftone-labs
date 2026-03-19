@@ -57,13 +57,13 @@ const STATUS_STRIPE: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   live:      "bg-green-100 text-green-700 border-green-200",
   scheduled: "bg-blue-100 text-blue-700 border-blue-200",
-  draft:     "bg-zinc-100 text-zinc-500 border-zinc-200",
-  ended:     "bg-zinc-100 text-zinc-400 border-zinc-200",
+  draft:     "bg-black/[0.05] text-ds-body border-black/[0.06]",
+  ended:     "bg-black/[0.05] text-ds-muted border-black/[0.06]",
 };
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[status] ?? "bg-zinc-100 text-zinc-500 border-zinc-200"}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[status] ?? "bg-black/[0.05] text-ds-body border-black/[0.06]"}`}>
       {status === "live" && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
@@ -97,12 +97,12 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 4 }}
-      className="border-t border-zinc-100 bg-zinc-50/80"
+      className="border-t border-black/[0.06] bg-ds-light-gray/80"
     >
       {/* Panel header */}
-      <div className="px-5 py-3 flex items-center justify-between border-b border-zinc-100">
+      <div className="px-5 py-3 flex items-center justify-between border-b border-black/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-zinc-800">Waitlist signups</span>
+          <span className="text-sm font-bold text-ds-dark">Waitlist signups</span>
           {!loading && (
             <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
               {signups.length}
@@ -113,7 +113,7 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
           {signups.length > 0 && (
             <button
               onClick={copyEmails}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-600 bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-ds-body bg-white border border-black/[0.06] hover:border-zinc-300 hover:bg-ds-light-gray transition-colors"
             >
               {copied ? (
                 <>
@@ -134,7 +134,7 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
           )}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+            className="p-1.5 rounded-lg text-ds-muted hover:text-ds-body hover:bg-black/[0.05] transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -148,13 +148,13 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-9 bg-zinc-100 rounded-lg animate-pulse" />
+              <div key={i} className="h-9 bg-black/[0.05] rounded-lg animate-pulse" />
             ))}
           </div>
         ) : signups.length === 0 ? (
           <div className="py-6 text-center">
-            <p className="text-zinc-400 text-sm">No signups yet</p>
-            <p className="text-zinc-300 text-xs mt-0.5">Share the drop link to get people on the list</p>
+            <p className="text-ds-muted text-sm">No signups yet</p>
+            <p className="text-ds-muted text-xs mt-0.5">Share the drop link to get people on the list</p>
           </div>
         ) : (
           <div className="space-y-1">
@@ -164,17 +164,17 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
                 initial={{ opacity: 0, x: -4 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-zinc-100 hover:border-zinc-200 transition-colors"
+                className="flex items-center justify-between py-2 px-3 rounded-xl bg-white border border-black/[0.06] hover:border-black/[0.06] transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   {/* Avatar initial */}
-                  <div className="w-7 h-7 rounded-full bg-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600 flex-shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-zinc-200 flex items-center justify-center text-xs font-bold text-ds-body flex-shrink-0">
                     {signup.email[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-zinc-800 truncate">{signup.email}</p>
+                    <p className="text-xs font-medium text-ds-dark truncate">{signup.email}</p>
                     {signup.phone && (
-                      <p className="text-[10px] text-zinc-400 truncate">{signup.phone}</p>
+                      <p className="text-[10px] text-ds-muted truncate">{signup.phone}</p>
                     )}
                   </div>
                 </div>
@@ -184,7 +184,7 @@ function WaitlistPanel({ dropId, userId, onClose }: { dropId: string; userId: st
                       WhatsApp
                     </span>
                   )}
-                  <span className="text-[10px] text-zinc-400">
+                  <span className="text-[10px] text-ds-muted">
                     {new Date(signup.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                   </span>
                 </div>
@@ -300,8 +300,8 @@ export default function DropsTab({ userId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>Drops</h2>
-          <p className="text-sm text-zinc-500 mt-0.5">Limited releases, collections & campaigns</p>
+          <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Drops</h2>
+          <p className="text-sm text-ds-body mt-0.5">Limited releases, collections & campaigns</p>
         </div>
         <div className="flex items-center gap-2">
           <LearnLink
@@ -311,7 +311,7 @@ export default function DropsTab({ userId }: Props) {
           />
           <button
             onClick={() => openBuilder()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 transition-colors shadow-sm"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -324,7 +324,7 @@ export default function DropsTab({ userId }: Props) {
       {/* Summary stat pills */}
       {!loading && drops.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="px-3 py-1 bg-zinc-100 text-zinc-600 text-xs font-semibold rounded-full">
+          <span className="px-3 py-1 bg-black/[0.05] text-ds-body text-xs font-semibold rounded-full">
             {drops.length} total
           </span>
           {liveCount > 0 && (
@@ -345,7 +345,7 @@ export default function DropsTab({ userId }: Props) {
       {loading && (
         <div className="space-y-3">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-20 bg-zinc-100 rounded-2xl animate-pulse" />
+            <div key={i} className="h-20 bg-black/[0.05] rounded-2xl animate-pulse" />
           ))}
         </div>
       )}
@@ -355,16 +355,16 @@ export default function DropsTab({ userId }: Props) {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center py-16 px-6 bg-gradient-to-b from-zinc-50 to-white rounded-2xl border border-dashed border-zinc-200"
+          className="text-center py-16 px-6 bg-gradient-to-b from-zinc-50 to-white rounded-2xl border border-dashed border-black/[0.06]"
         >
           <div className="text-5xl mb-4">🎯</div>
-          <p className="text-zinc-800 font-black text-lg" style={{ letterSpacing: "-0.03em" }}>Launch your first drop</p>
-          <p className="text-zinc-500 text-sm mt-2 max-w-xs mx-auto">
-            Create a limited release, festival merch, or exclusive collection — with countdown, waitlist, and share tools built in.
+          <p className="text-ds-dark font-semibold text-lg" style={{ letterSpacing: "-0.03em" }}>Launch your first drop</p>
+          <p className="text-ds-body text-sm mt-2 max-w-xs mx-auto">
+            Create a limited release, festival merch, or exclusive collection. Countdown, waitlist, and share tools built in.
           </p>
           <button
             onClick={() => openBuilder()}
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-700 transition-colors"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -390,7 +390,7 @@ export default function DropsTab({ userId }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:border-zinc-300 transition-colors"
+                className="bg-white border border-black/[0.06] rounded-2xl overflow-hidden hover:border-zinc-300 transition-colors"
               >
                 {/* Card row */}
                 <div className="flex items-stretch">
@@ -398,7 +398,7 @@ export default function DropsTab({ userId }: Props) {
                   <div className={`w-1 flex-shrink-0 ${STATUS_STRIPE[drop.status] ?? "bg-zinc-200"}`} />
 
                   {/* Cover thumbnail */}
-                  <div className="w-14 h-14 flex-shrink-0 self-center ml-3.5 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-100">
+                  <div className="w-14 h-14 flex-shrink-0 self-center ml-3.5 rounded-xl overflow-hidden bg-black/[0.05] border border-black/[0.06]">
                     {drop.cover_image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={drop.cover_image_url} alt={drop.title} className="w-full h-full object-cover" />
@@ -414,7 +414,7 @@ export default function DropsTab({ userId }: Props) {
                       {/* Left: title + meta */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold text-zinc-900 truncate">{drop.title}</span>
+                          <span className="text-sm font-bold text-ds-dark truncate">{drop.title}</span>
                           <StatusBadge status={drop.status} />
                         </div>
 
@@ -422,14 +422,14 @@ export default function DropsTab({ userId }: Props) {
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {/* Product count */}
                           {(drop.design_count ?? 0) > 0 && (
-                            <span className="text-xs text-zinc-400">
+                            <span className="text-xs text-ds-muted">
                               {drop.design_count} product{drop.design_count !== 1 ? "s" : ""}
                             </span>
                           )}
 
                           {/* Launch date */}
                           {drop.launch_at && (drop.status === "scheduled" || drop.status === "live") && (
-                            <span className="text-xs text-zinc-400">
+                            <span className="text-xs text-ds-muted">
                               {(drop.design_count ?? 0) > 0 && "·"} {drop.status === "scheduled" ? "Launches" : "Launched"}{" "}
                               {new Date(drop.launch_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                             </span>
@@ -437,7 +437,7 @@ export default function DropsTab({ userId }: Props) {
 
                           {/* Countdown badge */}
                           {drop.countdown_enabled && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-violet-600 bg-violet-50 border border-violet-100 px-1.5 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand bg-violet-50 border border-violet-100 px-1.5 py-0.5 rounded-full">
                               <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <circle cx="12" cy="12" r="10" /><path strokeLinecap="round" d="M12 6v6l4 2" />
                               </svg>
@@ -467,7 +467,7 @@ export default function DropsTab({ userId }: Props) {
 
                           {/* Store path */}
                           {store && (
-                            <span className="text-[10px] text-zinc-300 font-mono hidden sm:inline">/store/{store.handle}</span>
+                            <span className="text-[10px] text-ds-muted font-mono hidden sm:inline">/store/{store.handle}</span>
                           )}
                         </div>
                       </div>
@@ -482,7 +482,7 @@ export default function DropsTab({ userId }: Props) {
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Open drop page"
-                            className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                            className="p-2 rounded-lg text-ds-muted hover:text-ds-body hover:bg-black/[0.05] transition-colors"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -519,7 +519,7 @@ export default function DropsTab({ userId }: Props) {
                         <button
                           onClick={() => openBuilder(drop)}
                           title="Edit drop"
-                          className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                          className="p-2 rounded-lg text-ds-muted hover:text-ds-body hover:bg-black/[0.05] transition-colors"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -531,7 +531,7 @@ export default function DropsTab({ userId }: Props) {
                           onClick={() => handleDelete(drop.id)}
                           disabled={deletingId === drop.id}
                           title="Delete drop"
-                          className="p-2 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                          className="p-2 rounded-lg text-ds-muted hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
                         >
                           {deletingId === drop.id ? (
                             <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -131,27 +131,27 @@ export default function SizeGuide({ open, onClose, defaultTab = "regular", showB
             className="relative z-10 w-full sm:max-w-2xl bg-white rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
           >
             {/* Header */}
-            <div className="bg-zinc-900 text-white px-6 py-5 flex items-center justify-between flex-shrink-0">
+            <div className="bg-ds-dark text-white px-6 py-5 flex items-center justify-between flex-shrink-0">
               <div>
                 {showBranding && (
-                  <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">Halftone Labs</p>
+                  <p className="text-[0.6rem] font-mono uppercase tracking-widest text-ds-muted mb-0.5">Halftone Labs</p>
                 )}
-                <h2 className="text-lg font-black" style={{ letterSpacing: "-0.03em" }}>Size Guide</h2>
+                <h2 className="text-lg font-semibold" style={{ letterSpacing: "-0.03em" }}>Size Guide</h2>
               </div>
               <div className="flex items-center gap-3">
                 {/* CM / Inches toggle */}
                 <button
                   onClick={() => setUseCm((v) => !v)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors text-xs font-bold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-ds-dark2 transition-colors text-xs font-bold"
                 >
-                  <span className={useCm ? "text-zinc-400" : "text-white"}>IN</span>
-                  <span className="text-zinc-600">/</span>
-                  <span className={useCm ? "text-white" : "text-zinc-400"}>CM</span>
+                  <span className={useCm ? "text-ds-muted" : "text-white"}>IN</span>
+                  <span className="text-ds-body">/</span>
+                  <span className={useCm ? "text-white" : "text-ds-muted"}>CM</span>
                 </button>
                 {/* Close */}
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-300 hover:text-white"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-ds-dark2 transition-colors text-ds-muted hover:text-white"
                   aria-label="Close size guide"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -162,15 +162,15 @@ export default function SizeGuide({ open, onClose, defaultTab = "regular", showB
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 p-3 bg-zinc-50 border-b border-zinc-100 flex-shrink-0 overflow-x-auto">
+            <div className="flex gap-1 p-3 bg-ds-light-gray border-b border-black/[0.06] flex-shrink-0 overflow-x-auto">
               {TABS.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${
                     activeTab === tab.key
-                      ? "bg-zinc-900 text-white shadow-sm"
-                      : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100"
+                      ? "bg-ds-dark text-white shadow-sm"
+                      : "text-ds-body hover:text-ds-dark hover:bg-black/[0.05]"
                   }`}
                 >
                   {tab.label}
@@ -182,11 +182,11 @@ export default function SizeGuide({ open, onClose, defaultTab = "regular", showB
             <div className="overflow-y-auto flex-1 p-5">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200">
+                  <tr className="border-b border-black/[0.06]">
                     {columns.map((col, i) => (
                       <th
                         key={col.key}
-                        className={`pb-3 text-xs font-black uppercase tracking-widest text-zinc-400 ${i === 0 ? "text-left" : "text-right"}`}
+                        className={`pb-3 text-xs font-semibold uppercase tracking-widest text-ds-muted ${i === 0 ? "text-left" : "text-right"}`}
                       >
                         {col.label}{i > 0 ? ` (${unit})` : ""}
                       </th>
@@ -197,7 +197,7 @@ export default function SizeGuide({ open, onClose, defaultTab = "regular", showB
                   {rows.map((row, i) => (
                     <tr
                       key={String(row.size)}
-                      className={`border-b border-zinc-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-zinc-50"}`}
+                      className={`border-b border-black/[0.06] last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-ds-light-gray"}`}
                     >
                       {columns.map((col, ci) => (
                         <td
@@ -205,9 +205,9 @@ export default function SizeGuide({ open, onClose, defaultTab = "regular", showB
                           className={`py-3 ${ci === 0 ? "pl-1" : "text-right"} ${ci === columns.length - 1 ? "pr-1" : ""}`}
                         >
                           {ci === 0 ? (
-                            <span className="font-black text-zinc-900 text-sm">{row[col.key]}</span>
+                            <span className="font-semibold text-ds-dark text-sm">{row[col.key]}</span>
                           ) : (
-                            <span className="font-semibold text-zinc-700">{fmtVal(row[col.key], useCm)}</span>
+                            <span className="font-semibold text-ds-body">{fmtVal(row[col.key], useCm)}</span>
                           )}
                         </td>
                       ))}

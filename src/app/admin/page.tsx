@@ -91,8 +91,8 @@ function StatusBadge({ status }: { status: string }) {
 function SidebarItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${active ? "bg-zinc-100 text-zinc-900" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"}`}>
-      <span className={active ? "text-zinc-900" : "text-zinc-400"}>{icon}</span>
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${active ? "bg-black/[0.05] text-ds-dark" : "text-ds-body hover:text-ds-dark hover:bg-ds-light-gray"}`}>
+      <span className={active ? "text-ds-dark" : "text-ds-muted"}>{icon}</span>
       {label}
     </button>
   );
@@ -117,27 +117,27 @@ function LoginScreen({ onAuth }: { onAuth: (secret: string) => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-ds-darkest flex items-center justify-center p-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
         <div className="mb-6">
-          <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center mb-4">
-            <span className="text-white text-xs font-black">HL</span>
+          <div className="w-10 h-10 bg-ds-dark rounded-xl flex items-center justify-center mb-4">
+            <span className="text-white text-xs font-semibold">HL</span>
           </div>
-          <h1 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Halftone Labs Admin</h1>
-          <p className="text-zinc-500 text-sm mt-1">Sign in to manage orders and coupons</p>
+          <h1 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Halftone Labs Admin</h1>
+          <p className="text-ds-body text-sm mt-1">Sign in to manage orders and coupons</p>
         </div>
         <div className="flex flex-col gap-4">
           <div>
-            <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Admin Password</label>
+            <label className="text-xs font-semibold text-ds-body block mb-1.5">Admin Password</label>
             <input type="password" placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full px-4 py-3 rounded-xl border border-black/[0.06] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-zinc-900"
               value={secret} onChange={(e) => setSecret(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
           </div>
           {error && <p className="text-sm font-semibold text-red-500">{error}</p>}
           <button onClick={handleLogin} disabled={loading}
-            className="w-full py-3 rounded-xl bg-zinc-900 text-white font-bold text-sm hover:bg-zinc-700 transition-colors disabled:opacity-50">
+            className="w-full py-3 rounded-xl bg-ds-dark text-white font-bold text-sm hover:bg-ds-dark2 transition-colors disabled:opacity-50">
             {loading ? "Signing in…" : "Sign in →"}
           </button>
         </div>
@@ -163,7 +163,7 @@ function DownloadButton({ url, filename }: { url: string; filename: string }) {
   };
   return (
     <button onClick={handleDownload} disabled={loading}
-      className="flex-1 flex items-center justify-center gap-1 text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg bg-zinc-900 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50">
+      className="flex-1 flex items-center justify-center gap-1 text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg bg-ds-dark text-white hover:bg-ds-dark2 transition-colors disabled:opacity-50">
       {loading
         ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
         : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>}
@@ -256,51 +256,51 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Order list */}
-      <div className="w-80 flex-shrink-0 border-r border-zinc-200 flex flex-col bg-white">
-        <div className="p-4 border-b border-zinc-100">
+      <div className="w-80 flex-shrink-0 border-r border-black/[0.06] flex flex-col bg-white">
+        <div className="p-4 border-b border-black/[0.06]">
           <div className="relative mb-3">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" /></svg>
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" /></svg>
             <input type="text" placeholder="Search…"
-              className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+              className="w-full pl-9 pr-3 py-2 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
               value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-1 flex-wrap">
             {["All", ...STATUS_OPTIONS].map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-2.5 py-1 rounded-full text-[0.6rem] font-bold whitespace-nowrap transition-all ${filterStatus === s ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+                className={`px-2.5 py-1 rounded-full text-[0.6rem] font-bold whitespace-nowrap transition-all ${filterStatus === s ? "bg-ds-dark text-white" : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"}`}>
                 {s}
               </button>
             ))}
           </div>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-zinc-100">
-          {loading && <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>}
-          {!loading && filtered.length === 0 && <p className="text-center text-zinc-400 text-sm py-12">No orders</p>}
+          {loading && <p className="text-center text-ds-muted text-sm py-12">Loading…</p>}
+          {!loading && filtered.length === 0 && <p className="text-center text-ds-muted text-sm py-12">No orders</p>}
           {filtered.map((order) => (
             <button key={order.id} onClick={() => setSelected(order)}
-              className={`w-full text-left px-4 py-3.5 hover:bg-zinc-50 transition-colors ${selected?.id === order.id ? "bg-blue-50 border-l-2 border-l-blue-500" : ""}`}>
+              className={`w-full text-left px-4 py-3.5 hover:bg-ds-light-gray transition-colors ${selected?.id === order.id ? "bg-blue-50 border-l-2 border-l-blue-500" : ""}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-black text-zinc-900">#{order.ref}</span>
+                <span className="text-sm font-semibold text-ds-dark">#{order.ref}</span>
                 <StatusBadge status={order.status} />
               </div>
-              <p className="text-xs text-zinc-500 font-semibold">{order.customer_name}</p>
-              <p className="text-xs text-zinc-400 mt-0.5">{order.product_name} · ₹{order.total.toLocaleString("en-IN")}</p>
+              <p className="text-xs text-ds-body font-semibold">{order.customer_name}</p>
+              <p className="text-xs text-ds-muted mt-0.5">{order.product_name} · ₹{order.total.toLocaleString("en-IN")}</p>
               {order.is_shopify_order && order.shopify_domain && (
                 <p className="text-[0.65rem] font-bold mt-0.5" style={{ color: "#96bf48" }}>
                   Shopify · {order.merchant_name ?? order.merchant_email ?? order.shopify_domain}
                 </p>
               )}
-              <p className="text-[0.65rem] text-zinc-300 mt-0.5">{new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+              <p className="text-[0.65rem] text-ds-muted mt-0.5">{new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
             </button>
           ))}
         </div>
       </div>
 
       {/* Order detail */}
-      <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+      <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
         {!selected ? (
           <div className="h-full flex items-center justify-center">
-            <div className="text-center text-zinc-400">
+            <div className="text-center text-ds-muted">
               <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               <p className="font-semibold text-sm">Select an order to view details</p>
             </div>
@@ -311,9 +311,9 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
               {/* Header */}
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-zinc-400 font-semibold mb-0.5">Order</p>
-                  <h2 className="text-3xl font-black" style={{ letterSpacing: "-0.05em" }}>#{selected.ref}</h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">{new Date(selected.created_at).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "long", year: "numeric" })}</p>
+                  <p className="text-xs text-ds-muted font-semibold mb-0.5">Order</p>
+                  <h2 className="text-3xl font-semibold" style={{ letterSpacing: "-0.05em" }}>#{selected.ref}</h2>
+                  <p className="text-xs text-ds-muted mt-0.5">{new Date(selected.created_at).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "long", year: "numeric" })}</p>
                 </div>
                 <StatusBadge status={selected.status} />
               </div>
@@ -323,7 +323,7 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                 {selected.is_shopify_order && (
                   <div className="col-span-2 rounded-2xl p-5 border shadow-sm" style={{ background: "#f6faf0", borderColor: "rgba(150,191,72,0.3)" }}>
                     <p className="text-[0.62rem] font-bold uppercase tracking-widest mb-3" style={{ color: "#96bf48" }}>Shopify Merchant</p>
-                    <p className="font-bold text-zinc-900">{selected.merchant_name ?? "—"}</p>
+                    <p className="font-bold text-ds-dark">{selected.merchant_name ?? "—"}</p>
                     {selected.merchant_email && (
                       <a href={`mailto:${selected.merchant_email}`} className="text-xs text-blue-600 hover:underline block">{selected.merchant_email}</a>
                     )}
@@ -334,15 +334,15 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     )}
                   </div>
                 )}
-                <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Customer</p>
-                  <p className="font-bold text-zinc-900">{selected.customer_name}</p>
+                <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-3">Customer</p>
+                  <p className="font-bold text-ds-dark">{selected.customer_name}</p>
                   <a href={`mailto:${selected.customer_email}`} className="text-xs text-blue-600 hover:underline font-medium">{selected.customer_email}</a>
-                  <p className="text-xs text-zinc-500 mt-0.5">{selected.customer_phone}</p>
-                  <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{selected.address}, {selected.city} – {selected.pin}</p>
+                  <p className="text-xs text-ds-body mt-0.5">{selected.customer_phone}</p>
+                  <p className="text-xs text-ds-body mt-2 leading-relaxed">{selected.address}, {selected.city} – {selected.pin}</p>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Product</p>
+                <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-3">Product</p>
                   {[
                     { l: "Item", v: selected.product_name },
                     { l: "Colour", v: selected.color },
@@ -350,12 +350,12 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     { l: "Print", v: selected.print_tier ? `${selected.print_tier}` : "None" },
                   ].map(({ l, v }) => (
                     <div key={l} className="flex items-center justify-between py-0.5">
-                      <span className="text-xs text-zinc-400 font-medium">{l}</span>
-                      <span className="text-xs font-semibold text-zinc-800">{v}</span>
+                      <span className="text-xs text-ds-muted font-medium">{l}</span>
+                      <span className="text-xs font-semibold text-ds-dark">{v}</span>
                     </div>
                   ))}
                   {selected.neck_label && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 border border-orange-200">
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand/8 border border-orange-200">
                       <span className="text-xs">🏷️</span>
                       <span className="text-xs font-semibold text-orange-700">DTF Neck Label (+₹7/pc)</span>
                     </div>
@@ -364,8 +364,8 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
               </div>
 
               {/* Payment */}
-              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Payment Summary</p>
+              <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
+                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Payment Summary</p>
                 <div className="grid grid-cols-4 gap-3">
                   {[
                     { l: "Blank", v: `₹${selected.blank_price.toLocaleString("en-IN")}` },
@@ -373,24 +373,24 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     { l: "Shipping", v: selected.shipping === 0 ? "Free" : `₹${selected.shipping.toLocaleString("en-IN")}` },
                     { l: "Total", v: `₹${selected.total.toLocaleString("en-IN")}`, bold: true },
                   ].map(({ l, v, bold }) => (
-                    <div key={l} className="bg-zinc-50 rounded-xl p-3 text-center">
-                      <p className="text-[0.58rem] font-bold uppercase tracking-widest text-zinc-400">{l}</p>
-                      <p className={`text-sm mt-0.5 ${bold ? "font-black text-zinc-900" : "font-semibold text-zinc-700"}`}>{v}</p>
+                    <div key={l} className="bg-ds-light-gray rounded-xl p-3 text-center">
+                      <p className="text-[0.58rem] font-bold uppercase tracking-widest text-ds-muted">{l}</p>
+                      <p className={`text-sm mt-0.5 ${bold ? "font-semibold text-ds-dark" : "font-semibold text-ds-body"}`}>{v}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Shipping Info */}
-              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Shipping Info</p>
+              <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
+                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Shipping Info</p>
 
                 {/* Show existing tracking if set */}
                 {selected.courier && selected.tracking_number && (
                   <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[0.6rem] font-bold uppercase tracking-widest text-blue-400 mb-0.5">Current tracking</p>
-                      <p className="text-sm font-black text-blue-900">{selected.courier} · <span className="tracking-wider">{selected.tracking_number}</span></p>
+                      <p className="text-sm font-semibold text-blue-900">{selected.courier} · <span className="tracking-wider">{selected.tracking_number}</span></p>
                     </div>
                     <span className="text-[0.6rem] font-bold text-blue-400 bg-blue-100 px-2 py-0.5 rounded-full">Saved</span>
                   </div>
@@ -399,11 +399,11 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                 <div className="flex flex-col gap-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 block mb-1">Courier</label>
+                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted block mb-1">Courier</label>
                       <select
                         value={trackingForm.courier}
                         onChange={(e) => setTrackingForm({ ...trackingForm, courier: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                        className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
                       >
                         <option value="">Select courier…</option>
                         {["Delhivery","Blue Dart","DTDC","Xpressbees","Ecom Express","Shadow Fax","Ekart","Shiprocket","Other"].map((c) => (
@@ -412,13 +412,13 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                       </select>
                     </div>
                     <div>
-                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 block mb-1">AWB / Tracking No.</label>
+                      <label className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted block mb-1">AWB / Tracking No.</label>
                       <input
                         type="text"
                         placeholder="e.g. 1234567890"
                         value={trackingForm.awb}
                         onChange={(e) => setTrackingForm({ ...trackingForm, awb: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                        className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
                       />
                     </div>
                   </div>
@@ -459,15 +459,15 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                             Paid via Halftone Wallet — refund will go back instantly
                           </div>
                         ) : isRazorpay ? (
-                          <div className="text-xs text-zinc-500 font-medium">
-                            Payment ID: <span className="font-mono text-zinc-700">{pid}</span>
+                          <div className="text-xs text-ds-body font-medium">
+                            Payment ID: <span className="font-mono text-ds-body">{pid}</span>
                           </div>
                         ) : (
-                          <div className="text-xs text-zinc-500 italic">This was a free order. No refund needed.</div>
+                          <div className="text-xs text-ds-body italic">This was a free order. No refund needed.</div>
                         );
                       })()}
-                      <div className="text-xs text-zinc-600 font-medium">
-                        Refund amount: <span className="font-bold text-zinc-900">₹{selected.total.toLocaleString("en-IN")}</span>
+                      <div className="text-xs text-ds-body font-medium">
+                        Refund amount: <span className="font-bold text-ds-dark">₹{selected.total.toLocaleString("en-IN")}</span>
                       </div>
                       <textarea
                         value={cancelForm.reason}
@@ -504,9 +504,9 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
               )}
 
               {/* Print Files — always shown */}
-              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
+              <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400">Print Files</p>
+                  <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted">Print Files</p>
                   {(selected.front_design_url || selected.back_design_url) && (
                     <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">
                       {[selected.front_design_url && "Front", selected.back_design_url && "Back"].filter(Boolean).join(" + ")} received
@@ -514,7 +514,7 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                   )}
                 </div>
                 {!(selected.front_design_url || selected.back_design_url || selected.mockup_url || selected.back_mockup_url) ? (
-                  <div className="flex items-center gap-2 text-zinc-400 text-xs py-2">
+                  <div className="flex items-center gap-2 text-ds-muted text-xs py-2">
                     <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -525,24 +525,24 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     {/* Placement mockups — shown large so printer can see position clearly */}
                     {(selected.mockup_url || selected.back_mockup_url) && (
                       <div>
-                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 mb-2">Placement mockup</p>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted mb-2">Placement mockup</p>
                         <div className="flex gap-6 flex-wrap items-start">
                           {([
                             { url: selected.mockup_url,      label: "Front",  file: `${selected.ref}-mockup-front.jpg` },
                             { url: selected.back_mockup_url, label: "Back",   file: `${selected.ref}-mockup-back.jpg`  },
                           ] as const).map(({ url, label, file }) => url && (
                             <div key={label} className="flex flex-col gap-2">
-                              <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-500">{label}</p>
+                              <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-body">{label}</p>
                               <div className="flex gap-3 items-start">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={url} alt={`${label} placement mockup`}
-                                  className="w-44 h-auto rounded-xl border border-zinc-200 bg-zinc-50 object-contain" />
+                                  className="w-44 h-auto rounded-xl border border-black/[0.06] bg-ds-light-gray object-contain" />
                                 <div className="flex flex-col gap-1.5">
-                                  <p className="text-xs text-zinc-500 leading-relaxed max-w-[140px]">
+                                  <p className="text-xs text-ds-body leading-relaxed max-w-[140px]">
                                     {label} placement position and scale.
                                   </p>
                                   <a href={url} target="_blank" rel="noopener noreferrer"
-                                    className="text-center text-[0.65rem] font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
+                                    className="text-center text-[0.65rem] font-semibold px-3 py-1.5 rounded-lg border border-black/[0.06] bg-white hover:border-zinc-400 transition-colors text-ds-body">
                                     View full ↗
                                   </a>
                                   <DownloadButton url={url} filename={file} />
@@ -557,20 +557,20 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
                     {/* Raw design files */}
                     {(selected.front_design_url || selected.back_design_url) && (
                       <div>
-                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 mb-2">Raw design files (for print)</p>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted mb-2">Raw design files (for print)</p>
                         <div className="flex gap-3 flex-wrap">
                           {([
                             { url: selected.front_design_url, label: "Front" },
                             { url: selected.back_design_url,  label: "Back"  },
                           ] as const).map(({ url, label }) => url && (
-                            <div key={label} className="flex flex-col gap-2 p-3 rounded-xl border border-zinc-100 bg-zinc-50">
+                            <div key={label} className="flex flex-col gap-2 p-3 rounded-xl border border-black/[0.06] bg-ds-light-gray">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={url} alt={`${label} design`}
-                                className="w-28 h-28 object-contain rounded-lg bg-white border border-zinc-100" />
-                              <p className="text-[0.65rem] font-bold text-zinc-500 text-center">{label} print</p>
+                                className="w-28 h-28 object-contain rounded-lg bg-white border border-black/[0.06]" />
+                              <p className="text-[0.65rem] font-bold text-ds-body text-center">{label} print</p>
                               <div className="flex gap-1.5">
                                 <a href={url} target="_blank" rel="noopener noreferrer"
-                                  className="flex-1 text-center text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 transition-colors text-zinc-600">
+                                  className="flex-1 text-center text-[0.65rem] font-semibold px-2 py-1.5 rounded-lg border border-black/[0.06] bg-white hover:border-zinc-400 transition-colors text-ds-body">
                                   View ↗
                                 </a>
                                 <DownloadButton url={url} filename={`${selected.ref}-${label.toLowerCase()}-design.png`} />
@@ -585,50 +585,50 @@ function OrdersPanel({ secret, orders, loading, onRefresh }: { secret: string; o
               </div>
 
               {/* Timeline */}
-              <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm">
-                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Order Timeline</p>
+              <div className="bg-white rounded-2xl p-5 border border-black/[0.06] shadow-sm">
+                <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Order Timeline</p>
                 {selected.milestones.length === 0 && (
-                  <p className="text-xs text-zinc-400 font-medium mb-4">No updates yet.</p>
+                  <p className="text-xs text-ds-muted font-medium mb-4">No updates yet.</p>
                 )}
                 {selected.milestones.map((m, i) => (
                   <div key={m.id} className="flex gap-3 mb-3 last:mb-0">
                     <div className="flex flex-col items-center pt-1">
-                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-900 flex-shrink-0" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-ds-dark flex-shrink-0" />
                       {i < selected.milestones.length - 1 && <div className="w-px flex-1 my-1 bg-zinc-200" style={{ minHeight: 18 }} />}
                     </div>
                     <div className="pb-1">
-                      <p className="text-sm font-semibold text-zinc-900">{m.title}</p>
-                      {m.description && <p className="text-xs text-zinc-500 mt-0.5">{m.description}</p>}
-                      <p className="text-[0.62rem] text-zinc-300 mt-0.5">{new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {new Date(m.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</p>
+                      <p className="text-sm font-semibold text-ds-dark">{m.title}</p>
+                      {m.description && <p className="text-xs text-ds-body mt-0.5">{m.description}</p>}
+                      <p className="text-[0.62rem] text-ds-muted mt-0.5">{new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {new Date(m.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</p>
                     </div>
                   </div>
                 ))}
 
                 {/* Add update */}
-                <div className="mt-5 pt-5 border-t border-zinc-100">
-                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400 mb-3">Add Update</p>
+                <div className="mt-5 pt-5 border-t border-black/[0.06]">
+                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-ds-muted mb-3">Add Update</p>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {["Design Confirmed","Printing Started","Print Complete","Packed","Shipped","Out for Delivery","Delivered"].map((t) => (
                       <button key={t} onClick={() => setMilestoneForm({ ...milestoneForm, title: t })}
-                        className={`px-2.5 py-1 rounded-full text-[0.65rem] font-semibold border transition-all ${milestoneForm.title === t ? "bg-zinc-900 text-white border-zinc-900" : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400"}`}>
+                        className={`px-2.5 py-1 rounded-full text-[0.65rem] font-semibold border transition-all ${milestoneForm.title === t ? "bg-ds-dark text-white border-zinc-900" : "bg-white text-ds-body border-black/[0.06] hover:border-zinc-400"}`}>
                         {t}
                       </button>
                     ))}
                   </div>
                   <div className="flex flex-col gap-2">
                     <input type="text" placeholder="Or type a custom title…"
-                      className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                      className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
                       value={milestoneForm.title} onChange={(e) => setMilestoneForm({ ...milestoneForm, title: e.target.value })} />
                     <input type="text" placeholder="Details for customer (optional)"
-                      className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                      className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
                       value={milestoneForm.description} onChange={(e) => setMilestoneForm({ ...milestoneForm, description: e.target.value })} />
-                    <select className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-zinc-50"
+                    <select className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 bg-ds-light-gray"
                       value={milestoneForm.status} onChange={(e) => setMilestoneForm({ ...milestoneForm, status: e.target.value })}>
                       <option value="">Don&apos;t change order status</option>
                       {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                     <button onClick={addMilestone} disabled={adding || !milestoneForm.title}
-                      className="w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40">
+                      className="w-full py-3 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors disabled:opacity-40">
                       {adding ? "Adding…" : "Add Update →"}
                     </button>
                   </div>
@@ -704,16 +704,16 @@ function CouponsPanel({ secret }: { secret: string }) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Coupon Codes</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""}</p>
+            <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Coupon Codes</h2>
+            <p className="text-xs text-ds-muted mt-0.5">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""}</p>
           </div>
           <button onClick={() => setShowCreate(true)}
-            className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors flex items-center gap-2">
+            className="px-4 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             Create coupon
           </button>
@@ -723,64 +723,64 @@ function CouponsPanel({ secret }: { secret: string }) {
         <AnimatePresence>
           {showCreate && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              className="bg-white rounded-2xl border border-zinc-200 p-6 mb-6 shadow-sm">
+              className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-zinc-900">New Coupon</h3>
-                <button onClick={() => setShowCreate(false)} className="text-zinc-400 hover:text-zinc-700 text-xl leading-none">&times;</button>
+                <h3 className="font-bold text-ds-dark">New Coupon</h3>
+                <button onClick={() => setShowCreate(false)} className="text-ds-muted hover:text-ds-body text-xl leading-none">&times;</button>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Code *</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Code *</label>
                   <input type="text" placeholder="SUMMER20" value={form.code}
                     onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-zinc-900 uppercase tracking-wider" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-zinc-900 uppercase tracking-wider" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Description</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Description</label>
                   <input type="text" placeholder="Summer sale" value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Discount Type</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Discount Type</label>
                   <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value as "percent" | "fixed" })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-zinc-900">
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-zinc-900">
                     <option value="percent">Percentage (%)</option>
                     <option value="fixed">Fixed amount (₹)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Discount Value *</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Discount Value *</label>
                   <input type="number" placeholder={form.discount_type === "percent" ? "20" : "100"} value={form.discount_value}
                     onChange={(e) => setForm({ ...form, discount_value: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Min Order (₹)</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Min Order (₹)</label>
                   <input type="number" placeholder="0" value={form.min_order}
                     onChange={(e) => setForm({ ...form, min_order: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Max Uses (blank = unlimited)</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Max Uses (blank = unlimited)</label>
                   <input type="number" placeholder="100" value={form.max_uses}
                     onChange={(e) => setForm({ ...form, max_uses: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Expiry Date (optional)</label>
+                  <label className="text-xs font-semibold text-ds-body block mb-1.5">Expiry Date (optional)</label>
                   <input type="date" value={form.expires_at}
                     onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" />
                 </div>
               </div>
               <div className="flex gap-3 mt-5">
                 <button onClick={() => setShowCreate(false)}
-                  className="flex-1 py-3 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+                  className="flex-1 py-3 rounded-xl border border-black/[0.06] text-sm font-semibold text-ds-body hover:bg-ds-light-gray transition-colors">
                   Cancel
                 </button>
                 <button onClick={createCoupon} disabled={saving || !form.code || !form.discount_value}
-                  className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40">
+                  className="flex-1 py-3 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors disabled:opacity-40">
                   {saving ? "Creating…" : "Create Coupon →"}
                 </button>
               </div>
@@ -789,9 +789,9 @@ function CouponsPanel({ secret }: { secret: string }) {
         </AnimatePresence>
 
         {/* Coupon list */}
-        {loading && <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>}
+        {loading && <p className="text-center text-ds-muted text-sm py-12">Loading…</p>}
         {!loading && coupons.length === 0 && (
-          <div className="text-center py-16 text-zinc-400">
+          <div className="text-center py-16 text-ds-muted">
             <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z" /></svg>
             <p className="font-semibold text-sm">No coupons yet</p>
             <p className="text-xs mt-1">Create your first coupon code above</p>
@@ -799,21 +799,21 @@ function CouponsPanel({ secret }: { secret: string }) {
         )}
         <div className="flex flex-col gap-3">
           {coupons.map((c) => (
-            <div key={c.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${c.active ? "border-zinc-200" : "border-zinc-100 opacity-60"}`}>
+            <div key={c.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${c.active ? "border-black/[0.06]" : "border-black/[0.06] opacity-60"}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="font-black text-zinc-900 tracking-wider text-lg" style={{ letterSpacing: "0.04em", fontFamily: "monospace" }}>{c.code}</span>
-                    <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${c.active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
+                    <span className="font-semibold text-ds-dark tracking-wider text-lg" style={{ letterSpacing: "0.04em", fontFamily: "monospace" }}>{c.code}</span>
+                    <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${c.active ? "bg-green-100 text-green-700" : "bg-black/[0.05] text-ds-body"}`}>
                       {c.active ? "ACTIVE" : "DISABLED"}
                     </span>
                     {c.expires_at && new Date(c.expires_at) < new Date() && (
                       <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600">EXPIRED</span>
                     )}
                   </div>
-                  {c.description && <p className="text-xs text-zinc-500 mb-2">{c.description}</p>}
-                  <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
-                    <span className="font-semibold text-zinc-800">
+                  {c.description && <p className="text-xs text-ds-body mb-2">{c.description}</p>}
+                  <div className="flex flex-wrap gap-3 text-xs text-ds-body">
+                    <span className="font-semibold text-ds-dark">
                       {c.discount_type === "percent" ? `${c.discount_value}% off` : `₹${c.discount_value} off`}
                     </span>
                     {c.min_order > 0 && <span>Min ₹{c.min_order.toLocaleString("en-IN")}</span>}
@@ -824,12 +824,12 @@ function CouponsPanel({ secret }: { secret: string }) {
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {/* Toggle */}
                   <button onClick={() => toggleActive(c.id, !c.active)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${c.active ? "bg-zinc-900" : "bg-zinc-300"}`}>
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${c.active ? "bg-ds-dark" : "bg-zinc-300"}`}>
                     <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${c.active ? "translate-x-5" : "translate-x-0.5"}`} />
                   </button>
                   {/* Delete */}
                   <button onClick={() => deleteCoupon(c.id)} disabled={deleting === c.id}
-                    className="p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
+                    className="p-1.5 rounded-lg text-ds-muted hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </div>
@@ -890,24 +890,24 @@ function ZoneEditor({
   mockupSrc: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-      <p className="font-bold text-zinc-900 mb-4 text-sm">{label}</p>
+    <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
+      <p className="font-bold text-ds-dark mb-4 text-sm">{label}</p>
       <div className="grid grid-cols-2 gap-3 mb-4">
         {(["left", "top", "width", "height"] as (keyof PrintZone)[]).map((field) => (
           <div key={field}>
-            <label className="text-xs font-semibold text-zinc-500 block mb-1 capitalize">{field} %</label>
+            <label className="text-xs font-semibold text-ds-body block mb-1 capitalize">{field} %</label>
             <input
               type="number"
               step={0.1}
               value={zone[field]}
               onChange={(e) => onChange({ ...zone, [field]: Number(e.target.value) })}
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
             />
           </div>
         ))}
       </div>
       {/* Visual preview — real product photo */}
-      <div className="relative w-full overflow-hidden rounded-xl border border-zinc-100">
+      <div className="relative w-full overflow-hidden rounded-xl border border-black/[0.06]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={mockupSrc} alt={label} className="w-full block" draggable={false} />
         <div
@@ -1055,22 +1055,22 @@ function StudioPanel({ secret }: { secret: string }) {
   const updateColor = (i: number, field: string, value: string | boolean) =>
     setForm((f) => ({ ...f, colors: f.colors.map((c, idx) => idx === i ? { ...c, [field]: value } : c) }));
 
-  const INPUT = "w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900";
+  const INPUT = "w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900";
 
   return (
-    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
       <div className="max-w-4xl mx-auto">
         {/* Sub-tab nav */}
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setSubTab("products")}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "products" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "products" ? "bg-ds-dark text-white" : "bg-white border border-black/[0.06] text-ds-body hover:bg-ds-light-gray"}`}
           >
             Products
           </button>
           <button
             onClick={() => setSubTab("zones")}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "zones" ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${subTab === "zones" ? "bg-ds-dark text-white" : "bg-white border border-black/[0.06] text-ds-body hover:bg-ds-light-gray"}`}
           >
             Print Zones
           </button>
@@ -1081,12 +1081,12 @@ function StudioPanel({ secret }: { secret: string }) {
           <>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Studio Products</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">{PRODUCTS.length + products.length} product{(PRODUCTS.length + products.length) !== 1 ? "s" : ""} ({PRODUCTS.length} built-in)</p>
+                <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Studio Products</h2>
+                <p className="text-xs text-ds-muted mt-0.5">{PRODUCTS.length + products.length} product{(PRODUCTS.length + products.length) !== 1 ? "s" : ""} ({PRODUCTS.length} built-in)</p>
               </div>
               <button
                 onClick={openCreate}
-                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 New Product
@@ -1100,32 +1100,32 @@ function StudioPanel({ secret }: { secret: string }) {
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="bg-white rounded-2xl border border-zinc-200 p-6 mb-6 shadow-sm"
+                  className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-6 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-5">
-                    <h3 className="font-bold text-zinc-900">{editingId ? "Edit Product" : "New Product"}</h3>
-                    <button onClick={closeForm} className="text-zinc-400 hover:text-zinc-700 text-xl leading-none">&times;</button>
+                    <h3 className="font-bold text-ds-dark">{editingId ? "Edit Product" : "New Product"}</h3>
+                    <button onClick={closeForm} className="text-ds-muted hover:text-ds-body text-xl leading-none">&times;</button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Name *</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">Name *</label>
                       <input type="text" placeholder="Classic Tee" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={INPUT} />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">GSM</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">GSM</label>
                       <input type="text" placeholder="220 GSM" value={form.gsm} onChange={(e) => setForm({ ...form, gsm: e.target.value })} className={INPUT} />
                     </div>
                     <div className="col-span-2">
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Description</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">Description</label>
                       <textarea rows={2} placeholder="Product description…" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={INPUT + " resize-none"} />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Blank Price (₹) *</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">Blank Price (₹) *</label>
                       <input type="number" placeholder="599" value={form.blank_price} onChange={(e) => setForm({ ...form, blank_price: e.target.value })} className={INPUT} />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Type</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">Type</label>
                       <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "regular" | "oversized" | "baby" })} className={INPUT}>
                         <option value="regular">Regular</option>
                         <option value="oversized">Oversized</option>
@@ -1133,7 +1133,7 @@ function StudioPanel({ secret }: { secret: string }) {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-zinc-500 block mb-1.5">Size Guide Key</label>
+                      <label className="text-xs font-semibold text-ds-body block mb-1.5">Size Guide Key</label>
                       <select value={form.size_guide_key} onChange={(e) => setForm({ ...form, size_guide_key: e.target.value })} className={INPUT}>
                         <option value="regular">regular</option>
                         <option value="oversized-ft">oversized-ft</option>
@@ -1145,22 +1145,22 @@ function StudioPanel({ secret }: { secret: string }) {
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, active: !form.active })}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${form.active ? "bg-zinc-900" : "bg-zinc-300"}`}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${form.active ? "bg-ds-dark" : "bg-zinc-300"}`}
                       >
                         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${form.active ? "translate-x-5" : "translate-x-0.5"}`} />
                       </button>
-                      <label className="text-xs font-semibold text-zinc-500">Active</label>
+                      <label className="text-xs font-semibold text-ds-body">Active</label>
                     </div>
                   </div>
 
                   {/* Colors */}
                   <div className="mb-5">
                     <div className="flex items-center justify-between mb-3">
-                      <label className="text-xs font-semibold text-zinc-500">Colors</label>
+                      <label className="text-xs font-semibold text-ds-body">Colors</label>
                       <button
                         type="button"
                         onClick={addColor}
-                        className="text-xs font-bold text-zinc-900 hover:text-zinc-600 flex items-center gap-1"
+                        className="text-xs font-bold text-ds-dark hover:text-ds-body flex items-center gap-1"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                         Add color
@@ -1168,18 +1168,18 @@ function StudioPanel({ secret }: { secret: string }) {
                     </div>
                     <div className="flex flex-col gap-3">
                       {form.colors.map((c, i) => (
-                        <div key={i} className="bg-zinc-50 rounded-xl p-3 border border-zinc-100">
+                        <div key={i} className="bg-ds-light-gray rounded-xl p-3 border border-black/[0.06]">
                           <div className="grid grid-cols-2 gap-2 mb-2">
                             <input type="text" placeholder="Name (e.g. White)" value={c.name} onChange={(e) => updateColor(i, "name", e.target.value)} className={INPUT} />
                             <div className="flex items-center gap-2">
-                              <input type="color" value={c.hex} onChange={(e) => updateColor(i, "hex", e.target.value)} className="w-10 h-10 rounded-lg border border-zinc-200 p-0.5 cursor-pointer" />
+                              <input type="color" value={c.hex} onChange={(e) => updateColor(i, "hex", e.target.value)} className="w-10 h-10 rounded-lg border border-black/[0.06] p-0.5 cursor-pointer" />
                               <input type="text" placeholder="#ffffff" value={c.hex} onChange={(e) => updateColor(i, "hex", e.target.value)} className={INPUT} />
                             </div>
                             <input type="text" placeholder="Mockup Front URL" value={c.mockupFront} onChange={(e) => updateColor(i, "mockupFront", e.target.value)} className={INPUT} />
                             <input type="text" placeholder="Mockup Back URL" value={c.mockupBack} onChange={(e) => updateColor(i, "mockupBack", e.target.value)} className={INPUT} />
                           </div>
                           <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-2 text-xs text-zinc-500 font-medium cursor-pointer">
+                            <label className="flex items-center gap-2 text-xs text-ds-body font-medium cursor-pointer">
                               <input type="checkbox" checked={c.border} onChange={(e) => updateColor(i, "border", e.target.checked)} className="rounded" />
                               Show border
                             </label>
@@ -1188,16 +1188,16 @@ function StudioPanel({ secret }: { secret: string }) {
                         </div>
                       ))}
                       {form.colors.length === 0 && (
-                        <p className="text-xs text-zinc-300 text-center py-3">No colors added yet</p>
+                        <p className="text-xs text-ds-muted text-center py-3">No colors added yet</p>
                       )}
                     </div>
                   </div>
 
                   <div className="flex gap-3">
-                    <button onClick={closeForm} className="flex-1 py-3 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+                    <button onClick={closeForm} className="flex-1 py-3 rounded-xl border border-black/[0.06] text-sm font-semibold text-ds-body hover:bg-ds-light-gray transition-colors">
                       Cancel
                     </button>
-                    <button onClick={saveProduct} disabled={saving || !form.name || !form.blank_price} className="flex-1 py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40">
+                    <button onClick={saveProduct} disabled={saving || !form.name || !form.blank_price} className="flex-1 py-3 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors disabled:opacity-40">
                       {saving ? "Saving…" : editingId ? "Update Product →" : "Create Product →"}
                     </button>
                   </div>
@@ -1206,61 +1206,61 @@ function StudioPanel({ secret }: { secret: string }) {
             </AnimatePresence>
 
             {/* Product list */}
-            {productsLoading && <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>}
+            {productsLoading && <p className="text-center text-ds-muted text-sm py-12">Loading…</p>}
             {!productsLoading && (
               <div className="flex flex-col gap-3">
                 {/* ── Built-in (hardcoded) products ── */}
-                <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 px-1">Built-in products</p>
+                <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted px-1">Built-in products</p>
                 {PRODUCTS.map((p) => (
-                  <div key={p.id} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
+                  <div key={p.id} className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
+                          <span className="font-semibold text-ds-dark text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
                           <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">BUILT-IN</span>
                           <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">ACTIVE</span>
                         </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+                        <div className="flex flex-wrap gap-3 text-xs text-ds-body">
                           {p.gsm && <span className="font-mono">{p.gsm}</span>}
-                          <span className="font-semibold text-zinc-800">₹{p.blankPrice.toLocaleString("en-IN")}</span>
+                          <span className="font-semibold text-ds-dark">₹{p.blankPrice.toLocaleString("en-IN")}</span>
                           <span className="capitalize">{p.id.includes("oversized") ? "oversized" : p.id.includes("baby") ? "baby" : "regular"}</span>
                           <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>
                         </div>
                       </div>
-                      <span className="text-[0.65rem] text-zinc-400 font-medium self-center">Defined in code</span>
+                      <span className="text-[0.65rem] text-ds-muted font-medium self-center">Defined in code</span>
                     </div>
                   </div>
                 ))}
 
                 {/* ── DB products ── */}
                 {products.length > 0 && (
-                  <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 px-1 mt-2">Custom products</p>
+                  <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted px-1 mt-2">Custom products</p>
                 )}
                 {products.map((p) => (
-                  <div key={p.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${p.active ? "border-zinc-200" : "border-zinc-100 opacity-60"}`}>
+                  <div key={p.id} className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${p.active ? "border-black/[0.06]" : "border-black/[0.06] opacity-60"}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-black text-zinc-900 text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
-                          <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
+                          <span className="font-semibold text-ds-dark text-base" style={{ letterSpacing: "-0.02em" }}>{p.name}</span>
+                          <span className={`text-[0.6rem] font-bold px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-black/[0.05] text-ds-body"}`}>
                             {p.active ? "ACTIVE" : "INACTIVE"}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+                        <div className="flex flex-wrap gap-3 text-xs text-ds-body">
                           {p.gsm && <span className="font-mono">{p.gsm}</span>}
-                          <span className="font-semibold text-zinc-800">₹{p.blank_price.toLocaleString("en-IN")}</span>
+                          <span className="font-semibold text-ds-dark">₹{p.blank_price.toLocaleString("en-IN")}</span>
                           <span className="capitalize">{p.type}</span>
                           {p.colors?.length > 0 && <span>{p.colors.length} color{p.colors.length !== 1 ? "s" : ""}</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <button onClick={() => toggleActive(p.id, !p.active)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.active ? "bg-zinc-900" : "bg-zinc-300"}`}>
+                        <button onClick={() => toggleActive(p.id, !p.active)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.active ? "bg-ds-dark" : "bg-zinc-300"}`}>
                           <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${p.active ? "translate-x-5" : "translate-x-0.5"}`} />
                         </button>
-                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+                        <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-ds-muted hover:text-ds-body hover:bg-black/[0.05] transition-colors">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         </button>
-                        <button onClick={() => deleteProduct(p.id)} disabled={deleting === p.id} className="p-1.5 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
+                        <button onClick={() => deleteProduct(p.id)} disabled={deleting === p.id} className="p-1.5 rounded-lg text-ds-muted hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                       </div>
@@ -1269,7 +1269,7 @@ function StudioPanel({ secret }: { secret: string }) {
                 ))}
 
                 {products.length === 0 && (
-                  <p className="text-xs text-zinc-400 text-center py-4">No custom products yet — create one above</p>
+                  <p className="text-xs text-ds-muted text-center py-4">No custom products yet — create one above</p>
                 )}
               </div>
             )}
@@ -1281,19 +1281,19 @@ function StudioPanel({ secret }: { secret: string }) {
           <>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Print Zone Calibration</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">Adjust the print zone position and size for each garment type</p>
+                <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Print Zone Calibration</h2>
+                <p className="text-xs text-ds-muted mt-0.5">Adjust the print zone position and size for each garment type</p>
               </div>
               <button
                 onClick={saveZones}
                 disabled={zonesSaving}
-                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors disabled:opacity-40"
+                className="px-4 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors disabled:opacity-40"
               >
                 {zonesSaving ? "Saving…" : zonesSaved ? "Saved ✓" : "Save Zones"}
               </button>
             </div>
             {zonesLoading ? (
-              <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>
+              <p className="text-center text-ds-muted text-sm py-12">Loading…</p>
             ) : (
               <div className="flex flex-col gap-5">
                 <ZoneEditor label="Regular Tee" zone={zones.regular} onChange={(z) => setZones({ ...zones, regular: z })} mockupSrc="/mockups/regular-tee/Mannequin_Image4.png" />
@@ -1383,14 +1383,14 @@ function WalletsPanel({ secret }: { secret: string }) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 px-8 py-6 border-b border-zinc-200 bg-white">
+      <div className="flex-shrink-0 px-8 py-6 border-b border-black/[0.06] bg-white">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Wallets</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">{wallets.length} wallet{wallets.length !== 1 ? "s" : ""}</p>
+            <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Wallets</h2>
+            <p className="text-xs text-ds-muted mt-0.5">{wallets.length} wallet{wallets.length !== 1 ? "s" : ""}</p>
           </div>
           <button onClick={fetchWallets}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-black/[0.06] bg-white text-sm font-semibold text-ds-body hover:bg-ds-light-gray transition-colors">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             Refresh
           </button>
@@ -1401,53 +1401,53 @@ function WalletsPanel({ secret }: { secret: string }) {
           {[
             { label: "Total Outstanding Credit", value: `₹${totalCredit.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-emerald-600" },
             { label: "Users with Balance", value: String(usersWithBalance), accent: "text-blue-600" },
-            { label: "Total Wallets", value: String(wallets.length), accent: "text-zinc-900" },
+            { label: "Total Wallets", value: String(wallets.length), accent: "text-ds-dark" },
           ].map((s) => (
-            <div key={s.label} className="bg-zinc-50 rounded-2xl px-5 py-4">
-              <p className="text-xs text-zinc-400 font-semibold mb-1">{s.label}</p>
-              <p className={`text-2xl font-black ${s.accent}`} style={{ letterSpacing: "-0.04em" }}>{s.value}</p>
+            <div key={s.label} className="bg-ds-light-gray rounded-2xl px-5 py-4">
+              <p className="text-xs text-ds-muted font-semibold mb-1">{s.label}</p>
+              <p className={`text-2xl font-semibold ${s.accent}`} style={{ letterSpacing: "-0.04em" }}>{s.value}</p>
             </div>
           ))}
         </div>
 
         {/* Search */}
         <div className="mt-4 relative">
-          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:border-zinc-400 bg-white" />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 bg-white" />
         </div>
       </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto px-8 py-4 space-y-3">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-zinc-400 text-sm">Loading…</div>
+          <div className="flex items-center justify-center py-16 text-ds-muted text-sm">Loading…</div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="font-semibold text-sm text-zinc-600">No wallets found</p>
-            <p className="text-xs text-zinc-400 mt-1">Wallets are created automatically when users top up.</p>
+            <p className="font-semibold text-sm text-ds-body">No wallets found</p>
+            <p className="text-xs text-ds-muted mt-1">Wallets are created automatically when users top up.</p>
           </div>
         ) : (
           filtered.map((w) => (
-            <div key={w.user_id} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
+            <div key={w.user_id} className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
               {/* Row header */}
-              <div className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-zinc-50 transition-colors"
+              <div className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-ds-light-gray transition-colors"
                 onClick={() => setExpanded(expanded === w.user_id ? null : w.user_id)}>
-                <div className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-100 flex-shrink-0">
-                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                <div className="flex items-center justify-center w-9 h-9 rounded-full bg-black/[0.05] flex-shrink-0">
+                  <svg className="w-4 h-4 text-ds-body" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-zinc-900 truncate">{w.name ?? w.email ?? w.user_id}</p>
-                  <p className="text-xs text-zinc-400 truncate">{w.email ?? "—"}{w.company ? ` · ${w.company}` : ""}</p>
+                  <p className="text-sm font-bold text-ds-dark truncate">{w.name ?? w.email ?? w.user_id}</p>
+                  <p className="text-xs text-ds-muted truncate">{w.email ?? "—"}{w.company ? ` · ${w.company}` : ""}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className={`text-lg font-black ${w.balance > 0 ? "text-emerald-600" : "text-zinc-400"}`}
+                  <p className={`text-lg font-semibold ${w.balance > 0 ? "text-emerald-600" : "text-ds-muted"}`}
                     style={{ letterSpacing: "-0.03em" }}>
                     ₹{w.balance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-[10px] text-zinc-400">{w.transactions.length} txn{w.transactions.length !== 1 ? "s" : ""}</p>
+                  <p className="text-[10px] text-ds-muted">{w.transactions.length} txn{w.transactions.length !== 1 ? "s" : ""}</p>
                 </div>
-                <svg className={`w-4 h-4 text-zinc-400 flex-shrink-0 transition-transform ${expanded === w.user_id ? "rotate-180" : ""}`}
+                <svg className={`w-4 h-4 text-ds-muted flex-shrink-0 transition-transform ${expanded === w.user_id ? "rotate-180" : ""}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -1458,7 +1458,7 @@ function WalletsPanel({ secret }: { secret: string }) {
                 {expanded === w.user_id && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
-                    className="border-t border-zinc-100 overflow-hidden">
+                    className="border-t border-black/[0.06] overflow-hidden">
                     <div className="px-5 py-4 space-y-4">
 
                       {/* Adjust balance buttons */}
@@ -1476,32 +1476,32 @@ function WalletsPanel({ secret }: { secret: string }) {
                           </button>
                         </div>
                       ) : (
-                        <div className="bg-zinc-50 rounded-xl p-4 space-y-3">
+                        <div className="bg-ds-light-gray rounded-xl p-4 space-y-3">
                           <div className="flex gap-2">
                             <button onClick={() => setAdjType("credit")}
-                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "credit" ? "bg-emerald-500 text-white" : "bg-white border border-zinc-200 text-zinc-600"}`}>
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "credit" ? "bg-emerald-500 text-white" : "bg-white border border-black/[0.06] text-ds-body"}`}>
                               + Credit
                             </button>
                             <button onClick={() => setAdjType("debit")}
-                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "debit" ? "bg-red-500 text-white" : "bg-white border border-zinc-200 text-zinc-600"}`}>
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-colors ${adjType === "debit" ? "bg-red-500 text-white" : "bg-white border border-black/[0.06] text-ds-body"}`}>
                               − Deduct
                             </button>
                           </div>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ds-muted font-bold text-sm">₹</span>
                             <input type="number" min="1" placeholder="Amount" value={adjAmount} onChange={(e) => setAdjAmount(e.target.value)}
-                              className="w-full pl-7 pr-3 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold focus:outline-none focus:border-zinc-400" />
+                              className="w-full pl-7 pr-3 py-2.5 rounded-xl border border-black/[0.06] text-sm font-bold focus:outline-none focus:border-zinc-400" />
                           </div>
                           <input placeholder="Note (optional)" value={adjDesc} onChange={(e) => setAdjDesc(e.target.value)}
-                            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:border-zinc-400" />
+                            className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400" />
                           {adjError && <p className="text-xs text-red-500">{adjError}</p>}
                           <div className="flex gap-2">
                             <button onClick={() => handleAdjust(w.user_id)} disabled={adjLoading}
-                              className={`flex-1 py-2.5 rounded-xl text-sm font-black text-white transition-colors disabled:opacity-60 ${adjType === "credit" ? "bg-emerald-500 hover:bg-emerald-600" : "bg-red-500 hover:bg-red-600"}`}>
+                              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-60 ${adjType === "credit" ? "bg-emerald-500 hover:bg-emerald-600" : "bg-red-500 hover:bg-red-600"}`}>
                               {adjLoading ? "Saving…" : adjType === "credit" ? "Add Credit" : "Deduct"}
                             </button>
                             <button onClick={() => { setAdjusting(null); setAdjAmount(""); setAdjDesc(""); setAdjError(null); }}
-                              className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-600 hover:bg-zinc-50">
+                              className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-black/[0.06] text-ds-body hover:bg-ds-light-gray">
                               Cancel
                             </button>
                           </div>
@@ -1510,21 +1510,21 @@ function WalletsPanel({ secret }: { secret: string }) {
 
                       {/* Transaction history */}
                       <div>
-                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Transaction History</p>
+                        <p className="text-xs font-bold text-ds-muted uppercase tracking-wider mb-2">Transaction History</p>
                         {w.transactions.length === 0 ? (
-                          <p className="text-xs text-zinc-400 py-2">No transactions yet.</p>
+                          <p className="text-xs text-ds-muted py-2">No transactions yet.</p>
                         ) : (
                           <div className="space-y-1.5">
                             {w.transactions.map((t) => (
-                              <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-zinc-50 text-sm">
+                              <div key={t.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-ds-light-gray text-sm">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                   <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${t.type === "credit" ? "bg-emerald-500" : "bg-red-400"}`} />
                                   <div className="min-w-0">
-                                    <p className="text-zinc-700 font-medium text-xs truncate">{t.description ?? (t.type === "credit" ? "Credit" : "Debit")}</p>
-                                    <p className="text-zinc-400 text-[10px]">{fmtDate(t.created_at)}</p>
+                                    <p className="text-ds-body font-medium text-xs truncate">{t.description ?? (t.type === "credit" ? "Credit" : "Debit")}</p>
+                                    <p className="text-ds-muted text-[10px]">{fmtDate(t.created_at)}</p>
                                   </div>
                                 </div>
-                                <span className={`font-black text-sm flex-shrink-0 ml-3 ${t.type === "credit" ? "text-emerald-600" : "text-red-500"}`}>
+                                <span className={`font-semibold text-sm flex-shrink-0 ml-3 ${t.type === "credit" ? "text-emerald-600" : "text-red-500"}`}>
                                   {t.type === "credit" ? "+" : "−"}₹{t.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                                 </span>
                               </div>
@@ -1534,7 +1534,7 @@ function WalletsPanel({ secret }: { secret: string }) {
                       </div>
 
                       {/* User ID (for reference) */}
-                      <p className="text-[10px] font-mono text-zinc-300 break-all">uid: {w.user_id}</p>
+                      <p className="text-[10px] font-mono text-ds-muted break-all">uid: {w.user_id}</p>
                     </div>
                   </motion.div>
                 )}
@@ -1590,7 +1590,7 @@ function UserAvatar({ name, email, size = 32 }: { name: string | null; email: st
   const idx = (name ?? email).charCodeAt(0) % colors.length;
   return (
     <div
-      className="flex items-center justify-center rounded-full flex-shrink-0 font-black text-white"
+      className="flex items-center justify-center rounded-full flex-shrink-0 font-semibold text-white"
       style={{ width: size, height: size, background: colors[idx], fontSize: size * 0.35 }}
     >
       {initials}
@@ -1606,21 +1606,21 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
   ).length;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
       <div className="max-w-3xl mx-auto flex flex-col gap-5">
         {/* Back */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition-colors self-start">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-semibold text-ds-body hover:text-ds-dark transition-colors self-start">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           All Users
         </button>
 
         {/* User header */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-6 shadow-sm">
           <div className="flex items-start gap-4">
             <UserAvatar name={user.name} email={user.customer_email} size={56} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
+                <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
                   {user.name ?? user.customer_email}
                 </h2>
                 {user.gst_number && (
@@ -1631,14 +1631,14 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
                 )}
               </div>
               <a href={`mailto:${user.customer_email}`} className="text-sm text-blue-600 hover:underline font-medium">{user.customer_email}</a>
-              {user.phone && <p className="text-xs text-zinc-500 mt-0.5">{user.phone}</p>}
+              {user.phone && <p className="text-xs text-ds-body mt-0.5">{user.phone}</p>}
               {(user.city || user.state) && (
-                <p className="text-xs text-zinc-500 mt-0.5">{[user.city, user.state].filter(Boolean).join(", ")}</p>
+                <p className="text-xs text-ds-body mt-0.5">{[user.city, user.state].filter(Boolean).join(", ")}</p>
               )}
               {user.company_name && (
-                <p className="text-xs text-zinc-600 font-semibold mt-0.5">{user.company_name}{user.gst_number ? ` · GST: ${user.gst_number}` : ""}</p>
+                <p className="text-xs text-ds-body font-semibold mt-0.5">{user.company_name}{user.gst_number ? ` · GST: ${user.gst_number}` : ""}</p>
               )}
-              <p className="text-[0.65rem] text-zinc-400 mt-1.5">
+              <p className="text-[0.65rem] text-ds-muted mt-1.5">
                 Member since {new Date(user.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
               </p>
             </div>
@@ -1649,24 +1649,24 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
         <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Total Orders", value: String(user.order_count), accent: "text-blue-600" },
-            { label: "Total Spend", value: `₹${user.total_spend.toLocaleString("en-IN")}`, accent: "text-orange-600" },
-            { label: "Neck Label", value: String(user.neck_label_orders), accent: "text-violet-600" },
+            { label: "Total Spend", value: `₹${user.total_spend.toLocaleString("en-IN")}`, accent: "text-brand-dark" },
+            { label: "Neck Label", value: String(user.neck_label_orders), accent: "text-brand" },
             { label: "Active", value: String(activeOrders), accent: "text-green-600" },
           ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm text-center">
-              <p className={`text-2xl font-black ${s.accent}`}>{s.value}</p>
-              <p className="text-[0.62rem] text-zinc-400 mt-1 font-medium">{s.label}</p>
+            <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] p-4 shadow-sm text-center">
+              <p className={`text-2xl font-semibold ${s.accent}`}>{s.value}</p>
+              <p className="text-[0.62rem] text-ds-muted mt-1 font-medium">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Orders list */}
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-100">
-            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400">Order History</p>
+        <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-black/[0.06]">
+            <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted">Order History</p>
           </div>
           {user.orders.length === 0 ? (
-            <p className="text-sm text-zinc-400 text-center py-8">No orders yet</p>
+            <p className="text-sm text-ds-muted text-center py-8">No orders yet</p>
           ) : (
             <div className="divide-y divide-zinc-100">
               {user.orders.map((o) => {
@@ -1674,47 +1674,47 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
                 return (
                   <div key={o.id}>
                     <button
-                      className="w-full text-left px-5 py-4 hover:bg-zinc-50 transition-colors"
+                      className="w-full text-left px-5 py-4 hover:bg-ds-light-gray transition-colors"
                       onClick={() => setExpandedOrder(expanded ? null : o.id)}
                     >
                       <div className="flex items-center gap-3">
                         {o.mockup_url && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={o.mockup_url} alt="mockup" className="w-10 h-10 rounded-lg object-contain bg-zinc-100 border border-zinc-200 flex-shrink-0" />
+                          <img src={o.mockup_url} alt="mockup" className="w-10 h-10 rounded-lg object-contain bg-black/[0.05] border border-black/[0.06] flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-black text-zinc-900">#{o.ref}</span>
+                            <span className="text-sm font-semibold text-ds-dark">#{o.ref}</span>
                             <StatusBadge status={o.status} />
                             {o.neck_label && (
-                              <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700">🏷️</span>
+                              <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full bg-brand/8 border border-orange-200 text-orange-700">🏷️</span>
                             )}
                           </div>
-                          <p className="text-xs text-zinc-500 mt-0.5 truncate">{o.product_name}</p>
-                          <p className="text-[0.62rem] text-zinc-300 mt-0.5">{new Date(o.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                          <p className="text-xs text-ds-body mt-0.5 truncate">{o.product_name}</p>
+                          <p className="text-[0.62rem] text-ds-muted mt-0.5">{new Date(o.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-black text-zinc-900">₹{o.total.toLocaleString("en-IN")}</p>
+                          <p className="text-sm font-semibold text-ds-dark">₹{o.total.toLocaleString("en-IN")}</p>
                           <div className="flex gap-1 justify-end mt-1">
                             {o.front_design_url && <span className="w-2 h-2 rounded-full bg-green-400 inline-block" title="Front design" />}
                             {o.back_design_url && <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" title="Back design" />}
                           </div>
-                          <svg className={`w-4 h-4 text-zinc-300 ml-auto mt-1 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                          <svg className={`w-4 h-4 text-ds-muted ml-auto mt-1 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                       </div>
                     </button>
 
                     {expanded && (o.front_design_url || o.back_design_url || o.mockup_url) && (
-                      <div className="px-5 pb-4 bg-zinc-50 border-t border-zinc-100">
-                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400 py-3">Design Files</p>
+                      <div className="px-5 pb-4 bg-ds-light-gray border-t border-black/[0.06]">
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted py-3">Design Files</p>
                         <div className="flex gap-3 flex-wrap">
                           {o.mockup_url && (
                             <div className="flex flex-col gap-1.5 items-center">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={o.mockup_url} alt="Mockup" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
-                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Mockup</p>
+                              <img src={o.mockup_url} alt="Mockup" className="w-24 h-24 object-contain rounded-xl border border-black/[0.06] bg-white" />
+                              <p className="text-[0.6rem] text-ds-muted font-semibold">Mockup</p>
                               <div className="flex gap-1">
-                                <a href={o.mockup_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <a href={o.mockup_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-ds-body hover:text-ds-dark px-2 py-1 rounded-lg border border-black/[0.06] bg-white">View ↗</a>
                                 <DownloadButton url={o.mockup_url} filename={`${o.ref}-mockup.jpg`} />
                               </div>
                             </div>
@@ -1722,10 +1722,10 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
                           {o.front_design_url && (
                             <div className="flex flex-col gap-1.5 items-center">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={o.front_design_url} alt="Front" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
-                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Front</p>
+                              <img src={o.front_design_url} alt="Front" className="w-24 h-24 object-contain rounded-xl border border-black/[0.06] bg-white" />
+                              <p className="text-[0.6rem] text-ds-muted font-semibold">Front</p>
                               <div className="flex gap-1">
-                                <a href={o.front_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <a href={o.front_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-ds-body hover:text-ds-dark px-2 py-1 rounded-lg border border-black/[0.06] bg-white">View ↗</a>
                                 <DownloadButton url={o.front_design_url} filename={`${o.ref}-front.png`} />
                               </div>
                             </div>
@@ -1733,10 +1733,10 @@ function UserDetailView({ user, onBack, secret }: { user: UserProfile; onBack: (
                           {o.back_design_url && (
                             <div className="flex flex-col gap-1.5 items-center">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={o.back_design_url} alt="Back" className="w-24 h-24 object-contain rounded-xl border border-zinc-200 bg-white" />
-                              <p className="text-[0.6rem] text-zinc-400 font-semibold">Back</p>
+                              <img src={o.back_design_url} alt="Back" className="w-24 h-24 object-contain rounded-xl border border-black/[0.06] bg-white" />
+                              <p className="text-[0.6rem] text-ds-muted font-semibold">Back</p>
                               <div className="flex gap-1">
-                                <a href={o.back_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-zinc-500 hover:text-zinc-800 px-2 py-1 rounded-lg border border-zinc-200 bg-white">View ↗</a>
+                                <a href={o.back_design_url} target="_blank" rel="noopener noreferrer" className="text-[0.6rem] font-semibold text-ds-body hover:text-ds-dark px-2 py-1 rounded-lg border border-black/[0.06] bg-white">View ↗</a>
                                 <DownloadButton url={o.back_design_url} filename={`${o.ref}-back.png`} />
                               </div>
                             </div>
@@ -1793,15 +1793,15 @@ function UsersPanel({ secret }: { secret: string }) {
   const topThreshold = users.length > 0 ? users[Math.floor(users.length * 0.2)]?.total_spend ?? 0 : 0;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
       <div className="max-w-5xl mx-auto flex flex-col gap-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Users</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">{totalUsers} registered user{totalUsers !== 1 ? "s" : ""}</p>
+            <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Users</h2>
+            <p className="text-xs text-ds-muted mt-0.5">{totalUsers} registered user{totalUsers !== 1 ? "s" : ""}</p>
           </div>
-          <button onClick={fetchUsers} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors">
+          <button onClick={fetchUsers} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-black/[0.06] bg-white text-sm font-semibold text-ds-body hover:bg-ds-light-gray transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             Refresh
           </button>
@@ -1811,43 +1811,43 @@ function UsersPanel({ secret }: { secret: string }) {
         <div className="grid grid-cols-4 gap-3">
           {[
             { label: "Total Users", value: String(totalUsers), accent: "text-blue-600" },
-            { label: "Total Orders", value: String(totalOrders), accent: "text-zinc-900" },
-            { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-orange-600" },
-            { label: "Neck Label Users", value: String(usersWithNeckLabel), accent: "text-violet-600" },
+            { label: "Total Orders", value: String(totalOrders), accent: "text-ds-dark" },
+            { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-brand-dark" },
+            { label: "Neck Label Users", value: String(usersWithNeckLabel), accent: "text-brand" },
           ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm text-center">
-              <p className={`text-xl font-black ${s.accent}`}>{s.value}</p>
-              <p className="text-[0.62rem] text-zinc-400 mt-1 font-medium">{s.label}</p>
+            <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] p-4 shadow-sm text-center">
+              <p className={`text-xl font-semibold ${s.accent}`}>{s.value}</p>
+              <p className="text-[0.62rem] text-ds-muted mt-1 font-medium">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Search */}
         <div className="relative">
-          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" /></svg>
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ds-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" /></svg>
           <input
             type="text"
             placeholder="Search by name, email, city, company…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/[0.06] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
           />
         </div>
 
         {/* Table */}
         {loading ? (
-          <p className="text-center text-zinc-400 text-sm py-12">Loading…</p>
+          <p className="text-center text-ds-muted text-sm py-12">Loading…</p>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-zinc-400">
+          <div className="text-center py-16 text-ds-muted">
             <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
             <p className="font-semibold text-sm">No users found</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm overflow-hidden">
             {/* Table header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b border-zinc-100 bg-zinc-50">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b border-black/[0.06] bg-ds-light-gray">
               {["User", "City", "Orders", "Neck Label", "Spend", ""].map((h) => (
-                <span key={h} className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-400">{h}</span>
+                <span key={h} className="text-[0.6rem] font-bold uppercase tracking-widest text-ds-muted">{h}</span>
               ))}
             </div>
             <div className="divide-y divide-zinc-100">
@@ -1856,14 +1856,14 @@ function UsersPanel({ secret }: { secret: string }) {
                 return (
                   <div
                     key={u.id}
-                    className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 items-center px-5 py-3.5 hover:bg-zinc-50 transition-colors ${isTopSpender ? "border-l-2 border-l-orange-400" : ""}`}
+                    className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 items-center px-5 py-3.5 hover:bg-ds-light-gray transition-colors ${isTopSpender ? "border-l-2 border-l-orange-400" : ""}`}
                   >
                     {/* Name / Email */}
                     <div className="flex items-center gap-3 min-w-0">
                       <UserAvatar name={u.name} email={u.customer_email} size={32} />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-zinc-900 truncate">{u.name ?? u.customer_email}</p>
-                        {u.name && <p className="text-xs text-zinc-400 truncate">{u.customer_email}</p>}
+                        <p className="text-sm font-bold text-ds-dark truncate">{u.name ?? u.customer_email}</p>
+                        {u.name && <p className="text-xs text-ds-muted truncate">{u.customer_email}</p>}
                         {u.gst_number && (
                           <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">GST</span>
                         )}
@@ -1871,13 +1871,13 @@ function UsersPanel({ secret }: { secret: string }) {
                     </div>
                     {/* City */}
                     <div>
-                      <p className="text-xs text-zinc-600 font-medium">{u.city ?? "—"}</p>
-                      {u.state && <p className="text-[0.6rem] text-zinc-400">{u.state}</p>}
+                      <p className="text-xs text-ds-body font-medium">{u.city ?? "—"}</p>
+                      {u.state && <p className="text-[0.6rem] text-ds-muted">{u.state}</p>}
                     </div>
                     {/* Orders */}
-                    <p className="text-sm font-bold text-zinc-800">{u.order_count}</p>
+                    <p className="text-sm font-bold text-ds-dark">{u.order_count}</p>
                     {/* Neck label */}
-                    <p className="text-sm font-semibold text-zinc-600">
+                    <p className="text-sm font-semibold text-ds-body">
                       {u.neck_label_orders > 0 ? (
                         <span className="inline-flex items-center gap-1">
                           <span className="w-2 h-2 rounded-full bg-orange-400 inline-block" />
@@ -1886,13 +1886,13 @@ function UsersPanel({ secret }: { secret: string }) {
                       ) : "—"}
                     </p>
                     {/* Spend */}
-                    <p className={`text-sm font-black ${isTopSpender ? "text-orange-600" : "text-zinc-800"}`}>
+                    <p className={`text-sm font-semibold ${isTopSpender ? "text-brand-dark" : "text-ds-dark"}`}>
                       ₹{u.total_spend.toLocaleString("en-IN")}
                     </p>
                     {/* Action */}
                     <button
                       onClick={() => setSelectedUser(u)}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors whitespace-nowrap"
+                      className="px-3 py-1.5 rounded-lg bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors whitespace-nowrap"
                     >
                       View →
                     </button>
@@ -1950,33 +1950,33 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
   const maxProductCount = Math.max(1, ...topProducts.map(([, v]) => v));
 
   const STAT_CARDS = [
-    { label: "Total Revenue",    value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-orange-600" },
+    { label: "Total Revenue",    value: `₹${totalRevenue.toLocaleString("en-IN")}`, accent: "text-brand-dark" },
     { label: "Total Orders",     value: String(totalOrders),                         accent: "text-blue-600" },
-    { label: "Avg Order Value",  value: `₹${avgOrderValue.toLocaleString("en-IN")}`, accent: "text-violet-600" },
+    { label: "Avg Order Value",  value: `₹${avgOrderValue.toLocaleString("en-IN")}`, accent: "text-brand" },
     { label: "Delivered",        value: String(delivered),                            accent: "text-green-600" },
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto bg-zinc-50 p-6">
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         <div>
-          <h2 className="text-xl font-black" style={{ letterSpacing: "-0.04em" }}>Analytics</h2>
-          <p className="text-xs text-zinc-400 mt-0.5">All-time overview · {totalOrders} order{totalOrders !== 1 ? "s" : ""}</p>
+          <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Analytics</h2>
+          <p className="text-xs text-ds-muted mt-0.5">All-time overview · {totalOrders} order{totalOrders !== 1 ? "s" : ""}</p>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {STAT_CARDS.map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-              <p className={`text-2xl font-black ${s.accent}`}>{s.value}</p>
-              <p className="text-xs text-zinc-400 mt-1 font-medium">{s.label}</p>
+            <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
+              <p className={`text-2xl font-semibold ${s.accent}`}>{s.value}</p>
+              <p className="text-xs text-ds-muted mt-1 font-medium">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Orders by status */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Orders by Status</p>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Orders by Status</p>
           <div className="flex flex-col gap-3">
             {STATUS_OPTIONS.map((status) => {
               const count = statusCounts[status] ?? 0;
@@ -1984,14 +1984,14 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
               const c     = STATUS_COLORS[status] ?? { bg: "#f3f4f6", text: "#374151" };
               return (
                 <div key={status} className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-zinc-600 w-36 flex-shrink-0">{status}</span>
-                  <div className="flex-1 bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+                  <span className="text-xs font-semibold text-ds-body w-36 flex-shrink-0">{status}</span>
+                  <div className="flex-1 bg-black/[0.05] rounded-full h-2.5 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${pct}%`, background: c.text }}
                     />
                   </div>
-                  <span className="text-xs font-bold text-zinc-700 w-6 text-right flex-shrink-0">{count}</span>
+                  <span className="text-xs font-bold text-ds-body w-6 text-right flex-shrink-0">{count}</span>
                 </div>
               );
             })}
@@ -1999,21 +1999,21 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
         </div>
 
         {/* Last 7 days revenue */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Revenue — Last 7 Days</p>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Revenue — Last 7 Days</p>
           <div className="flex items-end gap-2 h-28">
             {dayEntries.map(([day, rev]) => {
               const pct = Math.round((rev / maxDayRev) * 100);
               return (
                 <div key={day} className="flex-1 flex flex-col items-center gap-1.5">
-                  <span className="text-[0.55rem] font-bold text-zinc-500">{rev > 0 ? `₹${(rev / 1000).toFixed(1)}k` : ""}</span>
-                  <div className="w-full bg-zinc-100 rounded-md overflow-hidden flex-1 flex items-end">
+                  <span className="text-[0.55rem] font-bold text-ds-body">{rev > 0 ? `₹${(rev / 1000).toFixed(1)}k` : ""}</span>
+                  <div className="w-full bg-black/[0.05] rounded-md overflow-hidden flex-1 flex items-end">
                     <div
                       className="w-full bg-orange-400 rounded-md transition-all duration-500"
                       style={{ height: `${Math.max(pct, 2)}%` }}
                     />
                   </div>
-                  <span className="text-[0.55rem] text-zinc-400 font-medium text-center leading-tight">{day}</span>
+                  <span className="text-[0.55rem] text-ds-muted font-medium text-center leading-tight">{day}</span>
                 </div>
               );
             })}
@@ -2021,21 +2021,21 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
         </div>
 
         {/* Top products */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-sm">
-          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-zinc-400 mb-4">Top Products</p>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-sm">
+          <p className="text-[0.62rem] font-bold uppercase tracking-widest text-ds-muted mb-4">Top Products</p>
           {topProducts.length === 0 ? (
-            <p className="text-sm text-zinc-400">No data yet.</p>
+            <p className="text-sm text-ds-muted">No data yet.</p>
           ) : (
             <div className="flex flex-col gap-3">
               {topProducts.map(([name, count]) => {
                 const pct = Math.round((count / maxProductCount) * 100);
                 return (
                   <div key={name} className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-600 w-40 flex-shrink-0 truncate">{name}</span>
-                    <div className="flex-1 bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+                    <span className="text-xs font-semibold text-ds-body w-40 flex-shrink-0 truncate">{name}</span>
+                    <div className="flex-1 bg-black/[0.05] rounded-full h-2.5 overflow-hidden">
                       <div className="h-full bg-violet-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-xs font-bold text-zinc-700 w-6 text-right flex-shrink-0">{count}</span>
+                    <span className="text-xs font-bold text-ds-body w-6 text-right flex-shrink-0">{count}</span>
                   </div>
                 );
               })}
@@ -2111,20 +2111,20 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
+    <div className="min-h-screen bg-ds-light-gray flex flex-col">
       {/* Top nav bar */}
-      <header className="h-14 bg-white border-b border-zinc-200 flex items-center px-5 gap-4 flex-shrink-0">
+      <header className="h-14 bg-white border-b border-black/[0.06] flex items-center px-5 gap-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-zinc-900 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[0.6rem] font-black">HL</span>
+          <div className="w-7 h-7 bg-ds-dark rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-[0.6rem] font-semibold">HL</span>
           </div>
-          <span className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.03em" }}>Halftone Labs</span>
-          <span className="text-zinc-300 text-sm">/</span>
-          <span className="text-sm text-zinc-500 font-semibold">Admin</span>
+          <span className="font-semibold text-ds-dark text-sm" style={{ letterSpacing: "-0.03em" }}>Halftone Labs</span>
+          <span className="text-ds-muted text-sm">/</span>
+          <span className="text-sm text-ds-body font-semibold">Admin</span>
         </div>
         <div className="ml-auto">
           <button onClick={() => { sessionStorage.removeItem("hl_admin"); setAuthed(false); setOrders([]); }}
-            className="text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors">
+            className="text-xs font-semibold text-ds-muted hover:text-ds-body transition-colors">
             Sign out
           </button>
         </div>
@@ -2132,12 +2132,12 @@ export default function AdminPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-56 flex-shrink-0 bg-white border-r border-zinc-200 p-3 flex flex-col gap-1">
+        <aside className="w-56 flex-shrink-0 bg-white border-r border-black/[0.06] p-3 flex flex-col gap-1">
           {NAV.map((n) => (
             <SidebarItem key={n.id} icon={n.icon} label={n.label} active={tab === n.id} onClick={() => setTab(n.id)} />
           ))}
-          <div className="mt-auto pt-4 border-t border-zinc-100">
-            <p className="text-[0.6rem] font-semibold text-zinc-300 px-3">ADMIN v1.0</p>
+          <div className="mt-auto pt-4 border-t border-black/[0.06]">
+            <p className="text-[0.6rem] font-semibold text-ds-muted px-3">ADMIN v1.0</p>
           </div>
         </aside>
 

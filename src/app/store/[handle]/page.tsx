@@ -45,7 +45,7 @@ function ProductCard({
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-white rounded-3xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-lg transition-all cursor-pointer flex flex-col"
+        className="bg-white rounded-3xl overflow-hidden border border-black/[0.06] hover:border-black/[0.06] hover:shadow-lg transition-all cursor-pointer flex flex-col"
       >
         {/* Visual */}
         <div
@@ -82,20 +82,20 @@ function ProductCard({
           <div className="flex items-start justify-between mb-1">
             <div className="flex-1 min-w-0 pr-2">
               <h3
-                className="font-black text-zinc-900 text-sm truncate"
+                className="font-semibold text-ds-dark text-sm truncate"
                 style={{ letterSpacing: "-0.02em" }}
               >
                 {product.product_name}
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">{product.color_name}</p>
+              <p className="text-xs text-ds-muted mt-0.5">{product.color_name}</p>
             </div>
-            <span className="font-black text-zinc-900 text-sm whitespace-nowrap">
+            <span className="font-semibold text-ds-dark text-sm whitespace-nowrap">
               {fmt(product.retail_price_inr)}
             </span>
           </div>
 
           {product.description && (
-            <p className="text-xs text-zinc-500 mt-1 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-ds-body mt-1 line-clamp-2 leading-relaxed">
               {product.description}
             </p>
           )}
@@ -104,13 +104,13 @@ function ProductCard({
             {product.sizes.slice(0, 5).map((s) => (
               <span
                 key={s}
-                className="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded"
+                className="text-[10px] font-bold bg-black/[0.05] text-ds-body px-1.5 py-0.5 rounded"
               >
                 {s}
               </span>
             ))}
             {product.sizes.length > 5 && (
-              <span className="text-[10px] text-zinc-400">+{product.sizes.length - 5}</span>
+              <span className="text-[10px] text-ds-muted">+{product.sizes.length - 5}</span>
             )}
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function StorePage({
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: "#f8f7f5" }}
+        
       >
         <div className="w-6 h-6 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
       </div>
@@ -157,17 +157,17 @@ export default function StorePage({
         <StoreNavbar storeName="Store" storeHandle={handle} variant="solid" />
         <div
           className="min-h-screen flex items-center justify-center p-6 pt-24"
-          style={{ background: "#f8f7f5" }}
+          
         >
           <div className="text-center">
             <div className="text-6xl mb-4">👕</div>
             <h1
-              className="text-2xl font-black text-zinc-900 mb-2"
+              className="text-2xl font-semibold text-ds-dark mb-2"
               style={{ letterSpacing: "-0.04em" }}
             >
               Store not found
             </h1>
-            <p className="text-zinc-500 text-sm mb-6">
+            <p className="text-ds-body text-sm mb-6">
               This store doesn&apos;t exist or hasn&apos;t launched yet.
             </p>
           </div>
@@ -179,11 +179,11 @@ export default function StorePage({
   const products = store.store_products ?? [];
 
   return (
-    <div className="min-h-screen" style={{ background: "#f8f7f5" }}>
+    <div className="min-h-screen" >
       <StoreNavbar storeName={store.artist_name} storeHandle={handle} variant="overlay" />
 
       {/* Hero — pt-14 offsets fixed navbar */}
-      <div className="bg-zinc-900 relative overflow-hidden pt-14">
+      <div className="bg-ds-dark relative overflow-hidden pt-14">
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
@@ -194,17 +194,17 @@ export default function StorePage({
         />
         <div className="max-w-5xl mx-auto px-6 py-16 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-zinc-500 mb-3">
+            <p className="text-[0.6rem] font-mono uppercase tracking-widest text-ds-body mb-3">
               Official Merch Store
             </p>
             <h1
-              className="text-5xl md:text-7xl font-black text-white leading-[0.9] mb-4"
+              className="text-5xl md:text-7xl font-semibold text-white leading-[0.9] mb-4"
               style={{ letterSpacing: "-0.055em" }}
             >
               {store.artist_name}
             </h1>
             {store.description && (
-              <p className="text-zinc-400 text-lg max-w-xl leading-relaxed mb-6">
+              <p className="text-ds-muted text-lg max-w-xl leading-relaxed mb-6">
                 {store.description}
               </p>
             )}
@@ -213,7 +213,7 @@ export default function StorePage({
                 href={`https://instagram.com/${store.instagram.replace("@", "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm"
+                className="inline-flex items-center gap-2 text-ds-muted hover:text-white transition-colors text-sm"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -230,13 +230,13 @@ export default function StorePage({
         {products.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">🎨</div>
-            <p className="text-zinc-500">No products yet — check back soon.</p>
+            <p className="text-ds-body">No products yet — check back soon.</p>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between mb-8">
               <h2
-                className="font-black text-zinc-900 text-xl"
+                className="font-semibold text-ds-dark text-xl"
                 style={{ letterSpacing: "-0.03em" }}
               >
                 {products.length} {products.length === 1 ? "piece" : "pieces"}
@@ -259,9 +259,9 @@ export default function StorePage({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-200 py-6 px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-zinc-400 text-xs">
-          <Link href="/track" className="hover:text-zinc-600 transition-colors">
+      <div className="border-t border-black/[0.06] py-6 px-6">
+        <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-ds-muted text-xs">
+          <Link href="/track" className="hover:text-ds-body transition-colors">
             Track your order
           </Link>
           <span>·</span>

@@ -116,42 +116,42 @@ export default function OrgSettings({ org, userId, onUpdated, onClose }: Props) 
   }
 
   const isOwner = org.owner_id === userId;
-  const inputCls = "w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors";
+  const inputCls = "w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors";
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700 transition-colors">
+        <button onClick={onClose} className="text-ds-muted hover:text-ds-body transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h2 className="text-xl font-black text-zinc-900" style={{ letterSpacing: "-0.04em" }}>
+        <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
           {org.name} — Settings
         </h2>
       </div>
 
       {/* Org details */}
       {isOwner && (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-5 space-y-4">
-          <h3 className="text-sm font-bold text-zinc-800">Organization Info</h3>
+        <div className="bg-white border border-black/[0.06] rounded-2xl p-5 space-y-4">
+          <h3 className="text-sm font-bold text-ds-dark">Organization Info</h3>
           <div>
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Name</label>
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Name</label>
             <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Gully Gang" />
           </div>
           <div>
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Description</label>
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block mb-1">Description</label>
             <textarea className={`${inputCls} resize-none`} rows={2} value={description}
               onChange={(e) => setDescription(e.target.value)} placeholder="A short description of your label or brand" />
           </div>
-          <div className="flex items-center gap-2 bg-zinc-50 rounded-xl px-3 py-2.5 border border-zinc-200">
-            <span className="text-xs text-zinc-400 font-mono">halftonelabs.in/org/</span>
-            <span className="text-xs font-mono font-bold text-zinc-700">{org.slug}</span>
+          <div className="flex items-center gap-2 bg-ds-light-gray rounded-xl px-3 py-2.5 border border-black/[0.06]">
+            <span className="text-xs text-ds-muted font-mono">halftonelabs.in/org/</span>
+            <span className="text-xs font-mono font-bold text-ds-body">{org.slug}</span>
           </div>
           <button onClick={handleSave} disabled={saving}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              saved ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"
+              saved ? "bg-green-500 text-white" : "bg-ds-dark text-white hover:bg-ds-dark2"
             } disabled:opacity-50`}>
             {saving ? "Saving…" : saved ? "✓ Saved!" : "Save changes"}
           </button>
@@ -159,35 +159,35 @@ export default function OrgSettings({ org, userId, onUpdated, onClose }: Props) 
       )}
 
       {/* Stores */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-800">
-          Linked Stores <span className="text-zinc-400 font-normal ml-1">{stores.length}</span>
+      <div className="bg-white border border-black/[0.06] rounded-2xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-ds-dark">
+          Linked Stores <span className="text-ds-muted font-normal ml-1">{stores.length}</span>
         </h3>
         {stores.length === 0 ? (
-          <p className="text-sm text-zinc-400">No stores linked yet.</p>
+          <p className="text-sm text-ds-muted">No stores linked yet.</p>
         ) : (
           <div className="space-y-2">
             {stores.map((s) => (
-              <div key={s.id} className="flex items-center justify-between bg-zinc-50 rounded-xl px-4 py-2.5">
+              <div key={s.id} className="flex items-center justify-between bg-ds-light-gray rounded-xl px-4 py-2.5">
                 <div>
-                  <p className="text-sm font-bold text-zinc-800">{s.artist_name}</p>
-                  <p className="text-[10px] text-zinc-400 font-mono">/store/{s.handle}</p>
+                  <p className="text-sm font-bold text-ds-dark">{s.artist_name}</p>
+                  <p className="text-[10px] text-ds-muted font-mono">/store/{s.handle}</p>
                 </div>
                 <a href={`/store/${s.handle}`} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-violet-600 hover:underline">View ↗</a>
+                  className="text-xs text-brand hover:underline">View ↗</a>
               </div>
             ))}
           </div>
         )}
         {isOwner && (
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Add store by handle</label>
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block">Add store by handle</label>
             <div className="flex gap-2">
               <input className={`${inputCls} flex-1 font-mono`} value={storeHandle}
                 onChange={(e) => setStoreHandle(e.target.value.toLowerCase())}
                 placeholder="divine" />
               <button onClick={handleAddStore} disabled={addingStore || !storeHandle}
-                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors whitespace-nowrap">
+                className="px-4 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors whitespace-nowrap">
                 {addingStore ? "Adding…" : "Add store"}
               </button>
             </div>
@@ -197,36 +197,36 @@ export default function OrgSettings({ org, userId, onUpdated, onClose }: Props) 
       </div>
 
       {/* Members */}
-      <div className="bg-white border border-zinc-200 rounded-2xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-800">
-          Members <span className="text-zinc-400 font-normal ml-1">{members.length}</span>
+      <div className="bg-white border border-black/[0.06] rounded-2xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-ds-dark">
+          Members <span className="text-ds-muted font-normal ml-1">{members.length}</span>
         </h3>
         {members.length === 0 ? (
-          <p className="text-sm text-zinc-400">No members yet.</p>
+          <p className="text-sm text-ds-muted">No members yet.</p>
         ) : (
           <div className="space-y-2">
             {members.map((m) => (
               <div key={m.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-xs font-black">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">
                     {(m.name ?? m.email ?? "?").slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-zinc-800">{m.name ?? m.email ?? "Unknown"}</p>
-                    {m.name && m.email && <p className="text-[10px] text-zinc-400">{m.email}</p>}
+                    <p className="text-sm font-semibold text-ds-dark">{m.name ?? m.email ?? "Unknown"}</p>
+                    {m.name && m.email && <p className="text-[10px] text-ds-muted">{m.email}</p>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    m.role === "owner" ? "bg-violet-100 text-violet-700" :
+                    m.role === "owner" ? "bg-violet-100 text-brand" :
                     m.role === "manager" ? "bg-blue-100 text-blue-700" :
-                    "bg-zinc-100 text-zinc-500"
+                    "bg-black/[0.05] text-ds-body"
                   }`}>
                     {m.role}
                   </span>
                   {isOwner && m.user_id !== userId && (
                     <button onClick={() => handleRemoveMember(m.user_id)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-colors text-xs">
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-ds-muted hover:text-red-500 hover:bg-red-50 transition-colors text-xs">
                       ✕
                     </button>
                   )}
@@ -237,24 +237,24 @@ export default function OrgSettings({ org, userId, onUpdated, onClose }: Props) 
         )}
 
         {isOwner && (
-          <div className="space-y-2 pt-2 border-t border-zinc-100">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Add member by email</label>
+          <div className="space-y-2 pt-2 border-t border-black/[0.06]">
+            <label className="text-[10px] font-bold text-ds-muted uppercase tracking-widest block">Add member by email</label>
             <div className="flex gap-2">
               <input className={`${inputCls} flex-1`} type="email" value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)} placeholder="artist@example.com" />
               <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border border-zinc-200 text-sm outline-none focus:border-zinc-900 transition-colors bg-white">
+                className="px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm outline-none focus:border-zinc-900 transition-colors bg-white">
                 <option value="contributor">Contributor</option>
                 <option value="manager">Manager</option>
               </select>
               <button onClick={handleInvite} disabled={inviting || !inviteEmail}
-                className="px-4 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors whitespace-nowrap">
+                className="px-4 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors whitespace-nowrap">
                 {inviting ? "Adding…" : "Add"}
               </button>
             </div>
             {inviteError && <p className="text-xs text-red-500 font-semibold">{inviteError}</p>}
             {inviteOk    && <p className="text-xs text-green-600 font-semibold">✓ {inviteOk}</p>}
-            <p className="text-[10px] text-zinc-400">The person must already have a Halftone Labs account.</p>
+            <p className="text-[10px] text-ds-muted">The person must already have a Halftone Labs account.</p>
           </div>
         )}
       </div>

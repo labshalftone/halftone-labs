@@ -68,11 +68,11 @@ function StatusBadge({ status }: { status: string | null }) {
   if (!status) return null;
   const map: Record<string, { bg: string; text: string }> = {
     confirmed:     { bg: "bg-green-50 border-green-200",   text: "text-green-700" },
-    in_production: { bg: "bg-orange-50 border-orange-200", text: "text-orange-700" },
+    in_production: { bg: "bg-brand/8 border-orange-200", text: "text-orange-700" },
     fulfilled:     { bg: "bg-blue-50 border-blue-200",     text: "text-blue-700"   },
     cancelled:     { bg: "bg-red-50 border-red-200",       text: "text-red-600"    },
   };
-  const s = map[status] ?? { bg: "bg-zinc-50 border-zinc-200", text: "text-zinc-600" };
+  const s = map[status] ?? { bg: "bg-ds-light-gray border-black/[0.06]", text: "text-ds-body" };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${s.bg} ${s.text}`}>
       {status.replace(/_/g, " ")}
@@ -109,8 +109,8 @@ function ConnectForm({ userId }: { userId: string; onConnected: (c: Connection) 
           </svg>
         </div>
         <div>
-          <h3 className="font-black text-zinc-900 text-lg" style={{ letterSpacing: "-0.03em" }}>Connect your Shopify store</h3>
-          <p className="text-sm text-zinc-400">Orders sync automatically. No API keys needed.</p>
+          <h3 className="font-semibold text-ds-dark text-lg" style={{ letterSpacing: "-0.03em" }}>Connect your Shopify store</h3>
+          <p className="text-sm text-ds-muted">Orders sync automatically. No API keys needed.</p>
         </div>
       </div>
 
@@ -119,11 +119,11 @@ function ConnectForm({ userId }: { userId: string; onConnected: (c: Connection) 
         {[
           { n: "1", text: "Enter your Shopify store URL below" },
           { n: "2", text: "You'll be redirected to Shopify to approve access" },
-          { n: "3", text: "Click Install — you're done. Orders appear instantly." },
+          { n: "3", text: "Click Install. You're done. Orders appear instantly." },
         ].map((step) => (
           <div key={step.n} className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-zinc-900 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{step.n}</div>
-            <p className="text-sm text-zinc-600">{step.text}</p>
+            <div className="w-6 h-6 rounded-full bg-ds-dark text-white text-xs font-semibold flex items-center justify-center flex-shrink-0">{step.n}</div>
+            <p className="text-sm text-ds-body">{step.text}</p>
           </div>
         ))}
       </div>
@@ -135,13 +135,13 @@ function ConnectForm({ userId }: { userId: string; onConnected: (c: Connection) 
             onChange={(e) => { setDomain(e.target.value); setError(""); }}
             onKeyDown={(e) => e.key === "Enter" && handleConnect()}
             placeholder="your-store.myshopify.com"
-            className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            className="w-full border border-black/[0.06] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
         <button
           onClick={handleConnect}
           disabled={loading || !domain.trim()}
-          className="px-5 py-3 rounded-xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 disabled:opacity-40 transition-colors whitespace-nowrap flex items-center gap-2"
+          className="px-5 py-3 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-orange-600 disabled:opacity-40 transition-colors whitespace-nowrap flex items-center gap-2"
         >
           {loading ? (
             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -207,21 +207,21 @@ function SkuMapper({ userId }: { userId: string }) {
   return (
     <div>
       <div className="mb-6">
-        <h3 className="font-black text-zinc-900 text-base mb-1" style={{ letterSpacing: "-0.02em" }}>SKU Mapping</h3>
-        <p className="text-sm text-zinc-500">
-          Map your Shopify product variant SKUs to Halftone Labs products. Alternatively, just set your Shopify variant SKUs to our format directly (e.g. <code className="bg-zinc-100 px-1.5 py-0.5 rounded text-xs font-mono">HL-RT-WHT-M</code>).
+        <h3 className="font-semibold text-ds-dark text-base mb-1" style={{ letterSpacing: "-0.02em" }}>SKU Mapping</h3>
+        <p className="text-sm text-ds-body">
+          Map your Shopify product variant SKUs to Halftone Labs products. Alternatively, just set your Shopify variant SKUs to our format directly (e.g. <code className="bg-black/[0.05] px-1.5 py-0.5 rounded text-xs font-mono">HL-RT-WHT-M</code>).
         </p>
       </div>
 
       {/* SKU catalog reference */}
-      <details className="mb-6 bg-zinc-50 border border-zinc-200 rounded-xl">
-        <summary className="px-4 py-3 text-sm font-semibold text-zinc-700 cursor-pointer select-none">
+      <details className="mb-6 bg-ds-light-gray border border-black/[0.06] rounded-xl">
+        <summary className="px-4 py-3 text-sm font-semibold text-ds-body cursor-pointer select-none">
           View full SKU catalog ({SKU_CATALOG.length} variants)
         </summary>
         <div className="px-4 pb-4 overflow-x-auto">
           <table className="w-full text-xs mt-2">
             <thead>
-              <tr className="text-zinc-400 uppercase tracking-widest text-[10px]">
+              <tr className="text-ds-muted uppercase tracking-widest text-[10px]">
                 <th className="text-left py-1.5 pr-4">SKU</th>
                 <th className="text-left py-1.5 pr-4">Product</th>
                 <th className="text-left py-1.5 pr-4">Color</th>
@@ -231,13 +231,13 @@ function SkuMapper({ userId }: { userId: string }) {
             <tbody className="divide-y divide-zinc-100">
               {SKU_CATALOG.map((s) => (
                 <tr key={s.sku} className="font-mono">
-                  <td className="py-1 pr-4 text-orange-600 font-semibold">{s.sku}</td>
-                  <td className="py-1 pr-4 font-sans text-zinc-700">{s.productName} <span className="text-zinc-400">({s.gsm})</span></td>
+                  <td className="py-1 pr-4 text-brand-dark font-semibold">{s.sku}</td>
+                  <td className="py-1 pr-4 font-sans text-ds-body">{s.productName} <span className="text-ds-muted">({s.gsm})</span></td>
                   <td className="py-1 pr-4 font-sans flex items-center gap-1.5 mt-0.5">
-                    <span className="w-3 h-3 rounded-full border border-zinc-200 flex-shrink-0" style={{ background: s.colorHex }} />
+                    <span className="w-3 h-3 rounded-full border border-black/[0.06] flex-shrink-0" style={{ background: s.colorHex }} />
                     {s.colorName}
                   </td>
-                  <td className="py-1 font-sans text-zinc-700">{s.size}</td>
+                  <td className="py-1 font-sans text-ds-body">{s.size}</td>
                 </tr>
               ))}
             </tbody>
@@ -246,17 +246,17 @@ function SkuMapper({ userId }: { userId: string }) {
       </details>
 
       {/* Add mapping form */}
-      <div className="bg-white border border-zinc-200 rounded-xl p-4 mb-4">
-        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">Add Mapping</p>
+      <div className="bg-white border border-black/[0.06] rounded-xl p-4 mb-4">
+        <p className="text-xs font-semibold text-ds-muted uppercase tracking-widest mb-3">Add Mapping</p>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             value={shopifySku} onChange={(e) => setShopifySku(e.target.value)}
             placeholder="Your Shopify SKU (e.g. MY-TEE-BLK-M)"
-            className="flex-1 border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 font-mono"
+            className="flex-1 border border-black/[0.06] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 font-mono"
           />
           <select
             value={selectedHlSku} onChange={(e) => setSelectedHlSku(e.target.value)}
-            className="flex-1 border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+            className="flex-1 border border-black/[0.06] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
           >
             <option value="">Select HL product variant…</option>
             {PRODUCTS.map((product) => (
@@ -280,7 +280,7 @@ function SkuMapper({ userId }: { userId: string }) {
           <button
             onClick={handleAdd}
             disabled={saving || !shopifySku.trim() || !selectedHlSku}
-            className="px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors whitespace-nowrap"
+            className="px-5 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors whitespace-nowrap"
           >
             {saving ? "Saving…" : "Add"}
           </button>
@@ -290,30 +290,30 @@ function SkuMapper({ userId }: { userId: string }) {
 
       {/* Existing mappings */}
       {loading ? (
-        <p className="text-sm text-zinc-400">Loading mappings…</p>
+        <p className="text-sm text-ds-muted">Loading mappings…</p>
       ) : mappings.length === 0 ? (
-        <p className="text-sm text-zinc-400">No custom mappings yet. Add one above, or set your Shopify SKUs to our HL format directly.</p>
+        <p className="text-sm text-ds-muted">No custom mappings yet. Add one above, or set your Shopify SKUs to our HL format directly.</p>
       ) : (
         <div className="flex flex-col gap-2">
           {mappings.map((m) => (
-            <div key={m.id} className="flex items-center justify-between gap-3 bg-white border border-zinc-100 rounded-xl px-4 py-3">
+            <div key={m.id} className="flex items-center justify-between gap-3 bg-white border border-black/[0.06] rounded-xl px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div>
-                  <p className="font-mono text-xs text-zinc-700 font-semibold">{m.shopify_sku}</p>
-                  <p className="text-[10px] text-zinc-400">Shopify SKU</p>
+                  <p className="font-mono text-xs text-ds-body font-semibold">{m.shopify_sku}</p>
+                  <p className="text-[10px] text-ds-muted">Shopify SKU</p>
                 </div>
-                <svg className="w-4 h-4 text-zinc-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-ds-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="w-3 h-3 rounded-full flex-shrink-0 border border-zinc-200" style={{ background: m.hl_color_hex }} />
+                  <span className="w-3 h-3 rounded-full flex-shrink-0 border border-black/[0.06]" style={{ background: m.hl_color_hex }} />
                   <div>
-                    <p className="text-xs text-zinc-700 font-semibold truncate">{m.hl_product_name} / {m.hl_color_name} / {m.hl_size}</p>
-                    <p className="text-[10px] text-zinc-400">{m.hl_gsm} · ₹{m.hl_blank_price}</p>
+                    <p className="text-xs text-ds-body font-semibold truncate">{m.hl_product_name} / {m.hl_color_name} / {m.hl_size}</p>
+                    <p className="text-[10px] text-ds-muted">{m.hl_gsm} · ₹{m.hl_blank_price}</p>
                   </div>
                 </div>
               </div>
-              <button onClick={() => handleDelete(m.id)} className="text-zinc-300 hover:text-red-400 transition-colors flex-shrink-0">
+              <button onClick={() => handleDelete(m.id)} className="text-ds-muted hover:text-red-400 transition-colors flex-shrink-0">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -500,7 +500,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+      <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
@@ -518,16 +518,16 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
   }
 
   if (orders.length === 0) {
-    return <p className="text-sm text-zinc-400 py-4">No orders found in your Shopify store.</p>;
+    return <p className="text-sm text-ds-muted py-4">No orders found in your Shopify store.</p>;
   }
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <p className="text-xs text-zinc-400">{orders.length} orders from {shopDomain}</p>
+        <p className="text-xs text-ds-muted">{orders.length} orders from {shopDomain}</p>
         <div className="flex items-center gap-3">
           {walletBalance !== null && (
-            <span className="flex items-center gap-1 text-xs font-semibold bg-zinc-100 text-zinc-600 rounded-full px-3 py-1">
+            <span className="flex items-center gap-1 text-xs font-semibold bg-black/[0.05] text-ds-body rounded-full px-3 py-1">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
@@ -536,7 +536,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                 : `₹${Number(walletBalance).toLocaleString("en-IN")}`}
             </span>
           )}
-          <button onClick={fetchOrders} className="text-xs text-orange-500 hover:text-orange-600 transition-colors">↻ Refresh</button>
+          <button onClick={fetchOrders} className="text-xs text-brand hover:text-brand-dark transition-colors">↻ Refresh</button>
         </div>
       </div>
 
@@ -546,7 +546,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
         const isConfirmed  = !!order.hlStatus;
 
         return (
-          <motion.div key={order.id} layout className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
+          <motion.div key={order.id} layout className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
             {/* Order header */}
             <button
               onClick={() => {
@@ -559,7 +559,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
               <div className="flex items-center gap-3 min-w-0">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-black text-sm text-zinc-900">{order.name}</p>
+                    <p className="font-semibold text-sm text-ds-dark">{order.name}</p>
                     {isConfirmed && <StatusBadge status={order.hlStatus} />}
                     {!isConfirmed && !order.anyMatched && (
                       <span className="text-[10px] bg-red-50 border border-red-200 text-red-500 rounded-full px-2 py-0.5 font-semibold">
@@ -577,7 +577,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-xs text-ds-muted mt-0.5">
                     {order.email ?? "No email"} · {new Date(order.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </div>
@@ -585,9 +585,9 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="text-right">
                   <p className="font-bold text-sm">{order.currency} {Number(order.total_price).toLocaleString()}</p>
-                  <p className="text-[10px] text-zinc-400 capitalize">{order.financial_status}</p>
+                  <p className="text-[10px] text-ds-muted capitalize">{order.financial_status}</p>
                 </div>
-                <svg className={`w-4 h-4 text-zinc-300 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className={`w-4 h-4 text-ds-muted transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
@@ -601,7 +601,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="overflow-hidden border-t border-zinc-100"
+                  className="overflow-hidden border-t border-black/[0.06]"
                 >
                   <div className="px-5 py-4 flex flex-col gap-4">
                     {/* Line items */}
@@ -619,13 +619,13 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-semibold text-zinc-800">{line.title}</p>
+                              <p className="text-sm font-semibold text-ds-dark">{line.title}</p>
                               {line.variant_title && (
-                                <span className="text-xs text-zinc-400">{line.variant_title}</span>
+                                <span className="text-xs text-ds-muted">{line.variant_title}</span>
                               )}
-                              <span className="text-xs text-zinc-400">×{line.quantity}</span>
+                              <span className="text-xs text-ds-muted">×{line.quantity}</span>
                             </div>
-                            <p className="text-xs text-zinc-400 font-mono mt-0.5">
+                            <p className="text-xs text-ds-muted font-mono mt-0.5">
                               SKU: {line.sku ?? <span className="text-red-400">None</span>}
                             </p>
                             {line.hlProduct ? (
@@ -634,7 +634,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                                   <span className="w-2 h-2 rounded-full" style={{ background: line.hlProduct.colorHex }} />
                                   {line.hlProduct.productName} · {line.hlProduct.colorName} · {line.hlProduct.size}
                                 </span>
-                                <span className="text-[10px] text-zinc-400">{line.hlProduct.gsm}</span>
+                                <span className="text-[10px] text-ds-muted">{line.hlProduct.gsm}</span>
                               </div>
                             ) : (
                               <p className="text-[10px] text-red-500 mt-1">
@@ -649,15 +649,15 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
 
                     {/* Shipping address */}
                     {order.shipping_address && (
-                      <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-600 space-y-0.5">
-                        <p className="font-semibold text-zinc-700 mb-1.5">Ship to</p>
+                      <div className="bg-ds-light-gray rounded-xl px-4 py-3 text-xs text-ds-body space-y-0.5">
+                        <p className="font-semibold text-ds-body mb-1.5">Ship to</p>
                         {order.shipping_address.company && <p className="font-medium">{order.shipping_address.company}</p>}
                         <p>{order.shipping_address.name}</p>
                         <p>{order.shipping_address.address1}</p>
                         {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
                         <p>{order.shipping_address.city}{order.shipping_address.province ? `, ${order.shipping_address.province}` : ""} {order.shipping_address.zip}</p>
                         <p>{order.shipping_address.country_name ?? order.shipping_address.country}</p>
-                        {order.shipping_address.phone && <p className="text-zinc-400">{order.shipping_address.phone}</p>}
+                        {order.shipping_address.phone && <p className="text-ds-muted">{order.shipping_address.phone}</p>}
                       </div>
                     )}
 
@@ -670,9 +670,9 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                       const sel = selectedShipping[order.id];
                       return (
                         <div className="space-y-2">
-                          <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Shipping Method</p>
+                          <p className="text-xs font-bold text-ds-body uppercase tracking-wider">Shipping Method</p>
                           {isLoadingRates ? (
-                            <p className="text-xs text-zinc-400">Fetching rates…</p>
+                            <p className="text-xs text-ds-muted">Fetching rates…</p>
                           ) : rates ? (
                             <div className="flex gap-2">
                               {rates.map((opt) => (
@@ -680,12 +680,12 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                                   onClick={() => setSelectedShipping((p) => ({ ...p, [order.id]: opt }))}
                                   className={`flex-1 rounded-xl border-2 px-3 py-2.5 text-left transition-all ${
                                     sel?.type === opt.type
-                                      ? "border-zinc-900 bg-zinc-900 text-white"
-                                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                                      ? "border-zinc-900 bg-ds-dark text-white"
+                                      : "border-black/[0.06] bg-white text-ds-body hover:border-zinc-400"
                                   }`}>
-                                  <p className="text-xs font-black capitalize">{opt.type === "surface" ? "🚛 Surface" : "✈️ Air"}</p>
-                                  <p className={`text-[10px] mt-0.5 ${sel?.type === opt.type ? "text-zinc-300" : "text-zinc-400"}`}>{opt.days}</p>
-                                  <p className={`text-sm font-black mt-1 ${sel?.type === opt.type ? "text-white" : "text-zinc-900"}`}>₹{opt.rate}</p>
+                                  <p className="text-xs font-semibold capitalize">{opt.type === "surface" ? "🚛 Surface" : "✈️ Air"}</p>
+                                  <p className={`text-[10px] mt-0.5 ${sel?.type === opt.type ? "text-ds-muted" : "text-ds-muted"}`}>{opt.days}</p>
+                                  <p className={`text-sm font-semibold mt-1 ${sel?.type === opt.type ? "text-white" : "text-ds-dark"}`}>₹{opt.rate}</p>
                                 </button>
                               ))}
                             </div>
@@ -715,14 +715,14 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                           const shpCost = selectedShipping[order.id]?.rate ?? 0;
                           const total = Math.round(prodCost + shpCost);
                           return prodCost > 0 ? (
-                            <div className="text-xs text-zinc-400 text-center space-y-0.5">
+                            <div className="text-xs text-ds-muted text-center space-y-0.5">
                               <p>
-                                Products: <span className="font-bold text-zinc-700">{fmtWallet(prodCost)}</span>
-                                {shpCost > 0 && <> · Shipping: <span className="font-bold text-zinc-700">{fmtWallet(shpCost)}</span></>}
+                                Products: <span className="font-bold text-ds-body">{fmtWallet(prodCost)}</span>
+                                {shpCost > 0 && <> · Shipping: <span className="font-bold text-ds-body">{fmtWallet(shpCost)}</span></>}
                               </p>
-                              <p>Total to deduct: <span className="font-black text-zinc-900">{fmtWallet(total)}</span>
-                                {walletCurrency !== "INR" && <span className="ml-1 text-zinc-300">(₹{total.toLocaleString("en-IN")} INR)</span>}
-                                <span className="ml-1 text-zinc-300">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
+                              <p>Total to deduct: <span className="font-semibold text-ds-dark">{fmtWallet(total)}</span>
+                                {walletCurrency !== "INR" && <span className="ml-1 text-ds-muted">(₹{total.toLocaleString("en-IN")} INR)</span>}
+                                <span className="ml-1 text-ds-muted">(retail: {order.currency} {Number(order.total_price).toLocaleString()})</span>
                               </p>
                             </div>
                           ) : null;
@@ -735,7 +735,7 @@ function OrdersList({ userId, shopDomain }: { userId: string; shopDomain: string
                         <button
                           onClick={() => handleConfirmViaWallet(order)}
                           disabled={isConfirming || !order.anyMatched}
-                          className="w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-black hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                          className="w-full py-3 rounded-xl bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
                         >
                           {isConfirming ? (
                             <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>Confirming…</>
@@ -786,7 +786,7 @@ export default function ShopifyTab({ userId }: { userId: string }) {
 
   if (loadingConn) {
     return (
-      <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+      <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
         Loading…
       </div>
@@ -808,10 +808,10 @@ export default function ShopifyTab({ userId }: { userId: string }) {
             </svg>
           </div>
           <div>
-            <p className="font-black text-zinc-900 text-sm" style={{ letterSpacing: "-0.02em" }}>
+            <p className="font-semibold text-ds-dark text-sm" style={{ letterSpacing: "-0.02em" }}>
               {connection.shop_name ?? connection.shop_domain}
             </p>
-            <p className="text-xs text-zinc-400">{connection.shop_domain}</p>
+            <p className="text-xs text-ds-muted">{connection.shop_domain}</p>
           </div>
           <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />Connected
@@ -820,19 +820,19 @@ export default function ShopifyTab({ userId }: { userId: string }) {
         <button
           onClick={handleDisconnect}
           disabled={disconnecting}
-          className="text-xs text-zinc-400 hover:text-red-500 transition-colors disabled:opacity-40"
+          className="text-xs text-ds-muted hover:text-red-500 transition-colors disabled:opacity-40"
         >
           {disconnecting ? "Disconnecting…" : "Disconnect store"}
         </button>
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-1 mb-6 bg-zinc-100 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 mb-6 bg-black/[0.05] rounded-xl p-1 w-fit">
         {(["orders", "skus"] as ShopifySubTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setSubTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${subTab === t ? "bg-white shadow-sm text-zinc-900" : "text-zinc-500 hover:text-zinc-700"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${subTab === t ? "bg-white shadow-sm text-ds-dark" : "text-ds-body hover:text-ds-body"}`}
           >
             {t === "orders" ? "Shopify Orders" : "SKU Mapping"}
           </button>

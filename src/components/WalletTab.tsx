@@ -208,7 +208,7 @@ export default function WalletTab({ userId }: { userId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-zinc-400 py-8">
+      <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
@@ -220,36 +220,36 @@ export default function WalletTab({ userId }: { userId: string }) {
   return (
     <div className="max-w-2xl">
       {/* Title */}
-      <h2 className="text-2xl font-black text-zinc-900 mb-6" style={{ letterSpacing: "-0.04em" }}>Wallet</h2>
+      <h2 className="text-2xl font-semibold text-ds-dark mb-6" style={{ letterSpacing: "-0.04em" }}>Wallet</h2>
 
       {/* Credit balance card */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 mb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Your Credit</p>
-        <p className="text-4xl font-black text-zinc-900 mb-1" style={{ letterSpacing: "-0.03em" }}>
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-2">Your Credit</p>
+        <p className="text-4xl font-semibold text-ds-dark mb-1" style={{ letterSpacing: "-0.03em" }}>
           {currency} {formatCurrency(balance)}
         </p>
         <div className="mt-4 flex flex-col gap-1.5">
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-ds-body">
             • What is Credit and how does it work?{" "}
-            <button onClick={() => setShowLearnMore(true)} className="text-orange-500 hover:underline font-semibold">Learn more</button>
+            <button onClick={() => setShowLearnMore(true)} className="text-brand hover:underline font-semibold">Learn more</button>
           </p>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-ds-body">
             • Credit are not eligible for withdrawal.
           </p>
         </div>
       </div>
 
       {/* Payment card section */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 mb-4">
-        <p className="text-sm font-black text-zinc-900 mb-1" style={{ letterSpacing: "-0.02em" }}>Payment card</p>
-        <p className="text-xs text-zinc-500 mb-4">
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4">
+        <p className="text-sm font-semibold text-ds-dark mb-1" style={{ letterSpacing: "-0.02em" }}>Payment card</p>
+        <p className="text-xs text-ds-body mb-4">
           Add funds to your wallet to confirm Shopify orders and cover production costs.
         </p>
 
         {!addingCredit ? (
           <button
             onClick={() => { setAddingCredit(true); setError(null); }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-zinc-900 text-white text-sm font-black hover:bg-zinc-700 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -260,7 +260,7 @@ export default function WalletTab({ userId }: { userId: string }) {
           <div className="flex flex-col gap-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-sm">₹</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ds-muted font-bold text-sm">₹</span>
                 <input
                   type="number"
                   min="100"
@@ -269,14 +269,14 @@ export default function WalletTab({ userId }: { userId: string }) {
                   placeholder="Enter amount (min ₹100)"
                   value={creditAmount}
                   onChange={(e) => { setCreditAmount(e.target.value); setError(null); }}
-                  className="w-full pl-8 pr-4 py-2.5 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                  className="w-full pl-8 pr-4 py-2.5 border border-black/[0.06] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
                   onKeyDown={(e) => e.key === "Enter" && handleAddCredit()}
                 />
               </div>
               <button
                 onClick={handleAddCredit}
                 disabled={processing || !creditAmount}
-                className="px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors whitespace-nowrap flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors whitespace-nowrap flex items-center gap-2"
               >
                 {processing ? (
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -287,7 +287,7 @@ export default function WalletTab({ userId }: { userId: string }) {
               </button>
               <button
                 onClick={() => { setAddingCredit(false); setCreditAmount(""); setError(null); }}
-                className="px-3 py-2.5 rounded-xl border border-zinc-200 text-zinc-400 hover:text-zinc-600 transition-colors text-sm"
+                className="px-3 py-2.5 rounded-xl border border-black/[0.06] text-ds-muted hover:text-ds-body transition-colors text-sm"
               >
                 Cancel
               </button>
@@ -300,20 +300,20 @@ export default function WalletTab({ userId }: { userId: string }) {
       </div>
 
       {/* Store billing currency */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 mb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Store billing currency</p>
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-3">Store billing currency</p>
 
         {!changingCurrency ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-700">
+              <div className="w-8 h-8 rounded-full bg-black/[0.05] flex items-center justify-center text-sm font-bold text-ds-body">
                 {CURRENCIES.find((c) => c.code === currency)?.symbol ?? currency}
               </div>
-              <span className="font-bold text-zinc-900 text-sm">{currency}</span>
+              <span className="font-bold text-ds-dark text-sm">{currency}</span>
             </div>
             <button
               onClick={() => { setSelectedCurrency(currency); setChangingCurrency(true); setCurrencyError(null); }}
-              className="px-4 py-2 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-semibold hover:border-zinc-400 hover:text-zinc-900 transition-colors"
+              className="px-4 py-2 rounded-xl border border-black/[0.06] text-ds-body text-xs font-semibold hover:border-zinc-400 hover:text-ds-dark transition-colors"
             >
               Change
             </button>
@@ -327,14 +327,14 @@ export default function WalletTab({ userId }: { userId: string }) {
                   onClick={() => setSelectedCurrency(c.code)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all ${
                     selectedCurrency === c.code
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 hover:border-zinc-400 text-zinc-700"
+                      ? "border-zinc-900 bg-ds-dark text-white"
+                      : "border-black/[0.06] hover:border-zinc-400 text-ds-body"
                   }`}
                 >
                   <span className="text-sm font-bold w-6 text-center">{c.symbol}</span>
                   <div>
                     <p className="text-xs font-bold leading-none">{c.code}</p>
-                    <p className={`text-[10px] mt-0.5 leading-none ${selectedCurrency === c.code ? "text-zinc-300" : "text-zinc-400"}`}>{c.name}</p>
+                    <p className={`text-[10px] mt-0.5 leading-none ${selectedCurrency === c.code ? "text-ds-muted" : "text-ds-muted"}`}>{c.name}</p>
                   </div>
                 </button>
               ))}
@@ -344,7 +344,7 @@ export default function WalletTab({ userId }: { userId: string }) {
               <button
                 onClick={handleSaveCurrency}
                 disabled={currencySaving || !selectedCurrency}
-                className="flex-1 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
               >
                 {currencySaving ? (
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -355,7 +355,7 @@ export default function WalletTab({ userId }: { userId: string }) {
               </button>
               <button
                 onClick={() => { setChangingCurrency(false); setCurrencyError(null); }}
-                className="px-4 py-2.5 rounded-xl border border-zinc-200 text-zinc-500 text-sm font-semibold hover:text-zinc-800 transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-black/[0.06] text-ds-body text-sm font-semibold hover:text-ds-dark transition-colors"
               >
                 Cancel
               </button>
@@ -365,21 +365,21 @@ export default function WalletTab({ userId }: { userId: string }) {
       </div>
 
       {/* Wallet Transaction Record */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6">
-        <p className="text-sm font-black text-zinc-900 mb-4" style={{ letterSpacing: "-0.02em" }}>
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+        <p className="text-sm font-semibold text-ds-dark mb-4" style={{ letterSpacing: "-0.02em" }}>
           Wallet Transaction Record
         </p>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 bg-zinc-100 rounded-xl p-1 w-fit">
+        <div className="flex gap-1 mb-4 bg-black/[0.05] rounded-xl p-1 w-fit">
           {(["inflow", "outflow"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveFlowTab(tab)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
                 activeFlowTab === tab
-                  ? "bg-white shadow-sm text-zinc-900"
-                  : "text-zinc-500 hover:text-zinc-700"
+                  ? "bg-white shadow-sm text-ds-dark"
+                  : "text-ds-body hover:text-ds-body"
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -389,9 +389,9 @@ export default function WalletTab({ userId }: { userId: string }) {
 
         {/* Table */}
         {filteredTransactions.length === 0 ? (
-          <div className="text-center py-10 border-2 border-dashed border-zinc-100 rounded-xl">
-            <p className="text-zinc-400 text-sm font-semibold">No data</p>
-            <p className="text-zinc-300 text-xs mt-1">
+          <div className="text-center py-10 border-2 border-dashed border-black/[0.06] rounded-xl">
+            <p className="text-ds-muted text-sm font-semibold">No data</p>
+            <p className="text-ds-muted text-xs mt-1">
               {activeFlowTab === "inflow" ? "No credits yet" : "No debits yet"}
             </p>
           </div>
@@ -399,7 +399,7 @@ export default function WalletTab({ userId }: { userId: string }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-zinc-400 text-[10px] uppercase tracking-widest border-b border-zinc-100">
+                <tr className="text-ds-muted text-[10px] uppercase tracking-widest border-b border-black/[0.06]">
                   <th className="text-left py-2 pr-4 font-semibold">Description</th>
                   <th className="text-left py-2 pr-4 font-semibold">Time</th>
                   <th className="text-right py-2 font-semibold">Amount</th>
@@ -407,17 +407,17 @@ export default function WalletTab({ userId }: { userId: string }) {
               </thead>
               <tbody className="divide-y divide-zinc-50">
                 {filteredTransactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-zinc-50 transition-colors">
+                  <tr key={t.id} className="hover:bg-ds-light-gray transition-colors">
                     <td className="py-3 pr-4">
-                      <p className="font-semibold text-zinc-800 text-xs">{t.description ?? "—"}</p>
+                      <p className="font-semibold text-ds-dark text-xs">{t.description ?? "—"}</p>
                       {t.reference_id && (
-                        <p className="text-[10px] font-mono text-zinc-400 mt-0.5">{t.reference_id}</p>
+                        <p className="text-[10px] font-mono text-ds-muted mt-0.5">{t.reference_id}</p>
                       )}
                     </td>
-                    <td className="py-3 pr-4 text-xs text-zinc-500 whitespace-nowrap">
+                    <td className="py-3 pr-4 text-xs text-ds-body whitespace-nowrap">
                       {formatDate(t.created_at)}
                     </td>
-                    <td className={`py-3 text-right font-black text-sm ${
+                    <td className={`py-3 text-right font-semibold text-sm ${
                       t.type === "credit" ? "text-green-600" : "text-red-500"
                     }`}>
                       {t.type === "credit" ? "+ " : "- "}₹{formatCurrency(Number(t.amount))}
@@ -433,33 +433,33 @@ export default function WalletTab({ userId }: { userId: string }) {
       {showLearnMore && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setShowLearnMore(false)}>
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowLearnMore(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 transition-colors">
+            <button onClick={() => setShowLearnMore(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/[0.05] hover:bg-zinc-200 text-ds-body transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center">
-                <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+              <div className="w-10 h-10 rounded-2xl bg-brand/8 flex items-center justify-center">
+                <svg className="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
               </div>
-              <h3 className="text-lg font-black text-zinc-900" style={{ letterSpacing: "-0.03em" }}>How Wallet Credit Works</h3>
+              <h3 className="text-lg font-semibold text-ds-dark" style={{ letterSpacing: "-0.03em" }}>How Wallet Credit Works</h3>
             </div>
-            <div className="flex flex-col gap-4 text-sm text-zinc-600">
+            <div className="flex flex-col gap-4 text-sm text-ds-body">
               {[
                 { icon: "💳", title: "Add Credit", body: "Top up your wallet using Razorpay (UPI, cards, net banking). Minimum ₹100." },
                 { icon: "🛍️", title: "Pay for Orders", body: "Use your wallet balance to confirm Shopify orders and pay production costs (blank + print + shipping) instantly." },
                 { icon: "💰", title: "Pay at Checkout", body: "You can also use your wallet balance at the normal checkout for custom orders." },
-                { icon: "↩️", title: "Instant Refunds", body: "If an order is cancelled, the production cost is refunded back to your wallet immediately — no waiting 5–7 days." },
+                { icon: "↩️", title: "Instant Refunds", body: "If an order is cancelled, the production cost is refunded back to your wallet immediately. No waiting 5–7 days." },
                 { icon: "🚫", title: "No Withdrawal", body: "Wallet credits cannot be withdrawn as cash. They can only be used for orders on Halftone Labs." },
               ].map(({ icon, title, body }) => (
                 <div key={title} className="flex gap-3">
                   <span className="text-lg flex-shrink-0 mt-0.5">{icon}</span>
                   <div>
-                    <p className="font-bold text-zinc-800 text-sm">{title}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{body}</p>
+                    <p className="font-bold text-ds-dark text-sm">{title}</p>
+                    <p className="text-xs text-ds-body mt-0.5 leading-relaxed">{body}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <button onClick={() => setShowLearnMore(false)} className="mt-6 w-full py-3 rounded-xl bg-zinc-900 text-white text-sm font-bold hover:bg-zinc-700 transition-colors">Got it</button>
+            <button onClick={() => setShowLearnMore(false)} className="mt-6 w-full py-3 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors">Got it</button>
           </div>
         </div>
       )}

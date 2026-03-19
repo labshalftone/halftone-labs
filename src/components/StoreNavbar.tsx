@@ -41,8 +41,8 @@ export default function StoreNavbar({
           {/* Store name — NOT Halftone branding */}
           <Link
             href={`/store/${storeHandle}`}
-            className={`font-black text-lg leading-none transition-colors ${
-              light ? "text-zinc-900" : "text-white"
+            className={`font-semibold text-lg leading-none transition-colors ${
+              light ? "text-ds-dark" : "text-white"
             }`}
             style={{ letterSpacing: "-0.04em" }}
           >
@@ -54,7 +54,7 @@ export default function StoreNavbar({
               href="/track"
               className={`hidden sm:block text-xs font-semibold px-3 py-2 rounded-full transition-colors ${
                 light
-                  ? "text-zinc-500 hover:text-zinc-900 hover:bg-black/5"
+                  ? "text-ds-body hover:text-ds-dark hover:bg-black/5"
                   : "text-white/60 hover:text-white hover:bg-white/10"
               }`}
             >
@@ -70,7 +70,7 @@ export default function StoreNavbar({
               }`}
             >
               <svg
-                className={`w-5 h-5 transition-colors ${light ? "text-zinc-900" : "text-white"}`}
+                className={`w-5 h-5 transition-colors ${light ? "text-ds-dark" : "text-white"}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -83,7 +83,7 @@ export default function StoreNavbar({
                 />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-orange-500 text-white text-[9px] font-black flex items-center justify-center leading-none px-1">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-brand text-white text-[9px] font-semibold flex items-center justify-center leading-none px-1">
                   {count}
                 </span>
               )}

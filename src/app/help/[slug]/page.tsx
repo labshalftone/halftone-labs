@@ -33,17 +33,17 @@ export default async function HelpArticlePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-zinc-100">
+      <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-black/[0.06]">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center shrink-0">
-            <span className="text-base text-zinc-900" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Halftone Labs</span>
+            <span className="text-base text-ds-dark" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Halftone Labs</span>
             <span className="hidden sm:block mx-3 w-px h-4 bg-zinc-300 self-center" />
-            <span className="hidden sm:block text-[11px] font-bold tracking-[0.18em] text-zinc-400 uppercase">Help</span>
+            <span className="hidden sm:block text-[11px] font-bold tracking-[0.18em] text-ds-muted uppercase">Help</span>
           </Link>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link href="/academy" className="hidden sm:block text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Academy</Link>
-            <Link href="/help" className="hidden sm:block text-sm font-semibold text-zinc-900">Help</Link>
-            <Link href="/account" className="text-sm font-semibold bg-zinc-900 text-white px-3 py-1.5 rounded-full hover:bg-zinc-700 transition-colors whitespace-nowrap">
+            <Link href="/academy" className="hidden sm:block text-sm font-medium text-ds-body hover:text-ds-dark transition-colors">Academy</Link>
+            <Link href="/help" className="hidden sm:block text-sm font-semibold text-ds-dark">Help</Link>
+            <Link href="/account" className="text-sm font-semibold bg-ds-dark text-white px-3 py-1.5 rounded-full hover:bg-ds-dark2 transition-colors whitespace-nowrap">
               Dashboard →
             </Link>
           </div>
@@ -52,27 +52,27 @@ export default async function HelpArticlePage({ params }: Props) {
 
       <div className="max-w-3xl mx-auto px-6">
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400 pt-6">
-          <Link href="/help" className="hover:text-zinc-700 transition-colors">Help Center</Link>
+        <div className="flex items-center gap-2 text-xs text-ds-muted pt-6">
+          <Link href="/help" className="hover:text-ds-body transition-colors">Help Center</Link>
           <span>/</span>
-          <Link href="/help" className="hover:text-zinc-700 transition-colors">{category?.label ?? article.category}</Link>
+          <Link href="/help" className="hover:text-ds-body transition-colors">{category?.label ?? article.category}</Link>
           <span>/</span>
-          <span className="text-zinc-600 truncate">{article.title}</span>
+          <span className="text-ds-body truncate">{article.title}</span>
         </div>
 
         {/* Header */}
-        <header className="pt-8 pb-8 border-b border-zinc-100">
+        <header className="pt-8 pb-8 border-b border-black/[0.06]">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-lg">{category?.icon ?? "📄"}</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{category?.label}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-ds-body">{category?.label}</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-zinc-900 leading-tight mb-3" style={{ letterSpacing: "-0.03em" }}>
+          <h1 className="text-2xl md:text-3xl font-semibold text-ds-dark leading-tight mb-3" style={{ letterSpacing: "-0.03em" }}>
             {article.title}
           </h1>
-          <p className="text-zinc-500 text-sm leading-relaxed">{article.excerpt}</p>
+          <p className="text-ds-body text-sm leading-relaxed">{article.excerpt}</p>
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             {article.tags.map((tag) => (
-              <span key={tag} className="text-[10px] font-semibold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+              <span key={tag} className="text-[10px] font-semibold text-ds-body bg-black/[0.05] px-2 py-0.5 rounded-full">
                 {tag}
               </span>
             ))}
@@ -83,33 +83,33 @@ export default async function HelpArticlePage({ params }: Props) {
         <article className="py-10">
           <div
             className="prose prose-zinc prose-sm max-w-none
-              prose-headings:font-black prose-headings:tracking-tight prose-headings:text-zinc-900
+              prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-ds-dark
               prose-h2:text-lg prose-h2:mt-10 prose-h2:mb-4
               prose-h3:text-sm prose-h3:mt-7 prose-h3:mb-2
-              prose-p:text-zinc-600 prose-p:leading-relaxed prose-p:text-sm
-              prose-li:text-zinc-600 prose-li:leading-relaxed prose-li:text-sm
-              prose-a:text-violet-600 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-zinc-800 prose-strong:font-semibold
-              prose-code:text-xs prose-code:bg-zinc-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-zinc-700
-              prose-pre:bg-zinc-950 prose-pre:text-zinc-100 prose-pre:rounded-xl prose-pre:text-xs prose-pre:overflow-x-auto
-              prose-ol:text-zinc-600 prose-ol:text-sm
-              prose-ul:text-zinc-600 prose-ul:text-sm
+              prose-p:text-ds-body prose-p:leading-relaxed prose-p:text-sm
+              prose-li:text-ds-body prose-li:leading-relaxed prose-li:text-sm
+              prose-a:text-brand prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-ds-dark prose-strong:font-semibold
+              prose-code:text-xs prose-code:bg-black/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-ds-body
+              prose-pre:bg-ds-darkest prose-pre:text-zinc-100 prose-pre:rounded-xl prose-pre:text-xs prose-pre:overflow-x-auto
+              prose-ol:text-ds-body prose-ol:text-sm
+              prose-ul:text-ds-body prose-ul:text-sm
               prose-table:text-xs
-              prose-th:text-zinc-700 prose-th:font-semibold prose-th:bg-zinc-50
-              prose-td:text-zinc-600"
+              prose-th:text-ds-body prose-th:font-semibold prose-th:bg-ds-light-gray
+              prose-td:text-ds-body"
             dangerouslySetInnerHTML={{ __html: article.body }}
           />
         </article>
 
         {/* Still need help */}
-        <div className="border border-zinc-100 rounded-2xl p-5 bg-zinc-50 mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="border border-black/[0.06] rounded-2xl p-5 bg-ds-light-gray mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-bold text-zinc-800">Was this helpful?</p>
-            <p className="text-xs text-zinc-500 mt-0.5">If you&apos;re still stuck, our team can help.</p>
+            <p className="text-sm font-bold text-ds-dark">Was this helpful?</p>
+            <p className="text-xs text-ds-body mt-0.5">If you&apos;re still stuck, our team can help.</p>
           </div>
           <a
             href="mailto:support@halftone.co"
-            className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-semibold hover:bg-zinc-700 transition-colors"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-ds-dark text-white rounded-xl text-xs font-semibold hover:bg-ds-dark2 transition-colors"
           >
             Contact support →
           </a>
@@ -117,20 +117,20 @@ export default async function HelpArticlePage({ params }: Props) {
 
         {/* Related articles */}
         {related.length > 0 && (
-          <div className="border-t border-zinc-100 py-8">
-            <h2 className="text-sm font-black text-zinc-900 mb-4">Related articles</h2>
+          <div className="border-t border-black/[0.06] py-8">
+            <h2 className="text-sm font-semibold text-ds-dark mb-4">Related articles</h2>
             <div className="space-y-2">
               {related.map((r) => (
                 <Link
                   key={r.slug}
                   href={`/help/${r.slug}`}
-                  className="group flex items-center gap-3 p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 hover:bg-zinc-50 transition-all"
+                  className="group flex items-center gap-3 p-3 rounded-xl border border-black/[0.06] hover:border-zinc-300 hover:bg-ds-light-gray transition-all"
                 >
                   <span className="text-base flex-shrink-0">
                     {HELP_CATEGORIES.find((c) => c.id === r.category)?.icon ?? "📄"}
                   </span>
-                  <span className="text-sm font-medium text-zinc-700 group-hover:text-violet-700 transition-colors">{r.title}</span>
-                  <svg className="w-4 h-4 text-zinc-300 group-hover:text-violet-500 ml-auto flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <span className="text-sm font-medium text-ds-body group-hover:text-brand transition-colors">{r.title}</span>
+                  <svg className="w-4 h-4 text-ds-muted group-hover:text-violet-500 ml-auto flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -143,7 +143,7 @@ export default async function HelpArticlePage({ params }: Props) {
         <div className="pb-12">
           <Link
             href="/help"
-            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 transition-colors font-medium"
+            className="inline-flex items-center gap-2 text-sm text-ds-body hover:text-ds-dark transition-colors font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

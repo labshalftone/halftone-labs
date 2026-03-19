@@ -65,10 +65,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#f8f7f5] flex flex-col items-center justify-center gap-6">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6">
         <Navbar />
-        <p className="text-2xl font-bold text-stone-700 mt-24">Product not found.</p>
-        <Link href="/studio" className="text-orange-500 underline underline-offset-2">
+        <p className="text-2xl font-bold text-ds-body mt-24">Product not found.</p>
+        <Link href="/studio" className="text-brand underline underline-offset-2">
           Back to Studio
         </Link>
       </div>
@@ -88,14 +88,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
         showBranding={false}
       />
 
-      <div className="min-h-screen bg-[#f8f7f5] pt-16">
+      <div className="min-h-screen bg-white pt-16">
         {/* ── Breadcrumb ── */}
-        <div className="max-w-5xl mx-auto px-6 pt-8 pb-0 flex items-center gap-2 text-sm text-stone-400">
-          <Link href="/studio" className="hover:text-stone-700 transition-colors">
+        <div className="max-w-5xl mx-auto px-6 pt-8 pb-0 flex items-center gap-2 text-sm text-ds-muted">
+          <Link href="/studio" className="hover:text-ds-body transition-colors">
             Studio
           </Link>
           <span>/</span>
-          <span className="text-stone-600 font-medium">{product.name}</span>
+          <span className="text-ds-body font-medium">{product.name}</span>
         </div>
 
         {/* ── Two-column hero ── */}
@@ -135,8 +135,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                     onClick={() => setPhotoSide(side)}
                     className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all ${
                       photoSide === side
-                        ? "bg-zinc-900 text-white"
-                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                        ? "bg-ds-dark text-white"
+                        : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"
                     }`}
                   >
                     {side}
@@ -172,34 +172,34 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
           >
             {/* Tag */}
             {product.tag && (
-              <span className="inline-block self-start rounded-full bg-orange-100 text-orange-600 text-xs font-semibold px-3 py-1 tracking-wide uppercase">
+              <span className="inline-block self-start rounded-full bg-orange-100 text-brand-dark text-xs font-semibold px-3 py-1 tracking-wide uppercase">
                 {product.tag}
               </span>
             )}
 
             {/* Name + GSM */}
             <div>
-              <h1 className="text-4xl font-black text-stone-900 leading-tight">{product.name}</h1>
-              <span className="inline-block mt-2 text-xs font-semibold tracking-widest uppercase text-stone-400 border border-stone-200 rounded px-2 py-0.5">
+              <h1 className="text-4xl font-semibold text-ds-dark leading-tight">{product.name}</h1>
+              <span className="inline-block mt-2 text-xs font-semibold tracking-widest uppercase text-ds-muted border border-black/[0.06] rounded px-2 py-0.5">
                 {product.gsm}
               </span>
             </div>
 
             {/* Description */}
-            <p className="text-stone-500 leading-relaxed text-[15px]">{product.description}</p>
+            <p className="text-ds-body leading-relaxed text-[15px]">{product.description}</p>
 
             {/* Price */}
-            <p className="text-2xl font-bold text-stone-900">
+            <p className="text-2xl font-bold text-ds-dark">
               From {fmt(product.blankPrice)}{" "}
-              <span className="text-base font-normal text-stone-400">+ print</span>
+              <span className="text-base font-normal text-ds-muted">+ print</span>
             </p>
 
-            <hr className="border-stone-200" />
+            <hr className="border-black/[0.06]" />
 
             {/* Color picker */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">
-                Color — <span className="text-stone-700 normal-case font-medium">{selectedColor.name}</span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-ds-muted mb-2">
+                Color — <span className="text-ds-body normal-case font-medium">{selectedColor.name}</span>
               </p>
               <div className="flex items-center gap-2 flex-wrap">
                 {product.colors.map((c, i) => (
@@ -223,18 +223,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
               </div>
             </div>
 
-            <hr className="border-stone-200" />
+            <hr className="border-black/[0.06]" />
 
             {/* Sizes */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-ds-muted mb-2">
                 Available sizes
               </p>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => (
                   <span
                     key={s}
-                    className="rounded border border-stone-200 px-3 py-1 text-xs font-semibold text-stone-600 bg-white"
+                    className="rounded border border-black/[0.06] px-3 py-1 text-xs font-semibold text-ds-body bg-white"
                   >
                     {s}
                   </span>
@@ -242,27 +242,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
               </div>
               <button
                 onClick={() => setSizeGuideOpen(true)}
-                className="mt-3 text-sm text-orange-500 hover:text-orange-600 font-medium underline underline-offset-2 transition-colors"
+                className="mt-3 text-sm text-brand hover:text-brand-dark font-medium underline underline-offset-2 transition-colors"
               >
                 Size Guide
               </button>
             </div>
 
-            <hr className="border-stone-200" />
+            <hr className="border-black/[0.06]" />
 
             {/* CTA */}
             <button
               onClick={() => router.push("/studio")}
-              className="w-full rounded-full bg-stone-900 text-white font-bold text-base py-4 hover:bg-stone-700 transition-colors"
+              className="w-full rounded-full bg-ds-dark text-white font-bold text-base py-4 hover:bg-ds-dark2 transition-colors"
             >
               Customise this tee →
             </button>
 
-            <p className="text-center text-sm text-stone-400">
+            <p className="text-center text-sm text-ds-muted">
               or{" "}
               <a
                 href="mailto:hello@halftonelabs.in"
-                className="text-orange-500 hover:text-orange-600 transition-colors"
+                className="text-brand hover:text-brand-dark transition-colors"
               >
                 get a bulk quote
               </a>
@@ -272,7 +272,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
 
         {/* ── Specs section ── */}
         <section className="max-w-5xl mx-auto px-6 py-12">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-6">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-ds-muted mb-6">
             Product specs
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -285,27 +285,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-xl bg-white border border-stone-100 px-5 py-4 flex flex-col gap-1"
+                className="rounded-xl bg-white border border-black/[0.06] px-5 py-4 flex flex-col gap-1"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-ds-muted">
                   {item.label}
                 </p>
-                <p className="text-sm font-medium text-stone-700">{item.value}</p>
+                <p className="text-sm font-medium text-ds-body">{item.value}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* ── Bulk pricing section ── */}
-        <section className="max-w-5xl mx-auto px-6 py-12 border-t border-stone-100">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-2">
+        <section className="max-w-5xl mx-auto px-6 py-12 border-t border-black/[0.06]">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-ds-muted mb-2">
             Bulk pricing
           </h2>
-          <p className="text-sm text-stone-400 mb-6">
+          <p className="text-sm text-ds-muted mb-6">
             MOQ 50 units. Email{" "}
             <a
               href="mailto:hello@halftonelabs.in"
-              className="text-orange-500 hover:text-orange-600 transition-colors"
+              className="text-brand hover:text-brand-dark transition-colors"
             >
               hello@halftonelabs.in
             </a>{" "}
@@ -315,41 +315,41 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
             {product.bulkTiers.map((tier) => (
               <div
                 key={tier.qty}
-                className="rounded-xl bg-white border border-stone-100 px-6 py-5 flex flex-col gap-1"
+                className="rounded-xl bg-white border border-black/[0.06] px-6 py-5 flex flex-col gap-1"
               >
-                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                <p className="text-xs font-semibold uppercase tracking-wider text-ds-muted">
                   {tier.qty} units
                 </p>
-                <p className="text-2xl font-black text-stone-900">₹{tier.priceInr}</p>
-                <p className="text-xs text-stone-400">blank per piece</p>
+                <p className="text-2xl font-semibold text-ds-dark">₹{tier.priceInr}</p>
+                <p className="text-xs text-ds-muted">blank per piece</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* ── Print techniques section ── */}
-        <section className="max-w-5xl mx-auto px-6 py-12 border-t border-stone-100 mb-16">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-2">
+        <section className="max-w-5xl mx-auto px-6 py-12 border-t border-black/[0.06] mb-16">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-ds-muted mb-2">
             Print techniques
           </h2>
-          <p className="text-sm text-stone-400 mb-6">We&apos;ve perfected DTG — it&apos;s our standard for a reason.</p>
+          <p className="text-sm text-ds-muted mb-6">We&apos;ve perfected DTG — it&apos;s our standard for a reason.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* DTG card — recommended */}
-            <div className="rounded-xl bg-zinc-900 text-white px-6 py-6 flex flex-col gap-3 relative overflow-hidden">
-              <span className="absolute top-4 right-4 text-[0.6rem] font-black uppercase tracking-widest bg-orange-500 text-white px-2 py-0.5 rounded-full">Recommended</span>
+            <div className="rounded-xl bg-ds-dark text-white px-6 py-6 flex flex-col gap-3 relative overflow-hidden">
+              <span className="absolute top-4 right-4 text-[0.6rem] font-semibold uppercase tracking-widest bg-brand text-white px-2 py-0.5 rounded-full">Recommended</span>
               <div className="flex items-center gap-3">
-                <span className="rounded-lg bg-white text-zinc-900 text-xs font-black px-3 py-1 uppercase tracking-wide">
+                <span className="rounded-lg bg-white text-ds-dark text-xs font-semibold px-3 py-1 uppercase tracking-wide">
                   DTG
                 </span>
                 <span className="text-sm font-semibold text-zinc-200">Direct to Garment</span>
               </div>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <p className="text-sm text-ds-muted leading-relaxed">
                 Ink printed directly into the fabric — breathable, soft, and vibrant. Our signature technique refined over thousands of prints. Feels like it was always part of the garment.
               </p>
-              <ul className="text-xs text-zinc-400 space-y-1">
+              <ul className="text-xs text-ds-muted space-y-1">
                 {["Breathable & soft hand-feel", "Vibrant colour, photographic detail", "Works across all garment colours", "Improves with every wash"].map(p => (
                   <li key={p} className="flex items-center gap-2">
-                    <svg className="w-3 h-3 text-orange-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <svg className="w-3 h-3 text-brand flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     {p}
                   </li>
                 ))}
@@ -357,25 +357,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
             </div>
 
             {/* DTF card */}
-            <div className="rounded-xl bg-white border border-stone-100 px-6 py-6 flex flex-col gap-3">
+            <div className="rounded-xl bg-white border border-black/[0.06] px-6 py-6 flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <span className="rounded-lg bg-zinc-100 text-zinc-500 text-xs font-bold px-3 py-1 uppercase tracking-wide">
+                <span className="rounded-lg bg-black/[0.05] text-ds-body text-xs font-bold px-3 py-1 uppercase tracking-wide">
                   DTF
                 </span>
-                <span className="text-sm font-semibold text-stone-500">Direct to Film</span>
+                <span className="text-sm font-semibold text-ds-body">Direct to Film</span>
               </div>
-              <p className="text-sm text-stone-400 leading-relaxed">
+              <p className="text-sm text-ds-muted leading-relaxed">
                 A film-transfer option available on request. Produces a slightly raised, textured finish — suited to bold graphics with thick outlines.
               </p>
-              <ul className="text-xs text-stone-400 space-y-1">
+              <ul className="text-xs text-ds-muted space-y-1">
                 {["Slightly raised, textured finish", "Suits bold graphic prints", "Available on request"].map(p => (
                   <li key={p} className="flex items-center gap-2">
-                    <svg className="w-3 h-3 text-zinc-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <svg className="w-3 h-3 text-ds-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     {p}
                   </li>
                 ))}
               </ul>
-              <p className="text-[0.65rem] text-stone-300 pt-2 border-t border-stone-100">
+              <p className="text-[0.65rem] text-ds-muted pt-2 border-t border-black/[0.06]">
                 Not sure? Go DTG — you won&apos;t regret it.
               </p>
             </div>

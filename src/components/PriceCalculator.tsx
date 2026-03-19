@@ -83,13 +83,13 @@ function Pill({
       onClick={onClick}
       className={`px-3.5 py-2 rounded-xl border text-sm font-semibold transition-all duration-150 flex flex-col items-start gap-0.5 ${
         active
-          ? "bg-zinc-900 text-white border-zinc-900"
-          : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400 hover:text-zinc-900"
+          ? "bg-ds-dark text-white border-zinc-900"
+          : "bg-white text-ds-body border-black/[0.06] hover:border-zinc-400 hover:text-ds-dark"
       }`}
     >
       <span>{children}</span>
       {sub && (
-        <span className={`text-[0.65rem] font-normal leading-none ${active ? "text-zinc-300" : "text-zinc-400"}`}>
+        <span className={`text-[0.65rem] font-normal leading-none ${active ? "text-ds-muted" : "text-ds-muted"}`}>
           {sub}
         </span>
       )}
@@ -122,43 +122,43 @@ export default function PriceCalculator() {
 
           {/* ── Left copy ─────────────────────────────────────────────── */}
           <div className="lg:pt-6">
-            <span className="text-[0.65rem] font-mono uppercase tracking-widest text-zinc-400 mb-4 block">
+            <span className="text-[0.65rem] font-mono uppercase tracking-widest text-ds-muted mb-4 block">
               Pricing
             </span>
             <h2
-              className="text-4xl md:text-5xl font-black text-zinc-900 leading-[0.92] mb-5"
+              className="text-4xl md:text-5xl font-semibold text-ds-dark leading-[0.92] mb-5"
               style={{ letterSpacing: "-0.055em" }}
             >
               Get a quote
               <br />
               instantly
             </h2>
-            <p className="text-zinc-500 leading-relaxed mb-8 max-w-sm text-[0.95rem]">
+            <p className="text-ds-body leading-relaxed mb-8 max-w-sm text-[0.95rem]">
               Configure your product and get an instant price estimate. No
               back-and-forth emails.
             </p>
-            <div className="inline-flex items-center gap-2 bg-white border border-zinc-200 rounded-full px-4 py-2 text-xs font-medium text-zinc-600 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-white border border-black/[0.06] rounded-full px-4 py-2 text-xs font-medium text-ds-body shadow-sm">
               <span>🇮🇳</span>
               <span>Fulfilled from India</span>
             </div>
 
             {/* Lead time callout */}
-            <div className="mt-8 flex items-center gap-3 text-sm text-zinc-500">
+            <div className="mt-8 flex items-center gap-3 text-sm text-ds-body">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />
               <span>
                 Est. lead time for{" "}
-                <span className="font-semibold text-zinc-900">{qty} unit{qty !== 1 ? "s" : ""}</span>
-                : <span className="font-semibold text-zinc-900">{leadTime}</span>
+                <span className="font-semibold text-ds-dark">{qty} unit{qty !== 1 ? "s" : ""}</span>
+                : <span className="font-semibold text-ds-dark">{leadTime}</span>
               </span>
             </div>
           </div>
 
           {/* ── Right calculator card ──────────────────────────────────── */}
-          <div className="bg-white rounded-3xl shadow-lg shadow-zinc-200/60 border border-zinc-100 p-7 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl shadow-lg shadow-zinc-200/60 border border-black/[0.06] p-7 flex flex-col gap-6">
 
             {/* Product */}
             <div>
-              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-zinc-400 mb-2.5 block">
+              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-ds-muted mb-2.5 block">
                 Product
               </label>
               <div className="flex flex-wrap gap-2">
@@ -178,7 +178,7 @@ export default function PriceCalculator() {
 
             {/* Technique */}
             <div>
-              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-zinc-400 mb-2.5 block">
+              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-ds-muted mb-2.5 block">
                 Print Technique
               </label>
               <div className="flex flex-wrap gap-2">
@@ -197,7 +197,7 @@ export default function PriceCalculator() {
 
             {/* Print size */}
             <div>
-              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-zinc-400 mb-2.5 block">
+              <label className="text-[0.7rem] font-mono uppercase tracking-widest text-ds-muted mb-2.5 block">
                 Print Size
               </label>
               <div className="flex flex-wrap gap-2">
@@ -218,7 +218,7 @@ export default function PriceCalculator() {
             {/* Quantity */}
             <div>
               <div className="flex items-center justify-between mb-2.5">
-                <label className="text-[0.7rem] font-mono uppercase tracking-widest text-zinc-400">
+                <label className="text-[0.7rem] font-mono uppercase tracking-widest text-ds-muted">
                   Quantity
                 </label>
                 <div className="flex items-center gap-2">
@@ -231,9 +231,9 @@ export default function PriceCalculator() {
                       const v = Math.max(1, Math.min(500, Number(e.target.value) || 1));
                       setQty(v);
                     }}
-                    className="w-16 text-right text-sm font-semibold border border-zinc-200 rounded-lg px-2 py-1 outline-none focus:border-zinc-400 text-zinc-900"
+                    className="w-16 text-right text-sm font-semibold border border-black/[0.06] rounded-lg px-2 py-1 outline-none focus:border-zinc-400 text-ds-dark"
                   />
-                  <span className="text-xs text-zinc-400">units</span>
+                  <span className="text-xs text-ds-muted">units</span>
                 </div>
               </div>
               <input
@@ -244,33 +244,33 @@ export default function PriceCalculator() {
                 onChange={(e) => setQty(Number(e.target.value))}
                 className="w-full accent-zinc-900"
               />
-              <div className="flex justify-between text-[0.65rem] text-zinc-300 mt-1">
+              <div className="flex justify-between text-[0.65rem] text-ds-muted mt-1">
                 <span>1</span>
                 <span>500</span>
               </div>
             </div>
 
             {/* Price breakdown */}
-            <div className="rounded-2xl bg-zinc-50 border border-zinc-100 p-5 flex flex-col gap-2.5">
+            <div className="rounded-2xl bg-ds-light-gray border border-black/[0.06] p-5 flex flex-col gap-2.5">
               {[
                 { label: `Unit cost (×${qty})`,                        value: fmt(unitCost) },
                 { label: "Print",                                        value: printCost > 0 ? fmt(printCost) : "included" },
                 { label: "Subtotal",                                     value: fmt(subtotal) },
                 { label: currency === "INR" ? "Est. GST (5%)" : "Tax", value: currency === "INR" ? fmt(gst) : "at checkout" },
               ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between text-sm text-zinc-500">
+                <div key={row.label} className="flex items-center justify-between text-sm text-ds-body">
                   <span>{row.label}</span>
-                  <AnimatedPrice value={row.value} className="font-medium text-zinc-700 tabular-nums" />
+                  <AnimatedPrice value={row.value} className="font-medium text-ds-body tabular-nums" />
                 </div>
               ))}
 
-              <div className="border-t border-zinc-200 pt-3 mt-1 flex items-center justify-between">
-                <span className="text-sm font-black text-zinc-900 uppercase tracking-tight">
+              <div className="border-t border-black/[0.06] pt-3 mt-1 flex items-center justify-between">
+                <span className="text-sm font-semibold text-ds-dark uppercase tracking-tight">
                   Grand Total
                 </span>
                 <AnimatedPrice
                   value={fmt(grandTotal)}
-                  className="text-xl font-black text-zinc-900 tabular-nums"
+                  className="text-xl font-semibold text-ds-dark tabular-nums"
                 />
               </div>
             </div>
@@ -279,13 +279,13 @@ export default function PriceCalculator() {
             <div className="flex gap-3">
               <Link
                 href="/studio"
-                className="flex-1 bg-zinc-900 text-white text-sm font-bold py-3 rounded-xl text-center hover:bg-zinc-700 transition-colors duration-150"
+                className="flex-1 bg-ds-dark text-white text-sm font-bold py-3 rounded-xl text-center hover:bg-ds-dark2 transition-colors duration-150"
               >
                 Start designing →
               </Link>
               <a
                 href={`mailto:hello@halftonelabs.in?subject=Price%20enquiry&body=Hi%2C%20I%27d%20like%20a%20quote%20for%20${qty}%20x%20${selectedProduct.label}.`}
-                className="flex-1 border border-zinc-200 text-zinc-700 text-sm font-semibold py-3 rounded-xl text-center hover:border-zinc-400 hover:text-zinc-900 transition-colors duration-150"
+                className="flex-1 border border-black/[0.06] text-ds-body text-sm font-semibold py-3 rounded-xl text-center hover:border-zinc-400 hover:text-ds-dark transition-colors duration-150"
               >
                 Send to email
               </a>

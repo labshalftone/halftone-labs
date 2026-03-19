@@ -50,12 +50,12 @@ export default function CountdownTimer({ launchAt, onLaunched }: { launchAt: str
       {units.map((u, i) => (
         <div key={u.label} className="flex items-center gap-2">
           <div className="text-center">
-            <div className="bg-zinc-900 text-white font-black text-lg leading-none px-3 py-2 rounded-xl min-w-[2.8rem] text-center tabular-nums">
+            <div className="bg-ds-dark text-white font-semibold text-lg leading-none px-3 py-2 rounded-xl min-w-[2.8rem] text-center tabular-nums">
               {pad(u.value)}
             </div>
-            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">{u.label}</p>
+            <p className="text-[9px] font-bold text-ds-muted uppercase tracking-widest mt-1">{u.label}</p>
           </div>
-          {i < 3 && <span className="text-zinc-400 font-black text-lg mb-4">:</span>}
+          {i < 3 && <span className="text-ds-muted font-semibold text-lg mb-4">:</span>}
         </div>
       ))}
     </div>

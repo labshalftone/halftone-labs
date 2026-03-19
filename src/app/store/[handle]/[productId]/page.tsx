@@ -123,7 +123,7 @@ export default function ProductPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8f7f5" }}>
+      <div className="min-h-screen flex items-center justify-center" >
         <div className="w-6 h-6 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
       </div>
     );
@@ -133,13 +133,13 @@ export default function ProductPage({
     return (
       <>
         <StoreNavbar storeName={store?.artist_name ?? "Store"} storeHandle={handle} variant="solid" />
-        <div className="min-h-screen flex items-center justify-center p-6 pt-24" style={{ background: "#f8f7f5" }}>
+        <div className="min-h-screen flex items-center justify-center p-6 pt-24" >
           <div className="text-center">
             <div className="text-5xl mb-4">👕</div>
-            <h1 className="text-xl font-black text-zinc-900 mb-2" style={{ letterSpacing: "-0.04em" }}>
+            <h1 className="text-xl font-semibold text-ds-dark mb-2" style={{ letterSpacing: "-0.04em" }}>
               Product not found
             </h1>
-            <Link href={`/store/${handle}`} className="text-sm font-bold text-orange-500 hover:underline">
+            <Link href={`/store/${handle}`} className="text-sm font-bold text-brand hover:underline">
               ← Back to store
             </Link>
           </div>
@@ -163,17 +163,17 @@ export default function ProductPage({
     : "regular";
 
   return (
-    <div className="min-h-screen" style={{ background: "#f8f7f5" }}>
+    <div className="min-h-screen" >
       <StoreNavbar storeName={store.artist_name} storeHandle={handle} variant="solid" />
 
       <div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400 mb-8">
-          <Link href={`/store/${handle}`} className="hover:text-zinc-700 transition-colors font-semibold">
+        <div className="flex items-center gap-2 text-xs text-ds-muted mb-8">
+          <Link href={`/store/${handle}`} className="hover:text-ds-body transition-colors font-semibold">
             {store.artist_name}
           </Link>
           <span>/</span>
-          <span className="text-zinc-600">{product.product_name}</span>
+          <span className="text-ds-body">{product.product_name}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
@@ -192,8 +192,8 @@ export default function ProductPage({
                     onClick={() => setView(v)}
                     className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all ${
                       view === v
-                        ? "bg-zinc-900 text-white"
-                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                        ? "bg-ds-dark text-white"
+                        : "bg-black/[0.05] text-ds-body hover:bg-zinc-200"
                     }`}
                   >
                     {v === "photo" ? "Product photo" : "Tee mockup"}
@@ -226,7 +226,7 @@ export default function ProductPage({
                 className="w-5 h-5 rounded-full border-2 border-white shadow"
                 style={{ background: product.color_hex }}
               />
-              <span className="text-sm text-zinc-500">{product.color_name}</span>
+              <span className="text-sm text-ds-body">{product.color_name}</span>
             </div>
           </motion.div>
 
@@ -236,21 +236,21 @@ export default function ProductPage({
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-col"
           >
-            <p className="text-xs font-mono uppercase tracking-widest text-zinc-400 mb-2">
+            <p className="text-xs font-mono uppercase tracking-widest text-ds-muted mb-2">
               {product.print_technique} Print
             </p>
             <h1
-              className="text-4xl font-black text-zinc-900 mb-1 leading-tight"
+              className="text-4xl font-semibold text-ds-dark mb-1 leading-tight"
               style={{ letterSpacing: "-0.04em" }}
             >
               {product.product_name}
             </h1>
-            <p className="text-3xl font-black text-zinc-900 mb-6">
+            <p className="text-3xl font-semibold text-ds-dark mb-6">
               {fmt(product.retail_price_inr)}
             </p>
 
             {product.description && (
-              <p className="text-zinc-600 text-sm leading-relaxed mb-8 border-l-2 border-zinc-200 pl-4">
+              <p className="text-ds-body text-sm leading-relaxed mb-8 border-l-2 border-black/[0.06] pl-4">
                 {product.description}
               </p>
             )}
@@ -258,12 +258,12 @@ export default function ProductPage({
             {/* Size */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Size</p>
+                <p className="text-xs font-bold text-ds-body uppercase tracking-widest">Size</p>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-zinc-900">{selectedSize}</span>
+                  <span className="text-xs font-bold text-ds-dark">{selectedSize}</span>
                   <button
                     onClick={() => setSizeGuideOpen(true)}
-                    className="text-xs font-semibold text-orange-500 hover:text-orange-600 underline underline-offset-2 transition-colors"
+                    className="text-xs font-semibold text-brand hover:text-brand-dark underline underline-offset-2 transition-colors"
                   >
                     Size Guide
                   </button>
@@ -276,8 +276,8 @@ export default function ProductPage({
                     onClick={() => setSelectedSize(s)}
                     className={`w-12 h-12 rounded-xl text-sm font-bold transition-all ${
                       selectedSize === s
-                        ? "bg-zinc-900 text-white shadow-md"
-                        : "bg-white text-zinc-500 border border-zinc-200 hover:border-zinc-400"
+                        ? "bg-ds-dark text-white shadow-md"
+                        : "bg-white text-ds-body border border-black/[0.06] hover:border-zinc-400"
                     }`}
                   >
                     {s}
@@ -290,10 +290,10 @@ export default function ProductPage({
             <button
               onClick={handleAdd}
               disabled={!selectedSize}
-              className={`w-full py-4 rounded-2xl text-base font-black transition-all ${
+              className={`w-full py-4 rounded-2xl text-base font-semibold transition-all ${
                 added
                   ? "bg-green-500 text-white"
-                  : "bg-zinc-900 text-white hover:bg-zinc-700 disabled:opacity-40"
+                  : "bg-ds-dark text-white hover:bg-ds-dark2 disabled:opacity-40"
               }`}
             >
               {added ? "✓ Added to cart" : `Add to Cart — ${fmt(product.retail_price_inr)}`}
@@ -305,7 +305,7 @@ export default function ProductPage({
                 { icon: "📦", text: "Ships in 5–7 business days" },
                 { icon: "🎨", text: `${product.print_technique} printed, made to order` },
               ].map(({ icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-xs text-zinc-400">
+                <div key={text} className="flex items-center gap-2 text-xs text-ds-muted">
                   <span>{icon}</span>
                   <span>{text}</span>
                 </div>
@@ -318,7 +318,7 @@ export default function ProductPage({
         {otherProducts.length > 0 && (
           <div className="mt-20">
             <h2
-              className="font-black text-zinc-900 text-lg mb-6"
+              className="font-semibold text-ds-dark text-lg mb-6"
               style={{ letterSpacing: "-0.03em" }}
             >
               More from this store
@@ -330,7 +330,7 @@ export default function ProductPage({
                   <Link key={p.id} href={`/store/${handle}/${p.id}`}>
                     <motion.div
                       whileHover={{ y: -3 }}
-                      className="bg-white rounded-2xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-md transition-all"
+                      className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] hover:border-black/[0.06] hover:shadow-md transition-all"
                     >
                       <div
                         className="aspect-square flex items-center justify-center overflow-hidden"
@@ -344,8 +344,8 @@ export default function ProductPage({
                         )}
                       </div>
                       <div className="p-3">
-                        <p className="font-bold text-zinc-900 text-xs truncate">{p.product_name}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">{fmt(p.retail_price_inr)}</p>
+                        <p className="font-bold text-ds-dark text-xs truncate">{p.product_name}</p>
+                        <p className="text-xs text-ds-body mt-0.5">{fmt(p.retail_price_inr)}</p>
                       </div>
                     </motion.div>
                   </Link>
@@ -357,9 +357,9 @@ export default function ProductPage({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-200 py-6 px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-zinc-400 text-xs">
-          <Link href="/track" className="hover:text-zinc-600 transition-colors">Track your order</Link>
+      <div className="border-t border-black/[0.06] py-6 px-6">
+        <div className="max-w-5xl mx-auto flex items-center justify-center gap-2 text-ds-muted text-xs">
+          <Link href="/track" className="hover:text-ds-body transition-colors">Track your order</Link>
           <span>·</span>
           <span>Shipped in 5–7 days</span>
         </div>
