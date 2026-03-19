@@ -208,11 +208,25 @@ export default function WalletTab({ userId }: { userId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-ds-muted py-8">
-        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        Loading wallet…
+      <div className="max-w-2xl space-y-4 animate-pulse">
+        <div className="h-7 w-24 bg-black/[0.07] rounded-full mb-6" />
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+          <div className="h-2.5 w-20 bg-black/[0.06] rounded-full mb-4" />
+          <div className="h-10 w-40 bg-black/[0.06] rounded-full mb-4" />
+          <div className="h-2.5 w-48 bg-black/[0.05] rounded-full" />
+        </div>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+          <div className="h-2.5 w-28 bg-black/[0.06] rounded-full mb-4" />
+          <div className="h-9 w-36 bg-black/[0.06] rounded-xl" />
+        </div>
+        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+          <div className="h-2.5 w-32 bg-black/[0.06] rounded-full mb-4" />
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-10 bg-black/[0.04] rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -229,12 +243,14 @@ export default function WalletTab({ userId }: { userId: string }) {
           {currency} {formatCurrency(balance)}
         </p>
         <div className="mt-4 flex flex-col gap-1.5">
-          <p className="text-xs text-ds-body">
-            • What is Credit and how does it work?{" "}
+          <p className="text-xs text-ds-body flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-ds-muted flex-shrink-0" />
+            What is Credit and how does it work?{" "}
             <button onClick={() => setShowLearnMore(true)} className="text-brand hover:underline font-semibold">Learn more</button>
           </p>
-          <p className="text-xs text-ds-body">
-            • Credit are not eligible for withdrawal.
+          <p className="text-xs text-ds-body flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-ds-muted flex-shrink-0" />
+            Credit is not eligible for withdrawal.
           </p>
         </div>
       </div>
@@ -249,12 +265,12 @@ export default function WalletTab({ userId }: { userId: string }) {
         {!addingCredit ? (
           <button
             onClick={() => { setAddingCredit(true); setError(null); }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-ds-dark text-white text-sm font-semibold hover:bg-ds-dark2 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-brand text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            + Add Credit
+            Add Credit
           </button>
         ) : (
           <div className="flex flex-col gap-3">

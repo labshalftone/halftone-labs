@@ -2247,11 +2247,6 @@ function SettingsTab({
           <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-3">Support</p>
           <a href="mailto:hello@halftonelabs.in" className="text-sm font-bold text-brand hover:underline">hello@halftonelabs.in</a>
         </div>
-        <div className="px-6 py-5">
-          <button onClick={onSignOut} className="px-5 py-2.5 rounded-full border-2 border-red-200 text-red-600 text-sm font-bold hover:bg-red-50 transition-colors">
-            Sign out
-          </button>
-        </div>
       </div>
 
       {/* Currency preference */}
@@ -2515,6 +2510,20 @@ function SettingsTab({
             </button>
           </div>
         )}
+      </div>
+
+      {/* Danger zone */}
+      <div className="max-w-lg mt-8 pt-8 border-t border-black/[0.06]">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-ds-muted mb-3">Account actions</p>
+        <button
+          onClick={onSignOut}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Sign out
+        </button>
       </div>
     </div>
   );

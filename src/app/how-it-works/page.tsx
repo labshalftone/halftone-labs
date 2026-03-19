@@ -114,16 +114,16 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Steps */}
-        <section className="max-w-5xl mx-auto px-6 py-24">
+        <section className="max-w-5xl mx-auto px-6 py-16">
           <div className="flex flex-col gap-0">
             {STEPS.map((step, i) => (
               <motion.div
                 key={step.n}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-16 ${i < STEPS.length - 1 ? "border-b border-black/[0.06]" : ""}`}
+                viewport={{ once: true, amount: 0 }}
+                transition={{ duration: 0.4 }}
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-12 ${i < STEPS.length - 1 ? "border-b border-black/[0.06]" : ""}`}
               >
                 {/* Text side — alternates */}
                 <div className={i % 2 === 1 ? "lg:order-2" : ""}>
@@ -166,9 +166,9 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Two modes */}
-        <section className="px-6 py-20 bg-ds-light-gray border-t border-black/[0.06]">
+        <section className="px-6 py-14 bg-ds-light-gray border-t border-black/[0.06]">
           <div className="max-w-5xl mx-auto">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0 }} className="mb-12">
               <span className="ds-label ds-label-brand mb-4 block">Two modes</span>
               <h2
                 className="text-4xl text-ds-dark"
@@ -188,8 +188,8 @@ export default function HowItWorksPage() {
                   key={mode.label}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true, amount: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
                   className={`rounded-3xl p-8 flex flex-col ${mode.dark ? "bg-ds-dark text-white" : "ds-card"}`}
                 >
                   <div className="flex items-center justify-between mb-6">
@@ -233,9 +233,9 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Quick Q&A */}
-        <section className="px-6 py-20 bg-white border-t border-black/[0.06]">
+        <section className="px-6 py-14 bg-white border-t border-black/[0.06]">
           <div className="max-w-3xl mx-auto">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-10">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0 }} className="mb-10">
               <h2
                 className="text-3xl text-ds-dark"
                 style={{ fontWeight: 700, letterSpacing: "-0.04em" }}
@@ -249,7 +249,7 @@ export default function HowItWorksPage() {
                   key={item.q}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, amount: 0 }}
                   transition={{ delay: i * 0.07 }}
                   className="ds-card p-6"
                 >
@@ -272,7 +272,7 @@ export default function HowItWorksPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0 }}
               className="text-center relative overflow-hidden"
             >
               <div className="absolute inset-0 opacity-[0.04]"
