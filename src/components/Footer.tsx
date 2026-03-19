@@ -20,7 +20,7 @@ export default function Footer() {
   return (
     <footer
       id="contact"
-      className="relative bg-halftone-navy text-white overflow-hidden"
+      className="relative bg-zinc-950 text-white overflow-hidden"
       ref={scrollRef}
     >
       <HalftoneField color="purple" side="right" density={15} />

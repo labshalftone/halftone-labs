@@ -2,8 +2,8 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ArrowDown } from "lucide-react";
-import { HalftoneSpotlight, HalftoneField, HalftoneCircle } from "./HalftoneBackground";
+import Link from "next/link";
+import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
 
 export default function Hero() {
   const ref = useRef(null);
@@ -12,113 +12,114 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
-  const titleY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, -30]);
   const opacityFade = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const circleScale = useTransform(scrollYProgress, [0, 1], [1, 1.3]);
 
   return (
-    <section ref={ref} className="relative min-h-screen flex flex-col justify-center overflow-visible">
-      {/* Interactive mouse-following halftone spotlight */}
-      <HalftoneSpotlight />
+    <section
+      ref={ref}
+      className="relative min-h-screen bg-white flex flex-col justify-center overflow-hidden"
+    >
+      {/* Subtle halftone dot fields */}
+      <HalftoneField color="purple" side="right" density={18} />
+      <HalftoneField color="orange" side="left" density={10} />
+      <HalftoneCircle size={500} position="top-right" color="purple" />
+      <HalftoneCircle size={260} position="bottom-left" color="orange" />
 
-      {/* Floating dot fields on both sides */}
-      <HalftoneField color="purple" side="right" density={20} />
-      <HalftoneField color="orange" side="left" density={12} />
+      {/* Faint grid texture */}
+      <div className="absolute inset-0 grid-bg pointer-events-none z-0 opacity-50" />
 
-      {/* Large pulsing halftone circle — top right */}
-      <HalftoneCircle size={550} position="top-right" color="purple" />
+      <div className="max-w-[1200px] mx-auto px-6 pt-32 pb-24 relative z-10">
 
-      {/* Smaller orange circle — bottom left */}
-      <HalftoneCircle size={300} position="bottom-left" color="orange" />
-
-      {/* Halftone stripe band */}
-      <div className="absolute top-0 left-0 w-full h-full halftone-stripe-animated pointer-events-none z-0" />
-
-      <div className="max-w-[1200px] mx-auto px-6 pt-24 relative z-10">
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
           style={{ opacity: opacityFade }}
-          className="mono-tag mb-8"
+          className="mono-tag mb-10 !text-zinc-400"
         >
-          [ est. 2021 ]
-        </motion.div>
+          [ drop commerce platform ]
+        </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           style={{ y: titleY, opacity: opacityFade }}
-          className="mb-10"
+          className="mb-3"
         >
           <h1
-            className="text-[clamp(3.5rem,11vw,9rem)] leading-[0.88] text-halftone-dark"
-            style={{ letterSpacing: "-0.065em" }}
+            className="text-[clamp(3.2rem,10vw,8.5rem)] leading-[0.88] text-zinc-900"
+            style={{ letterSpacing: "-0.055em" }}
           >
-            halftone
+            drop your
             <br />
-            <span className="gradient-text">labs</span>
+            <span className="gradient-text">merch.</span>
           </h1>
         </motion.div>
 
-        {/* Halftone dot underline accent */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          style={{ y: titleY, opacity: opacityFade }}
+          className="mb-10"
+        >
+          <h2
+            className="text-[clamp(1.6rem,4vw,3.8rem)] leading-[0.95] text-zinc-300"
+            style={{ letterSpacing: "-0.05em" }}
+          >
+            keep your audience.
+          </h2>
+        </motion.div>
+
+        {/* Halftone dot underline */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="h-2 w-48 mb-12 origin-left"
+          className="h-2 w-48 mb-10 origin-left"
           style={{
             opacity: opacityFade,
-            backgroundImage: "radial-gradient(circle, rgba(158,108,158,0.3) 2px, transparent 2px)",
+            backgroundImage: "radial-gradient(circle, rgba(158,108,158,0.25) 2px, transparent 2px)",
             backgroundSize: "8px 8px",
           }}
         />
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           style={{ y: subtitleY, opacity: opacityFade }}
-          className="max-w-xl mb-14"
+          className="max-w-md mb-12"
         >
-          <p className="text-xl md:text-2xl leading-snug text-halftone-dark/90" style={{ letterSpacing: "-0.025em" }}>
-            Merch Design, Production & Brand Building for Artists, Creators, and
-            the Music Industry.
+          <p
+            className="text-base md:text-lg leading-relaxed text-zinc-500"
+            style={{ letterSpacing: "-0.02em" }}
+          >
+            Artists, labels, and festivals launch merch drops on Halftone. No upfront inventory. No production headaches.
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
           style={{ opacity: opacityFade }}
           className="flex flex-wrap items-center gap-4"
         >
-          <a href="/studio" className="btn-primary">
-            Start designing →
-          </a>
-          <a href="#contact" className="btn-outline">
-            Book a call
-          </a>
+          <Link href="/signup" className="btn-primary">
+            Launch your first drop
+          </Link>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="absolute bottom-12 right-10 flex items-center gap-2 text-xs text-halftone-muted/50"
-        >
-          <span className="font-mono text-[0.65rem]">scroll</span>
-          <ArrowDown size={12} className="animate-bounce" />
-        </motion.div>
       </div>
 
-      {/* Dot cluster accent — bottom right */}
+      {/* Dot cluster */}
       <div className="absolute bottom-16 right-16 dot-cluster hidden lg:grid z-0">
         {Array.from({ length: 25 }).map((_, i) => (
-          <span key={i} />
+          <span key={i} className="!bg-zinc-200 !opacity-100" />
         ))}
       </div>
 

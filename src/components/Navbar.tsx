@@ -59,7 +59,7 @@ export default function Navbar() {
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-0">
-            <span className="text-lg text-halftone-dark" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>
+            <span className="text-lg text-halftone-dark" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>
               Halftone Labs
             </span>
           </a>
@@ -155,7 +155,7 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full bg-halftone-orange text-white text-[9px] font-black flex items-center justify-center leading-none">
+                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full bg-halftone-orange text-white text-[9px] font-semibold flex items-center justify-center leading-none">
                   {count}
                 </span>
               )}

@@ -40,7 +40,7 @@ function Separator() {
 
 export default function TrustedBy() {
   return (
-    <section className="bg-[#f8f7f5] py-16 border-t border-zinc-200/60 overflow-hidden">
+    <section className="bg-zinc-50 py-16 border-t border-zinc-200/60 overflow-hidden">
       {/* Header */}
       <div className="text-center mb-10 px-6">
         <p className="text-[0.65rem] font-mono uppercase tracking-[0.2em] text-zinc-400">
@@ -54,7 +54,7 @@ export default function TrustedBy() {
           {TRACK_1.map((brand, i) => (
             <span key={i} className="inline-flex items-center flex-shrink-0">
               <span
-                className="text-[1.05rem] font-black uppercase text-zinc-800 tracking-tight select-none hover:text-orange-500 transition-colors duration-200 cursor-default"
+                className="text-[1.05rem] font-semibold uppercase text-zinc-800 tracking-tight select-none hover:text-orange-500 transition-colors duration-200 cursor-default"
                 style={{ letterSpacing: "-0.03em" }}
               >
                 {brand}
@@ -71,7 +71,7 @@ export default function TrustedBy() {
           {TRACK_2.map((brand, i) => (
             <span key={i} className="inline-flex items-center flex-shrink-0">
               <span
-                className="text-[1.05rem] font-black uppercase text-zinc-400 tracking-tight select-none hover:text-zinc-800 transition-colors duration-200 cursor-default"
+                className="text-[1.05rem] font-semibold uppercase text-zinc-400 tracking-tight select-none hover:text-zinc-800 transition-colors duration-200 cursor-default"
                 style={{ letterSpacing: "-0.03em" }}
               >
                 {brand}

@@ -38,7 +38,7 @@ export default function Benefits() {
   const rightY = useTransform(scrollYProgress, [0, 1], [60, -30]);
 
   return (
-    <section className="relative py-32 bg-white overflow-hidden" ref={scrollRef}>
+    <section className="relative py-32 bg-zinc-50 overflow-hidden" ref={scrollRef}>
       <HalftoneField color="purple" side="left" density={10} />
       <HalftoneCircle size={300} position="bottom-right" color="orange" />
 

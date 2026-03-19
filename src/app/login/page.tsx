@@ -23,12 +23,26 @@ export default function LoginPage() {
       return;
     }
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
-      if (error) setError(error.message);
-      else router.push("/account");
+      if (error) {
+        setError(error.message);
+      } else if (signInData.user) {
+        // Check onboarding status
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed_at")
+          .eq("user_id", signInData.user.id)
+          .maybeSingle();
+
+        if (!profile?.onboarding_completed_at) {
+          router.push("/onboarding");
+        } else {
+          router.push("/account");
+        }
+      }
     } catch {
       setError("Network error — check your Supabase URL is correct and the project is active.");
     }
@@ -40,12 +54,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <nav className="h-14 flex items-center px-6 border-b border-black/[0.04]">
-        <Link href="/" className="text-base" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Halftone Labs</Link>
+        <Link href="/" className="text-base" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Halftone Labs</Link>
       </nav>
 
       <div className="flex-1 flex items-center justify-center p-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
-          <h1 className="text-3xl mb-1" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Sign in</h1>
+          <h1 className="text-3xl mb-1" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Sign in</h1>
           <p className="text-halftone-muted text-sm font-bold mb-8">Track your orders and manage your account.</p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
@@ -60,7 +74,7 @@ export default function LoginPage() {
 
             {error && <p className="text-sm font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>}
 
-            <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-all" style={{ background: "#9e6c9e", fontWeight: 900 }}>
+            <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-all" style={{ background: "#9e6c9e", fontWeight: 600 }}>
               {loading ? "Signing in…" : "Sign In →"}
             </button>
           </form>

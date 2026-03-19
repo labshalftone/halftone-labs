@@ -8,15 +8,15 @@ import { HalftoneField, HalftoneCircle } from "./HalftoneBackground";
 const faqs = [
   {
     q: "What is your minimum order quantity?",
-    a: "Depends on what you need. For on-demand Studio orders — printed and shipped one at a time — the MOQ is 1. No bulk commitment, no dead stock. For custom bulk drops (cut-and-sew, screen print, woven labels, embroidery), the MOQ is 50 units per style. Two modes, built for different stages of your journey.",
+    a: "Depends on what you need. For on-demand Studio orders (printed and shipped one at a time), the MOQ is 1. No bulk commitment, no dead stock. For custom bulk drops (cut-and-sew, screen print, woven labels, embroidery), the MOQ is 50 units per style. Two modes, built for different stages of your journey.",
   },
   {
     q: "How long does production take?",
-    a: "On-demand Studio orders ship within 5–7 business days domestically. Custom bulk drops — the kind with bespoke construction, specialty printing, or full packaging — take 3–4 weeks depending on complexity and volume. We'll give you a clear timeline upfront, not a vague estimate.",
+    a: "On-demand Studio orders ship within 5–7 business days domestically. Custom bulk drops (the kind with bespoke construction, specialty printing, or full packaging) take 3–4 weeks depending on complexity and volume. We'll give you a clear timeline upfront, not a vague estimate.",
   },
   {
     q: "What print technique do you use?",
-    a: "DTG (Direct-to-Garment) is our signature technique — ink is printed directly into the fabric for a breathable, soft feel that looks incredible and only gets better with wear. We've refined it over thousands of prints and recommend it for virtually every design. DTF (Direct-to-Film) is also available on request; it creates a slightly raised, textured finish suited to specific bold graphic styles — but for most designs, DTG is simply the better experience.",
+    a: "DTG (Direct-to-Garment) is our signature technique. Ink is printed directly into the fabric for a breathable, soft feel that looks incredible and only gets better with wear. We've refined it over thousands of prints and recommend it for virtually every design. DTF (Direct-to-Film) is also available on request; it creates a slightly raised, textured finish suited to specific bold graphic styles. For most designs, DTG is simply the better experience.",
   },
   {
     q: "Can I order a sample before committing to bulk?",
@@ -28,11 +28,11 @@ const faqs = [
   },
   {
     q: "What if I'm not happy with the quality?",
-    a: "We stand behind everything that leaves our facility. If there's a print defect, a sizing issue, or anything that doesn't meet the spec you approved, we'll reprint or refund — no runaround. Reach us at hello@halftonelabs.in with photos and your order number.",
+    a: "We stand behind everything that leaves our facility. If there's a print defect, a sizing issue, or anything that doesn't meet the spec you approved, we'll reprint or refund. No runaround. Reach us at hello@halftonelabs.in with photos and your order number.",
   },
   {
     q: "Can you design the artwork for me?",
-    a: "Yes. Our in-house design team has worked on everything from minimalist logos to full tour merch collections. If you have a rough idea, a mood board, or just a vibe — we'll turn it into print-ready artwork. Design services are scoped separately; reach out to discuss.",
+    a: "Yes. Our in-house design team has worked on everything from minimalist logos to full tour merch collections. If you have a rough idea, a mood board, or just a vibe, we'll turn it into print-ready artwork. Design services are scoped separately; reach out to discuss.",
   },
   {
     q: "Do you offer custom neck labels or packaging?",
@@ -40,11 +40,11 @@ const faqs = [
   },
   {
     q: "What file format should I use for my artwork?",
-    a: "For the best results, send us a PNG or PDF with a transparent background, at least 300 DPI at print size. Vector files (AI or EPS) are ideal for logos and text-heavy designs. If your file isn't print-ready, our team can clean it up — just flag it when you submit.",
+    a: "For the best results, send us a PNG or PDF with a transparent background, at least 300 DPI at print size. Vector files (AI or EPS) are ideal for logos and text-heavy designs. If your file isn't print-ready, our team can clean it up. Just flag it when you submit.",
   },
   {
-    q: "How does pricing work — is there a price list?",
-    a: "On-demand Studio orders are priced transparently at checkout — you see the total before you confirm. For custom bulk quotes, pricing depends on garment type, print method, quantity, and finishing. Send us your brief and we'll turn around a detailed quote within 24 hours.",
+    q: "How does pricing work?",
+    a: "On-demand Studio orders are priced transparently at checkout. You see the total before you confirm. For custom bulk quotes, pricing depends on garment type, print method, quantity, and finishing. Send us your brief and we'll turn around a detailed quote within 24 hours.",
   },
   {
     q: "Do you work with independent artists or only big labels?",
@@ -52,7 +52,7 @@ const faqs = [
   },
   {
     q: "How do I get started?",
-    a: "Two ways. If you want on-demand merch right now, head to the Studio, upload your artwork, and place an order — it takes about five minutes. If you're thinking about a custom bulk drop, a full merch strategy, or something more involved, email us at hello@halftonelabs.in or book a discovery call. We'll take it from there.",
+    a: "Two ways. If you want on-demand merch right now, head to the Studio, upload your artwork, and place an order. It takes about five minutes. If you're thinking about a custom bulk drop, a full merch strategy, or something more involved, email us at hello@halftonelabs.in or book a discovery call. We'll take it from there.",
   },
 ];
 
@@ -106,7 +106,7 @@ export default function FAQ() {
   const contentY = useTransform(scrollYProgress, [0, 1], [30, -15]);
 
   return (
-    <section className="relative py-32 bg-halftone-light overflow-hidden" ref={scrollRef}>
+    <section className="relative py-32 bg-zinc-50 overflow-hidden" ref={scrollRef}>
       <HalftoneField color="purple" side="right" density={10} />
       <HalftoneCircle size={300} position="bottom-left" color="purple" />
 

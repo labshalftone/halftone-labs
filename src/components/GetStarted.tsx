@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export default function GetStarted() {
   return (
-    <section className="bg-zinc-900 py-24 px-6 overflow-hidden relative">
+    <section className="bg-zinc-950 py-24 px-6 overflow-hidden relative">
       {/* subtle dot-grid halftone overlay */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -29,7 +29,7 @@ export default function GetStarted() {
               Get started
             </span>
             <h2
-              className="text-4xl md:text-5xl font-black text-white leading-[0.92] mb-5"
+              className="text-4xl md:text-5xl font-semibold text-white leading-[0.92] mb-5"
               style={{ letterSpacing: "-0.055em" }}
             >
               Order your
@@ -40,7 +40,7 @@ export default function GetStarted() {
             </h2>
             <p className="text-zinc-400 leading-relaxed max-w-md text-[0.95rem] mb-4">
               Our garments are classic unisex fits, all made in India. Order a
-              sample to try before you buy — then design your full order in the
+              sample to try before you buy, then design your full order in the
               Halftone Studio.
             </p>
             <p className="text-zinc-500 text-sm mb-8">
@@ -76,7 +76,7 @@ export default function GetStarted() {
             {[
               {
                 icon: "👕",
-                title: "MOQ 1 — no bulk required",
+                title: "MOQ 1, no bulk required",
                 desc: "Order a single sample unit to check fit, feel, and print quality before committing.",
               },
               {
@@ -92,7 +92,7 @@ export default function GetStarted() {
               {
                 icon: "🇮🇳",
                 title: "100% made in India",
-                desc: "Every garment cut, printed, and fulfilled from our facility — no middlemen.",
+                desc: "Every garment cut, printed, and fulfilled from our facility. No middlemen.",
               },
             ].map((item, i) => (
               <motion.div

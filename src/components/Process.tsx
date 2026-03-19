@@ -9,7 +9,7 @@ const steps = [
     num: "01",
     title: "Brand Creation",
     subtitle: "From sound to style.",
-    desc: "We collaborate closely to design merch that matches the sound and story. No templates — each collection is built from scratch.",
+    desc: "We collaborate closely to design merch that matches the sound and story. No templates. Each collection is built from scratch.",
   },
   {
     num: "02",
@@ -37,7 +37,7 @@ export default function Process() {
   const cardsY = useTransform(scrollYProgress, [0, 1], [40, -20]);
 
   return (
-    <section id="process" className="relative py-32 bg-halftone-light overflow-hidden" ref={scrollRef}>
+    <section id="process" className="relative py-32 bg-zinc-50 overflow-hidden" ref={scrollRef}>
       <HalftoneParallaxGrid variant="light" />
       <HalftoneCircle size={350} position="top-left" color="purple" />
 

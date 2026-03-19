@@ -15,7 +15,7 @@ const testimonials = [
   },
   {
     quote:
-      "Halftone Labs understood my aesthetic from day one. The merch they created doesn't just look good — it feels like an extension of the music.",
+      "Halftone Labs understood my aesthetic from day one. The merch they created doesn't just look good. It feels like an extension of the music.",
     name: "Kevin Abstract",
     role: "Artist and Creative Director",
     initials: "KA",
@@ -50,7 +50,7 @@ export default function Testimonial() {
 
   return (
     <section
-      className="relative py-32 bg-halftone-navy text-white overflow-hidden"
+      className="relative py-32 bg-zinc-950 text-white overflow-hidden"
       ref={scrollRef}
     >
       <HalftoneField color="purple" side="right" density={20} />

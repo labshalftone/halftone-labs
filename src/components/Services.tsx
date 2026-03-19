@@ -50,7 +50,7 @@ export default function Services() {
   const cardsY = useTransform(scrollYProgress, [0, 1], [50, -25]);
 
   return (
-    <section id="services" className="relative py-32 bg-halftone-navy text-white overflow-hidden" ref={scrollRef}>
+    <section id="services" className="relative py-32 bg-zinc-950 text-white overflow-hidden" ref={scrollRef}>
       <HalftoneField color="orange" side="left" density={18} />
       <HalftoneField color="purple" side="right" density={14} />
       <HalftoneParallaxGrid variant="dark" />
@@ -112,7 +112,7 @@ export default function Services() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.2 + i * 0.06 }}
-                className="glass-card rounded-2xl p-7 group hover:border-halftone-purple/20 transition-all halftone-card-hover corner-brackets"
+                className="glass-card rounded-2xl p-7 group hover:border-halftone-purple/20 transition-colors halftone-card-hover corner-brackets"
               >
                 <div className="relative z-10">
                   <div className="w-9 h-9 rounded-lg bg-halftone-purple/10 flex items-center justify-center mb-5">

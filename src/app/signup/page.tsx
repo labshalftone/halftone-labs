@@ -24,10 +24,14 @@ export default function SignupPage() {
       return;
     }
     try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
       const { error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { name: form.name } },
+        options: {
+          data: { name: form.name },
+          emailRedirectTo: `${origin}/onboarding`,
+        },
       });
       if (error) setError(error.message);
       else setSent(true);
@@ -42,7 +46,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <nav className="h-14 flex items-center px-6 border-b border-black/[0.04]">
-        <Link href="/" className="text-base" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Halftone Labs</Link>
+        <Link href="/" className="text-base" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Halftone Labs</Link>
       </nav>
 
       <div className="flex-1 flex items-center justify-center p-6">
@@ -50,13 +54,13 @@ export default function SignupPage() {
           {sent ? (
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl" style={{ background: "#9e6c9e15" }}>✓</div>
-              <h1 className="text-2xl mb-2" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Check your email</h1>
-              <p className="text-halftone-muted text-sm font-bold mb-6">We&apos;ve sent a confirmation link to <strong>{form.email}</strong>. Click it to activate your account.</p>
+              <h1 className="text-2xl mb-2" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Check your email</h1>
+              <p className="text-halftone-muted text-sm font-bold mb-6">We&apos;ve sent a confirmation link to <strong>{form.email}</strong>. Click it to activate your account and set up your store.</p>
               <Link href="/login" className="text-halftone-purple font-bold underline underline-offset-2 text-sm">Back to Sign In</Link>
             </div>
           ) : (
             <>
-              <h1 className="text-3xl mb-1" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Create account</h1>
+              <h1 className="text-3xl mb-1" style={{ fontWeight: 600, letterSpacing: "-0.05em" }}>Create account</h1>
               <p className="text-halftone-muted text-sm font-bold mb-8">Track all your orders in one place.</p>
 
               <form onSubmit={handleSignup} className="flex flex-col gap-4">
@@ -75,7 +79,7 @@ export default function SignupPage() {
 
                 {error && <p className="text-sm font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>}
 
-                <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-all" style={{ background: "#9e6c9e", fontWeight: 900 }}>
+                <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-all" style={{ background: "#9e6c9e", fontWeight: 600 }}>
                   {loading ? "Creating account…" : "Create Account →"}
                 </button>
               </form>

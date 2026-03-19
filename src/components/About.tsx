@@ -24,7 +24,7 @@ export default function About() {
   const statsY = useTransform(scrollYProgress, [0, 1], [30, -15]);
 
   return (
-    <section id="about" className="relative py-32 bg-halftone-navy text-white overflow-hidden" ref={scrollRef}>
+    <section id="about" className="relative py-32 bg-zinc-950 text-white overflow-hidden" ref={scrollRef}>
       <HalftoneField color="purple" side="right" density={20} />
       <HalftoneField color="orange" side="left" density={10} />
       <HalftoneParallaxGrid variant="dark" />
@@ -45,7 +45,15 @@ export default function About() {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <span className="section-label !text-halftone-purple-light">Who We Are</span>
+            <span className="section-label !text-halftone-purple-light mb-4 block">Who We Are</span>
+            <h2
+              className="text-3xl md:text-4xl text-white"
+              style={{ letterSpacing: "-0.05em" }}
+            >
+              India&apos;s leading
+              <br />
+              merch studio.
+            </h2>
           </motion.div>
 
           <motion.p
@@ -56,7 +64,7 @@ export default function About() {
             style={{ letterSpacing: "-0.02em" }}
           >
             India&apos;s leading independent merch and creative studio. We help artists,
-            labels, and creators launch and scale merch brands — from design to
+            labels, and creators launch and scale merch brands. From design to
             delivery, we manage the entire pipeline.
           </motion.p>
         </motion.div>
