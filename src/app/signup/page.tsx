@@ -34,6 +34,12 @@ function SignupContent() {
   const redirect = searchParams.get("redirect") ?? "/account";
 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [referralCode, setReferralCode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return searchParams.get("ref") ?? "";
+    }
+    return "";
+  });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [linkedinLoading, setLinkedinLoading] = useState(false);
@@ -91,7 +97,12 @@ function SignupContent() {
         },
       });
       if (error) setError(error.message);
-      else setSent(true);
+      else {
+        if (referralCode.trim()) {
+          localStorage.setItem("hl_ref_code", referralCode.trim().toUpperCase());
+        }
+        setSent(true);
+      }
     } catch {
       setError("Network error — check your Supabase URL is correct and the project is active.");
     }
@@ -177,6 +188,18 @@ function SignupContent() {
                   {linkedinLoading ? <Loader2 size={16} className="animate-spin" /> : <LinkedInIcon />}
                   Continue with LinkedIn
                 </button>
+              </div>
+
+              {/* Referral code */}
+              <div className="mb-5">
+                <input
+                  type="text"
+                  placeholder="Referral code (optional)"
+                  className="w-full px-4 py-2.5 rounded-xl border border-black/[0.12] bg-white text-sm text-ds-dark placeholder:text-ds-muted focus:outline-none focus:ring-2 focus:ring-zinc-200 transition-colors font-mono tracking-wider"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  maxLength={12}
+                />
               </div>
 
               {/* Divider */}

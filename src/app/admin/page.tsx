@@ -2050,7 +2050,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets" | "plan-gates";
+type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets" | "plan-gates" | "affiliates";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -2114,6 +2114,11 @@ export default function AdminPage() {
       label: "Plan Gates",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>,
     },
+    {
+      id: "affiliates",
+      label: "Affiliates",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>,
+    },
   ];
 
   return (
@@ -2156,6 +2161,7 @@ export default function AdminPage() {
           {tab === "users"     && <UsersPanel     secret={secret} />}
           {tab === "wallets"    && <WalletsPanel    secret={secret} />}
           {tab === "plan-gates" && <PlanGatesPanel  secret={secret} />}
+          {tab === "affiliates" && <AffiliatesPanel secret={secret} />}
         </div>
       </div>
     </div>
@@ -2260,6 +2266,245 @@ function PlanGatesPanel({ secret }: { secret: string }) {
         <p className="text-xs text-ds-muted mt-4">
           Changes saved here override the default <code className="font-mono bg-zinc-100 px-1 rounded">planRequired</code> in code. Stored in the <code className="font-mono bg-zinc-100 px-1 rounded">product_plan_gates</code> Supabase table.
         </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Affiliates Panel ───────────────────────────────────────────────────────────
+
+type AdminAffiliate = {
+  id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  code: string;
+  status: string;
+  total_clicks: number;
+  total_signups: number;
+  total_earned: number;
+  pending_payout: number;
+  paid_out: number;
+  website: string | null;
+  social_handle: string | null;
+  reason: string | null;
+  created_at: string;
+};
+
+type AffiliateFilter = "all" | "pending" | "approved" | "rejected";
+
+function AffiliatesPanel({ secret }: { secret: string }) {
+  const [affiliates, setAffiliates] = useState<AdminAffiliate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<AffiliateFilter>("all");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const fetchAffiliates = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/affiliates", {
+        headers: { "x-admin-secret": secret },
+      });
+      const data = await res.json();
+      setAffiliates(Array.isArray(data) ? data : []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchAffiliates(); }, [secret]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAction = async (affiliateId: string, action: "approve" | "reject" | "pause") => {
+    setActionLoading(`${affiliateId}-${action}`);
+    try {
+      const res = await fetch("/api/admin/affiliates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+        body: JSON.stringify({ affiliateId, action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAffiliates((prev) =>
+          prev.map((a) => a.id === affiliateId ? { ...a, status: data.affiliate.status } : a)
+        );
+      }
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  };
+
+  const filtered = affiliates.filter((a) =>
+    filter === "all" ? true : a.status === filter
+  );
+
+  const totalAffiliates = affiliates.length;
+  const activeCount = affiliates.filter((a) => a.status === "approved").length;
+  const totalPaidOut = affiliates.reduce((s, a) => s + Number(a.paid_out ?? 0), 0);
+  const totalPending = affiliates.reduce((s, a) => s + Number(a.pending_payout ?? 0), 0);
+
+  const FILTERS: { id: AffiliateFilter; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "pending", label: "Pending" },
+    { id: "approved", label: "Approved" },
+    { id: "rejected", label: "Rejected" },
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="px-8 py-6 border-b border-black/[0.06] bg-white flex-shrink-0">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.03em" }}>Affiliates</h2>
+            <p className="text-sm text-ds-muted mt-0.5">Manage affiliate applications and track performance.</p>
+          </div>
+          <button
+            onClick={fetchAffiliates}
+            className="flex items-center gap-1.5 text-xs font-semibold text-ds-body hover:text-ds-dark transition-colors px-3 py-2 rounded-lg hover:bg-ds-light-gray"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4 mb-5">
+          {[
+            { label: "Total Affiliates", val: String(totalAffiliates), accent: "text-ds-dark" },
+            { label: "Active", val: String(activeCount), accent: "text-emerald-600" },
+            { label: "Total Paid Out", val: `₹${totalPaidOut.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-blue-600" },
+            { label: "Pending Payout", val: `₹${totalPending.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-amber-600" },
+          ].map((s) => (
+            <div key={s.label} className="bg-ds-light-gray rounded-2xl px-4 py-3">
+              <p className={`text-xl font-semibold ${s.accent}`} style={{ letterSpacing: "-0.04em" }}>{s.val}</p>
+              <p className="text-xs text-ds-muted mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Filter tabs */}
+        <div className="flex gap-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFilter(f.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                filter === f.id
+                  ? "bg-ds-dark text-white"
+                  : "text-ds-body hover:bg-ds-light-gray"
+              }`}
+            >
+              {f.label}
+              {f.id !== "all" && (
+                <span className="ml-1.5 text-[0.6rem]">
+                  ({affiliates.filter((a) => a.status === f.id).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-5 h-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="font-semibold text-sm text-ds-body">No affiliates found</p>
+            <p className="text-xs text-ds-muted mt-1">
+              {filter === "all" ? "No affiliate applications yet." : `No ${filter} affiliates.`}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-ds-light-gray border-b border-black/[0.06] sticky top-0">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-ds-muted">Affiliate</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ds-muted">Code</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ds-muted">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-ds-muted">Clicks</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-ds-muted">Signups</th>
+                  <th className="text-right px-4 py-3 text-xs font-bold text-ds-muted">Earned</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ds-muted">Joined</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-ds-muted">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 bg-white">
+                {filtered.map((aff) => {
+                  const statusColors: Record<string, string> = {
+                    approved: "bg-emerald-50 text-emerald-700",
+                    pending:  "bg-amber-50 text-amber-700",
+                    rejected: "bg-red-50 text-red-600",
+                    paused:   "bg-zinc-100 text-zinc-600",
+                  };
+                  return (
+                    <tr key={aff.id} className="hover:bg-ds-light-gray transition-colors">
+                      <td className="px-5 py-3.5">
+                        <p className="font-semibold text-ds-dark text-sm">{aff.name}</p>
+                        <p className="text-xs text-ds-muted">{aff.email}</p>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <code className="text-xs font-mono bg-black/[0.04] px-2 py-1 rounded-lg">{aff.code}</code>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[aff.status] ?? "bg-zinc-100 text-zinc-600"}`}>
+                          {aff.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-ds-dark">
+                        {(aff.total_clicks ?? 0).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-ds-dark">
+                        {(aff.total_signups ?? 0).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-emerald-600">
+                        ₹{Number(aff.total_earned ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-4 py-3.5 text-xs text-ds-muted">
+                        {new Date(aff.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-1.5">
+                          {aff.status !== "approved" && (
+                            <button
+                              onClick={() => handleAction(aff.id, "approve")}
+                              disabled={actionLoading === `${aff.id}-approve`}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                            >
+                              {actionLoading === `${aff.id}-approve` ? "…" : "Approve"}
+                            </button>
+                          )}
+                          {aff.status === "approved" && (
+                            <button
+                              onClick={() => handleAction(aff.id, "pause")}
+                              disabled={actionLoading === `${aff.id}-pause`}
+                              className="px-2.5 py-1.5 rounded-lg bg-amber-400 text-white text-xs font-bold hover:bg-amber-500 transition-colors disabled:opacity-50"
+                            >
+                              {actionLoading === `${aff.id}-pause` ? "…" : "Pause"}
+                            </button>
+                          )}
+                          {aff.status !== "rejected" && (
+                            <button
+                              onClick={() => handleAction(aff.id, "reject")}
+                              disabled={actionLoading === `${aff.id}-reject`}
+                              className="px-2.5 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-colors disabled:opacity-50"
+                            >
+                              {actionLoading === `${aff.id}-reject` ? "…" : "Reject"}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

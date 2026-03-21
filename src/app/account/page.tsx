@@ -39,7 +39,7 @@ type Order = {
   milestones: { id: string; title: string; description: string; created_at: string }[];
 };
 
-type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers" | "designer";
+type ActiveTab = "dashboard" | "orders" | "designs" | "drops" | "branding" | "stores" | "shopify" | "wallet" | "invoices" | "settings" | "create-order" | "customers" | "designer" | "affiliate";
 
 const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: (
@@ -106,6 +106,11 @@ const NAV: { id: ActiveTab; label: string; badge?: string; icon: React.ReactNode
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  )},
+  { id: "affiliate", label: "Affiliate", icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
     </svg>
   )},
 ];
@@ -3343,6 +3348,7 @@ export default function AccountPage() {
               {activeTab === "wallet"        && <WalletTab userId={user?.id ?? ""} />}
               {activeTab === "invoices"  && <InvoicesTab userId={user?.id ?? null} email={user?.email ?? null} />}
               {activeTab === "settings"  && <SettingsTab user={user} onSignOut={handleSignOut} userId={user?.id ?? null} email={user?.email ?? null} />}
+              {activeTab === "affiliate" && <AffiliateTab userId={user?.id ?? ""} />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -3350,6 +3356,433 @@ export default function AccountPage() {
 
       {/* Cart Drawer */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+    </div>
+  );
+}
+
+// ── Affiliate Tab ──────────────────────────────────────────────────────────────
+
+type AffiliateRecord = {
+  id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  code: string;
+  status: "pending" | "approved" | "rejected" | "paused";
+  total_clicks: number;
+  total_signups: number;
+  total_earned: number;
+  pending_payout: number;
+  paid_out: number;
+  created_at: string;
+};
+
+type AffiliateReferral = {
+  id: string;
+  type: string;
+  amount: number;
+  commission: number;
+  status: string;
+  description: string | null;
+  created_at: string;
+};
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/[0.05] hover:bg-black/[0.09] text-xs font-semibold text-ds-body transition-colors flex-shrink-0"
+    >
+      {copied ? (
+        <>
+          <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Copied!
+        </>
+      ) : (
+        <>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Copy
+        </>
+      )}
+    </button>
+  );
+}
+
+function AffiliateTab({ userId }: { userId: string }) {
+  const [affiliate, setAffiliate] = useState<AffiliateRecord | null>(null);
+  const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
+  const [stats, setStats] = useState({ totalEarnings: 0, pendingEarnings: 0, paidEarnings: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  // Apply form state
+  const [applyForm, setApplyForm] = useState({ website: "", social: "", reason: "" });
+  const [applying, setApplying] = useState(false);
+  const [applyError, setApplyError] = useState("");
+  const [applySuccess, setApplySuccess] = useState(false);
+
+  // Payout request
+  const [requestingPayout, setRequestingPayout] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    setLoadingStats(true);
+    fetch(`/api/affiliate/stats?userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        setAffiliate(d.affiliate ?? null);
+        setReferrals(d.referrals ?? []);
+        setStats({
+          totalEarnings: d.totalEarnings ?? 0,
+          pendingEarnings: d.pendingEarnings ?? 0,
+          paidEarnings: d.paidEarnings ?? 0,
+        });
+      })
+      .catch(() => {/* silently ignore */})
+      .finally(() => setLoadingStats(false));
+  }, [userId]);
+
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setApplying(true);
+    setApplyError("");
+    try {
+      // Get user email from supabase client
+      const { supabase } = await import("@/lib/supabase");
+      const { data: { user } } = await supabase.auth.getUser();
+      const res = await fetch("/api/affiliate/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          name: user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? "User",
+          email: user?.email ?? "",
+          website: applyForm.website || undefined,
+          socialHandle: applyForm.social || undefined,
+          reason: applyForm.reason || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setApplyError(data.error ?? "Something went wrong");
+      } else {
+        setApplySuccess(true);
+        // Reload stats to get the new affiliate record
+        const statsRes = await fetch(`/api/affiliate/stats?userId=${userId}`);
+        const statsData = await statsRes.json();
+        setAffiliate(statsData.affiliate ?? null);
+      }
+    } catch {
+      setApplyError("Network error — please try again.");
+    }
+    setApplying(false);
+  };
+
+  const handleRequestPayout = async () => {
+    setRequestingPayout(true);
+    // In a real app, this would call a payout request API.
+    // For now, show a simple alert.
+    await new Promise((r) => setTimeout(r, 800));
+    alert("Payout request sent! We'll process within 3–5 business days.");
+    setRequestingPayout(false);
+  };
+
+  if (loadingStats) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // ── Not applied yet ──
+  if (!affiliate) {
+    return (
+      <div className="max-w-xl">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
+            Affiliate Program
+          </h2>
+          <p className="text-ds-body text-sm mt-1">
+            Earn commissions by referring customers to Halftone Labs.
+          </p>
+        </div>
+
+        {/* Teaser cards */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[
+            { val: "5%", label: "Per order" },
+            { val: "₹5,000", label: "Per subscription" },
+            { val: "10% × 12mo", label: "Recurring" },
+          ].map((s) => (
+            <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] p-4 text-center">
+              <p className="text-lg font-bold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>{s.val}</p>
+              <p className="text-[0.65rem] text-ds-muted mt-0.5 font-semibold">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {applySuccess ? (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center">
+            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="font-semibold text-emerald-800">Application submitted!</p>
+            <p className="text-sm text-emerald-600 mt-1">We&apos;ll review and approve within 24 hours.</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+            <h3 className="font-semibold text-ds-dark mb-1">Join our affiliate program</h3>
+            <p className="text-xs text-ds-body mb-5">Tell us a bit about your audience and how you plan to promote Halftone Labs.</p>
+            <form onSubmit={handleApply} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Website or portfolio</label>
+                <input
+                  type="url"
+                  placeholder="https://yourbrand.com"
+                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors"
+                  value={applyForm.website}
+                  onChange={(e) => setApplyForm({ ...applyForm, website: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Social handle (Instagram, YouTube, etc.)</label>
+                <input
+                  type="text"
+                  placeholder="@yourhandle"
+                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors"
+                  value={applyForm.social}
+                  onChange={(e) => setApplyForm({ ...applyForm, social: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Why do you want to be an affiliate?</label>
+                <textarea
+                  placeholder="Tell us about your audience and how you plan to promote Halftone Labs…"
+                  rows={3}
+                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors resize-none"
+                  value={applyForm.reason}
+                  onChange={(e) => setApplyForm({ ...applyForm, reason: e.target.value })}
+                />
+              </div>
+              {applyError && (
+                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl border border-red-100">{applyError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={applying}
+                className="btn-brand w-full justify-center py-3 disabled:opacity-50"
+              >
+                {applying ? "Submitting…" : "Apply to Affiliate Program →"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        <p className="text-xs text-ds-muted mt-4 text-center">
+          Want to learn more?{" "}
+          <a href="/affiliate" target="_blank" rel="noopener noreferrer" className="text-brand font-semibold hover:underline">
+            View affiliate program details →
+          </a>
+        </p>
+      </div>
+    );
+  }
+
+  // ── Pending ──
+  if (affiliate.status === "pending") {
+    return (
+      <div className="max-w-xl">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Affiliate Program</h2>
+        </div>
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-8 text-center">
+          <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-amber-900 text-lg">Application under review</h3>
+          <p className="text-sm text-amber-700 mt-2 leading-relaxed">
+            We&apos;ve received your application and will review it within 24 hours.
+            You&apos;ll receive an email once approved.
+          </p>
+          <p className="text-xs text-amber-600 mt-4 font-mono">Your code: {affiliate.code}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Rejected / Paused ──
+  if (affiliate.status === "rejected" || affiliate.status === "paused") {
+    return (
+      <div className="max-w-xl">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Affiliate Program</h2>
+        </div>
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
+          <h3 className="font-semibold text-red-800">
+            {affiliate.status === "paused" ? "Account paused" : "Application not approved"}
+          </h3>
+          <p className="text-sm text-red-600 mt-2">
+            {affiliate.status === "paused"
+              ? "Your affiliate account has been paused. Contact support for details."
+              : "Your application wasn't approved at this time. Contact support if you have questions."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Approved dashboard ──
+  const referralLink = `https://halftonelabs.in?ref=${affiliate.code}`;
+  const minPayout = 500;
+  const canRequestPayout = affiliate.pending_payout >= minPayout;
+
+  return (
+    <div className="max-w-3xl">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
+            Affiliate Dashboard
+          </h2>
+          <p className="text-ds-body text-sm mt-1">Track your referrals and earnings in real-time.</p>
+        </div>
+        <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700">
+          Active
+        </span>
+      </div>
+
+      {/* Referral link */}
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 mb-5">
+        <p className="text-xs font-bold text-ds-muted uppercase tracking-widest mb-2">Your Referral Link</p>
+        <div className="flex items-center gap-3">
+          <code className="flex-1 text-sm font-mono text-ds-dark bg-ds-light-gray rounded-xl px-4 py-2.5 truncate">
+            {referralLink}
+          </code>
+          <CopyButton text={referralLink} />
+        </div>
+        <p className="text-xs text-ds-muted mt-2">
+          Share this link anywhere. Anyone who signs up through it is attributed to you for 30 days.
+        </p>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        {[
+          { label: "Link Clicks", val: affiliate.total_clicks.toLocaleString("en-IN"), accent: "text-blue-600" },
+          { label: "Signups", val: affiliate.total_signups.toLocaleString("en-IN"), accent: "text-violet-600" },
+          { label: "Total Earned", val: `₹${stats.totalEarnings.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-emerald-600" },
+          { label: "Pending Payout", val: `₹${stats.pendingEarnings.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, accent: "text-amber-600" },
+        ].map((s) => (
+          <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] px-4 py-4">
+            <p className={`text-2xl font-semibold ${s.accent}`} style={{ letterSpacing: "-0.04em" }}>{s.val}</p>
+            <p className="text-xs text-ds-muted mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Commission rates reminder */}
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-5 mb-5">
+        <p className="text-xs font-bold text-ds-muted uppercase tracking-widest mb-3">Commission Rates</p>
+        <div className="grid grid-cols-3 gap-3 text-sm">
+          <div className="bg-ds-light-gray rounded-xl p-3">
+            <p className="font-bold text-ds-dark">5%</p>
+            <p className="text-xs text-ds-muted mt-0.5">Per order value</p>
+          </div>
+          <div className="bg-ds-light-gray rounded-xl p-3">
+            <p className="font-bold text-ds-dark">₹500–₹5,000</p>
+            <p className="text-xs text-ds-muted mt-0.5">Per subscription</p>
+          </div>
+          <div className="bg-ds-light-gray rounded-xl p-3">
+            <p className="font-bold text-ds-dark">10% × 12 mo</p>
+            <p className="text-xs text-ds-muted mt-0.5">Recurring monthly</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent referrals table */}
+      <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden mb-5">
+        <div className="px-5 py-4 border-b border-black/[0.06]">
+          <p className="text-xs font-bold text-ds-muted uppercase tracking-widest">Recent Referrals</p>
+        </div>
+        {referrals.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-sm font-semibold text-ds-body">No referrals yet</p>
+            <p className="text-xs text-ds-muted mt-1">Share your link to start earning.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-ds-light-gray">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-ds-muted">Type</th>
+                  <th className="text-right px-5 py-3 text-xs font-bold text-ds-muted">Amount</th>
+                  <th className="text-right px-5 py-3 text-xs font-bold text-ds-muted">Commission</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-ds-muted">Status</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-ds-muted">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {referrals.map((r) => (
+                  <tr key={r.id} className="hover:bg-ds-light-gray transition-colors">
+                    <td className="px-5 py-3 font-semibold text-ds-dark capitalize">{r.type}</td>
+                    <td className="px-5 py-3 text-right text-ds-body">
+                      ₹{Number(r.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-5 py-3 text-right font-semibold text-emerald-600">
+                      +₹{Number(r.commission).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        r.status === "paid" ? "bg-emerald-50 text-emerald-700" :
+                        r.status === "pending" ? "bg-amber-50 text-amber-700" :
+                        "bg-red-50 text-red-600"
+                      }`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-xs text-ds-muted">
+                      {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Payout button */}
+      <div className="flex items-center justify-between bg-white rounded-2xl border border-black/[0.06] p-5">
+        <div>
+          <p className="font-semibold text-ds-dark text-sm">Request Payout</p>
+          <p className="text-xs text-ds-muted mt-0.5">
+            {canRequestPayout
+              ? `₹${stats.pendingEarnings.toLocaleString("en-IN", { minimumFractionDigits: 2 })} available`
+              : `Minimum ₹${minPayout} required — you have ₹${stats.pendingEarnings.toFixed(2)}`}
+          </p>
+        </div>
+        <button
+          onClick={handleRequestPayout}
+          disabled={!canRequestPayout || requestingPayout}
+          className="px-5 py-2.5 rounded-xl bg-ds-dark text-white text-sm font-bold hover:bg-ds-dark2 transition-colors disabled:opacity-40"
+        >
+          {requestingPayout ? "Requesting…" : "Request Payout →"}
+        </button>
+      </div>
     </div>
   );
 }
