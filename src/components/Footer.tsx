@@ -43,6 +43,8 @@ const FOOTER_LINKS = [
     links: [
       { label: "About Us", href: "/about" },
       { label: "Careers", href: "/careers" },
+      { label: "Become a Partner", href: "/become-a-partner" },
+      { label: "Talk to Sales", href: "/talk-to-sales" },
       { label: "Affiliate Program", href: "/affiliate" },
       { label: "Press & Media", href: "/press" },
       { label: "Quality Promise", href: "/quality" },
