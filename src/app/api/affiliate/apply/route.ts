@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
         social_handle: socialHandle ?? null,
         reason: reason ?? null,
         code,
-        status: "pending",
+        status: "approved",
       })
       .select("id, code, status")
       .single();

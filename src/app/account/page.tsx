@@ -3424,14 +3424,6 @@ function AffiliateTab({ userId }: { userId: string }) {
   const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
   const [stats, setStats] = useState({ totalEarnings: 0, pendingEarnings: 0, paidEarnings: 0 });
   const [loadingStats, setLoadingStats] = useState(true);
-
-  // Apply form state
-  const [applyForm, setApplyForm] = useState({ website: "", social: "", reason: "" });
-  const [applying, setApplying] = useState(false);
-  const [applyError, setApplyError] = useState("");
-  const [applySuccess, setApplySuccess] = useState(false);
-
-  // Payout request
   const [requestingPayout, setRequestingPayout] = useState(false);
 
   useEffect(() => {
@@ -3448,45 +3440,9 @@ function AffiliateTab({ userId }: { userId: string }) {
           paidEarnings: d.paidEarnings ?? 0,
         });
       })
-      .catch(() => {/* silently ignore */})
+      .catch(() => {})
       .finally(() => setLoadingStats(false));
   }, [userId]);
-
-  const handleApply = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setApplying(true);
-    setApplyError("");
-    try {
-      // Get user email from supabase client
-      const { supabase } = await import("@/lib/supabase");
-      const { data: { user } } = await supabase.auth.getUser();
-      const res = await fetch("/api/affiliate/apply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          name: user?.user_metadata?.name ?? user?.email?.split("@")[0] ?? "User",
-          email: user?.email ?? "",
-          website: applyForm.website || undefined,
-          socialHandle: applyForm.social || undefined,
-          reason: applyForm.reason || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setApplyError(data.error ?? "Something went wrong");
-      } else {
-        setApplySuccess(true);
-        // Reload stats to get the new affiliate record
-        const statsRes = await fetch(`/api/affiliate/stats?userId=${userId}`);
-        const statsData = await statsRes.json();
-        setAffiliate(statsData.affiliate ?? null);
-      }
-    } catch {
-      setApplyError("Network error — please try again.");
-    }
-    setApplying(false);
-  };
 
   const handleRequestPayout = async () => {
     setRequestingPayout(true);
@@ -3505,142 +3461,13 @@ function AffiliateTab({ userId }: { userId: string }) {
     );
   }
 
-  // ── Not applied yet ──
+  // ── Not enrolled yet (shouldn't happen for new users, but handle gracefully) ──
   if (!affiliate) {
     return (
-      <div className="max-w-xl">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>
-            Affiliate Program
-          </h2>
-          <p className="text-ds-body text-sm mt-1">
-            Earn commissions by referring customers to Halftone Labs.
-          </p>
-        </div>
-
-        {/* Teaser cards */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          {[
-            { val: "5%", label: "Per order" },
-            { val: "₹5,000", label: "Per subscription" },
-            { val: "10% × 12mo", label: "Recurring" },
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-black/[0.06] p-4 text-center">
-              <p className="text-lg font-bold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>{s.val}</p>
-              <p className="text-[0.65rem] text-ds-muted mt-0.5 font-semibold">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {applySuccess ? (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center">
-            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <p className="font-semibold text-emerald-800">Application submitted!</p>
-            <p className="text-sm text-emerald-600 mt-1">We&apos;ll review and approve within 24 hours.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
-            <h3 className="font-semibold text-ds-dark mb-1">Join our affiliate program</h3>
-            <p className="text-xs text-ds-body mb-5">Tell us a bit about your audience and how you plan to promote Halftone Labs.</p>
-            <form onSubmit={handleApply} className="flex flex-col gap-4">
-              <div>
-                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Website or portfolio</label>
-                <input
-                  type="url"
-                  placeholder="https://yourbrand.com"
-                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-                  value={applyForm.website}
-                  onChange={(e) => setApplyForm({ ...applyForm, website: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Social handle (Instagram, YouTube, etc.)</label>
-                <input
-                  type="text"
-                  placeholder="@yourhandle"
-                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-                  value={applyForm.social}
-                  onChange={(e) => setApplyForm({ ...applyForm, social: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-ds-muted uppercase tracking-widest block mb-1.5">Why do you want to be an affiliate?</label>
-                <textarea
-                  placeholder="Tell us about your audience and how you plan to promote Halftone Labs…"
-                  rows={3}
-                  className="w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 transition-colors resize-none"
-                  value={applyForm.reason}
-                  onChange={(e) => setApplyForm({ ...applyForm, reason: e.target.value })}
-                />
-              </div>
-              {applyError && (
-                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl border border-red-100">{applyError}</p>
-              )}
-              <button
-                type="submit"
-                disabled={applying}
-                className="btn-brand w-full justify-center py-3 disabled:opacity-50"
-              >
-                {applying ? "Submitting…" : "Apply to Affiliate Program →"}
-              </button>
-            </form>
-          </div>
-        )}
-
-        <p className="text-xs text-ds-muted mt-4 text-center">
-          Want to learn more?{" "}
-          <a href="/affiliate" target="_blank" rel="noopener noreferrer" className="text-brand font-semibold hover:underline">
-            View affiliate program details →
-          </a>
-        </p>
-      </div>
-    );
-  }
-
-  // ── Pending ──
-  if (affiliate.status === "pending") {
-    return (
-      <div className="max-w-xl">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Affiliate Program</h2>
-        </div>
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-8 text-center">
-          <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 className="font-semibold text-amber-900 text-lg">Application under review</h3>
-          <p className="text-sm text-amber-700 mt-2 leading-relaxed">
-            We&apos;ve received your application and will review it within 24 hours.
-            You&apos;ll receive an email once approved.
-          </p>
-          <p className="text-xs text-amber-600 mt-4 font-mono">Your code: {affiliate.code}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Rejected / Paused ──
-  if (affiliate.status === "rejected" || affiliate.status === "paused") {
-    return (
-      <div className="max-w-xl">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-ds-dark" style={{ letterSpacing: "-0.04em" }}>Affiliate Program</h2>
-        </div>
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
-          <h3 className="font-semibold text-red-800">
-            {affiliate.status === "paused" ? "Account paused" : "Application not approved"}
-          </h3>
-          <p className="text-sm text-red-600 mt-2">
-            {affiliate.status === "paused"
-              ? "Your affiliate account has been paused. Contact support for details."
-              : "Your application wasn't approved at this time. Contact support if you have questions."}
-          </p>
+      <div className="flex items-center justify-center py-24">
+        <div className="text-center">
+          <p className="text-sm font-semibold text-ds-body mb-1">Setting up your affiliate account…</p>
+          <p className="text-xs text-ds-muted">This usually happens automatically. Try refreshing.</p>
         </div>
       </div>
     );
