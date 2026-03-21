@@ -37,7 +37,8 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [linkedinLoading, setLinkedinLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(searchParams.get("error") ?? "");
+  const mergeError = error.toLowerCase().includes("already") || error.toLowerCase().includes("exists") || error.toLowerCase().includes("registered");
 
   const getCallbackUrl = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -190,9 +191,14 @@ function LoginContent() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 px-3 py-2.5 rounded-xl border border-red-100">
-                {error}
-              </p>
+              <div className={`text-sm px-3 py-2.5 rounded-xl border ${mergeError ? "text-amber-700 bg-amber-50 border-amber-100" : "text-red-600 bg-red-50 border-red-100"}`}>
+                {mergeError ? (
+                  <>
+                    <p className="font-semibold mb-1">Account already exists</p>
+                    <p>An account with this email was created with a password. Sign in with your email below, then link Google or LinkedIn from <strong>Account Settings → Connected Accounts</strong>.</p>
+                  </>
+                ) : error}
+              </div>
             )}
 
             <button

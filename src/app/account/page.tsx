@@ -2375,6 +2375,40 @@ function SettingsTab({
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCopied, setReferralCopied] = useState(false);
 
+  // Connected accounts
+  type Identity = { id: string; provider: string };
+  const [identities, setIdentities] = useState<Identity[]>([]);
+  const [linkingProvider, setLinkingProvider] = useState<string | null>(null);
+  const [unlinkingProvider, setUnlinkingProvider] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUserIdentities().then(({ data }) => {
+      setIdentities((data?.identities ?? []) as Identity[]);
+    });
+  }, []);
+
+  const handleLinkProvider = async (provider: "google" | "linkedin_oidc") => {
+    setLinkingProvider(provider);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: { redirectTo: `${origin}/auth/callback?redirect=/account?tab=settings` },
+    });
+    if (error) { alert(error.message); setLinkingProvider(null); }
+  };
+
+  const handleUnlinkProvider = async (identity: Identity) => {
+    if (identities.length <= 1) {
+      alert("You must keep at least one login method connected.");
+      return;
+    }
+    setUnlinkingProvider(identity.provider);
+    const { error } = await supabase.auth.unlinkIdentity(identity as Parameters<typeof supabase.auth.unlinkIdentity>[0]);
+    if (error) { alert(error.message); }
+    else { setIdentities((prev) => prev.filter((i) => i.id !== identity.id)); }
+    setUnlinkingProvider(null);
+  };
+
   // Bank account state
   const [bankAccount, setBankAccount] = useState({ accountHolderName: "", accountNumber: "", confirmAccountNumber: "", ifscCode: "", bankName: "", accountType: "savings" });
   const [bankMasked, setBankMasked]   = useState<string | null>(null);
@@ -2529,6 +2563,63 @@ function SettingsTab({
           <p className="text-xs font-bold uppercase tracking-widest text-ds-muted mb-3">Support</p>
           <a href="mailto:hello@halftonelabs.in" className="text-sm font-bold text-brand hover:underline">hello@halftonelabs.in</a>
         </div>
+      </div>
+
+      {/* Connected Accounts */}
+      <div className="bg-white rounded-2xl border border-black/[0.06] p-6 max-w-lg mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center">
+            <svg className="w-4 h-4 text-ds-body" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-ds-dark">Connected Accounts</h3>
+            <p className="text-xs text-ds-muted">Link social accounts to sign in faster</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          {(["google", "linkedin_oidc"] as const).map((provider) => {
+            const connected = identities.find((i) => i.provider === provider);
+            const label = provider === "google" ? "Google" : "LinkedIn";
+            const icon = provider === "google" ? (
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18Z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect width="18" height="18" rx="3" fill="#0A66C2"/><path d="M4.5 7H6.5V13.5H4.5V7ZM5.5 4C4.95 4 4.5 4.45 4.5 5 4.5 5.55 4.95 6 5.5 6 6.05 6 6.5 5.55 6.5 5 6.5 4.45 6.05 4 5.5 4Z" fill="white"/><path d="M8 7H9.9V7.9C10.2 7.35 10.95 7 11.75 7 13.4 7 14 8.05 14 9.65V13.5H12V10.1C12 9.4 11.75 9 11.1 9 10.4 9 10 9.45 10 10.1V13.5H8V7Z" fill="white"/></svg>
+            );
+            return (
+              <div key={provider} className="flex items-center justify-between p-3.5 rounded-xl border border-black/[0.06] bg-zinc-50/50">
+                <div className="flex items-center gap-3">
+                  {icon}
+                  <div>
+                    <p className="text-sm font-semibold text-ds-dark">{label}</p>
+                    <p className="text-xs text-ds-muted">{connected ? "Connected" : "Not connected"}</p>
+                  </div>
+                </div>
+                {connected ? (
+                  <button
+                    onClick={() => handleUnlinkProvider(connected)}
+                    disabled={!!unlinkingProvider || identities.length <= 1}
+                    className="text-xs font-semibold text-red-500 hover:text-red-600 disabled:opacity-40 transition-colors"
+                  >
+                    {unlinkingProvider === provider ? "Unlinking…" : "Unlink"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleLinkProvider(provider)}
+                    disabled={!!linkingProvider}
+                    className="text-xs font-semibold text-brand hover:text-brand-dark disabled:opacity-40 transition-colors"
+                  >
+                    {linkingProvider === provider ? "Connecting…" : "Connect"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {identities.length <= 1 && (
+          <p className="text-xs text-ds-muted mt-3">Add another login method before unlinking this one.</p>
+        )}
       </div>
 
       {/* Currency preference */}
