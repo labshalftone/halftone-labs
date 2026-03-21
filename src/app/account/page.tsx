@@ -3007,42 +3007,38 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-3">
 
-          {/* Stroke-draw text animation */}
-          <svg width="260" height="72" viewBox="0 0 260 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text
-              x="130" y="56"
-              textAnchor="middle"
-              fontFamily="'Georgia', serif"
-              fontSize="52"
-              fontWeight="400"
-              letterSpacing="-2"
-              fill="transparent"
-              stroke="#111111"
-              strokeWidth="1.2"
+          {/* Wordmark */}
+          <p className="text-ds-dark font-semibold text-base" style={{ letterSpacing: "-0.05em" }}>
+            Halftone
+          </p>
+
+          {/* Typewriter container — fixed width so steps() maps cleanly */}
+          <div className="overflow-hidden whitespace-nowrap" style={{ width: "34ch" }}>
+            <p
+              className="text-ds-dark font-semibold whitespace-nowrap border-r-2 border-ds-dark inline-block"
               style={{
-                strokeDasharray: 1200,
-                strokeDashoffset: 1200,
-                animation: "hlDraw 1.8s cubic-bezier(0.4,0,0.2,1) forwards, hlFill 0.6s ease 1.6s forwards",
+                fontSize: "1rem",
+                letterSpacing: "-0.025em",
+                overflow: "hidden",
+                width: 0,
+                animation: "hlType 2s steps(34, end) 0.3s forwards, hlBlink 0.75s step-end 0.3s infinite",
               }}
             >
-              Halftone
-            </text>
-          </svg>
-
-          <p className="text-[11px] text-ds-muted" style={{ letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            Setting up your workspace
-          </p>
+              Building your merch infrastructure
+            </p>
+          </div>
         </div>
 
         <style>{`
-          @keyframes hlDraw {
-            to { stroke-dashoffset: 0; }
+          @keyframes hlType {
+            from { width: 0; }
+            to   { width: 34ch; }
           }
-          @keyframes hlFill {
-            from { fill: transparent; }
-            to   { fill: #111111; stroke: transparent; }
+          @keyframes hlBlink {
+            0%, 100% { border-color: #111111; }
+            50%       { border-color: transparent; }
           }
         `}</style>
       </div>
