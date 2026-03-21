@@ -1,5 +1,3 @@
-"use client";
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -8,13 +6,11 @@ const SECTIONS = [
     heading: "Products",
     links: [
       { label: "All Products", href: "/products" },
-      { label: "Custom T-Shirts", href: "/products/t-shirts" },
-      { label: "Custom Hoodies", href: "/products/hoodies" },
-      { label: "Custom Caps", href: "/products/caps" },
-      { label: "Custom Tote Bags", href: "/products/tote-bags" },
-      { label: "Custom Phone Cases", href: "/products/phone-cases" },
-      { label: "Custom Posters", href: "/products/posters" },
-      { label: "Custom Stickers", href: "/products/stickers" },
+      { label: "Regular Tee", href: "/products/regular-tee" },
+      { label: "Oversized Tee", href: "/products/oversized-tee-sj" },
+      { label: "Baby Tee", href: "/products/baby-tee" },
+      { label: "Hoodie", href: "/products/hoodie" },
+      { label: "Waffle Tee", href: "/products/waffle-tee" },
       { label: "Bulk Orders", href: "/bulk-orders" },
     ],
   },
@@ -55,7 +51,6 @@ const SECTIONS = [
       { label: "Login", href: "/login" },
       { label: "Sign Up", href: "/signup" },
       { label: "Dashboard", href: "/account" },
-      { label: "Onboarding", href: "/onboarding" },
     ],
   },
   {
@@ -73,11 +68,11 @@ export default function SitemapPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-ds-dark min-h-screen text-white">
-        <section className="pt-36 pb-24 max-w-[1200px] mx-auto px-6">
-          <span className="ds-label text-white/30 block mb-6">Sitemap</span>
+      <main className="min-h-screen bg-white">
+        <section className="max-w-6xl mx-auto px-6 pt-36 pb-24">
+          <span className="ds-label ds-label-brand mb-6 block">Sitemap</span>
           <h1
-            className="text-4xl md:text-5xl leading-[0.92] mb-14"
+            className="text-4xl md:text-5xl text-ds-dark leading-[0.92] mb-14"
             style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
           >
             All pages
@@ -85,16 +80,13 @@ export default function SitemapPage() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10">
             {SECTIONS.map((s) => (
               <div key={s.heading}>
-                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
+                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-ds-muted mb-4 font-mono">
                   {s.heading}
                 </p>
                 <ul className="space-y-2">
                   {s.links.map((l) => (
                     <li key={l.href}>
-                      <a
-                        href={l.href}
-                        className="text-sm text-white/45 hover:text-white transition-colors"
-                      >
+                      <a href={l.href} className="text-sm text-ds-body hover:text-ds-dark transition-colors">
                         {l.label}
                       </a>
                     </li>

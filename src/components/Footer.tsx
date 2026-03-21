@@ -9,13 +9,11 @@ const FOOTER_LINKS = [
     heading: "Products",
     links: [
       { label: "All Products", href: "/products" },
-      { label: "Custom T-Shirts", href: "/products/t-shirts" },
-      { label: "Custom Hoodies", href: "/products/hoodies" },
-      { label: "Custom Caps", href: "/products/caps" },
-      { label: "Custom Tote Bags", href: "/products/tote-bags" },
-      { label: "Custom Phone Cases", href: "/products/phone-cases" },
-      { label: "Custom Posters", href: "/products/posters" },
-      { label: "Custom Stickers", href: "/products/stickers" },
+      { label: "Regular Tee", href: "/products/regular-tee" },
+      { label: "Oversized Tee", href: "/products/oversized-tee-sj" },
+      { label: "Baby Tee", href: "/products/baby-tee" },
+      { label: "Hoodie", href: "/products/hoodie" },
+      { label: "Waffle Tee", href: "/products/waffle-tee" },
       { label: "Bulk Orders", href: "/bulk-orders" },
     ],
   },
@@ -27,7 +25,7 @@ const FOOTER_LINKS = [
       { label: "Size Guide", href: "/size-guide" },
       { label: "How It Works", href: "/how-it-works" },
       { label: "Track Order", href: "/track" },
-      { label: "Shipping Rates", href: "/shipping-policy" },
+      { label: "Shipping Policy", href: "/shipping-policy" },
     ],
   },
   {
@@ -146,7 +144,7 @@ export default function Footer() {
                 Halftone Labs
               </p>
               <p className="text-xs text-white/30 leading-relaxed max-w-[220px]">
-                India&apos;s leading independent merch studio for artists, creators, and brands.
+                India&apos;s independent merch studio for artists, creators, and brands.
               </p>
               <p className="text-xs text-white/20 mt-4">India &mdash; hello@halftonelabs.in</p>
 
