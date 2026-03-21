@@ -37,9 +37,15 @@ export default function Hero() {
         className="absolute right-0 top-1/2 -translate-y-1/2 w-[55vw] max-w-[680px] aspect-square pointer-events-none z-0"
       >
         {/* Outer glow */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#B88AB8]/15 via-[#9E6C9E]/10 to-transparent blur-[80px]" />
+        <div
+          className="absolute inset-0 rounded-full blur-[80px]"
+          style={{ background: "radial-gradient(circle, rgba(184,138,184,0.15) 0%, rgba(158,108,158,0.10) 50%, transparent 100%)" }}
+        />
         {/* Inner shape */}
-        <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-[#9E6C9E]/12 to-[#7D527D]/6 blur-[40px]" />
+        <div
+          className="absolute inset-[15%] rounded-full blur-[40px]"
+          style={{ background: "radial-gradient(circle, rgba(158,108,158,0.12) 0%, rgba(125,82,125,0.06) 100%)" }}
+        />
         {/* Dot grid overlay */}
         <div
           className="absolute inset-[25%] rounded-full opacity-[0.12]"

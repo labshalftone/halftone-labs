@@ -204,7 +204,7 @@ function ConnectForm({ userId }: { userId: string; onConnected: (c: Connection) 
   return (
     <div className="max-w-md">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-[#96bf48]/10 rounded-2xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-[rgba(150,191,72,0.1)] rounded-2xl flex items-center justify-center">
           <svg className="w-6 h-6 text-[#96bf48]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
           </svg>
@@ -977,7 +977,7 @@ export default function ShopifyTab({ userId }: { userId: string }) {
       {/* Connected store header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#96bf48]/10 rounded-xl flex items-center justify-center">
+          <div className="w-9 h-9 bg-[rgba(150,191,72,0.1)] rounded-xl flex items-center justify-center">
             <svg className="w-4 h-4 text-[#96bf48]" viewBox="0 0 24 24" fill="currentColor">
               <path d="M15.337 23.979l6.163-1.098c0 0-2.236-15.076-2.256-15.21a.345.345 0 00-.34-.29c-.013 0-.243.005-.243.005s-1.404-1.37-1.92-1.874c.004-.046.008-.093.008-.14V5.37c0-2.96-2.408-5.37-5.371-5.37-2.963 0-5.37 2.41-5.37 5.37v.002c-.516.504-1.92 1.874-1.92 1.874s-.23-.005-.244-.005a.344.344 0 00-.339.29C3.483 7.905 1.5 22.881 1.5 22.881l13.837 1.098zM12.378 1.744a3.627 3.627 0 013.624 3.624v.004l-7.247.004a3.625 3.625 0 013.623-3.632z"/>
             </svg>

@@ -884,7 +884,7 @@ function DesignsTab({ userId, email }: { userId: string | null; email: string | 
                     className={`w-full mt-3 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
                       d.shopify_product_id
                         ? "bg-[#f0f7e6] text-[#5a8a1a] hover:bg-[#e4f0d5]"
-                        : "bg-[#f4fce8] text-[#5a8a1a] border border-[#96bf48]/30 hover:bg-[#ebf5d5]"
+                        : "bg-[#f4fce8] text-[#5a8a1a] border border-[rgba(150,191,72,0.3)] hover:bg-[#ebf5d5]"
                     }`}>
                     <svg className="w-3.5 h-3.5" viewBox="0 0 109.5 124.5" fill="currentColor">
                       <path d="M74.7 14.8s-1.4-.4-3.6-.8c-.2-1.2-.9-2.3-1.9-3.3-2.9-3-7.1-4.6-12.6-4.6-.1 0-1.2-5.6-4-5.6H28.2c-2.8 0-2.8 3.7-2.8 3.7L24 18.9c-4.5.7-8.7 2-10.4 2.4C7.5 22.8 7 23.2 6.3 29L.3 78.7C-.3 82.9 2.8 87 7.1 87h95.4c4.3 0 7.4-4.1 6.8-8.3L100.1 22C99.4 16.1 98.9 15.7 93 14.3c-2.1-.5-9.8-1.9-18.3 0zM68.6 16c-5.5 1.3-11.5 1.7-17.5 1.6L52 8.9c4.2.1 7.4 1.3 9.5 3.4.9 1 1.6 2.3 2 3.7h5.1zm-22.1.1L47.3 8.9c4.1 0 7.3 1.3 9.4 3.4.9 1 1.5 2.2 1.9 3.7-6 .1-12-.5-12.1-.9z"/>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -155,7 +155,7 @@ const toSlug = (s: string) =>
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // If user came from a plan CTA, redirect back there after onboarding so
@@ -1102,5 +1102,13 @@ function Skip({ onClick }: { onClick: () => void }) {
     >
       Skip for now
     </button>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense>
+      <OnboardingContent />
+    </Suspense>
   );
 }
