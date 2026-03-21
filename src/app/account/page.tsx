@@ -3006,11 +3006,54 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ds-light-gray">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-          <p className="text-sm text-ds-muted font-medium">Loading your account…</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-5">
+
+          {/* Halftone Labs logo mark — faithful recreation */}
+          <svg width="64" height="72" viewBox="0 0 160 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Top slab — "Halftone" */}
+            <rect x="4" y="4" width="152" height="52" rx="14" fill="white" stroke="#111" strokeWidth="6"/>
+            <line x1="14" y1="18" x2="38" y2="18" stroke="#111" strokeWidth="4" strokeLinecap="round"/>
+            <text x="148" y="44" fontSize="22" fontFamily="Georgia, serif" fill="#111" textAnchor="end" fontWeight="400">Halftone</text>
+
+            {/* Dash band */}
+            <rect x="4" y="64" width="152" height="30" rx="10" fill="white" stroke="#111" strokeWidth="6"/>
+            {[16,30,44,58,72,86,100,114,128,142].map(x => (
+              <line key={x} x1={x} y1="76" x2={x+8} y2="84" stroke="#111" strokeWidth="3.5" strokeLinecap="round"/>
+            ))}
+
+            {/* Dot band */}
+            <rect x="4" y="102" width="152" height="30" rx="10" fill="white" stroke="#111" strokeWidth="6"/>
+            {[16,28,40,52,64,76,88,100,112,124,136,148].map(x => (
+              <circle key={x} cx={x} cy="117" r="3.5" fill="#111"/>
+            ))}
+
+            {/* Bottom slab — "Labs_" */}
+            <rect x="4" y="140" width="152" height="36" rx="14" fill="white" stroke="#111" strokeWidth="6"/>
+            <text x="12" y="165" fontSize="24" fontFamily="Georgia, serif" fill="#111" fontWeight="400">Labs_</text>
+          </svg>
+
+          {/* Wordmark */}
+          <div className="text-center">
+            <p className="text-ds-dark font-semibold text-sm" style={{ letterSpacing: "-0.03em" }}>
+              Halftone Labs
+            </p>
+            <p className="text-[11px] text-ds-muted mt-0.5">Setting up your workspace…</p>
+          </div>
+
+          {/* Sliding progress bar */}
+          <div className="w-28 h-0.5 bg-black/[0.07] rounded-full overflow-hidden">
+            <div className="h-full bg-brand rounded-full" style={{ animation: "hlSlide 1.5s ease-in-out infinite" }} />
+          </div>
         </div>
+
+        <style>{`
+          @keyframes hlSlide {
+            0%   { width: 0%;   margin-left: 0%; }
+            50%  { width: 55%;  margin-left: 22%; }
+            100% { width: 0%;   margin-left: 100%; }
+          }
+        `}</style>
       </div>
     );
   }
