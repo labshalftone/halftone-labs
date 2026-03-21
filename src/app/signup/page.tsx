@@ -18,6 +18,16 @@ function GoogleIcon() {
   );
 }
 
+function LinkedInIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+      <rect width="18" height="18" rx="3" fill="#0A66C2"/>
+      <path d="M4.5 7H6.5V13.5H4.5V7ZM5.5 4C4.95 4 4.5 4.45 4.5 5C4.5 5.55 4.95 6 5.5 6C6.05 6 6.5 5.55 6.5 5C6.5 4.45 6.05 4 5.5 4Z" fill="white"/>
+      <path d="M8 7H9.9V7.9C10.2 7.35 10.95 7 11.75 7C13.4 7 14 8.05 14 9.65V13.5H12V10.1C12 9.4 11.75 9 11.1 9C10.4 9 10 9.45 10 10.1V13.5H8V7Z" fill="white"/>
+    </svg>
+  );
+}
+
 function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,22 +36,33 @@ function SignupContent() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+
+  const getCallbackUrl = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return `${origin}/auth/callback${redirect !== "/account" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`;
+  };
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
     setError("");
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const callbackUrl = `${origin}/auth/callback${redirect !== "/account" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: callbackUrl },
+      options: { redirectTo: getCallbackUrl() },
     });
-    if (error) {
-      setError(error.message);
-      setGoogleLoading(false);
-    }
+    if (error) { setError(error.message); setGoogleLoading(false); }
+  };
+
+  const handleLinkedIn = async () => {
+    setLinkedinLoading(true);
+    setError("");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "linkedin_oidc",
+      options: { redirectTo: getCallbackUrl() },
+    });
+    if (error) { setError(error.message); setLinkedinLoading(false); }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -136,16 +157,27 @@ function SignupContent() {
                 </p>
               </div>
 
-              {/* Google */}
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={googleLoading || loading}
-                className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border border-black/[0.12] bg-white hover:bg-zinc-50 transition-colors text-sm font-medium text-ds-dark disabled:opacity-50 mb-5"
-              >
-                {googleLoading ? <Loader2 size={16} className="animate-spin" /> : <GoogleIcon />}
-                Continue with Google
-              </button>
+              {/* Social logins */}
+              <div className="flex flex-col gap-2.5 mb-5">
+                <button
+                  type="button"
+                  onClick={handleGoogle}
+                  disabled={googleLoading || linkedinLoading || loading}
+                  className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border border-black/[0.12] bg-white hover:bg-zinc-50 transition-colors text-sm font-medium text-ds-dark disabled:opacity-50"
+                >
+                  {googleLoading ? <Loader2 size={16} className="animate-spin" /> : <GoogleIcon />}
+                  Continue with Google
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLinkedIn}
+                  disabled={googleLoading || linkedinLoading || loading}
+                  className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border border-black/[0.12] bg-white hover:bg-zinc-50 transition-colors text-sm font-medium text-ds-dark disabled:opacity-50"
+                >
+                  {linkedinLoading ? <Loader2 size={16} className="animate-spin" /> : <LinkedInIcon />}
+                  Continue with LinkedIn
+                </button>
+              </div>
 
               {/* Divider */}
               <div className="flex items-center gap-3 mb-5">
