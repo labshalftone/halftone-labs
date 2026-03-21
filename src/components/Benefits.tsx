@@ -6,21 +6,25 @@ import {
   Zap, Shield, Sparkles, Clock, Heart, Layers, Target, Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
-
-const benefits = [
-  { icon: Layers, text: "MOQ of 1", sub: "Order a single unit or ten thousand. No leftover stock, no dead inventory." },
-  { icon: Clock, text: "5–7 day turnaround", sub: "Domestic orders ship in under a week. Fast enough for surprise drops." },
-  { icon: Sparkles, text: "DTG & DTF printing", sub: "Photographic quality on any colour garment. Your artwork, uncompromised." },
-  { icon: Shield, text: "India-first pricing", sub: "Premium quality at a fraction of Western rates. More margin per drop." },
-  { icon: Heart, text: "60+ artist collabs", sub: "From bedroom producers to festival headliners. We've done it all." },
-  { icon: Zap, text: "White-label fulfillment", sub: "Ships in your branded packaging. Invisible supply chain." },
-  { icon: Target, text: "Custom neck labels", sub: "Your brand on the garment, not ours. Available from MOQ 50." },
-  { icon: Lightbulb, text: "Full-service pipeline", sub: "Design, production, fulfillment, and marketing. One team, zero handoffs." },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function Benefits() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const benefits = [
+    { icon: Layers, text: "MOQ of 1", sub: "Order a single unit or ten thousand. No leftover stock, no dead inventory." },
+    { icon: Clock, text: "5–7 day turnaround", sub: "Domestic orders ship in under a week. Fast enough for surprise drops." },
+    { icon: Sparkles, text: "DTG & DTF printing", sub: "Photographic quality on any colour garment. Your artwork, uncompromised." },
+    { icon: Shield, text: c.benefitPricingTitle, sub: c.benefitPricingDesc },
+    { icon: Heart, text: "60+ artist collabs", sub: "From bedroom producers to festival headliners. We've done it all." },
+    { icon: Zap, text: "White-label fulfillment", sub: "Ships in your branded packaging. Invisible supply chain." },
+    { icon: Target, text: "Custom neck labels", sub: "Your brand on the garment, not ours. Available from MOQ 50." },
+    { icon: Lightbulb, text: "Full-service pipeline", sub: "Design, production, fulfillment, and marketing. One team, zero handoffs." },
+  ];
 
   return (
     <section className="relative py-28 bg-white overflow-hidden">

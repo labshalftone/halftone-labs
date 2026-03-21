@@ -2,17 +2,21 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-
-const stats = [
-  { value: "100K+", label: "Units Sold" },
-  { value: "500+", label: "SKUs Launched" },
-  { value: "₹25Cr+", label: "Revenue FY24" },
-  { value: "60+", label: "Collaborations" },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function About() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const stats = [
+    { value: "100K+", label: "Units Sold" },
+    { value: "500+", label: "SKUs Launched" },
+    { value: c.aboutRevenueValue, label: c.aboutRevenueLabel },
+    { value: "60+", label: "Collaborations" },
+  ];
 
   return (
     <section id="about" className="relative py-28 bg-white overflow-hidden">
@@ -34,9 +38,19 @@ export default function About() {
               className="text-3xl md:text-5xl leading-[0.92] mb-0"
               style={{ letterSpacing: "-0.055em" }}
             >
-              <span className="h-fade">India&apos;s leading </span>
-              <br />
-              <span className="h-bold">merch studio.</span>
+              {isIndia ? (
+                <>
+                  <span className="h-fade">India&apos;s leading </span>
+                  <br />
+                  <span className="h-bold">merch studio.</span>
+                </>
+              ) : (
+                <>
+                  <span className="h-fade">The merch studio </span>
+                  <br />
+                  <span className="h-bold">for artists everywhere.</span>
+                </>
+              )}
             </h2>
           </motion.div>
 
@@ -47,9 +61,7 @@ export default function About() {
             className="text-lg leading-relaxed text-ds-body max-w-xl lg:w-1/2 lg:pt-2"
             style={{ letterSpacing: "-0.015em" }}
           >
-            India&apos;s leading independent merch and creative studio. We help artists,
-            labels, and creators launch and scale merch brands. From design to
-            delivery, we manage the entire pipeline — so you never have to.
+            {c.aboutSectionBody}
           </motion.p>
         </div>
 
@@ -99,14 +111,14 @@ export default function About() {
               </h3>
               <p className="text-white/70 leading-relaxed max-w-2xl text-sm">
                 Our in-house music-inspired streetwear label. What started as an
-                experiment is now a 100,000+ order brand with ₹25Cr+ in annual
-                revenue, 40K followers, and a loyal fanbase across India.
+                experiment is now a 100,000+ order brand with {isIndia ? "₹25Cr+" : "$3M+"} in annual
+                revenue, 40K followers, and a loyal fanbase worldwide.
               </p>
             </div>
             <div className="flex gap-4 shrink-0">
               {[
                 { v: "100K+", l: "Orders" },
-                { v: "₹25Cr+", l: "Revenue" },
+                { v: isIndia ? "₹25Cr+" : "$3M+", l: "Revenue" },
                 { v: "40K+", l: "Followers" },
               ].map((s) => (
                 <div key={s.l} className="text-center min-w-[80px]">

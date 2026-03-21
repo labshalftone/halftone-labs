@@ -64,6 +64,22 @@ export interface RegionCopy {
   footerTagline: string;
   footerLocation: string;
 
+  // About section (homepage component)
+  aboutSectionBody: string;
+  aboutRevenueValue: string;
+  aboutRevenueLabel: string;
+
+  // Benefits / Enterprise features
+  benefitPricingTitle: string;
+  benefitPricingDesc: string;
+  enterprisePricingTitle: string;
+  enterprisePricingDesc: string;
+
+  // GetStarted section
+  madeInTitle: string;
+  madeInDesc: string;
+  getStartedBody: string;
+
   // Sustainability
   sustainLocal: string;
 
@@ -125,6 +141,22 @@ const india: RegionCopy = {
   footerTagline: "India's independent merch studio for artists, creators, and brands.",
   footerLocation: "India — hello@halftonelabs.in",
 
+  aboutSectionBody:
+    "India's leading independent merch and creative studio. We help artists, labels, and creators launch and scale merch brands. From design to delivery, we manage the entire pipeline — so you never have to.",
+  aboutRevenueValue: "₹25Cr+",
+  aboutRevenueLabel: "Revenue FY24",
+
+  benefitPricingTitle: "India-first pricing",
+  benefitPricingDesc: "Premium quality at a fraction of Western rates. More margin per drop.",
+  enterprisePricingTitle: "India-first pricing",
+  enterprisePricingDesc:
+    "Premium quality at a fraction of Western prices. More margin on every drop. Ideal for independent artists and small labels.",
+
+  madeInTitle: "100% made in India",
+  madeInDesc: "Every garment cut, printed, and fulfilled from our facility. No middlemen.",
+  getStartedBody:
+    "Our garments are classic unisex fits, all made in India. Order a sample to try before you buy, then design your full order in the Halftone Studio.",
+
   sustainLocal:
     "Everything is produced in India. Shorter supply chains mean fewer freight miles, lower carbon emissions, and faster delivery to you.",
 
@@ -185,6 +217,22 @@ const global: RegionCopy = {
 
   footerTagline: "The merch studio for artists, creators, and brands everywhere.",
   footerLocation: "Global — hello@halftonelabs.in",
+
+  aboutSectionBody:
+    "The merch studio for artists, labels, and creators everywhere. We help you launch and scale merch brands you're proud of. From design to delivery, we manage the entire pipeline — so you never have to.",
+  aboutRevenueValue: "$3M+",
+  aboutRevenueLabel: "Revenue",
+
+  benefitPricingTitle: "Competitive global pricing",
+  benefitPricingDesc: "High-quality production at rates built for independent artists, not big brands. More margin per drop.",
+  enterprisePricingTitle: "Competitive global pricing",
+  enterprisePricingDesc:
+    "High-quality production at rates built for independent artists, not big brands. More margin on every drop, wherever you are.",
+
+  madeInTitle: "Crafted to order",
+  madeInDesc: "Every garment is made after you order it — no dead stock, no middlemen, just quality.",
+  getStartedBody:
+    "Our garments are classic unisex fits, crafted to order from combed cotton blanks. Order a sample to try before you buy, then design your full order in the Halftone Studio.",
 
   sustainLocal:
     "Our production is centralised for quality control, and we ship via optimised global carriers to minimise freight miles and emissions.",

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const CLIENTS = [
   {
@@ -27,42 +29,44 @@ const CLIENTS = [
   },
 ];
 
-const FEATURES = [
-  {
-    icon: "⚡",
-    title: "On-demand, no minimums",
-    desc: "Drop a limited run of 1 or 10,000. No leftover stock, no dead inventory. Perfect for time-sensitive album or tour releases.",
-  },
-  {
-    icon: "🎨",
-    title: "Artwork you can trust",
-    desc: "DTG and DTF printing preserves every detail of your artwork: full colour, photographic gradients, crisp type. Your vision, uncompromised.",
-  },
-  {
-    icon: "📦",
-    title: "White-label fulfillment",
-    desc: "Ship direct to fans with your branding on the box. Custom neck labels available. Invisible supply chain.",
-  },
-  {
-    icon: "🇮🇳",
-    title: "India-first pricing",
-    desc: "Premium quality at a fraction of Western prices. More margin on every drop. Ideal for independent artists and small labels.",
-  },
-  {
-    icon: "⏱️",
-    title: "5–7 day turnaround",
-    desc: "Plan a release, go live in under a week. Fast enough for surprise drops, structured enough for tour cycles.",
-  },
-  {
-    icon: "🔗",
-    title: "API & bulk order tools",
-    desc: "Running a merch store? Use our Halftone Studio to place and manage orders at scale with zero friction.",
-  },
-];
-
 export default function Enterprise() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const FEATURES = [
+    {
+      icon: "⚡",
+      title: "On-demand, no minimums",
+      desc: "Drop a limited run of 1 or 10,000. No leftover stock, no dead inventory. Perfect for time-sensitive album or tour releases.",
+    },
+    {
+      icon: "🎨",
+      title: "Artwork you can trust",
+      desc: "DTG and DTF printing preserves every detail of your artwork: full colour, photographic gradients, crisp type. Your vision, uncompromised.",
+    },
+    {
+      icon: "📦",
+      title: "White-label fulfillment",
+      desc: "Ship direct to fans with your branding on the box. Custom neck labels available. Invisible supply chain.",
+    },
+    {
+      icon: isIndia ? "🇮🇳" : "💰",
+      title: c.enterprisePricingTitle,
+      desc: c.enterprisePricingDesc,
+    },
+    {
+      icon: "⏱️",
+      title: "5–7 day turnaround",
+      desc: "Plan a release, go live in under a week. Fast enough for surprise drops, structured enough for tour cycles.",
+    },
+    {
+      icon: "🔗",
+      title: "API & bulk order tools",
+      desc: "Running a merch store? Use our Halftone Studio to place and manage orders at scale with zero friction.",
+    },
+  ];
 
   return (
     <section className="bg-ds-light-gray py-28 px-6 border-t border-black/[0.05]">
@@ -113,23 +117,23 @@ export default function Enterprise() {
 
         {/* Who it's for */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {CLIENTS.map((c, i) => (
+          {CLIENTS.map((cl, i) => (
             <motion.div
-              key={c.category}
+              key={cl.category}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.4, delay: i * 0.07 }}
               className="ds-card"
             >
-              <span className="text-2xl block mb-3">{c.icon}</span>
+              <span className="text-2xl block mb-3">{cl.icon}</span>
               <h3
                 className="text-ds-dark text-sm mb-2"
                 style={{ fontWeight: 600, letterSpacing: "-0.02em" }}
               >
-                {c.category}
+                {cl.category}
               </h3>
               <ul className="space-y-1">
-                {c.examples.map((ex) => (
+                {cl.examples.map((ex) => (
                   <li key={ex} className="text-[0.7rem] text-ds-body flex items-center gap-1.5">
                     <span className="w-1 h-1 rounded-full bg-brand flex-shrink-0" />
                     {ex}

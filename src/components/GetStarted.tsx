@@ -4,33 +4,39 @@ import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
-
-const features = [
-  {
-    icon: "👕",
-    title: "MOQ 1, no bulk required",
-    desc: "Order a single sample unit to check fit, feel, and print quality before committing.",
-  },
-  {
-    icon: "🖨️",
-    title: "DTG & DTF printing",
-    desc: "Photographic-quality print on premium 180–240 GSM combed cotton blanks.",
-  },
-  {
-    icon: "📦",
-    title: "Ships in 5–7 business days",
-    desc: "Fast domestic delivery via Shiprocket. International orders ship in 10–18 days.",
-  },
-  {
-    icon: "🇮🇳",
-    title: "100% made in India",
-    desc: "Every garment cut, printed, and fulfilled from our facility. No middlemen.",
-  },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function GetStarted() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const features = [
+    {
+      icon: "👕",
+      title: "MOQ 1, no bulk required",
+      desc: "Order a single sample unit to check fit, feel, and print quality before committing.",
+    },
+    {
+      icon: "🖨️",
+      title: "DTG & DTF printing",
+      desc: "Photographic-quality print on premium 180–240 GSM combed cotton blanks.",
+    },
+    {
+      icon: "📦",
+      title: isIndia ? "Ships in 5–7 business days" : "Ships worldwide",
+      desc: isIndia
+        ? "Fast domestic delivery via Shiprocket. International orders ship in 10–18 days."
+        : "Fast fulfilment reaching most global destinations in 5–18 business days.",
+    },
+    {
+      icon: isIndia ? "🇮🇳" : "✨",
+      title: c.madeInTitle,
+      desc: c.madeInDesc,
+    },
+  ];
 
   return (
     <section className="relative overflow-hidden bg-ds-dark py-32 px-6">
@@ -64,16 +70,21 @@ export default function GetStarted() {
               <span className="h-bold-dark">sample today</span>
             </h2>
             <p className="text-white/50 leading-relaxed max-w-md text-sm mb-3">
-              Our garments are classic unisex fits, all made in India. Order a
-              sample to try before you buy, then design your full order in the
-              Halftone Studio.
+              {c.getStartedBody}
             </p>
-            <p className="text-white/40 text-sm mb-10">
-              Blank samples from{" "}
-              <span className="text-brand-light font-semibold">₹499</span>
-              {" · "}Printed samples from{" "}
-              <span className="text-brand-light font-semibold">₹799</span>
-            </p>
+            {isIndia && (
+              <p className="text-white/40 text-sm mb-10">
+                Blank samples from{" "}
+                <span className="text-brand-light font-semibold">₹499</span>
+                {" · "}Printed samples from{" "}
+                <span className="text-brand-light font-semibold">₹799</span>
+              </p>
+            )}
+            {!isIndia && (
+              <p className="text-white/40 text-sm mb-10">
+                Order a sample to experience the quality first-hand before scaling your drop.
+              </p>
+            )}
 
             <div className="flex flex-wrap gap-3">
               <Link href="/studio" className="btn-brand">
