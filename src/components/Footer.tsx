@@ -114,6 +114,7 @@ export default function Footer() {
                   { label: "Case Studies", href: "/case-studies" },
                   { label: "Journal", href: "/journal" },
                   { label: "Academy", href: "/academy" },
+                  { label: "Affiliate", href: "/affiliate" },
                   { label: "Track Order", href: "/track" },
                   { label: "Contact", href: "/contact" },
                   { label: "Help", href: "/help" },
