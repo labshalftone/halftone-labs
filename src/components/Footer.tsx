@@ -4,6 +4,62 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 
+const FOOTER_LINKS = [
+  {
+    heading: "Products",
+    links: [
+      { label: "All Products", href: "/products" },
+      { label: "Custom T-Shirts", href: "/products/t-shirts" },
+      { label: "Custom Hoodies", href: "/products/hoodies" },
+      { label: "Custom Caps", href: "/products/caps" },
+      { label: "Custom Tote Bags", href: "/products/tote-bags" },
+      { label: "Custom Phone Cases", href: "/products/phone-cases" },
+      { label: "Custom Posters", href: "/products/posters" },
+      { label: "Custom Stickers", href: "/products/stickers" },
+      { label: "Bulk Orders", href: "/bulk-orders" },
+    ],
+  },
+  {
+    heading: "Tools",
+    links: [
+      { label: "Studio", href: "/studio" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Size Guide", href: "/size-guide" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Track Order", href: "/track" },
+      { label: "Shipping Rates", href: "/shipping-policy" },
+    ],
+  },
+  {
+    heading: "Learn",
+    links: [
+      { label: "Academy", href: "/academy" },
+      { label: "Journal", href: "/journal" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "Help Center", href: "/help" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About Us", href: "/about" },
+      { label: "Careers", href: "/careers" },
+      { label: "Affiliate Program", href: "/affiliate" },
+      { label: "Press & Media", href: "/press" },
+      { label: "Quality Promise", href: "/quality" },
+      { label: "Sustainability", href: "/sustainability" },
+      { label: "Sitemap", href: "/sitemap-page" },
+    ],
+  },
+];
+
+const SOCIAL_LINKS = [
+  { label: "Instagram", href: "https://instagram.com/halftonelabs.in" },
+  { label: "X / Twitter", href: "https://x.com/halftonelabs.in" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/101764839" },
+];
+
 export default function Footer() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -74,108 +130,73 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Footer bottom */}
+      {/* Footer links */}
       <div className="border-t border-white/[0.04] relative z-10">
-        <div className="max-w-[1200px] mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="max-w-[1200px] mx-auto px-6 pt-14 pb-10">
+
+          {/* Top row: brand + 4 link columns */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-14">
 
             {/* Brand */}
-            <div>
+            <div className="col-span-2 md:col-span-3 lg:col-span-1">
               <p
                 className="text-white text-base mb-3"
                 style={{ fontWeight: 700, letterSpacing: "-0.05em" }}
               >
                 Halftone Labs
               </p>
-              <p className="text-xs text-white/30 leading-relaxed">
-                India&apos;s leading independent merch and creative studio.
+              <p className="text-xs text-white/30 leading-relaxed max-w-[220px]">
+                India&apos;s leading independent merch studio for artists, creators, and brands.
               </p>
-            </div>
+              <p className="text-xs text-white/20 mt-4">India &mdash; hello@halftonelabs.in</p>
 
-            {/* Location */}
-            <div>
-              <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
-                Location
-              </p>
-              <p className="text-sm text-white/45">India</p>
-              <p className="text-sm text-white/45">hello@halftonelabs.in</p>
-            </div>
-
-            {/* Sitemap */}
-            <div>
-              <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
-                Pages
-              </p>
-              <div className="flex flex-col gap-2">
-                {[
-                  { label: "Products", href: "/products" },
-                  { label: "Studio", href: "/studio" },
-                  { label: "How It Works", href: "/how-it-works" },
-                  { label: "Case Studies", href: "/case-studies" },
-                  { label: "Journal", href: "/journal" },
-                  { label: "Academy", href: "/academy" },
-                  { label: "Affiliate", href: "/affiliate" },
-                  { label: "Track Order", href: "/track" },
-                  { label: "Contact", href: "/contact" },
-                  { label: "Help", href: "/help" },
-                ].map((link) => (
+              {/* Social */}
+              <div className="flex flex-col gap-2 mt-6">
+                {SOCIAL_LINKS.map((s) => (
                   <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm text-white/35 hover:text-white/70 transition-colors"
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white/35 hover:text-white/70 transition-colors inline-flex items-center gap-1"
                   >
-                    {link.label}
+                    {s.label} <ArrowUpRight size={11} />
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Follow */}
-            <div>
-              <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
-                Follow Us
-              </p>
-              <div className="flex flex-col gap-2">
-                <a
-                  href="https://instagram.com/halftonelabs.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-white/35 hover:text-white/70 transition-colors inline-flex items-center gap-1"
-                >
-                  Instagram <ArrowUpRight size={11} />
-                </a>
-                <a
-                  href="https://x.com/halftonelabs.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-white/35 hover:text-white/70 transition-colors inline-flex items-center gap-1"
-                >
-                  X / Twitter <ArrowUpRight size={11} />
-                </a>
-                <a
-                  href="https://www.linkedin.com/company/101764839"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-white/35 hover:text-white/70 transition-colors inline-flex items-center gap-1"
-                >
-                  LinkedIn <ArrowUpRight size={11} />
-                </a>
+            {/* 4 link columns */}
+            {FOOTER_LINKS.map((col) => (
+              <div key={col.heading}>
+                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-white/20 mb-4 font-mono">
+                  {col.heading}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {col.links.map((link) => (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      className="text-sm text-white/35 hover:text-white/70 transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
 
-          {/* Copyright */}
-          <div className="mt-10 pt-6 border-t border-white/[0.04] flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          {/* Copyright + legal */}
+          <div className="pt-6 border-t border-white/[0.04] flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <p className="text-xs text-white/20">
               &copy; 2021&ndash;2025 Halftone Labs. All rights reserved.
             </p>
-            <div className="flex gap-6">
-              <a href="/privacy" className="text-xs text-white/20 hover:text-white/50 transition-colors">
-                Privacy Policy
-              </a>
-              <a href="/terms" className="text-xs text-white/20 hover:text-white/50 transition-colors">
-                Terms
-              </a>
+            <div className="flex flex-wrap gap-6">
+              <a href="/privacy" className="text-xs text-white/20 hover:text-white/50 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="text-xs text-white/20 hover:text-white/50 transition-colors">Terms of Service</a>
+              <a href="/shipping-policy" className="text-xs text-white/20 hover:text-white/50 transition-colors">Shipping Policy</a>
+              <a href="/return-policy" className="text-xs text-white/20 hover:text-white/50 transition-colors">Return Policy</a>
             </div>
           </div>
 
