@@ -107,7 +107,7 @@ export default function About() {
             <div>
               <span className="ds-label text-white/60 mb-3 block">Our Flagship Brand</span>
               <h3 className="text-2xl md:text-3xl text-white mb-3" style={{ fontWeight: 700, letterSpacing: "-0.04em" }}>
-                All Day, High Decibels
+                All Day, High Decibels (WearADHD)
               </h3>
               <p className="text-white/70 leading-relaxed max-w-2xl text-sm">
                 Our in-house music-inspired streetwear label. What started as an

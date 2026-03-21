@@ -218,7 +218,7 @@ export default function CareersPage() {
                 <span className="text-brand">All Day, High Decibels</span>
               </p>
               <p className="text-ds-body text-sm mt-1 max-w-md leading-relaxed">
-                All Day, High Decibels (ADHD) is our flagship music-inspired streetwear brand — 100K+ orders, ₹25Cr+ in revenue, and the in-house proof that everything Halftone Labs builds actually works.
+                All Day, High Decibels (WearADHD) is our flagship music-inspired streetwear brand — 100K+ orders, ₹25Cr+ in revenue, and the in-house proof that everything Halftone Labs builds actually works.
               </p>
             </div>
             <a
