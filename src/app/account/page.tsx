@@ -2917,6 +2917,33 @@ type UserOrg = {
   description: string | null;
 };
 
+// ── Loading Screen ─────────────────────────────────────────────────────────────
+function AccountLoadingScreen() {
+  const [displayed, setDisplayed] = useState("");
+  const full = "Building your merch infrastructure";
+  useEffect(() => {
+    let i = 0;
+    const t = setInterval(() => {
+      i++;
+      setDisplayed(full.slice(0, i));
+      if (i >= full.length) clearInterval(t);
+    }, 55);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+      <div className="w-6 h-6 rounded-full border-2 border-black/[0.08] border-t-brand animate-spin" />
+      <p
+        className="text-ds-dark text-base font-semibold"
+        style={{ letterSpacing: "-0.035em", minWidth: "20ch", textAlign: "center" }}
+      >
+        {displayed}
+        <span className="opacity-60 animate-pulse">|</span>
+      </p>
+    </div>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function AccountPage() {
   const router = useRouter();
@@ -3005,44 +3032,7 @@ export default function AccountPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-3">
-
-          {/* Wordmark */}
-          <p className="text-ds-dark font-semibold text-base" style={{ letterSpacing: "-0.05em" }}>
-            Halftone
-          </p>
-
-          {/* Typewriter container — fixed width so steps() maps cleanly */}
-          <div className="overflow-hidden whitespace-nowrap" style={{ width: "34ch" }}>
-            <p
-              className="text-ds-dark font-semibold whitespace-nowrap border-r-2 border-ds-dark inline-block"
-              style={{
-                fontSize: "1rem",
-                letterSpacing: "-0.025em",
-                overflow: "hidden",
-                width: 0,
-                animation: "hlType 2s steps(34, end) 0.3s forwards, hlBlink 0.75s step-end 0.3s infinite",
-              }}
-            >
-              Building your merch infrastructure
-            </p>
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes hlType {
-            from { width: 0; }
-            to   { width: 34ch; }
-          }
-          @keyframes hlBlink {
-            0%, 100% { border-color: #111111; }
-            50%       { border-color: transparent; }
-          }
-        `}</style>
-      </div>
-    );
+    return <AccountLoadingScreen />;
   }
 
   const initials = (user?.user_metadata?.name ?? user?.email ?? "?").slice(0, 2).toUpperCase();

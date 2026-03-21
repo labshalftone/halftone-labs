@@ -17,26 +17,11 @@ function CallbackContent() {
     const code = searchParams.get("code");
     const redirect = searchParams.get("redirect") ?? "/account";
 
-    async function finish() {
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          router.replace(`/login?error=${encodeURIComponent(error.message)}`);
-          return;
-        }
-      }
-
-      // Check if onboarding is done
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
-
+    async function routeUser(userId: string) {
       const { data: profile } = await supabase
         .from("user_profiles")
         .select("onboarding_completed_at")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (!profile || !profile.onboarding_completed_at) {
@@ -47,6 +32,40 @@ function CallbackContent() {
       } else {
         router.replace(redirect);
       }
+    }
+
+    async function finish() {
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          router.replace(`/login?error=${encodeURIComponent(error.message)}`);
+          return;
+        }
+      }
+
+      // Try to get the user — may be null briefly on implicit OAuth flow
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await routeUser(user.id);
+        return;
+      }
+
+      // Fallback: wait for onAuthStateChange to fire with the session
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          subscription.unsubscribe();
+          await routeUser(session.user.id);
+        } else if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+          subscription.unsubscribe();
+          router.replace("/login");
+        }
+      });
+
+      // Safety timeout — if nothing fires in 5s, give up
+      setTimeout(() => {
+        subscription.unsubscribe();
+        router.replace("/login");
+      }, 5000);
     }
 
     finish();
