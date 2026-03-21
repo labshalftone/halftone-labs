@@ -3026,7 +3026,7 @@ export default function AccountPage() {
 
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-full z-40 w-64 bg-white border-r border-black/[0.06] flex flex-col transition-transform duration-300
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:flex`}>
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
 
         {/* Logo */}
         <div className="px-6 h-16 flex items-center border-b border-black/[0.06]">
@@ -3174,7 +3174,7 @@ export default function AccountPage() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col lg:ml-64">
         {/* Top bar */}
         <header className="h-16 bg-white border-b border-black/[0.06] px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-3">
