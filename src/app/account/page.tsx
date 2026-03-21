@@ -2930,6 +2930,7 @@ export default function AccountPage() {
   const [showOrgSwitcher,  setShowOrgSwitcher]  = useState(false);
   const [showOrgSettings,  setShowOrgSettings]  = useState(false);
   const [showCreateOrg,    setShowCreateOrg]    = useState(false);
+  const [showUserMenu,     setShowUserMenu]     = useState(false);
   const [newOrgName,       setNewOrgName]       = useState("");
   const [newOrgSlug,       setNewOrgSlug]       = useState("");
   const [newOrgDesc,       setNewOrgDesc]       = useState("");
@@ -3224,8 +3225,48 @@ export default function AccountPage() {
               )}
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold">
-              {initials}
+            {/* User avatar dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu((o) => !o)}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+                title={user?.email}
+              >
+                {initials}
+              </button>
+              <AnimatePresence>
+                {showUserMenu && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setShowUserMenu(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute right-0 top-full mt-2 z-40 bg-white rounded-2xl border border-zinc-200 shadow-lg overflow-hidden min-w-[200px]"
+                    >
+                      <div className="px-4 py-3 border-b border-zinc-100">
+                        <p className="text-xs font-semibold text-ds-dark truncate">{user?.user_metadata?.name ?? "Account"}</p>
+                        <p className="text-[10px] text-ds-muted truncate">{user?.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { setShowUserMenu(false); setActiveTab("settings"); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-ds-dark hover:bg-zinc-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Account Settings
+                      </button>
+                      <button
+                        onClick={() => { setShowUserMenu(false); handleSignOut(); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        Sign out
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
