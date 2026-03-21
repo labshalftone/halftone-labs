@@ -7,7 +7,8 @@ import { useCart } from "@/lib/cart-context";
 import { supabase } from "@/lib/supabase";
 import CartDrawer from "./CartDrawer";
 import { useCurrency, CURRENCY_META, type Currency } from "@/lib/currency-context";
-import { ShoppingBag, User, ChevronDown, Menu, X } from "lucide-react";
+import { ShoppingBag, User, ChevronDown, Menu, X, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const CURRENCIES: Currency[] = ["INR", "USD", "EUR"];
 
@@ -23,9 +24,21 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const { count } = useCart();
   const { currency, setCurrency } = useCurrency();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUserOpen(false);
+    router.push("/");
+  };
+
+  const userInitials = userEmail
+    ? userEmail.split("@")[0].slice(0, 2).toUpperCase()
+    : "";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -139,13 +152,48 @@ export default function Navbar() {
 
             {/* Account */}
             {userEmail ? (
-              <Link
-                href="/account"
-                className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full hover:bg-black/[0.05] transition-colors"
-                title={userEmail}
-              >
-                <User size={16} className="text-ds-dark" strokeWidth={2} />
-              </Link>
+              <div className="relative hidden sm:block">
+                <button
+                  onClick={() => setUserOpen((o) => !o)}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-ds-dark text-white text-[0.65rem] font-bold hover:opacity-90 transition-opacity"
+                  title={userEmail}
+                >
+                  {userInitials}
+                </button>
+                <AnimatePresence>
+                  {userOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setUserOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                        transition={{ duration: 0.12 }}
+                        className="absolute right-0 top-full mt-2 z-40 bg-white rounded-2xl border border-zinc-200 shadow-lg overflow-hidden min-w-[180px]"
+                      >
+                        <div className="px-4 py-3 border-b border-zinc-100">
+                          <p className="text-[0.7rem] text-ds-body truncate">{userEmail}</p>
+                        </div>
+                        <Link
+                          href="/account"
+                          onClick={() => setUserOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-ds-dark hover:bg-zinc-50 transition-colors"
+                        >
+                          <User size={14} />
+                          Account
+                        </Link>
+                        <button
+                          onClick={handleSignOut}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut size={14} />
+                          Sign out
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -225,13 +273,22 @@ export default function Navbar() {
                     Open Studio
                   </Link>
                   {userEmail ? (
-                    <Link
-                      href="/account"
-                      onClick={() => setMenuOpen(false)}
-                      className="text-sm text-ds-body font-medium"
-                    >
-                      Account
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href="/account"
+                        onClick={() => setMenuOpen(false)}
+                        className="text-sm text-ds-body font-medium"
+                      >
+                        Account
+                      </Link>
+                      <button
+                        onClick={() => { setMenuOpen(false); handleSignOut(); }}
+                        className="text-sm text-red-500 font-medium flex items-center gap-1"
+                      >
+                        <LogOut size={13} />
+                        Sign out
+                      </button>
+                    </div>
                   ) : (
                     <Link
                       href="/login"
