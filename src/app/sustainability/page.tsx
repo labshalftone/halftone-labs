@@ -3,17 +3,22 @@
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const ACTIONS = [
-  { emoji: "🌿", title: "Organic & sustainable fabrics", body: "We stock and actively promote GOTS-certified organic cotton blanks. When you see the 'Organic' tag in Studio, the base fabric is certified pesticide-free and sustainably farmed." },
-  { emoji: "🖨️", title: "Water-based inks", body: "Our DTG printing uses water-based inks — lower toxicity, better biodegradability, and softer on the garment. We avoid plastisol inks wherever possible." },
-  { emoji: "📦", title: "Minimal packaging", body: "We ship in recyclable poly mailers and unbleached kraft paper. No foam, bubble wrap, or excessive void fill. Custom packaging uses uncoated or recycled materials." },
-  { emoji: "🔁", title: "Print on demand by default", body: "Our model is built around on-demand production. We don't print and warehouse. Every item is made after it's ordered — near-zero unsold inventory waste." },
-  { emoji: "🇮🇳", title: "Local production", body: "Everything is produced in India. Shorter supply chains mean fewer freight miles, lower carbon emissions, and faster delivery to you." },
-  { emoji: "📏", title: "Made to last", body: "We obsess over wash durability. A garment that lasts 3 years is always more sustainable than one that fades in 10 washes." },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function SustainabilityPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const ACTIONS = [
+    { emoji: "🌿", title: "Organic & sustainable fabrics", body: "We stock and actively promote GOTS-certified organic cotton blanks. When you see the 'Organic' tag in Studio, the base fabric is certified pesticide-free and sustainably farmed." },
+    { emoji: "🖨️", title: "Water-based inks", body: "Our DTG printing uses water-based inks — lower toxicity, better biodegradability, and softer on the garment. We avoid plastisol inks wherever possible." },
+    { emoji: "📦", title: "Minimal packaging", body: "We ship in recyclable poly mailers and unbleached kraft paper. No foam, bubble wrap, or excessive void fill. Custom packaging uses uncoated or recycled materials." },
+    { emoji: "🔁", title: "Print on demand by default", body: "Our model is built around on-demand production. We don't print and warehouse. Every item is made after it's ordered — near-zero unsold inventory waste." },
+    { emoji: "🇮🇳", title: "Local production", body: c.sustainLocal },
+    { emoji: "📏", title: "Made to last", body: "We obsess over wash durability. A garment that lasts 3 years is always more sustainable than one that fades in 10 washes." },
+  ];
+
   return (
     <>
       <Navbar />

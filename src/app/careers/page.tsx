@@ -3,15 +3,20 @@
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const PERKS = [
-  { emoji: "🎨", title: "Creative-first environment", body: "We work with artists every day. You will too." },
-  { emoji: "📦", title: "Hands-on work", body: "See your work go from a file on a screen to a garment in someone's hands." },
-  { emoji: "🇮🇳", title: "India-based & independent", body: "We're not a corporate. We move fast, try things, and actually listen." },
-  { emoji: "📈", title: "Room to grow", body: "We're small now. Get in early and grow with us." },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function CareersPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const PERKS = [
+    { emoji: "🎨", title: "Creative-first environment", body: "We work with artists every day. You will too." },
+    { emoji: "📦", title: "Hands-on work", body: "See your work go from a file on a screen to a garment in someone's hands." },
+    { emoji: "🇮🇳", title: c.careersPerk3Title, body: c.careersPerk3Body },
+    { emoji: "📈", title: "Room to grow", body: "We're small now. Get in early and grow with us." },
+  ];
+
   return (
     <>
       <Navbar />
@@ -27,12 +32,10 @@ export default function CareersPage() {
                 className="text-[clamp(2.8rem,7vw,5.5rem)] text-ds-dark leading-[0.9] mb-6"
                 style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
               >
-                <span className="h-fade">Build the future of </span>
-                <span className="h-bold">creator merch in India.</span>
+                {c.careersHeadline}
               </h1>
               <p className="text-ds-body text-lg max-w-xl leading-relaxed">
-                We&apos;re a small, passionate team building the infrastructure for independent
-                artists to sell merch they&apos;re proud of. If that excites you, keep reading.
+                {c.careersSubtitle}
               </p>
             </motion.div>
           </div>

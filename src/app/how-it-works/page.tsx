@@ -4,44 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const STEPS = [
-  {
-    n: "01",
-    title: "Choose your product",
-    body: "Browse the Studio catalog — Regular Tee, Oversized, Baby Tee, and more dropping regularly. Pick your base garment, colour, and GSM weight. Every blank is combed cotton, cut and fulfilled from India.",
-    tag: "~2 minutes",
-    emoji: "🎨",
-  },
-  {
-    n: "02",
-    title: "Upload your artwork",
-    body: "Drop your PNG (transparent background), JPG, or WebP file directly onto the garment mockup. You'll see exactly where it prints before you confirm anything. Drag to reposition, resize to fit. What you see is what gets printed.",
-    tag: "~3 minutes",
-    emoji: "📐",
-  },
-  {
-    n: "03",
-    title: "We validate & print",
-    body: "Our team checks your file for resolution, bleed, and colour profile before production starts. We use DTG as our standard — it's breathable, vibrant, and we've perfected it over thousands of prints. DTF is available on request for specific design styles.",
-    tag: "Same day",
-    emoji: "🖨️",
-  },
-  {
-    n: "04",
-    title: "Quality check",
-    body: "Every single order goes through a manual quality inspection before it gets folded and packed. We're checking print registration, colour accuracy, and garment condition. Issues get caught here, not at your door.",
-    tag: "Before dispatch",
-    emoji: "✅",
-  },
-  {
-    n: "05",
-    title: "Shipped to your door",
-    body: "Domestic orders via Shiprocket, delivered in 5–7 business days. International orders reach most destinations in 10–18 days. Track your order in real time from your Halftone account.",
-    tag: "5–7 days domestic",
-    emoji: "📦",
-  },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const MODES = [
   {
@@ -86,6 +50,47 @@ const QUICK_QA = [
 ];
 
 export default function HowItWorksPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const STEPS = [
+    {
+      n: "01",
+      title: "Choose your product",
+      body: c.howStep1Body,
+      tag: "~2 minutes",
+      emoji: "🎨",
+    },
+    {
+      n: "02",
+      title: "Upload your artwork",
+      body: "Drop your PNG (transparent background), JPG, or WebP file directly onto the garment mockup. You'll see exactly where it prints before you confirm anything. Drag to reposition, resize to fit. What you see is what gets printed.",
+      tag: "~3 minutes",
+      emoji: "📐",
+    },
+    {
+      n: "03",
+      title: "We validate & print",
+      body: "Our team checks your file for resolution, bleed, and colour profile before production starts. We use DTG as our standard — it's breathable, vibrant, and we've perfected it over thousands of prints. DTF is available on request for specific design styles.",
+      tag: "Same day",
+      emoji: "🖨️",
+    },
+    {
+      n: "04",
+      title: "Quality check",
+      body: "Every single order goes through a manual quality inspection before it gets folded and packed. We're checking print registration, colour accuracy, and garment condition. Issues get caught here, not at your door.",
+      tag: "Before dispatch",
+      emoji: "✅",
+    },
+    {
+      n: "05",
+      title: "Shipped to your door",
+      body: c.howStep5Body,
+      tag: "5–7 days domestic",
+      emoji: "📦",
+    },
+  ];
+
   return (
     <>
       <Navbar />

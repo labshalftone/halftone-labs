@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { CheckCircle2, ArrowUpRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const PARTNER_TYPES = [
   {
@@ -52,6 +54,8 @@ const FAQS = [
 
 export default function BecomeAPartnerPage() {
   const [submitted, setSubmitted] = useState(false);
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
 
   return (
     <>
@@ -68,12 +72,10 @@ export default function BecomeAPartnerPage() {
                 className="text-[clamp(2.8rem,7vw,5.5rem)] text-ds-dark leading-[0.9] mb-6"
                 style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
               >
-                <span className="h-fade">Your merch. </span>
-                <span className="h-bold">Our production.</span>
+                {c.partnerHeadline}
               </h1>
               <p className="text-ds-body text-lg max-w-xl leading-relaxed">
-                We partner with artists, labels, agencies, and event companies who need a
-                reliable, high-quality merch production partner they can count on drop after drop.
+                {c.partnerSubtitle}
               </p>
               <div className="flex gap-3 mt-8">
                 <a href="#apply" className="btn-brand"><ArrowUpRight size={15} /> Apply now</a>

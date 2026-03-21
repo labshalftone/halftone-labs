@@ -3,15 +3,20 @@
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const STATS = [
-  { value: "10,000+", label: "Garments printed" },
-  { value: "500+", label: "Artists & brands served" },
-  { value: "4+", label: "Years in operation" },
-  { value: "48h", label: "Avg. production time" },
-];
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function AboutPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const STATS = [
+    { value: "10,000+", label: c.aboutScaleLabel },
+    { value: "500+", label: "Artists & brands served" },
+    { value: "4+", label: "Years in operation" },
+    { value: "48h", label: "Avg. production time" },
+  ];
+
   return (
     <>
       <Navbar />
@@ -31,7 +36,7 @@ export default function AboutPage() {
                 <span className="h-bold">artists are proud to sell.</span>
               </h1>
               <p className="text-ds-body text-lg max-w-xl leading-relaxed">
-                Halftone Labs is India&apos;s independent merch and creative studio — built for
+                Halftone Labs is {isIndia ? "India's" : "a global"} merch and creative studio — built for
                 musicians, creators, and brands who care about quality as much as they care
                 about their art.
               </p>
@@ -50,21 +55,9 @@ export default function AboutPage() {
               >
                 Started out of frustration. Built with intention.
               </h2>
-              <p className="text-ds-body leading-relaxed mb-4">
-                We&apos;ve been on both sides of the table — as artists ordering merch, and as
-                the people printing it. We know what goes wrong: files that aren&apos;t
-                checked, blanks that shrink after one wash, colours that fade.
-              </p>
-              <p className="text-ds-body leading-relaxed mb-4">
-                So we built a studio that operates differently. Every file is reviewed by a
-                human before it touches a garment. Every blank we stock has been tested.
-                Every print is checked before it ships.
-              </p>
-              <p className="text-ds-body leading-relaxed">
-                We&apos;re based in India, shipping pan-India, and we&apos;re proud to work with
-                some of the country&apos;s most exciting independent artists, labels, and creator
-                brands.
-              </p>
+              <p className="text-ds-body leading-relaxed mb-4">{c.aboutStory1}</p>
+              <p className="text-ds-body leading-relaxed mb-4">{c.aboutStory2}</p>
+              <p className="text-ds-body leading-relaxed">{c.aboutStory3}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {STATS.map((s) => (

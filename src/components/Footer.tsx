@@ -3,6 +3,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const FOOTER_LINKS = [
   {
@@ -63,6 +65,8 @@ const SOCIAL_LINKS = [
 export default function Footer() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
 
   return (
     <footer id="contact" className="relative bg-ds-dark text-white overflow-hidden">
@@ -146,9 +150,9 @@ export default function Footer() {
                 Halftone Labs
               </p>
               <p className="text-xs text-white/30 leading-relaxed max-w-[220px]">
-                India&apos;s independent merch studio for artists, creators, and brands.
+                {c.footerTagline}
               </p>
-              <p className="text-xs text-white/20 mt-4">India &mdash; hello@halftonelabs.in</p>
+              <p className="text-xs text-white/20 mt-4">{c.footerLocation}</p>
 
               {/* Social */}
               <div className="flex flex-col gap-2 mt-6">

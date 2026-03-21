@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { CheckCircle2, ArrowUpRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const TIERS = [
   {
@@ -27,14 +29,17 @@ const TIERS = [
   },
 ];
 
-const STEPS = [
-  { n: "01", title: "Tell us your requirements", body: "Fill in the form below with your product, quantity, design details, and timeline. We respond within 24 hours." },
-  { n: "02", title: "Receive a custom quote", body: "We'll send you a detailed quote with per-unit pricing, total cost, and estimated delivery dates." },
-  { n: "03", title: "Approve & pay", body: "Confirm your order with a 50% advance. We start production immediately." },
-  { n: "04", title: "Production & delivery", body: "We keep you updated throughout. Final balance on dispatch. Pan-India delivery." },
-];
-
 export default function BulkOrdersPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
+  const STEPS = [
+    { n: "01", title: "Tell us your requirements", body: "Fill in the form below with your product, quantity, design details, and timeline. We respond within 24 hours." },
+    { n: "02", title: "Receive a custom quote", body: "We'll send you a detailed quote with per-unit pricing, total cost, and estimated delivery dates." },
+    { n: "03", title: "Approve & pay", body: "Confirm your order with a 50% advance. We start production immediately." },
+    { n: "04", title: "Production & delivery", body: c.bulkStep4Body },
+  ];
+
   return (
     <>
       <Navbar />

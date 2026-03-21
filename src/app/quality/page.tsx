@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 const PILLARS = [
   { emoji: "🧵", title: "Blanks we actually believe in", body: "Every fabric we stock has been tested for shrinkage, colour retention, and washability. We use combed cotton as our standard — softer, stronger, and better for print adhesion." },
@@ -25,6 +27,9 @@ const CHECKLIST = [
 ];
 
 export default function QualityPage() {
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
+
   return (
     <>
       <Navbar />
@@ -44,9 +49,7 @@ export default function QualityPage() {
                 <span className="h-bold">checked. Every time.</span>
               </h1>
               <p className="text-ds-body text-lg max-w-xl leading-relaxed">
-                We don&apos;t automate quality. Every file is reviewed by a human, every print is
-                inspected before dispatch, and every order comes with our commitment to make
-                it right if something isn&apos;t.
+                {c.qualityHeroSub}
               </p>
             </motion.div>
           </div>

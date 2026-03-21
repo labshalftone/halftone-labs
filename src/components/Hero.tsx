@@ -4,9 +4,13 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 export default function Hero() {
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
+  const { isIndia } = useCurrency();
+  const c = copy(isIndia);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -74,7 +78,7 @@ export default function Hero() {
                 className="text-[0.72rem] text-ds-body"
                 style={{ fontWeight: 600, letterSpacing: "0.02em" }}
               >
-                Drop commerce platform · India
+                {c.heroCommerceTag}
               </span>
             </motion.div>
 
@@ -174,7 +178,7 @@ export default function Hero() {
                   >
                     100K+
                   </p>
-                  <p className="text-ds-body text-sm">units shipped across India &amp; globally</p>
+                  <p className="text-ds-body text-sm">{c.heroStat1Label}</p>
                 </div>
 
                 {/* Mini bar chart — sell-through rates */}
@@ -222,7 +226,7 @@ export default function Hero() {
 
                 {/* Pill tags */}
                 <div className="flex flex-wrap gap-2">
-                  {["DTG Printing", "White-label", "India-made"].map((tag) => (
+                  {["DTG Printing", "White-label", c.heroBadge].map((tag) => (
                     <span key={tag} className="pill-dark text-[0.68rem]">
                       {tag}
                     </span>
@@ -233,7 +237,9 @@ export default function Hero() {
               {/* Floating accent */}
               <div className="absolute -top-4 -right-4 ds-card-purple rounded-2xl p-4 shadow-lg z-20">
                 <p className="text-[0.65rem] text-white/70 mb-1" style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Revenue FY24</p>
-                <p className="text-2xl text-white font-bold" style={{ letterSpacing: "-0.04em" }}>₹25Cr+</p>
+                <p className="text-2xl text-white font-bold" style={{ letterSpacing: "-0.04em" }}>
+                  {isIndia ? "₹25Cr+" : "$3M+"}
+                </p>
               </div>
             </div>
           </motion.div>
