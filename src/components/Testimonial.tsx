@@ -7,7 +7,7 @@ import { Quote } from "lucide-react";
 const testimonials = [
   {
     quote:
-      "Working with Halftone Labs has been a game-changer for me in India. They took my vision and turned it into merch that truly represents me.",
+      "Working with Halftone Labs has been a game-changer. They took my vision and turned it into merch that truly represents me.",
     name: "DJ ADHD",
     role: "Producer and DJ",
     initials: "DA",

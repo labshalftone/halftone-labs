@@ -88,7 +88,7 @@ export default function JournalPostPage({ params }: { params: Promise<{ slug: st
             </div>
             <div>
               <p className="font-bold text-ds-dark text-sm">Halftone Labs</p>
-              <p className="text-xs text-ds-muted">India's leading merch studio for artists, labels, and festivals.</p>
+              <p className="text-xs text-ds-muted">The merch studio for artists, labels, and festivals everywhere.</p>
             </div>
             <Link href="/studio" className="ml-auto flex-shrink-0 px-4 py-2 rounded-xl bg-ds-dark text-white text-xs font-bold hover:bg-ds-dark2 transition-colors">
               Try the Studio →

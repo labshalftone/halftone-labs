@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCurrency } from "@/lib/currency-context";
+import { copy } from "@/lib/copy";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -104,7 +105,8 @@ export default function PriceCalculator() {
   const [technique, setTechnique] = useState<TechniqueId>("DTG");
   const [printSize, setPrintSize] = useState<PrintSizeId>("medium");
   const [qty, setQty]             = useState(10);
-  const { fmt, currency }         = useCurrency();
+  const { fmt, currency, isIndia } = useCurrency();
+  const c = copy(isIndia);
 
   const selectedProduct   = PRODUCTS.find((p) => p.id === product)!;
   const selectedPrintSize = PRINT_SIZES.find((s) => s.id === printSize)!;
@@ -138,8 +140,8 @@ export default function PriceCalculator() {
               back-and-forth emails.
             </p>
             <div className="inline-flex items-center gap-2 bg-white border border-black/[0.06] rounded-full px-4 py-2 text-xs font-medium text-ds-body shadow-sm">
-              <span>🇮🇳</span>
-              <span>Fulfilled from India</span>
+              <span>{isIndia ? "🇮🇳" : "🌍"}</span>
+              <span>{isIndia ? "Fulfilled from India" : "Fulfilled globally"}</span>
             </div>
 
             {/* Lead time callout */}

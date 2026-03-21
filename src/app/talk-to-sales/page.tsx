@@ -32,7 +32,7 @@ const VALUE_PROPS = [
 const TESTIMONIALS = [
   { quote: "They turned our album release merch around in 4 days. Unreal quality.", name: "Independent artist, Mumbai" },
   { quote: "The bulk pricing made our festival uniform order actually profitable.", name: "Event production company, Delhi" },
-  { quote: "First merch studio that actually reviewed our files before printing. Saved us from a disaster.", name: "Creator brand, Bangalore" },
+  { quote: "First merch studio that actually reviewed our files before printing. Saved us from a disaster.", name: "Creator brand, Noida" },
 ];
 
 export default function TalkToSalesPage() {

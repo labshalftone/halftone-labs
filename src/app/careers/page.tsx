@@ -42,7 +42,7 @@ const OPEN_ROLES = [
       {
         title: "Graphic Designer — Merch & Brand",
         type: "Full-time",
-        desc: "Design merch drops, brand assets, and print-ready artwork for our clients and our own label ADHD. You know how garment design differs from screen design.",
+        desc: "Design merch drops, brand assets, and print-ready artwork for our clients and our own label All Day, High Decibels. You know how garment design differs from screen design.",
         tags: ["Design", "Mid", "Noida"],
       },
     ],
@@ -109,13 +109,23 @@ const OPEN_ROLES = [
   },
 ];
 
-const PERKS = [
-  { emoji: "🚀", title: "Series A trajectory", body: "We're scaling to $100M ARR. Get equity, get in early, and grow with the rocket." },
-  { emoji: "🌍", title: "Global team", body: "Work with people across India, North America, and Europe building something new in creator commerce." },
-  { emoji: "🎨", title: "Creative-first culture", body: "We work with artists every day. The work is real, the clients are interesting, and the product ships." },
-  { emoji: "📈", title: "Real ownership", body: "Small team, big scope. You won't spend 3 years owning a button. You'll own a function." },
-  { emoji: "💰", title: "Competitive comp", body: "Market-rate salaries plus equity. We pay fairly and transparently across all regions." },
-  { emoji: "🎧", title: "The perks are real", body: "Free merch. Early access to drops. And the kind of Spotify playlist that actually slaps." },
+const VALUES = [
+  {
+    title: "Creative-first",
+    body: "We work with artists every day. The work is real, the clients are interesting, and the product actually ships.",
+  },
+  {
+    title: "Global team",
+    body: "People across India, North America, and Europe — building something new in creator commerce together.",
+  },
+  {
+    title: "Real ownership",
+    body: "Small team, big scope. You won't spend 3 years owning a button. You'll own a function.",
+  },
+  {
+    title: "Honest comp",
+    body: "Market-rate salaries plus equity. We pay fairly and transparently across all regions — no surprises.",
+  },
 ];
 
 function RoleCard({ role }: { role: (typeof OPEN_ROLES)[0]["roles"][0] }) {
@@ -172,37 +182,76 @@ export default function CareersPage() {
       <main className="min-h-screen bg-white">
 
         {/* Hero */}
-        <section className="relative overflow-hidden border-b border-black/[0.06] pt-32 pb-20 px-6">
+        <section className="relative overflow-hidden border-b border-black/[0.06] pt-32 pb-24 px-6">
           <div className="halftone-divider" />
-          <div className="max-w-4xl mx-auto relative z-10">
+          <div className="max-w-5xl mx-auto relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <span className="ds-label ds-label-brand mb-5 block">Careers</span>
+              <span className="ds-label ds-label-brand mb-6 block">Careers at Halftone Labs</span>
               <h1
-                className="text-[clamp(2.8rem,7vw,5.5rem)] text-ds-dark leading-[0.9] mb-6"
+                className="text-[clamp(2.8rem,7vw,5.5rem)] text-ds-dark leading-[0.9] mb-6 max-w-3xl"
                 style={{ fontWeight: 700, letterSpacing: "-0.055em" }}
               >
                 {c.careersHeadline}
               </h1>
-              <p className="text-ds-body text-lg max-w-xl leading-relaxed mb-6">
+              <p className="text-ds-body text-lg max-w-xl leading-relaxed mb-8">
                 {c.careersSubtitle}
               </p>
-              <div className="flex items-center gap-4">
-                <a href="#roles" className="btn-brand"><ArrowUpRight size={15} /> See {totalRoles} open roles</a>
+              <div className="flex flex-wrap items-center gap-4">
+                <a href="#roles" className="btn-brand">
+                  <ArrowUpRight size={15} /> See {totalRoles} open roles
+                </a>
+                <span className="text-xs text-ds-muted">
+                  Roles across India · North America · Europe
+                </span>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Perks */}
-        <section className="max-w-6xl mx-auto px-6 py-20">
-          <span className="ds-label ds-label-brand mb-10 block">Why Halftone Labs</span>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {PERKS.map((p) => (
-              <div key={p.title} className="bg-ds-off-white border border-black/[0.06] rounded-2xl p-6">
-                <span className="text-3xl block mb-4">{p.emoji}</span>
-                <h3 className="text-ds-dark text-sm font-semibold mb-2">{p.title}</h3>
-                <p className="text-ds-muted text-xs leading-relaxed">{p.body}</p>
+        {/* Parent company / ADHD banner */}
+        <section className="border-b border-black/[0.06] bg-ds-off-white px-6 py-10">
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-ds-muted mb-2">Part of the family</p>
+              <p className="text-ds-dark font-semibold text-base" style={{ letterSpacing: "-0.02em" }}>
+                Halftone Labs is a subsidiary of{" "}
+                <span className="text-brand">All Day, High Decibels</span>
+              </p>
+              <p className="text-ds-body text-sm mt-1 max-w-md leading-relaxed">
+                All Day, High Decibels (ADHD) is our flagship music-inspired streetwear brand — 100K+ orders, ₹25Cr+ in revenue, and the in-house proof that everything Halftone Labs builds actually works.
+              </p>
+            </div>
+            <a
+              href="https://wearadhd.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 border border-black/[0.1] rounded-xl px-5 py-3 text-sm font-medium text-ds-dark hover:bg-white transition-colors inline-flex items-center gap-2"
+            >
+              Learn about ADHD <ArrowUpRight size={13} />
+            </a>
+          </div>
+        </section>
+
+        {/* Values */}
+        <section className="max-w-5xl mx-auto px-6 py-20">
+          <span className="ds-label ds-label-brand mb-10 block">Why join us</span>
+          <div className="grid sm:grid-cols-2 gap-px bg-black/[0.06] rounded-2xl overflow-hidden border border-black/[0.06]">
+            {VALUES.map((v) => (
+              <div key={v.title} className="bg-white px-8 py-8">
+                <h3 className="text-ds-dark font-semibold text-base mb-2" style={{ letterSpacing: "-0.02em" }}>
+                  {v.title}
+                </h3>
+                <p className="text-ds-muted text-sm leading-relaxed">{v.body}</p>
               </div>
+            ))}
+          </div>
+
+          {/* Perks strip */}
+          <div className="mt-6 flex flex-wrap gap-3">
+            {["Free merch drops", "Equity across all regions", "Remote-friendly", "Early access to drops", "Real ownership"].map((p) => (
+              <span key={p} className="bg-brand-5 text-brand text-xs font-semibold px-3 py-1.5 rounded-full">
+                {p}
+              </span>
             ))}
           </div>
         </section>
