@@ -3118,7 +3118,7 @@ export default function AccountPage() {
             { label: "Overview", ids: ["dashboard"] },
             { label: "Create",   ids: ["designer", "designs", "drops", "branding"] },
             { label: "Sell",     ids: ["orders", "stores", "shopify", "create-order", "customers"] },
-            { label: "Account",  ids: ["wallet", "invoices", "settings"] as ActiveTab[] },
+            { label: "Account",  ids: ["wallet", "invoices", "settings", "affiliate"] as ActiveTab[] },
           ] as { label: string; ids: ActiveTab[] }[]).map(({ label, ids }) => (
             <div key={label} className="mb-3">
               <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ds-muted px-3 pt-1 pb-2">{label}</p>
