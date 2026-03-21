@@ -12,38 +12,38 @@ const OPEN_ROLES = [
   // India Team
   {
     team: "India Team",
-    region: "Bangalore, India",
+    region: "Noida, India",
     flag: "🇮🇳",
     roles: [
       {
         title: "Head of Production",
         type: "Full-time",
         desc: "Own our print & fulfilment operations end-to-end. You'll manage vendor relationships, production SLAs, QC pipelines, and scale us from 10K to 100K garments/month.",
-        tags: ["Operations", "Senior", "Bangalore"],
+        tags: ["Operations", "Senior", "Noida"],
       },
       {
         title: "Senior Software Engineer — Platform",
         type: "Full-time",
         desc: "Build the core infrastructure behind Halftone Studio — order management, designer tooling, Shopify integrations, and our internal ops dashboards. TypeScript + Next.js.",
-        tags: ["Engineering", "Senior", "Bangalore / Remote"],
+        tags: ["Engineering", "Senior", "Noida / Remote"],
       },
       {
         title: "Growth Marketing Manager",
         type: "Full-time",
         desc: "Own acquisition across paid, organic, and influencer channels for the Indian market. You'll build the funnel from zero — CAC, LTV, all the fun stuff.",
-        tags: ["Marketing", "Mid-Senior", "Bangalore"],
+        tags: ["Marketing", "Mid-Senior", "Noida"],
       },
       {
         title: "Brand Partnerships Lead — India",
         type: "Full-time",
         desc: "Sign and onboard artists, labels, and festivals. You'll be the face of Halftone Labs to the Indian creator economy — building the network that fuels our next 10x.",
-        tags: ["Sales", "Senior", "Bangalore / Remote"],
+        tags: ["Sales", "Senior", "Noida / Remote"],
       },
       {
         title: "Graphic Designer — Merch & Brand",
         type: "Full-time",
         desc: "Design merch drops, brand assets, and print-ready artwork for our clients and our own label ADHD. You know how garment design differs from screen design.",
-        tags: ["Design", "Mid", "Bangalore"],
+        tags: ["Design", "Mid", "Noida"],
       },
     ],
   },
