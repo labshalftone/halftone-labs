@@ -1,10 +1,14 @@
 {
   "app": {
-    "[project]/src/app/page": [
+    "[project]/src/app/account/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/c9f6ebf08ddd616b-s.p.8e1a882d.woff2"
     ],
-    "[project]/src/app/pricing/page": [
+    "[project]/src/app/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/c9f6ebf08ddd616b-s.p.8e1a882d.woff2"
+    ],
+    "[project]/src/app/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/c9f6ebf08ddd616b-s.p.8e1a882d.woff2"
     ]

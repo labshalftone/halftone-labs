@@ -11,7 +11,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/render/components/motion/proxy.mjs [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/products.ts [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$subscription$2d$context$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/subscription-context.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$UpgradeModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/UpgradeModal.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$plans$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/plans.ts [app-ssr] (ecmascript)");
 "use client";
+;
+;
+;
 ;
 ;
 ;
@@ -195,7 +201,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                         draggable: false
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 134,
+                        lineNumber: 137,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -211,7 +217,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                         }
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 137,
+                        lineNumber: 140,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
@@ -239,7 +245,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                         }
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 146,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -247,13 +253,13 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                         children: "drag to reposition"
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 157,
+                        lineNumber: 160,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DesignerTab.tsx",
-                lineNumber: 121,
+                lineNumber: 124,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -267,7 +273,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                                 children: "Design size"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 165,
+                                lineNumber: 168,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -278,13 +284,13 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 166,
+                                lineNumber: 169,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 164,
+                        lineNumber: 167,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -302,7 +308,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                                 children: "−"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 169,
+                                lineNumber: 172,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -321,7 +327,7 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                                 className: "flex-1 accent-orange-500 h-1"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 171,
+                                lineNumber: 174,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -336,29 +342,31 @@ function DesignPlacer({ designSrc, mockupSrc, zoneKey, photoZone, onPriceChange,
                                 children: "+"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 174,
+                                lineNumber: 177,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 168,
+                        lineNumber: 171,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DesignerTab.tsx",
-                lineNumber: 163,
+                lineNumber: 166,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/DesignerTab.tsx",
-        lineNumber: 119,
+        lineNumber: 122,
         columnNumber: 5
     }, this);
 }
 function DesignerTab({ userId }) {
+    const { plan } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$subscription$2d$context$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useSubscription"])();
+    const [upgradeRequiredPlan, setUpgradeRequiredPlan] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     // Studio settings (print zones)
     const [photoZone, setPhotoZone] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(DEFAULT_ZONES);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
@@ -550,17 +558,17 @@ function DesignerTab({ userId }) {
                             d: "M5 13l4 4L19 7"
                         }, void 0, false, {
                             fileName: "[project]/src/components/DesignerTab.tsx",
-                            lineNumber: 325,
+                            lineNumber: 331,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 324,
+                        lineNumber: 330,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/DesignerTab.tsx",
-                    lineNumber: 323,
+                    lineNumber: 329,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -571,7 +579,7 @@ function DesignerTab({ userId }) {
                     children: "Design saved!"
                 }, void 0, false, {
                     fileName: "[project]/src/components/DesignerTab.tsx",
-                    lineNumber: 328,
+                    lineNumber: 334,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -579,7 +587,7 @@ function DesignerTab({ userId }) {
                     children: designName.trim() || `${product.name} – ${color.name}`
                 }, void 0, false, {
                     fileName: "[project]/src/components/DesignerTab.tsx",
-                    lineNumber: 329,
+                    lineNumber: 335,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -587,7 +595,7 @@ function DesignerTab({ userId }) {
                     children: savedSku
                 }, void 0, false, {
                     fileName: "[project]/src/components/DesignerTab.tsx",
-                    lineNumber: 330,
+                    lineNumber: 336,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -599,7 +607,7 @@ function DesignerTab({ userId }) {
                             children: "+ New design"
                         }, void 0, false, {
                             fileName: "[project]/src/components/DesignerTab.tsx",
-                            lineNumber: 332,
+                            lineNumber: 338,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -609,24 +617,24 @@ function DesignerTab({ userId }) {
                                 children: "View library →"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 337,
+                                lineNumber: 343,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/DesignerTab.tsx",
-                            lineNumber: 336,
+                            lineNumber: 342,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/DesignerTab.tsx",
-                    lineNumber: 331,
+                    lineNumber: 337,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/DesignerTab.tsx",
-            lineNumber: 321,
+            lineNumber: 327,
             columnNumber: 7
         }, this);
     }
@@ -644,7 +652,7 @@ function DesignerTab({ userId }) {
                         children: "Design Studio"
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 351,
+                        lineNumber: 357,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -652,13 +660,13 @@ function DesignerTab({ userId }) {
                         children: "Customise a product, position your artwork, and save it to your design library."
                     }, void 0, false, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 352,
+                        lineNumber: 358,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DesignerTab.tsx",
-                lineNumber: 350,
+                lineNumber: 356,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -677,17 +685,58 @@ function DesignerTab({ userId }) {
                                             children: "Product"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 363,
+                                            lineNumber: 369,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 362,
+                                        lineNumber: 368,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "p-3 grid grid-cols-2 gap-2",
-                                        children: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PRODUCTS"].map((p)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        children: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PRODUCTS"].map((p)=>{
+                                            const locked = !!p.planRequired && (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$plans$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["planRank"])(plan) < (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$plans$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["planRank"])(p.planRequired);
+                                            return locked ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>setUpgradeRequiredPlan(p.planRequired),
+                                                className: "relative text-left px-3 py-2.5 rounded-xl border-2 border-black/[0.06] opacity-60 hover:opacity-80 transition-all overflow-hidden",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                        className: "text-[13px] font-semibold leading-tight text-ds-dark",
+                                                        style: {
+                                                            letterSpacing: "-0.02em"
+                                                        },
+                                                        children: p.name
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/DesignerTab.tsx",
+                                                        lineNumber: 378,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                        className: "text-[10px] mt-0.5 text-ds-muted",
+                                                        children: p.gsm
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/DesignerTab.tsx",
+                                                        lineNumber: 379,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        className: "absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-zinc-100 text-zinc-500 capitalize",
+                                                        children: [
+                                                            p.planRequired,
+                                                            "+"
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/src/components/DesignerTab.tsx",
+                                                        lineNumber: 380,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, p.id, true, {
+                                                fileName: "[project]/src/components/DesignerTab.tsx",
+                                                lineNumber: 375,
+                                                columnNumber: 19
+                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                 onClick: ()=>handleProductChange(p),
                                                 className: `text-left px-3 py-2.5 rounded-xl border-2 transition-all ${product.id === p.id ? "border-zinc-900 bg-ds-dark" : "border-black/[0.06] hover:border-zinc-200"}`,
                                                 children: [
@@ -699,27 +748,37 @@ function DesignerTab({ userId }) {
                                                         children: p.name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 371,
-                                                        columnNumber: 19
+                                                        lineNumber: 387,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         className: `text-[10px] mt-0.5 ${product.id === p.id ? "text-zinc-400" : "text-ds-muted"}`,
                                                         children: p.gsm
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 373,
-                                                        columnNumber: 19
+                                                        lineNumber: 389,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, p.id, true, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 367,
-                                                columnNumber: 17
-                                            }, this))
+                                                lineNumber: 383,
+                                                columnNumber: 19
+                                            }, this);
+                                        })
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 365,
+                                        lineNumber: 371,
                                         columnNumber: 13
+                                    }, this),
+                                    upgradeRequiredPlan && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$UpgradeModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
+                                        onClose: ()=>setUpgradeRequiredPlan(null),
+                                        requiredPlan: upgradeRequiredPlan,
+                                        featureLabel: "This product"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/DesignerTab.tsx",
+                                        lineNumber: 395,
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "px-4 pb-3",
@@ -736,13 +795,13 @@ function DesignerTab({ userId }) {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 381,
+                                                        lineNumber: 405,
                                                         columnNumber: 24
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 380,
+                                                lineNumber: 404,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -758,18 +817,18 @@ function DesignerTab({ userId }) {
                                                         }
                                                     }, c.name, false, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 385,
+                                                        lineNumber: 409,
                                                         columnNumber: 19
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 383,
+                                                lineNumber: 407,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 379,
+                                        lineNumber: 403,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -780,7 +839,7 @@ function DesignerTab({ userId }) {
                                                 children: "Size"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 398,
+                                                lineNumber: 422,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -791,24 +850,24 @@ function DesignerTab({ userId }) {
                                                         children: s
                                                     }, s, false, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 401,
+                                                        lineNumber: 425,
                                                         columnNumber: 19
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 399,
+                                                lineNumber: 423,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 397,
+                                        lineNumber: 421,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 361,
+                                lineNumber: 367,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -821,12 +880,12 @@ function DesignerTab({ userId }) {
                                             children: "Artwork"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 413,
+                                            lineNumber: 437,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 412,
+                                        lineNumber: 436,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -848,19 +907,19 @@ function DesignerTab({ userId }) {
                                                                 className: "w-1.5 h-1.5 rounded-full bg-orange-400"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 427,
+                                                                lineNumber: 451,
                                                                 columnNumber: 31
                                                             }, this)
                                                         ]
                                                     }, tab, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 422,
+                                                        lineNumber: 446,
                                                         columnNumber: 21
                                                     }, this);
                                                 })
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 418,
+                                                lineNumber: 442,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$components$2f$AnimatePresence$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AnimatePresence"], {
@@ -895,12 +954,12 @@ function DesignerTab({ userId }) {
                                                                         d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 440,
+                                                                        lineNumber: 464,
                                                                         columnNumber: 150
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                    lineNumber: 440,
+                                                                    lineNumber: 464,
                                                                     columnNumber: 31
                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
                                                                     className: "w-4 h-4 text-ds-muted group-hover:text-brand transition-colors",
@@ -914,17 +973,17 @@ function DesignerTab({ userId }) {
                                                                         d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 441,
+                                                                        lineNumber: 465,
                                                                         columnNumber: 183
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                    lineNumber: 441,
+                                                                    lineNumber: 465,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 438,
+                                                                lineNumber: 462,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -935,7 +994,7 @@ function DesignerTab({ userId }) {
                                                                         children: uploadingFront ? "Uploading…" : "Upload front artwork"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 445,
+                                                                        lineNumber: 469,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -943,13 +1002,13 @@ function DesignerTab({ userId }) {
                                                                         children: "PNG · JPG · WebP"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 446,
+                                                                        lineNumber: 470,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 444,
+                                                                lineNumber: 468,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -960,13 +1019,13 @@ function DesignerTab({ userId }) {
                                                                 onChange: (e)=>onFileChange(e, "front")
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 448,
+                                                                lineNumber: 472,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 437,
+                                                        lineNumber: 461,
                                                         columnNumber: 23
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center gap-3 p-3 bg-ds-light-gray rounded-xl",
@@ -977,7 +1036,7 @@ function DesignerTab({ userId }) {
                                                                 className: "w-12 h-12 rounded-lg object-contain bg-white border border-black/[0.06]"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 453,
+                                                                lineNumber: 477,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -988,7 +1047,7 @@ function DesignerTab({ userId }) {
                                                                         children: "Front artwork"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 455,
+                                                                        lineNumber: 479,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     frontTier && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1002,13 +1061,13 @@ function DesignerTab({ userId }) {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 456,
+                                                                        lineNumber: 480,
                                                                         columnNumber: 41
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 454,
+                                                                lineNumber: 478,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1025,13 +1084,13 @@ function DesignerTab({ userId }) {
                                                                                 onChange: (e)=>onFileChange(e, "front")
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                                lineNumber: 461,
+                                                                                lineNumber: 485,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 459,
+                                                                        lineNumber: 483,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1046,24 +1105,24 @@ function DesignerTab({ userId }) {
                                                                         children: "Remove"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 463,
+                                                                        lineNumber: 487,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 458,
+                                                                lineNumber: 482,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 451,
+                                                        lineNumber: 475,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, "f", false, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 435,
+                                                    lineNumber: 459,
                                                     columnNumber: 19
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["motion"].div, {
                                                     initial: {
@@ -1095,12 +1154,12 @@ function DesignerTab({ userId }) {
                                                                         d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 475,
+                                                                        lineNumber: 499,
                                                                         columnNumber: 150
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                    lineNumber: 475,
+                                                                    lineNumber: 499,
                                                                     columnNumber: 31
                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
                                                                     className: "w-4 h-4 text-ds-muted group-hover:text-brand transition-colors",
@@ -1114,17 +1173,17 @@ function DesignerTab({ userId }) {
                                                                         d: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 476,
+                                                                        lineNumber: 500,
                                                                         columnNumber: 183
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                    lineNumber: 476,
+                                                                    lineNumber: 500,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 473,
+                                                                lineNumber: 497,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1135,7 +1194,7 @@ function DesignerTab({ userId }) {
                                                                         children: uploadingBack ? "Uploading…" : "Upload back artwork"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 480,
+                                                                        lineNumber: 504,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1143,13 +1202,13 @@ function DesignerTab({ userId }) {
                                                                         children: "PNG · JPG · WebP"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 481,
+                                                                        lineNumber: 505,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 479,
+                                                                lineNumber: 503,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1160,13 +1219,13 @@ function DesignerTab({ userId }) {
                                                                 onChange: (e)=>onFileChange(e, "back")
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 483,
+                                                                lineNumber: 507,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 472,
+                                                        lineNumber: 496,
                                                         columnNumber: 23
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center gap-3 p-3 bg-ds-light-gray rounded-xl",
@@ -1177,7 +1236,7 @@ function DesignerTab({ userId }) {
                                                                 className: "w-12 h-12 rounded-lg object-contain bg-white border border-black/[0.06]"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 488,
+                                                                lineNumber: 512,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1188,7 +1247,7 @@ function DesignerTab({ userId }) {
                                                                         children: "Back artwork"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 490,
+                                                                        lineNumber: 514,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     backTier && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1200,13 +1259,13 @@ function DesignerTab({ userId }) {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 491,
+                                                                        lineNumber: 515,
                                                                         columnNumber: 40
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 489,
+                                                                lineNumber: 513,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1223,13 +1282,13 @@ function DesignerTab({ userId }) {
                                                                                 onChange: (e)=>onFileChange(e, "back")
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                                lineNumber: 496,
+                                                                                lineNumber: 520,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 494,
+                                                                        lineNumber: 518,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1243,41 +1302,41 @@ function DesignerTab({ userId }) {
                                                                         children: "Remove"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                        lineNumber: 498,
+                                                                        lineNumber: 522,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                                lineNumber: 493,
+                                                                lineNumber: 517,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 486,
+                                                        lineNumber: 510,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, "b", false, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 470,
+                                                    lineNumber: 494,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 433,
+                                                lineNumber: 457,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 417,
+                                        lineNumber: 441,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 411,
+                                lineNumber: 435,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1288,7 +1347,7 @@ function DesignerTab({ userId }) {
                                         children: "Design name"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 511,
+                                        lineNumber: 535,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1299,7 +1358,7 @@ function DesignerTab({ userId }) {
                                         className: "w-full px-3 py-2.5 rounded-xl border border-black/[0.06] text-sm focus:outline-none focus:border-zinc-400 placeholder:text-zinc-300 bg-white"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 514,
+                                        lineNumber: 538,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1307,13 +1366,13 @@ function DesignerTab({ userId }) {
                                         children: "Used as the product title when pushed to Shopify"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 521,
+                                        lineNumber: 545,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 510,
+                                lineNumber: 534,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1329,7 +1388,7 @@ function DesignerTab({ userId }) {
                                                     children: "Blank garment"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 528,
+                                                    lineNumber: 552,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1340,13 +1399,13 @@ function DesignerTab({ userId }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 529,
+                                                    lineNumber: 553,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 527,
+                                            lineNumber: 551,
                                             columnNumber: 15
                                         }, this),
                                         frontPrice > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1365,13 +1424,13 @@ function DesignerTab({ userId }) {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                                            lineNumber: 533,
+                                                            lineNumber: 557,
                                                             columnNumber: 63
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 533,
+                                                    lineNumber: 557,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1382,13 +1441,13 @@ function DesignerTab({ userId }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 534,
+                                                    lineNumber: 558,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 532,
+                                            lineNumber: 556,
                                             columnNumber: 17
                                         }, this),
                                         backPrice > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1407,13 +1466,13 @@ function DesignerTab({ userId }) {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                                            lineNumber: 539,
+                                                            lineNumber: 563,
                                                             columnNumber: 62
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 539,
+                                                    lineNumber: 563,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1424,13 +1483,13 @@ function DesignerTab({ userId }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 540,
+                                                    lineNumber: 564,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 538,
+                                            lineNumber: 562,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1441,7 +1500,7 @@ function DesignerTab({ userId }) {
                                                     children: "Item total"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 544,
+                                                    lineNumber: 568,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1452,24 +1511,24 @@ function DesignerTab({ userId }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 545,
+                                                    lineNumber: 569,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 543,
+                                            lineNumber: 567,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                    lineNumber: 526,
+                                    lineNumber: 550,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 525,
+                                lineNumber: 549,
                                 columnNumber: 11
                             }, this),
                             saveError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1480,7 +1539,7 @@ function DesignerTab({ userId }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 552,
+                                lineNumber: 576,
                                 columnNumber: 13
                             }, this),
                             !hasDesign && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1488,7 +1547,7 @@ function DesignerTab({ userId }) {
                                 children: "Upload at least one design to save."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 555,
+                                lineNumber: 579,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1509,12 +1568,12 @@ function DesignerTab({ userId }) {
                                                 d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 564,
+                                                lineNumber: 588,
                                                 columnNumber: 125
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 564,
+                                            lineNumber: 588,
                                             columnNumber: 17
                                         }, this),
                                         "Saving…"
@@ -1533,12 +1592,12 @@ function DesignerTab({ userId }) {
                                                 d: "M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 566,
+                                                lineNumber: 590,
                                                 columnNumber: 112
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 566,
+                                            lineNumber: 590,
                                             columnNumber: 17
                                         }, this),
                                         "Save design to library"
@@ -1546,13 +1605,13 @@ function DesignerTab({ userId }) {
                                 }, void 0, true)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 561,
+                                lineNumber: 585,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 358,
+                        lineNumber: 364,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1571,7 +1630,7 @@ function DesignerTab({ userId }) {
                                                 }
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 576,
+                                                lineNumber: 600,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1588,13 +1647,13 @@ function DesignerTab({ userId }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 577,
+                                                lineNumber: 601,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 575,
+                                        lineNumber: 599,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1613,25 +1672,25 @@ function DesignerTab({ userId }) {
                                                         className: "w-1.5 h-1.5 rounded-full bg-orange-400"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                                        lineNumber: 591,
+                                                        lineNumber: 615,
                                                         columnNumber: 29
                                                     }, this)
                                                 ]
                                             }, s, true, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 586,
+                                                lineNumber: 610,
                                                 columnNumber: 19
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/DesignerTab.tsx",
-                                        lineNumber: 582,
+                                        lineNumber: 606,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 574,
+                                lineNumber: 598,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1657,7 +1716,7 @@ function DesignerTab({ userId }) {
                                     }
                                 }, `${side}-${color.name}`, false, {
                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                    lineNumber: 600,
+                                    lineNumber: 624,
                                     columnNumber: 15
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "flex flex-col items-center justify-center gap-4 py-8",
@@ -1668,7 +1727,7 @@ function DesignerTab({ userId }) {
                                             className: "w-full max-w-xs object-contain mx-auto"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 615,
+                                            lineNumber: 639,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1679,7 +1738,7 @@ function DesignerTab({ userId }) {
                                                     children: "No artwork yet"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 617,
+                                                    lineNumber: 641,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1691,24 +1750,24 @@ function DesignerTab({ userId }) {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                                    lineNumber: 618,
+                                                    lineNumber: 642,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 616,
+                                            lineNumber: 640,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                    lineNumber: 613,
+                                    lineNumber: 637,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 598,
+                                lineNumber: 622,
                                 columnNumber: 11
                             }, this),
                             activeSrc && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1728,12 +1787,12 @@ function DesignerTab({ userId }) {
                                                 d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                                lineNumber: 629,
+                                                lineNumber: 653,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 628,
+                                            lineNumber: 652,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1741,36 +1800,36 @@ function DesignerTab({ userId }) {
                                             children: "Drag your artwork to reposition · Use the slider to resize · Dashed line = print zone boundary"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/DesignerTab.tsx",
-                                            lineNumber: 631,
+                                            lineNumber: 655,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/DesignerTab.tsx",
-                                    lineNumber: 627,
+                                    lineNumber: 651,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/DesignerTab.tsx",
-                                lineNumber: 626,
+                                lineNumber: 650,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/DesignerTab.tsx",
-                        lineNumber: 572,
+                        lineNumber: 596,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/DesignerTab.tsx",
-                lineNumber: 355,
+                lineNumber: 361,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/DesignerTab.tsx",
-        lineNumber: 348,
+        lineNumber: 354,
         columnNumber: 5
     }, this);
 }

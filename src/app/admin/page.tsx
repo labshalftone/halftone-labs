@@ -2050,7 +2050,7 @@ function AnalyticsPanel({ orders }: { orders: Order[] }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets" | "plan-gates" | "affiliates";
+type Tab = "orders" | "coupons" | "analytics" | "studio" | "users" | "wallets" | "plan-gates" | "affiliates" | "forms";
 
 export default function AdminPage() {
   const [secret, setSecret] = useState("");
@@ -2119,6 +2119,11 @@ export default function AdminPage() {
       label: "Affiliates",
       icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>,
     },
+    {
+      id: "forms",
+      label: "Forms",
+      icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+    },
   ];
 
   return (
@@ -2162,6 +2167,7 @@ export default function AdminPage() {
           {tab === "wallets"    && <WalletsPanel    secret={secret} />}
           {tab === "plan-gates" && <PlanGatesPanel  secret={secret} />}
           {tab === "affiliates" && <AffiliatesPanel secret={secret} />}
+          {tab === "forms"     && <FormsPanel     secret={secret} />}
         </div>
       </div>
     </div>
@@ -2504,6 +2510,164 @@ function AffiliatesPanel({ secret }: { secret: string }) {
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Forms panel ────────────────────────────────────────────────────────────────
+
+type ContactSubmission = { id: string; name: string; email: string; topic: string | null; message: string; created_at: string };
+type SalesLead = { id: string; name: string; email: string; brand: string | null; volume: string | null; needs: string | null; notes: string | null; created_at: string };
+type PartnerApplication = { id: string; name: string; email: string; brand: string | null; partner_type: string | null; website: string | null; volume: string | null; notes: string | null; created_at: string };
+
+function FormsPanel({ secret }: { secret: string }) {
+  const [subTab, setSubTab] = useState<"contact" | "sales" | "partners">("contact");
+  const [contact, setContact] = useState<ContactSubmission[]>([]);
+  const [sales, setSales] = useState<SalesLead[]>([]);
+  const [partners, setPartners] = useState<PartnerApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchForms = async () => {
+    setLoading(true);
+    const res = await fetch("/api/admin/forms", { headers: { "x-admin-secret": secret } });
+    const data = await res.json();
+    setContact(Array.isArray(data.contact) ? data.contact : []);
+    setSales(Array.isArray(data.sales) ? data.sales : []);
+    setPartners(Array.isArray(data.partners) ? data.partners : []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchForms(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+  const TABS = [
+    { id: "contact" as const, label: "Contact", count: contact.length },
+    { id: "sales" as const, label: "Talk to Sales", count: sales.length },
+    { id: "partners" as const, label: "Partner Applications", count: partners.length },
+  ];
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-ds-light-gray p-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold" style={{ letterSpacing: "-0.04em" }}>Form Submissions</h2>
+            <p className="text-xs text-ds-muted mt-0.5">{contact.length + sales.length + partners.length} total across all forms</p>
+          </div>
+          <button onClick={fetchForms} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-black/[0.06] bg-white text-sm font-semibold text-ds-body hover:bg-ds-light-gray transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Refresh
+          </button>
+        </div>
+
+        {/* Sub-tabs */}
+        <div className="flex gap-2 mb-5">
+          {TABS.map((t) => (
+            <button key={t.id} onClick={() => setSubTab(t.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 ${subTab === t.id ? "bg-ds-dark text-white" : "bg-white border border-black/[0.06] text-ds-body hover:bg-ds-light-gray"}`}>
+              {t.label}
+              <span className={`text-xs px-1.5 py-0.5 rounded-md font-semibold ${subTab === t.id ? "bg-white/20 text-white" : "bg-ds-light-gray text-ds-muted"}`}>{t.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-5 h-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Contact submissions */}
+            {subTab === "contact" && (
+              contact.length === 0 ? (
+                <div className="bg-white border border-black/[0.06] rounded-2xl p-12 text-center">
+                  <p className="text-ds-body text-sm font-semibold">No contact submissions yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {contact.map((c) => (
+                    <div key={c.id} className="bg-white border border-black/[0.06] rounded-2xl p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          <p className="font-semibold text-ds-dark text-sm">{c.name}</p>
+                          <p className="text-xs text-ds-muted">{c.email}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-ds-muted">{fmt(c.created_at)}</p>
+                          {c.topic && <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ds-light-gray text-ds-body">{c.topic}</span>}
+                        </div>
+                      </div>
+                      <p className="text-sm text-ds-body leading-relaxed bg-ds-light-gray rounded-xl px-4 py-3">{c.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+
+            {/* Sales leads */}
+            {subTab === "sales" && (
+              sales.length === 0 ? (
+                <div className="bg-white border border-black/[0.06] rounded-2xl p-12 text-center">
+                  <p className="text-ds-body text-sm font-semibold">No sales enquiries yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sales.map((s) => (
+                    <div key={s.id} className="bg-white border border-black/[0.06] rounded-2xl p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          <p className="font-semibold text-ds-dark text-sm">{s.name}</p>
+                          <p className="text-xs text-ds-muted">{s.email}</p>
+                          {s.brand && <p className="text-xs text-ds-body mt-0.5">{s.brand}</p>}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-ds-muted">{fmt(s.created_at)}</p>
+                          {s.volume && <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand/10 text-brand">{s.volume}</span>}
+                        </div>
+                      </div>
+                      {s.needs && <p className="text-xs text-ds-body mb-2"><span className="font-semibold">Needs:</span> {s.needs}</p>}
+                      {s.notes && <p className="text-sm text-ds-body leading-relaxed bg-ds-light-gray rounded-xl px-4 py-3">{s.notes}</p>}
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+
+            {/* Partner applications */}
+            {subTab === "partners" && (
+              partners.length === 0 ? (
+                <div className="bg-white border border-black/[0.06] rounded-2xl p-12 text-center">
+                  <p className="text-ds-body text-sm font-semibold">No partner applications yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {partners.map((p) => (
+                    <div key={p.id} className="bg-white border border-black/[0.06] rounded-2xl p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          <p className="font-semibold text-ds-dark text-sm">{p.name}</p>
+                          <p className="text-xs text-ds-muted">{p.email}</p>
+                          {p.brand && <p className="text-xs text-ds-body mt-0.5">{p.brand}</p>}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-ds-muted">{fmt(p.created_at)}</p>
+                          {p.partner_type && <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ds-light-gray text-ds-body">{p.partner_type}</span>}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3 mb-2 text-xs text-ds-body">
+                        {p.website && <span><span className="font-semibold">Web:</span> {p.website}</span>}
+                        {p.volume && <span><span className="font-semibold">Volume:</span> {p.volume}</span>}
+                      </div>
+                      {p.notes && <p className="text-sm text-ds-body leading-relaxed bg-ds-light-gray rounded-xl px-4 py-3">{p.notes}</p>}
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </>
         )}
       </div>
     </div>

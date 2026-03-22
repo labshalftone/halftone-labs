@@ -185,7 +185,7 @@ const CURRENCY_META = {
     USD: {
         symbol: "$",
         label: "USD",
-        flag: "🇺🇸"
+        flag: "🌍"
     },
     EUR: {
         symbol: "€",
@@ -208,36 +208,58 @@ function fmtPrice(inr, currency) {
         return `₹${Math.round(inr).toLocaleString("en-IN")}`;
     }
     const converted = inr / RATES[currency];
-    // Round to nearest 0.5 for clean display
     const rounded = Math.ceil(converted * 2) / 2;
     return `${symbol}${rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)}`;
+}
+function getCookieCurrency() {
+    if (typeof document === "undefined") return "INR";
+    const match = document.cookie.match(/(?:^|;\s*)hl_currency=([^;]+)/);
+    const val = match?.[1];
+    if (val === "USD" || val === "EUR" || val === "INR") return val;
+    return "INR";
+}
+function setCookieCurrency(c) {
+    document.cookie = `hl_currency=${c};path=/;max-age=${60 * 60 * 24 * 30};samesite=lax`;
 }
 const CurrencyContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createContext"])({
     currency: "INR",
     setCurrency: ()=>{},
     fmt: (inr)=>`₹${Math.round(inr).toLocaleString("en-IN")}`,
-    symbol: "₹"
+    symbol: "₹",
+    isIndia: true
 });
 function CurrencyProvider({ children }) {
     _s();
-    const [currency, setCurrency] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("INR");
+    const [currency, setCurrencyState] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("INR");
+    // Read geo-detected cookie on mount (after hydration)
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "CurrencyProvider.useEffect": ()=>{
+            setCurrencyState(getCookieCurrency());
+        }
+    }["CurrencyProvider.useEffect"], []);
+    const setCurrency = (c)=>{
+        setCurrencyState(c);
+        setCookieCurrency(c);
+    };
     const fmt = (inr)=>fmtPrice(inr, currency);
     const symbol = CURRENCY_META[currency].symbol;
+    const isIndia = currency === "INR";
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(CurrencyContext.Provider, {
         value: {
             currency,
             setCurrency,
             fmt,
-            symbol
+            symbol,
+            isIndia
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/src/lib/currency-context.tsx",
-        lineNumber: 58,
+        lineNumber: 81,
         columnNumber: 5
     }, this);
 }
-_s(CurrencyProvider, "kCrRBSfU+73KOykVhgtfpXY0MTo=");
+_s(CurrencyProvider, "OHlKDP5nG9ZYeKRA6d6WIFQIvgo=");
 _c = CurrencyProvider;
 const useCurrency = ()=>{
     _s1();
@@ -301,12 +323,12 @@ const PLANS = {
         key: "free",
         name: "Free",
         tagline: "Your first drop",
-        description: "Everything you need to start — no credit card required.",
+        description: "Everything you need to start. No credit card required.",
         monthlyInr: 0,
         annualInr: 0,
         entitlements: {
             activeDrops: 1,
-            designs: 5,
+            designs: UNLIMITED,
             storefronts: 1,
             teamMembers: 0,
             customBranding: false,
@@ -328,7 +350,7 @@ const PLANS = {
         key: "launch",
         name: "Launch",
         tagline: "For solo creators and early brands",
-        description: "Run your brand independently — custom identity, unlimited designs, full analytics.",
+        description: "Run your brand independently — custom identity, full analytics.",
         monthlyInr: 1999,
         annualInr: 1499,
         entitlements: {
@@ -343,8 +365,8 @@ const PLANS = {
             analyticsHistory: UNLIMITED,
             csvExport: true,
             apiAccess: false,
-            allProducts: true,
-            neckLabels: true,
+            allProducts: false,
+            neckLabels: false,
             premiumPackaging: false,
             prioritySupport: false,
             dedicatedManager: false,
@@ -354,18 +376,18 @@ const PLANS = {
     scale: {
         key: "scale",
         name: "Scale",
-        tagline: "For growing teams and multi-brand creators",
-        description: "Multiple storefronts, team access, white-label — built for creators who are scaling.",
-        monthlyInr: 5999,
-        annualInr: 4999,
+        tagline: "The core plan for serious creators",
+        description: "Unlimited drops, premium products, branding unlocked — built for creators who are scaling.",
+        monthlyInr: 7499,
+        annualInr: 5999,
         entitlements: {
-            activeDrops: 20,
+            activeDrops: UNLIMITED,
             designs: UNLIMITED,
             storefronts: 3,
             teamMembers: 5,
             customBranding: true,
             customDomain: true,
-            removeHalftone: true,
+            removeHalftone: false,
             shopifySync: true,
             analyticsHistory: UNLIMITED,
             csvExport: true,
@@ -382,9 +404,36 @@ const PLANS = {
         key: "business",
         name: "Business",
         tagline: "For orgs, agencies, festivals, and labels",
-        description: "Unlimited drops, unlimited storefronts, dedicated manager — for teams that move at scale.",
-        monthlyInr: 12999,
-        annualInr: 9999,
+        description: "Multiple storefronts, white-label, API access — for teams that move at scale.",
+        monthlyInr: 29999,
+        annualInr: 24999,
+        entitlements: {
+            activeDrops: UNLIMITED,
+            designs: UNLIMITED,
+            storefronts: UNLIMITED,
+            teamMembers: UNLIMITED,
+            customBranding: true,
+            customDomain: true,
+            removeHalftone: true,
+            shopifySync: true,
+            analyticsHistory: UNLIMITED,
+            csvExport: true,
+            apiAccess: true,
+            allProducts: true,
+            neckLabels: true,
+            premiumPackaging: true,
+            prioritySupport: true,
+            dedicatedManager: true,
+            bulkDiscounts: true
+        }
+    },
+    enterprise: {
+        key: "enterprise",
+        name: "Enterprise",
+        tagline: "For brands running serious volume",
+        description: "Custom product development, hybrid inventory, omni-channel, dedicated ops team.",
+        monthlyInr: 150000,
+        annualInr: 0,
         entitlements: {
             activeDrops: UNLIMITED,
             designs: UNLIMITED,
@@ -424,11 +473,12 @@ function requiredPlanFor(feature) {
         "free",
         "launch",
         "scale",
-        "business"
+        "business",
+        "enterprise"
     ]){
         if (canAccess(key, feature)) return key;
     }
-    return "business";
+    return "enterprise";
 }
 function limitLabel(plan, feature) {
     const val = getEntitlements(plan)[feature];
@@ -440,7 +490,8 @@ const PLAN_ORDER = [
     "free",
     "launch",
     "scale",
-    "business"
+    "business",
+    "enterprise"
 ];
 function planRank(plan) {
     return PLAN_ORDER.indexOf(plan);

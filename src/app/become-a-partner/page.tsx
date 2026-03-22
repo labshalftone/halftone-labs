@@ -54,8 +54,26 @@ const FAQS = [
 
 export default function BecomeAPartnerPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", brand: "", partner_type: "", website: "", volume: "", notes: "" });
   const { isIndia } = useCurrency();
   const c = copy(isIndia);
+
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await fetch("/api/partner-application", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch { /* silent */ }
+    setSubmitting(false);
+    setSubmitted(true);
+  };
 
   return (
     <>
@@ -163,24 +181,28 @@ export default function BecomeAPartnerPage() {
                 <p className="text-ds-body text-sm">We&apos;ll review it and be in touch within 5 business days.</p>
               </div>
             ) : (
-              <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-ds-muted block mb-2 font-medium">Name</label>
-                    <input type="text" required className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="Your name" />
+                    <input type="text" required value={form.name} onChange={(e) => set("name", e.target.value)}
+                      className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="Your name" />
                   </div>
                   <div>
                     <label className="text-xs text-ds-muted block mb-2 font-medium">Email</label>
-                    <input type="email" required className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="you@example.com" />
+                    <input type="email" required value={form.email} onChange={(e) => set("email", e.target.value)}
+                      className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="you@example.com" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs text-ds-muted block mb-2 font-medium">Brand / Company / Artist name</label>
-                  <input type="text" required className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="Your brand name" />
+                  <input type="text" required value={form.brand} onChange={(e) => set("brand", e.target.value)}
+                    className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="Your brand name" />
                 </div>
                 <div>
                   <label className="text-xs text-ds-muted block mb-2 font-medium">Partner type</label>
-                  <select className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark focus:outline-none focus:border-brand">
+                  <select value={form.partner_type} onChange={(e) => set("partner_type", e.target.value)}
+                    className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark focus:outline-none focus:border-brand">
                     <option value="">Select type</option>
                     <option>Artist / Creator</option>
                     <option>Label / Management agency</option>
@@ -191,11 +213,13 @@ export default function BecomeAPartnerPage() {
                 </div>
                 <div>
                   <label className="text-xs text-ds-muted block mb-2 font-medium">Website or Instagram</label>
-                  <input type="text" className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="https://" />
+                  <input type="text" value={form.website} onChange={(e) => set("website", e.target.value)}
+                    className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand" placeholder="https://" />
                 </div>
                 <div>
                   <label className="text-xs text-ds-muted block mb-2 font-medium">Expected order volume</label>
-                  <select className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark focus:outline-none focus:border-brand">
+                  <select value={form.volume} onChange={(e) => set("volume", e.target.value)}
+                    className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark focus:outline-none focus:border-brand">
                     <option value="">Select range</option>
                     <option>200–500 pieces/month</option>
                     <option>500–1,000 pieces/month</option>
@@ -205,10 +229,11 @@ export default function BecomeAPartnerPage() {
                 </div>
                 <div>
                   <label className="text-xs text-ds-muted block mb-2 font-medium">Tell us more</label>
-                  <textarea rows={3} className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand resize-none" placeholder="What are you working on? What do you need from a merch partner?" />
+                  <textarea rows={3} value={form.notes} onChange={(e) => set("notes", e.target.value)}
+                    className="w-full bg-ds-off-white border border-black/[0.1] rounded-xl px-4 py-3 text-sm text-ds-dark placeholder-ds-muted focus:outline-none focus:border-brand resize-none" placeholder="What are you working on? What do you need from a merch partner?" />
                 </div>
-                <button type="submit" className="btn-brand w-full justify-center">
-                  Submit application
+                <button type="submit" disabled={submitting} className="btn-brand w-full justify-center disabled:opacity-60">
+                  {submitting ? "Submitting…" : "Submit application"}
                 </button>
               </form>
             )}

@@ -129,7 +129,10 @@
       "Bash(git -C:*)",
       "Bash(git -C \"C:/Users/ronit/fRAMER\" push)",
       "Bash(ls \"C:/Users/ronit/fRAMER/.git/\"*.lock)",
-      "WebFetch(domain:printify.com)"
+      "WebFetch(domain:printify.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3002/)",
+      "Bash(grep -r \"talk_to_sales\\\\|TalkToSales\\\\|partner_applications\" /c/Users/ronit/fRAMER/src --include=*.ts --include=*.tsx)",
+      "Bash(find /c/Users/ronit/fRAMER/src -name *talk* -o -name *partner*)"
     ]
   }
 }
