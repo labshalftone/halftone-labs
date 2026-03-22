@@ -2931,11 +2931,10 @@ function AccountLoadingScreen() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
-      <div className="w-6 h-6 rounded-full border-2 border-black/[0.08] border-t-brand animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <p
         className="text-ds-dark text-base font-semibold"
-        style={{ letterSpacing: "-0.035em", minWidth: "20ch", textAlign: "center" }}
+        style={{ letterSpacing: "-0.035em" }}
       >
         {displayed}
         <span className="opacity-60 animate-pulse">|</span>
