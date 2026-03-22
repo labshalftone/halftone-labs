@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { X, ArrowRight } from "lucide-react";
+import { X, ArrowRight, Zap } from "lucide-react";
 import { PLANS, type PlanKey } from "@/lib/plans";
+import PlanCheckoutModal, { type PaidPlan } from "@/components/PlanCheckoutModal";
 
 export interface UpgradeModalProps {
   /** Short label for the feature being blocked, e.g. "custom domain" */
@@ -17,15 +19,8 @@ export interface UpgradeModalProps {
   onClose: () => void;
 }
 
-/**
- * Contextual upgrade modal — appears in-product when a user hits a feature gate.
- *
- * Design principles:
- * - State the fact, not a sales pitch
- * - Show exactly what plan is needed and why
- * - One clear CTA, one easy dismiss
- * - Never manipulative, never spammy
- */
+const PAID_PLANS: PlanKey[] = ["launch", "scale", "business", "enterprise"];
+
 export default function UpgradeModal({
   featureLabel,
   requiredPlan,
@@ -33,11 +28,24 @@ export default function UpgradeModal({
   body,
   onClose,
 }: UpgradeModalProps) {
-  const plan = PLANS[requiredPlan];
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  const plan    = PLANS[requiredPlan];
+  const canCheckout = (["launch", "scale", "business"] as PlanKey[]).includes(requiredPlan);
 
   const defaultHeading = `${featureLabel} is available on the ${plan.name} plan`;
+  const defaultBody    = plan.description;
 
-  const defaultBody = plan.description;
+  // If showing checkout, render PlanCheckoutModal instead
+  if (showCheckout && canCheckout) {
+    return (
+      <PlanCheckoutModal
+        plan={requiredPlan as PaidPlan}
+        onClose={() => { setShowCheckout(false); onClose(); }}
+        onSuccess={onClose}
+      />
+    );
+  }
 
   return (
     <div
@@ -77,7 +85,7 @@ export default function UpgradeModal({
           {heading ?? defaultHeading}
         </h2>
 
-        <p className="text-sm text-zinc-500 leading-relaxed mb-6">
+        <p className="text-sm text-zinc-500 leading-relaxed mb-5">
           {body ?? defaultBody}
         </p>
 
@@ -89,21 +97,41 @@ export default function UpgradeModal({
           </p>
         )}
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/pricing"
-            onClick={onClose}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors"
-          >
-            See plans
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-          >
-            Not now
-          </button>
+        <div className="flex flex-col gap-2.5">
+          {canCheckout ? (
+            <button
+              onClick={() => setShowCheckout(true)}
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Upgrade to {plan.name}
+            </button>
+          ) : (
+            <Link
+              href="/pricing"
+              onClick={onClose}
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors"
+            >
+              Contact sales
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
+
+          <div className="flex items-center justify-between">
+            <Link
+              href="/pricing"
+              onClick={onClose}
+              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors underline underline-offset-2"
+            >
+              Compare all plans
+            </Link>
+            <button
+              onClick={onClose}
+              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              Not now
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

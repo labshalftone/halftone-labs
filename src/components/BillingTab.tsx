@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Check, AlertCircle } from "lucide-react";
+import { ArrowRight, Check, AlertCircle, Zap, CheckCircle2 } from "lucide-react";
 import { useSubscription } from "@/lib/subscription-context";
 import { PLANS, UNLIMITED, type PlanKey } from "@/lib/plans";
 import type { BillingUsage } from "@/app/api/billing/usage/route";
+import PlanCheckoutModal, { type PaidPlan } from "@/components/PlanCheckoutModal";
 
 interface BillingTabProps {
   userId: string;
@@ -116,39 +117,38 @@ function CancelConfirm({
 
 // ─── Next plan upgrade card ───────────────────────────────────────────────────
 function UpgradeCard({
-  from,
   to,
   billing,
+  onUpgrade,
 }: {
   from: PlanKey;
   to: PlanKey;
   billing: "monthly" | "annual";
+  onUpgrade?: () => void;
 }) {
-  const plan = PLANS[to];
+  const plan  = PLANS[to];
   const price = billing === "annual" ? plan.annualInr : plan.monthlyInr;
+  const canCheckout = (["launch", "scale", "business"] as PlanKey[]).includes(to);
 
   const highlights: Partial<Record<PlanKey, string[]>> = {
     free: [],
     launch: [
       "5 active drops",
-      "Unlimited designs",
       "Custom branding + custom domain",
       "Shopify integration",
       "Full analytics + CSV export",
     ],
     scale: [
       "Unlimited active drops",
-      "Premium product access (hoodies, waffle tees)",
-      "Neck labels + premium packaging unlocked",
-      "Up to 5 team members",
-      "API access + priority support",
+      "Premium products (hoodies, waffle tees)",
+      "Neck labels + premium packaging",
+      "Up to 5 team members · API access",
     ],
     business: [
       "Unlimited storefronts",
       "White-label — remove Halftone branding",
       "Unlimited team members",
-      "Dedicated account manager",
-      "Bulk order discounts",
+      "Dedicated account manager · Bulk discounts",
     ],
     enterprise: [],
   };
@@ -185,31 +185,58 @@ function UpgradeCard({
         ))}
       </ul>
 
-      <Link
-        href={`/pricing?plan=${to}`}
-        className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-          isDark
-            ? "bg-white text-zinc-900 hover:bg-zinc-100"
-            : "bg-zinc-900 text-white hover:bg-zinc-800"
-        }`}
-      >
-        Upgrade to {plan.name}
-        <ArrowRight className="w-3.5 h-3.5" />
-      </Link>
+      {canCheckout && onUpgrade ? (
+        <button
+          onClick={onUpgrade}
+          className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+            isDark
+              ? "bg-white text-zinc-900 hover:bg-zinc-100"
+              : "bg-zinc-900 text-white hover:bg-zinc-800"
+          }`}
+        >
+          <Zap className="w-3.5 h-3.5" />
+          Upgrade to {plan.name}
+        </button>
+      ) : (
+        <Link
+          href={`/pricing?plan=${to}`}
+          className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+            isDark
+              ? "bg-white text-zinc-900 hover:bg-zinc-100"
+              : "bg-zinc-900 text-white hover:bg-zinc-800"
+          }`}
+        >
+          {canCheckout ? "Upgrade to" : "Contact for"} {plan.name}
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      )}
     </div>
   );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function BillingTab({ userId }: BillingTabProps) {
-  const { plan, status, billing, razorpaySubscriptionId, refresh } = useSubscription();
+  const { plan, status, billing, refresh } = useSubscription();
   const [usage,          setUsage]          = useState<BillingUsage | null>(null);
   const [usageLoading,   setUsageLoading]   = useState(true);
   const [showCancel,     setShowCancel]     = useState(false);
   const [cancelLoading,  setCancelLoading]  = useState(false);
   const [cancelDone,     setCancelDone]     = useState(false);
+  const [checkoutPlan,   setCheckoutPlan]   = useState<PaidPlan | null>(null);
+  const [showSuccess,    setShowSuccess]    = useState(false);
 
   const billingCycle = billing ?? "monthly";
+
+  // Show success banner if redirected from old pricing-page checkout flow
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("plan=activated")) {
+      setShowSuccess(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("plan");
+      window.history.replaceState({}, "", url.toString());
+      setTimeout(() => setShowSuccess(false), 5000);
+    }
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -248,6 +275,34 @@ export default function BillingTab({ userId }: BillingTabProps) {
 
   return (
     <div className="max-w-2xl space-y-6">
+
+      {/* ── Checkout modal ── */}
+      {checkoutPlan && (
+        <PlanCheckoutModal
+          plan={checkoutPlan}
+          onClose={() => setCheckoutPlan(null)}
+          onSuccess={() => {
+            setCheckoutPlan(null);
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 5000);
+          }}
+        />
+      )}
+
+      {/* ── Upgrade success banner ── */}
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl"
+        >
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <p className="text-sm text-emerald-800 font-medium">
+            Plan activated — your new features are ready to use.
+          </p>
+        </motion.div>
+      )}
 
       {/* ── Current plan ── */}
       <motion.div
@@ -407,7 +462,12 @@ export default function BillingTab({ userId }: BillingTabProps) {
           <p className="text-xs font-semibold text-zinc-400 tracking-widest uppercase mb-3">
             Next plan
           </p>
-          <UpgradeCard from={plan} to={nextPlan} billing={billingCycle} />
+          <UpgradeCard
+            from={plan}
+            to={nextPlan}
+            billing={billingCycle}
+            onUpgrade={() => setCheckoutPlan(nextPlan as PaidPlan)}
+          />
           {nextPlan === "launch" && (
             <p className="mt-2 text-center">
               <Link href="/pricing" className="text-xs text-zinc-400 hover:text-zinc-600 underline">

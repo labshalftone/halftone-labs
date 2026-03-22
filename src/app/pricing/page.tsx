@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCurrency, fmtPrice, type Currency } from "@/lib/currency-context";
 import { supabase } from "@/lib/supabase";
+import { openSubscriptionCheckout } from "@/lib/checkout";
 
 // ─── Plan prices in INR ───────────────────────────────────────────────────────
 const PRICES = {
@@ -77,52 +78,7 @@ const FAQS = [
 ];
 
 // ─── Razorpay checkout ────────────────────────────────────────────────────────
-declare global {
-  interface Window { Razorpay: new (opts: Record<string, unknown>) => { open(): void } }
-}
-
-async function openSubscriptionCheckout(opts: {
-  plan: "launch" | "scale" | "business";
-  billing: BillingCycle;
-  currency: Currency;
-  userId: string;
-  userEmail: string;
-}) {
-  const res = await fetch("/api/subscribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(opts),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-
-  await new Promise<void>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Razorpay"));
-    document.head.appendChild(script);
-  });
-
-  const planLabel = `${opts.plan.charAt(0).toUpperCase() + opts.plan.slice(1)} — ${opts.billing === "annual" ? "Annual" : "Monthly"}`;
-  const rzp = new window.Razorpay({
-    key:             data.keyId,
-    subscription_id: data.subscriptionId,
-    name:            "Halftone Labs",
-    description:     planLabel,
-    image:           "/logo.png",
-    prefill:         { email: opts.userEmail },
-    theme:           { color: "#0f0f0f" },
-    handler:         (response: Record<string, string>) => {
-      fetch("/api/subscribe/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...response, userId: opts.userId, plan: opts.plan, billing: opts.billing }),
-      }).then(() => window.location.href = "/account/billing?plan=activated");
-    },
-  });
-  rzp.open();
-}
+// openSubscriptionCheckout is imported from @/lib/checkout
 
 // ─── Cell renderer ────────────────────────────────────────────────────────────
 function Cell({ val }: { val: FeatureVal }) {
@@ -180,8 +136,10 @@ export default function PricingPage() {
             setBilling(savedBilling);
             // Small delay so state settles
             setTimeout(() => {
-              openSubscriptionCheckout({ plan, billing: savedBilling, currency, userId: uid, userEmail: email })
-                .catch(console.error);
+              openSubscriptionCheckout({
+                plan, billing: savedBilling, currency, userId: uid, userEmail: email,
+                onSuccess: () => { window.location.href = "/account/billing?plan=activated"; },
+              }).catch(console.error);
             }, 300);
           } catch {
             localStorage.removeItem(PLAN_INTENT_KEY);
@@ -202,7 +160,14 @@ export default function PricingPage() {
     }
     setLoading(plan);
     try {
-      await openSubscriptionCheckout({ plan, billing, currency, userId, userEmail });
+      await openSubscriptionCheckout({
+        plan,
+        billing,
+        currency,
+        userId,
+        userEmail,
+        onSuccess: () => { window.location.href = "/account/billing?plan=activated"; },
+      });
     } catch (e) {
       console.error(e);
       alert("Something went wrong. Please try again.");
