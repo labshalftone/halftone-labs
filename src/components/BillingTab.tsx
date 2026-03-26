@@ -115,71 +115,92 @@ function CancelConfirm({
   );
 }
 
-// ─── Next plan upgrade card ───────────────────────────────────────────────────
+// ─── Plan highlights ──────────────────────────────────────────────────────────
+const PLAN_HIGHLIGHTS: Partial<Record<PlanKey, string[]>> = {
+  launch: [
+    "5 active drops",
+    "Custom branding + custom domain",
+    "Shopify integration",
+    "Full analytics + CSV export",
+  ],
+  scale: [
+    "Unlimited active drops",
+    "Premium products (hoodies, waffle tees)",
+    "Neck labels + premium packaging",
+    "Up to 5 team members · API access",
+  ],
+  business: [
+    "Unlimited storefronts",
+    "White-label — remove Halftone branding",
+    "Unlimited team members",
+    "Dedicated account manager · Bulk discounts",
+  ],
+};
+
+const ANNUAL_SAVINGS: Record<string, number> = {
+  launch: 25,
+  scale:  20,
+  business: 17,
+};
+
+// ─── Single upgrade plan card ─────────────────────────────────────────────────
 function UpgradeCard({
   to,
   billing,
   onUpgrade,
+  featured,
 }: {
   from: PlanKey;
   to: PlanKey;
   billing: "monthly" | "annual";
   onUpgrade?: () => void;
+  featured?: boolean;
 }) {
   const plan  = PLANS[to];
   const price = billing === "annual" ? plan.annualInr : plan.monthlyInr;
   const canCheckout = (["launch", "scale", "business"] as PlanKey[]).includes(to);
-
-  const highlights: Partial<Record<PlanKey, string[]>> = {
-    free: [],
-    launch: [
-      "5 active drops",
-      "Custom branding + custom domain",
-      "Shopify integration",
-      "Full analytics + CSV export",
-    ],
-    scale: [
-      "Unlimited active drops",
-      "Premium products (hoodies, waffle tees)",
-      "Neck labels + premium packaging",
-      "Up to 5 team members · API access",
-    ],
-    business: [
-      "Unlimited storefronts",
-      "White-label — remove Halftone branding",
-      "Unlimited team members",
-      "Dedicated account manager · Bulk discounts",
-    ],
-    enterprise: [],
-  };
-
-  const isDark = to === "business" || to === "enterprise";
+  const isDark = to === "business";
 
   return (
-    <div className={`rounded-xl border p-5 ${isDark ? "bg-zinc-950 border-zinc-800" : "bg-white border-zinc-200"}`}>
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <p className={`text-xs font-bold tracking-widest uppercase mb-1 ${isDark ? "text-zinc-400" : "text-brand"}`}>
-            {plan.name}
-          </p>
-          <p className={`text-sm font-medium leading-snug ${isDark ? "text-white" : "text-zinc-900"}`}>
-            {plan.tagline}
-          </p>
-        </div>
-        <div className="text-right shrink-0">
-          <p className={`text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}>
-            ₹{price.toLocaleString("en-IN")}
-          </p>
-          <p className={`text-[0.7rem] ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
-            / month{billing === "annual" ? " · billed annually" : ""}
-          </p>
-        </div>
+    <div className={`relative rounded-xl border p-5 flex flex-col ${
+      isDark ? "bg-zinc-950 border-zinc-800" :
+      featured ? "bg-white border-brand ring-1 ring-brand/20" :
+      "bg-white border-zinc-200"
+    }`}>
+      {featured && (
+        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[0.6rem] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-brand text-white">
+          Most popular
+        </span>
+      )}
+      <div className="mb-4">
+        <p className={`text-[0.68rem] font-bold tracking-[0.12em] uppercase mb-1 ${isDark ? "text-zinc-400" : "text-brand"}`}>
+          {plan.name}
+        </p>
+        <p className={`text-sm font-semibold leading-snug ${isDark ? "text-white" : "text-zinc-900"}`}>
+          {plan.tagline}
+        </p>
       </div>
 
-      <ul className="space-y-2 mb-5">
-        {(highlights[to] ?? []).map((item) => (
-          <li key={item} className="flex items-center gap-2 text-xs">
-            <Check className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-brand"}`} />
+      <div className="mb-4">
+        <div className="flex items-baseline gap-1">
+          <span className={`text-2xl font-bold tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}>
+            ₹{price.toLocaleString("en-IN")}
+          </span>
+          <span className={`text-xs ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>/mo</span>
+        </div>
+        {billing === "annual" && ANNUAL_SAVINGS[to] && (
+          <p className={`text-[0.68rem] mt-0.5 ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
+            Save{" "}
+            <span className="text-emerald-500 font-semibold">{ANNUAL_SAVINGS[to]}%</span>
+            {" "}vs monthly
+          </p>
+        )}
+      </div>
+
+      <ul className="space-y-2 mb-5 flex-1">
+        {(PLAN_HIGHLIGHTS[to] ?? []).map((item) => (
+          <li key={item} className="flex items-start gap-2 text-xs">
+            <Check className={`w-3 h-3 shrink-0 mt-0.5 ${isDark ? "text-emerald-400" : "text-brand"}`} strokeWidth={2.5} />
             <span className={isDark ? "text-zinc-300" : "text-zinc-600"}>{item}</span>
           </li>
         ))}
@@ -191,6 +212,8 @@ function UpgradeCard({
           className={`flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             isDark
               ? "bg-white text-zinc-900 hover:bg-zinc-100"
+              : featured
+              ? "bg-brand text-white hover:bg-brand/90"
               : "bg-zinc-900 text-white hover:bg-zinc-800"
           }`}
         >
@@ -206,11 +229,94 @@ function UpgradeCard({
               : "bg-zinc-900 text-white hover:bg-zinc-800"
           }`}
         >
-          {canCheckout ? "Upgrade to" : "Contact for"} {plan.name}
+          Contact for Enterprise
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       )}
     </div>
+  );
+}
+
+// ─── Upgrade plans section ────────────────────────────────────────────────────
+function UpgradePlansSection({
+  currentPlan,
+  onUpgrade,
+}: {
+  currentPlan: PlanKey;
+  onUpgrade: (plan: PaidPlan) => void;
+}) {
+  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
+
+  const availablePlans: PlanKey[] =
+    currentPlan === "free"   ? ["launch", "scale", "business"] :
+    currentPlan === "launch" ? ["scale", "business"] :
+    currentPlan === "scale"  ? ["business"] :
+    [];
+
+  if (!availablePlans.length) return null;
+
+  const featuredPlan: PlanKey =
+    currentPlan === "free"   ? "scale" :
+    currentPlan === "launch" ? "scale" :
+    "business";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold text-zinc-400 tracking-widest uppercase">
+          {availablePlans.length === 1 ? "Upgrade" : "Upgrade to"}
+        </p>
+        {/* Billing toggle */}
+        <div className="flex items-center gap-0.5 p-0.5 bg-zinc-100 rounded-lg">
+          <button
+            onClick={() => setBilling("monthly")}
+            className={`px-2.5 py-1 rounded-md text-[0.7rem] font-semibold transition-all ${
+              billing === "monthly" ? "bg-white shadow-sm text-zinc-900" : "text-zinc-500 hover:text-zinc-700"
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBilling("annual")}
+            className={`px-2.5 py-1 rounded-md text-[0.7rem] font-semibold transition-all flex items-center gap-1 ${
+              billing === "annual" ? "bg-white shadow-sm text-zinc-900" : "text-zinc-500 hover:text-zinc-700"
+            }`}
+          >
+            Annual
+            <span className="text-[0.55rem] font-bold uppercase tracking-wider px-1 py-0.5 rounded bg-emerald-100 text-emerald-700">
+              Save
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className={`grid gap-3 ${availablePlans.length === 1 ? "grid-cols-1" : availablePlans.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"}`}>
+        {availablePlans.map((p) => (
+          <UpgradeCard
+            key={p}
+            from={currentPlan}
+            to={p}
+            billing={billing}
+            featured={p === featuredPlan}
+            onUpgrade={
+              (["launch", "scale", "business"] as PlanKey[]).includes(p)
+                ? () => onUpgrade(p as PaidPlan)
+                : undefined
+            }
+          />
+        ))}
+      </div>
+
+      <p className="mt-2 text-center">
+        <Link href="/pricing" className="text-xs text-zinc-400 hover:text-zinc-600 underline">
+          See full plan comparison
+        </Link>
+      </p>
+    </motion.div>
   );
 }
 
@@ -265,14 +371,6 @@ export default function BillingTab({ userId }: BillingTabProps) {
     }
   }
 
-  // Determine upgrade path
-  const nextPlan: PlanKey | null =
-    plan === "free"   ? "launch"   :
-    plan === "launch" ? "scale"    :
-    plan === "scale"  ? "business" :
-    null;
-  // Note: business users see a contact sales card instead of UpgradeCard
-
   return (
     <div className="max-w-2xl space-y-6">
 
@@ -317,7 +415,7 @@ export default function BillingTab({ userId }: BillingTabProps) {
             <p className="mt-2 text-sm text-zinc-600">{PLANS[plan].tagline}</p>
           </div>
 
-          {plan !== "free" && (
+          {plan !== "free" ? (
             <div className="text-right">
               <p className="text-xl font-bold text-zinc-900 tracking-tight">
                 ₹{(billingCycle === "annual" ? PLANS[plan].annualInr : PLANS[plan].monthlyInr).toLocaleString("en-IN")}
@@ -326,9 +424,7 @@ export default function BillingTab({ userId }: BillingTabProps) {
                 / month · billed {billingCycle === "annual" ? "annually" : "monthly"}
               </p>
             </div>
-          )}
-
-          {plan === "free" && (
+          ) : (
             <span className="text-xl font-bold text-zinc-900">₹0</span>
           )}
         </div>
@@ -341,14 +437,14 @@ export default function BillingTab({ userId }: BillingTabProps) {
               <p className="text-sm font-medium text-zinc-700 capitalize">{billingCycle}</p>
             </div>
             {billingCycle === "monthly" && plan !== "enterprise" && (
-              <div className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-400">
                 Switch to annual to save{" "}
                 <span className="text-emerald-600 font-semibold">
-                  {plan === "launch" ? "25%" : plan === "scale" ? "20%" : "17%"}
+                  {ANNUAL_SAVINGS[plan] ?? 0}%
                 </span>
                 {" — "}
                 <Link href="/pricing" className="underline hover:text-zinc-600">change plan</Link>
-              </div>
+              </p>
             )}
           </div>
         )}
@@ -452,38 +548,20 @@ export default function BillingTab({ userId }: BillingTabProps) {
         </div>
       </motion.div>
 
-      {/* ── Upgrade card ── */}
-      {nextPlan && status !== "cancelled" && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <p className="text-xs font-semibold text-zinc-400 tracking-widest uppercase mb-3">
-            Next plan
-          </p>
-          <UpgradeCard
-            from={plan}
-            to={nextPlan}
-            billing={billingCycle}
-            onUpgrade={() => setCheckoutPlan(nextPlan as PaidPlan)}
-          />
-          {nextPlan === "launch" && (
-            <p className="mt-2 text-center">
-              <Link href="/pricing" className="text-xs text-zinc-400 hover:text-zinc-600 underline">
-                Or compare Scale and Business — see all plans
-              </Link>
-            </p>
-          )}
-        </motion.div>
+      {/* ── Upgrade plans ── */}
+      {status !== "cancelled" && (
+        <UpgradePlansSection
+          currentPlan={plan}
+          onUpgrade={(p) => setCheckoutPlan(p)}
+        />
       )}
 
-      {/* On Business — contact for custom */}
+      {/* On Business — contact for Enterprise */}
       {plan === "business" && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.15 }}
           className="border border-zinc-200 rounded-xl p-5 bg-zinc-50 text-center"
         >
           <p className="text-sm font-medium text-zinc-700 mb-1">Need something custom?</p>
@@ -498,13 +576,6 @@ export default function BillingTab({ userId }: BillingTabProps) {
           </Link>
         </motion.div>
       )}
-
-      {/* Compare plans link */}
-      <p className="text-center">
-        <Link href="/pricing" className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors underline">
-          Compare all plans
-        </Link>
-      </p>
     </div>
   );
 }
