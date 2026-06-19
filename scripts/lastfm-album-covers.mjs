@@ -1,28 +1,40 @@
 #!/usr/bin/env node
-// Scrape album covers from a Last.fm profile's album library and bundle them into a .zip.
+// Scrape album covers from a Last.fm profile and bundle them into a .zip.
+//
+// Two modes:
+//   • API mode  (recommended) — pass --api-key. Uses the official Last.fm API
+//     (user.getTopAlbums). Reliable for large libraries (thousands of albums),
+//     not subject to the anti-bot blocking that throttles HTML pages.
+//     Get a free key at https://www.last.fm/api/account/create
+//     (or set the LASTFM_API_KEY env var).
+//   • HTML mode (fallback) — no key needed, scrapes the public library pages.
+//     Fine for small/medium public libraries; Last.fm bot-blocks deep
+//     pagination, so very large libraries will stall after a few pages.
 //
 // Usage:
 //   node scripts/lastfm-album-covers.mjs <username> [options]
 //
 // Options:
-//   --pages <n>     Number of library pages to scrape (50 albums/page). Default: 1
-//   --limit <n>     Stop after collecting <n> covers (across pages).
+//   --api-key <key> Last.fm API key (enables reliable API mode).
+//   --pages <n>     Max pages to fetch. API: 1000 albums/page. HTML: 50/page. Default: 1
+//   --limit <n>     Stop after collecting <n> covers.
 //   --size <s>      Cover size: 174s | 300x300 | 600x600 | 770x0 | 64s. Default: 300x300
 //   --out <file>    Output zip path. Default: ./<username>-album-covers.zip
-//   --period <p>    Library date range: overall (default) | 7day | 1month | 3month |
-//                   6month | 12month
+//   --period <p>    Date range: overall (default) | 7day | 1month | 3month | 6month | 12month
+//   --all           Fetch every page (API mode) until the library is exhausted.
 //
 // Examples:
 //   node scripts/lastfm-album-covers.mjs rj
-//   node scripts/lastfm-album-covers.mjs someuser --pages 3 --size 600x600 --out covers.zip
+//   node scripts/lastfm-album-covers.mjs ronit1910 --api-key XXXX --all --size 300x300
+//   node scripts/lastfm-album-covers.mjs ronit1910 --api-key XXXX --limit 3000
 //
-// No external dependencies — uses Node's built-in fetch + a tiny stored-ZIP writer.
+// No external dependencies — Node 18+ built-in fetch + a tiny stored-ZIP writer.
 
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 
 const UA =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15";
 
 // Known Last.fm "no cover art" placeholder image hashes — skip these.
 const PLACEHOLDER_HASHES = new Set([
@@ -31,6 +43,7 @@ const PLACEHOLDER_HASHES = new Set([
   "2a96cbd8b46e442fc41c2b86b821562f",
 ]);
 
+// HTML library date_preset values.
 const DATE_PRESET = {
   overall: null,
   "7day": "LAST_7_DAYS",
@@ -39,23 +52,36 @@ const DATE_PRESET = {
   "6month": "LAST_180_DAYS",
   "12month": "LAST_365_DAYS",
 };
+// API period values (user.getTopAlbums).
+const API_PERIOD = {
+  overall: "overall",
+  "7day": "7day",
+  "1month": "1month",
+  "3month": "3month",
+  "6month": "6month",
+  "12month": "12month",
+};
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function parseArgs(argv) {
   const args = { _: [] };
+  const flags = new Set(["all", "help"]);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const key = a.slice(2);
-      const next = argv[i + 1];
-      if (next === undefined || next.startsWith("--")) {
+      if (flags.has(key)) {
         args[key] = true;
       } else {
-        args[key] = next;
-        i++;
+        const next = argv[i + 1];
+        if (next === undefined || next.startsWith("--")) args[key] = true;
+        else {
+          args[key] = next;
+          i++;
+        }
       }
-    } else {
-      args._.push(a);
-    }
+    } else args._.push(a);
   }
   return args;
 }
@@ -78,11 +104,50 @@ function sanitize(name) {
     .slice(0, 120);
 }
 
-// Parse one library/albums page into [{artist, album, imgUrl, hash}]
-function parsePage(html, size) {
+function upscale(url, size) {
+  // Rewrite any Last.fm CDN size segment (e.g. /64s/, /174s/, /300x300/) to the wanted one.
+  return url.replace(/\/(?:\d+s|\d+x\d+|avatar\d+s)\//, `/${size}/`);
+}
+
+// ---------- API mode -------------------------------------------------------
+async function fetchTopAlbumsPage(username, apiKey, page, period, perPage) {
+  const url = new URL("https://ws.audioscrobbler.com/2.0/");
+  url.searchParams.set("method", "user.gettopalbums");
+  url.searchParams.set("user", username);
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("period", period);
+  url.searchParams.set("limit", String(perPage));
+  url.searchParams.set("page", String(page));
+
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      const res = await fetch(url, { headers: { "User-Agent": UA } });
+      const json = await res.json();
+      if (json.error) {
+        throw new Error(`Last.fm API error ${json.error}: ${json.message}`);
+      }
+      const top = json.topalbums;
+      const albums = (top?.album || []).map((al) => {
+        const imgs = al.image || [];
+        const best = imgs[imgs.length - 1]?.["#text"] || "";
+        const hash = (best.match(/\/([0-9a-f]+)\.(?:jpg|png|gif)/) || [])[1] || "";
+        return { artist: al.artist?.name || "", album: al.name || "", imgUrl: best, hash };
+      });
+      const totalPages = parseInt(top?.["@attr"]?.totalPages || "1", 10);
+      const total = parseInt(top?.["@attr"]?.total || "0", 10);
+      return { albums, totalPages, total };
+    } catch (err) {
+      if (err.message?.startsWith("Last.fm API error")) throw err; // not retryable
+      if (attempt === 4) throw err;
+      await sleep(attempt * 1500);
+    }
+  }
+}
+
+// ---------- HTML mode ------------------------------------------------------
+function parseHtmlPage(html) {
   const items = [];
-  // Each album row's cover lives in a `chartlist-image` cell; split on it so we
-  // can grab the cover <img> and the first /music/ link per row independently.
   const segments = html.split('chartlist-image"');
   for (let i = 1; i < segments.length; i++) {
     const seg = segments[i].slice(0, 2000);
@@ -96,31 +161,51 @@ function parsePage(html, size) {
     const href = seg.match(/href="\/music\/([^/"]+)\/([^"]+)"/);
     let artist = "";
     if (href) artist = decodeEntities(decodeURIComponent(href[1].replace(/\+/g, " ")));
-    const imgUrl = img[1].replace(/\/(?:34s|64s|174s)\//, `/${size}/`);
-    items.push({ artist, album, imgUrl, hash });
+    items.push({ artist, album, imgUrl: img[1], hash });
   }
   return items;
 }
 
-async function fetchPage(username, page, preset) {
+function isChallengePage(html) {
+  // Bot-block / "Temporarily Unavailable" responses have no real <title> and no chartlist.
+  return !/<title>[^<]*Last\.fm[^<]*<\/title>/i.test(html) || !html.includes("chartlist");
+}
+
+async function fetchHtmlPage(username, page, preset) {
   const url = new URL(`https://www.last.fm/user/${encodeURIComponent(username)}/library/albums`);
   url.searchParams.set("page", String(page));
   if (preset) url.searchParams.set("date_preset", preset);
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
-  if (res.status === 404) throw new Error(`Last.fm user "${username}" not found (404).`);
-  if (!res.ok) throw new Error(`Failed to fetch page ${page}: HTTP ${res.status}`);
-  return res.text();
+
+  for (let attempt = 1; attempt <= 6; attempt++) {
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9", Accept: "text/html" },
+      redirect: "follow",
+    });
+    if (res.status === 404) throw new Error(`Last.fm user "${username}" not found (404).`);
+    const html = res.ok ? await res.text() : "";
+    if (res.ok && !isChallengePage(html)) return { html, blocked: false };
+    if (attempt < 6) await sleep(attempt * 4000); // back off through the throttle
+  }
+  return { html: "", blocked: true };
 }
 
 async function downloadImage(url) {
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
-  if (!res.ok) return null;
-  return Buffer.from(await res.arrayBuffer());
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url, { headers: { "User-Agent": UA } });
+      if (res.ok) {
+        const buf = Buffer.from(await res.arrayBuffer());
+        if (buf.length > 0) return buf;
+      }
+    } catch {
+      /* retry */
+    }
+    await sleep(attempt * 800);
+  }
+  return null;
 }
 
-// ---- Minimal stored (uncompressed) ZIP writer ----------------------------
-// Images are already compressed, so we store them without deflate. Pure Node,
-// no dependencies.
+// ---------- Minimal stored (uncompressed) ZIP writer -----------------------
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
   for (let n = 0; n < 256; n++) {
@@ -130,38 +215,32 @@ const CRC_TABLE = (() => {
   }
   return t;
 })();
-
 function crc32(buf) {
   let c = 0xffffffff;
   for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
   return (c ^ 0xffffffff) >>> 0;
 }
-
 function buildZip(files) {
   const chunks = [];
   const central = [];
   let offset = 0;
-
   for (const f of files) {
     const nameBuf = Buffer.from(f.name, "utf8");
     const data = f.data;
     const crc = crc32(data);
-
     const local = Buffer.alloc(30);
     local.writeUInt32LE(0x04034b50, 0);
-    local.writeUInt16LE(20, 4); // version needed
-    local.writeUInt16LE(0x0800, 6); // UTF-8 flag
-    local.writeUInt16LE(0, 8); // store
-    local.writeUInt16LE(0, 10); // time
-    local.writeUInt16LE(0, 12); // date
+    local.writeUInt16LE(20, 4);
+    local.writeUInt16LE(0x0800, 6);
+    local.writeUInt16LE(0, 8);
+    local.writeUInt16LE(0, 10);
+    local.writeUInt16LE(0, 12);
     local.writeUInt32LE(crc, 14);
     local.writeUInt32LE(data.length, 18);
     local.writeUInt32LE(data.length, 22);
     local.writeUInt16LE(nameBuf.length, 26);
     local.writeUInt16LE(0, 28);
-
     chunks.push(local, nameBuf, data);
-
     const cd = Buffer.alloc(46);
     cd.writeUInt32LE(0x02014b50, 0);
     cd.writeUInt16LE(20, 4);
@@ -181,10 +260,8 @@ function buildZip(files) {
     cd.writeUInt32LE(0, 38);
     cd.writeUInt32LE(offset, 42);
     central.push(Buffer.concat([cd, nameBuf]));
-
     offset += local.length + nameBuf.length + data.length;
   }
-
   const centralBuf = Buffer.concat(central);
   const end = Buffer.alloc(22);
   end.writeUInt32LE(0x06054b50, 0);
@@ -192,42 +269,48 @@ function buildZip(files) {
   end.writeUInt16LE(files.length, 10);
   end.writeUInt32LE(centralBuf.length, 12);
   end.writeUInt32LE(offset, 16);
-
   return Buffer.concat([...chunks, centralBuf, end]);
 }
 // --------------------------------------------------------------------------
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const username = args._[0];
-  if (!username || args.help) {
-    console.log(
-      "Usage: node scripts/lastfm-album-covers.mjs <username> [--pages n] [--limit n] " +
-        "[--size 300x300] [--out file.zip] [--period overall|7day|1month|3month|6month|12month]"
-    );
-    process.exit(username ? 0 : 1);
+async function collectViaApi(username, apiKey, { pages, all, limit, period }) {
+  const apiPeriod = API_PERIOD[period];
+  const perPage = 1000;
+  const seen = new Set();
+  const albums = [];
+  const first = await fetchTopAlbumsPage(username, apiKey, 1, apiPeriod, perPage);
+  const totalPages = all ? first.totalPages : Math.min(pages, first.totalPages);
+  console.log(`  library has ${first.total} albums across ${first.totalPages} API page(s).`);
+  const pushAll = (list) => {
+    for (const a of list) {
+      if (albums.length >= limit) break;
+      if (!a.imgUrl || !a.hash || PLACEHOLDER_HASHES.has(a.hash) || seen.has(a.hash)) continue;
+      seen.add(a.hash);
+      albums.push(a);
+    }
+  };
+  pushAll(first.albums);
+  for (let p = 2; p <= totalPages && albums.length < limit; p++) {
+    process.stdout.write(`\r  • fetched page ${p}/${totalPages} (${albums.length} covers)`);
+    const { albums: list } = await fetchTopAlbumsPage(username, apiKey, p, apiPeriod, perPage);
+    pushAll(list);
   }
+  process.stdout.write("\n");
+  return albums;
+}
 
-  const pages = Math.max(1, parseInt(args.pages, 10) || 1);
-  const limit = args.limit ? parseInt(args.limit, 10) : Infinity;
-  const size = args.size || "300x300";
-  const period = (args.period || "overall").toLowerCase();
-  if (!(period in DATE_PRESET)) {
-    console.error(`Invalid --period "${period}". Choose: ${Object.keys(DATE_PRESET).join(", ")}`);
-    process.exit(1);
-  }
+async function collectViaHtml(username, { pages, limit, period }) {
   const preset = DATE_PRESET[period];
-  const outPath = args.out || `${sanitize(username)}-album-covers.zip`;
-
-  console.log(`Scraping album covers for "${username}" (pages: ${pages}, size: ${size}, period: ${period})…`);
-
-  // Collect album metadata across pages, de-duping by image hash.
   const seen = new Set();
   const albums = [];
   for (let p = 1; p <= pages && albums.length < limit; p++) {
     process.stdout.write(`  • fetching page ${p}… `);
-    const html = await fetchPage(username, p, preset);
-    const found = parsePage(html, size);
+    const { html, blocked } = await fetchHtmlPage(username, p, preset);
+    if (blocked) {
+      console.log("blocked by Last.fm anti-bot (try API mode with --api-key).");
+      break;
+    }
+    const found = parseHtmlPage(html);
     let added = 0;
     for (const a of found) {
       if (albums.length >= limit) break;
@@ -237,36 +320,71 @@ async function main() {
       added++;
     }
     console.log(`${added} new (${albums.length} total)`);
-    if (found.length === 0) break; // no more pages
+    if (found.length === 0) break; // genuine end of library
+  }
+  return albums;
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const username = args._[0];
+  if (!username || args.help) {
+    console.log(
+      "Usage: node scripts/lastfm-album-covers.mjs <username> [--api-key key] [--all] " +
+        "[--pages n] [--limit n] [--size 300x300] [--out file.zip] " +
+        "[--period overall|7day|1month|3month|6month|12month]"
+    );
+    process.exit(username ? 0 : 1);
   }
 
-  if (albums.length === 0) {
-    console.error("No album covers found. Is the username correct and the library public?");
+  const apiKey = args["api-key"] || process.env.LASTFM_API_KEY || null;
+  const pages = Math.max(1, parseInt(args.pages, 10) || 1);
+  const all = !!args.all;
+  const limit = args.limit ? parseInt(args.limit, 10) : Infinity;
+  const size = args.size || "300x300";
+  const period = (args.period || "overall").toLowerCase();
+  if (!(period in DATE_PRESET)) {
+    console.error(`Invalid --period "${period}". Choose: ${Object.keys(DATE_PRESET).join(", ")}`);
+    process.exit(1);
+  }
+  const outPath = args.out || `${sanitize(username)}-album-covers.zip`;
+  const mode = apiKey ? "API" : "HTML";
+
+  console.log(
+    `Collecting album covers for "${username}" — ${mode} mode (size: ${size}, period: ${period})…`
+  );
+
+  let albums;
+  if (apiKey) albums = await collectViaApi(username, apiKey, { pages, all, limit, period });
+  else albums = await collectViaHtml(username, { pages, limit, period });
+
+  if (!albums || albums.length === 0) {
+    console.error(
+      "No album covers collected. Check the username/library is public, or use --api-key."
+    );
     process.exit(1);
   }
 
-  // Download covers.
   console.log(`Downloading ${albums.length} covers…`);
   const files = [];
   const usedNames = new Set();
   let done = 0;
   for (const a of albums) {
-    const data = await downloadImage(a.imgUrl);
+    const data = await downloadImage(upscale(a.imgUrl, size));
     done++;
-    if (!data || data.length === 0) {
-      console.log(`  ! skip (download failed): ${a.artist} — ${a.album}`);
-      continue;
-    }
-    const ext = a.imgUrl.split(".").pop().split("?")[0].toLowerCase();
+    if (!data) continue;
+    const ext = (a.imgUrl.split(".").pop() || "jpg").split("?")[0].toLowerCase();
     const base = sanitize(
-      `${String(files.length + 1).padStart(2, "0")} - ${a.artist ? a.artist + " - " : ""}${a.album || a.hash}`
+      `${String(files.length + 1).padStart(4, "0")} - ${a.artist ? a.artist + " - " : ""}${
+        a.album || a.hash
+      }`
     );
     let name = `${base}.${ext}`;
     let n = 2;
     while (usedNames.has(name.toLowerCase())) name = `${base} (${n++}).${ext}`;
     usedNames.add(name.toLowerCase());
     files.push({ name, data });
-    if (done % 10 === 0 || done === albums.length) {
+    if (done % 25 === 0 || done === albums.length) {
       process.stdout.write(`\r  • ${done}/${albums.length} downloaded`);
     }
   }
