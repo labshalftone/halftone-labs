@@ -122,7 +122,10 @@ async function fetchTopAlbumsPage(username, apiKey, page, period, perPage) {
 
   for (let attempt = 1; attempt <= 4; attempt++) {
     try {
-      const res = await fetch(url, { headers: { "User-Agent": UA } });
+      const res = await fetch(url, {
+        headers: { "User-Agent": UA },
+        signal: AbortSignal.timeout(20000),
+      });
       const json = await res.json();
       if (json.error) {
         throw new Error(`Last.fm API error ${json.error}: ${json.message}`);
@@ -180,6 +183,7 @@ async function fetchHtmlPage(username, page, preset) {
     const res = await fetch(url, {
       headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9", Accept: "text/html" },
       redirect: "follow",
+      signal: AbortSignal.timeout(25000),
     });
     if (res.status === 404) throw new Error(`Last.fm user "${username}" not found (404).`);
     const html = res.ok ? await res.text() : "";
@@ -192,17 +196,38 @@ async function fetchHtmlPage(username, page, preset) {
 async function downloadImage(url) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const res = await fetch(url, { headers: { "User-Agent": UA } });
+      const res = await fetch(url, {
+        headers: { "User-Agent": UA },
+        signal: AbortSignal.timeout(20000), // never hang on a dead connection
+      });
       if (res.ok) {
         const buf = Buffer.from(await res.arrayBuffer());
         if (buf.length > 0) return buf;
       }
     } catch {
-      /* retry */
+      /* timeout or network error — retry */
     }
-    await sleep(attempt * 800);
+    await sleep(attempt * 600);
   }
   return null;
+}
+
+// Run async tasks with bounded concurrency, preserving input order in results.
+async function mapPool(items, concurrency, worker, onProgress) {
+  const results = new Array(items.length);
+  let next = 0;
+  let completed = 0;
+  async function run() {
+    while (true) {
+      const i = next++;
+      if (i >= items.length) return;
+      results[i] = await worker(items[i], i);
+      completed++;
+      if (onProgress) onProgress(completed, items.length);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, run));
+  return results;
 }
 
 // ---------- Minimal stored (uncompressed) ZIP writer -----------------------
@@ -365,14 +390,25 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Downloading ${albums.length} covers…`);
+  console.log(`Downloading ${albums.length} covers (16 at a time)…`);
+  const downloaded = await mapPool(
+    albums,
+    16,
+    (a) => downloadImage(upscale(a.imgUrl, size)),
+    (done, total) => {
+      if (done % 25 === 0 || done === total) {
+        process.stdout.write(`\r  • ${done}/${total} downloaded`);
+      }
+    }
+  );
+  process.stdout.write("\n");
+
+  // Assemble in library order, skipping failures and de-duping filenames.
   const files = [];
   const usedNames = new Set();
-  let done = 0;
-  for (const a of albums) {
-    const data = await downloadImage(upscale(a.imgUrl, size));
-    done++;
-    if (!data) continue;
+  albums.forEach((a, i) => {
+    const data = downloaded[i];
+    if (!data) return;
     const ext = (a.imgUrl.split(".").pop() || "jpg").split("?")[0].toLowerCase();
     const base = sanitize(
       `${String(files.length + 1).padStart(4, "0")} - ${a.artist ? a.artist + " - " : ""}${
@@ -384,11 +420,7 @@ async function main() {
     while (usedNames.has(name.toLowerCase())) name = `${base} (${n++}).${ext}`;
     usedNames.add(name.toLowerCase());
     files.push({ name, data });
-    if (done % 25 === 0 || done === albums.length) {
-      process.stdout.write(`\r  • ${done}/${albums.length} downloaded`);
-    }
-  }
-  process.stdout.write("\n");
+  });
 
   if (files.length === 0) {
     console.error("All downloads failed — nothing to zip.");
