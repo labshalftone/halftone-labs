@@ -21,13 +21,6 @@ const testimonials = [
   },
   {
     quote:
-      "What I liked most was how effortless they made the process. The Halftone team really understood the timelines for the tour. Shipping to Australia was seamless.",
-    name: "Restricted",
-    role: "Australian DJ, CEO Revive Records",
-    initials: "RE",
-  },
-  {
-    quote:
       "Halftone Labs brought our merch vision to life. The quality of design and production was outstanding. They understood the brand instantly.",
     name: "Artist Collective",
     role: "Independent Label",
