@@ -28,27 +28,6 @@ const CASE_STUDIES = [
     ],
   },
   {
-    id: "restricted-teletech",
-    client: "Restricted",
-    tag: "DJ · Australia",
-    project: "Teletech — Merch Drop",
-    year: "2024",
-    colorBg: "#1a0a2e",
-    colorAccent: "#9b59b6",
-    colorText: "#ffffff",
-    quote: "What I liked most was how effortless they made the process. The team really understood the timelines. Shipping to Australia was seamless.",
-    intro: "Restricted is one of Australia's most respected underground techno DJs — a fixture of the global circuit with a sound that consistently bridges industrial grit and dancefloor urgency. Teletech is his label and creative brand, and the merch needed to match the uncompromising aesthetic of the music.",
-    challenge: "Getting high-quality merch from India to Australia on a tight timeline, with print quality that could hold up to the scrutiny of the electronic music community. The Teletech brand demanded precision — sharp graphics, heavy garments, and a dark colour palette that most print methods struggle with.",
-    solution: "We produced a run of oversized tees and longsleeves using DTF printing on 240 GSM French terry blanks in True Black. DTF's adhesion to dark garments delivered the crisp, high-contrast graphics the Teletech identity required. International shipping via Shiprocket ensured the drop landed in time for his tour schedule.",
-    result: "The drop became one of the most talked-about merch releases in Australia's underground dance community that year. The garment quality set a new standard for what techno merch could look and feel like.",
-    products: ["Oversized Tee (FT) 240 GSM", "Longsleeve 240 GSM", "DTF Printing"],
-    stats: [
-      { label: "Shipped to", value: "Australia" },
-      { label: "Lead time", value: "12 days" },
-      { label: "Print method", value: "DTF" },
-    ],
-  },
-  {
     id: "sunburn-wearadhd",
     client: "Sunburn Festival",
     tag: "Festival · India",
@@ -72,7 +51,7 @@ const CASE_STUDIES = [
 ];
 
 const ALL_CLIENTS = [
-  "Sunburn Festival", "Kevin Abstract", "Galactica", "Restricted", "Teletech",
+  "Sunburn Festival", "Kevin Abstract", "Galactica",
   "BLUSH", "Tidal Rave", "Katarsis", "Felicia Lu", "We Met At The Bar",
   "WearADHD", "Illusion Hills", "NovaRock", "RAUN", "DJ ADHD",
   "Lowlands", "C2C Festival", "Revive Records", "Vanisher", "Time Music",
